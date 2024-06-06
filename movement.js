@@ -3,16 +3,50 @@ const ctx = document.getElementById("main-canvas").getContext("2d");
 const player = {
 	x: 0,
 	y: 0,
+	sit: false,
 	movingLeft: false,
 	movingRight: false,
 	onGround: false,
 	verticalAcceleration: 0,
 };
 
+const platforms = [
+	{
+		x: 700,
+		y: 650,
+		width: 300,
+		height: 25,
+	},
+	{
+		x: 900,
+		y: 600,
+		width: 200,
+		height: 25,
+	},
+	{
+		x: 1100,
+		y: 700 - 30,
+		width: 80,
+		height: 30,
+	},
+];
+
 ctx.fillRect(player.x, player.y, 100, 200);
 
 addEventListener("keydown", (e) => {
 	switch (e.code) {
+		case "KeyZ":
+			player.sit = !player.sit;
+
+			ctx.clearRect(player.x, player.y, 100, 200);
+
+			ctx.fillRect(
+				player.x,
+				player.y + (player.sit ? 100 : 0),
+				100,
+				player.sit ? 100 : 200
+			);
+			break;
 		case "Space":
 			jump();
 			break;
@@ -43,6 +77,12 @@ addEventListener("keyup", (e) => {
 function gameLoop() {
 	window.requestAnimationFrame(gameLoop);
 
+	const prev = ctx.fillStyle;
+	ctx.fillStyle = "blue";
+	for (const platform of platforms)
+		ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+	ctx.fillStyle = prev;
+
 	applyForce();
 
 	if (player.movingLeft) {
@@ -53,72 +93,106 @@ function gameLoop() {
 }
 
 function moveRight() {
-	ctx.clearRect(player.x, player.y, 100, 200);
+	const prev = player.x;
+	player.x = Math.min(player.x + (player.sit ? 5 : 10), 1500 - 100);
+	if (IsCollide()) {
+		player.x = prev;
+		return;
+	}
 
-	player.x = Math.min(player.x + 10, 1500 - 100);
+	ctx.clearRect(prev, player.y, 100, 200);
 
-	ctx.fillRect(player.x, player.y, 100, 200);
+	ctx.fillRect(
+		player.x,
+		player.y + (player.sit ? 100 : 0),
+		100,
+		player.sit ? 100 : 200
+	);
 }
 
 function moveLeft() {
-	ctx.clearRect(player.x, player.y, 100, 200);
+	const prev = player.x;
+	player.x = Math.max(player.x - (player.sit ? 5 : 10), 0);
+	if (IsCollide()) {
+		player.x = prev;
+		return;
+	}
 
-	player.x = Math.max(player.x - 10, 0);
+	ctx.clearRect(prev, player.y, 100, 200);
 
-	ctx.fillRect(player.x, player.y, 100, 200);
+	ctx.fillRect(
+		player.x,
+		player.y + (player.sit ? 100 : 0),
+		100,
+		player.sit ? 100 : 200
+	);
+}
+
+function IsCollide() {
+	for (const platform of platforms)
+		if (
+			player.x + 100 > platform.x &&
+			player.x < platform.x + platform.width &&
+			player.y + 200 > platform.y &&
+			player.y < platform.y + platform.height
+		)
+			return true;
+
+	return false;
 }
 
 function applyForce() {
-    // падает
-    if (!player.onGround) {
-        ctx.clearRect(player.x, player.y, 100, 200);
+	// падает
+	if (!isOnGround() || player.verticalAcceleration < 0) {
+		ctx.clearRect(player.x, player.y, 100, 200);
 
-        player.verticalAcceleration = Math.min(player.verticalAcceleration + 2, 10);
-        player.y = Math.min(player.y + player.verticalAcceleration, 500);
-    
-        ctx.fillRect(player.x, player.y, 100, 200);
-    
-        if (player.y >= 500) {
-            player.onGround = true;
-            player.verticalAcceleration = 0;
-        }
-        
-        return
-    }
+		player.verticalAcceleration = Math.min(
+			player.verticalAcceleration + 2,
+			10
+		);
+		player.y = Math.min(player.y + player.verticalAcceleration, 500);
 
-    // прыгнул
-	// if (player.verticalAcceleration < 0) {
-    //     ctx.clearRect(player.x, player.y, 100, 200);
+		if (IsCollide()) {
+			player.y -= player.verticalAcceleration;
+			player.verticalAcceleration -= 2;
 
-    //     player.verticalAcceleration = Math.min(player.verticalAcceleration + 1);
-    //     player.y = Math.min(player.y - player.verticalAcceleration, 500);
-    
-    //     ctx.fillRect(player.x, player.y, 100, 200);
-    
-    //     if (player.y == 500) {
-    //         player.onGround = true;
-    //         player.jumpForce = 0;
-    //     }
+			ctx.fillRect(player.x, player.y, 100, 200);
+			player.onGround = true;
+			return;
+		}
 
-	// 	return;
-	// }
+		ctx.fillRect(
+			player.x,
+			player.y + (player.sit ? 100 : 0),
+			100,
+			player.sit ? 100 : 200
+		);
 
-	// ctx.clearRect(player.x, player.y, 100, 200);
+		if (player.y >= 500) {
+			player.onGround = true;
+			player.verticalAcceleration = 0;
+		}
 
-	// player.jumpForce = Math.min(player.jumpForce + 5);
-	// player.y = Math.min(player.y + --player.jumpForce, 500);
+		return;
+	}
+}
 
-	// ctx.fillRect(player.x, player.y, 100, 200);
+function isOnGround() {
+	if (player.y >= 500 + (player.sit ? 100 : 0)) return true;
 
-	// if (player.y == 500) {
-	// 	player.onGround = true;
-	// 	player.jumpForce = 0;
-	// }
+	for (const platform of platforms)
+		if (
+			player.x + 100 > platform.x &&
+			player.x < platform.x + platform.width &&
+			player.y + 200 + (player.sit ? 100 : 0) == platform.y
+		)
+			return true;
+
+	return false;
 }
 
 function jump() {
-	if (!player.onGround) return;
-	player.onGround = false;
+	if (!isOnGround()) return;
 
 	player.verticalAcceleration = -20;
 }
