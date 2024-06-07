@@ -1,9 +1,24 @@
-import { PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED } from "./constants.js";
-import { Clear, DrawRectangle, GetFillColor, SetFillColor } from "./context.js";
+import { Clamp } from "./Utulites.js";
+import {
+	PLAYER_JUMP_FORCE,
+	PLAYER_SIT_SPEED,
+	PLAYER_WALK_SPEED,
+} from "./constants.js";
+import {
+	Clear,
+	DrawCircle,
+	DrawRectangle,
+	DrawRectangleWithAngle,
+	GetFillColor,
+	SetFillColor,
+} from "./context.js";
 
 const player = {
 	x: 0,
 	y: 0,
+	xMouse: 0,
+	yMouse: 0,
+	direction: 1,
 	sit: false,
 	movingLeft: false,
 	movingRight: false,
@@ -65,6 +80,13 @@ addEventListener("keyup", (e) => {
 	}
 });
 
+addEventListener("mousemove", (e) => {
+	player.xMouse = e.x;
+	player.yMouse = 750 - e.y;
+
+	player.direction = e.x > player.x + 50 ? 1 : -1;
+});
+
 function gameLoop() {
 	window.requestAnimationFrame(gameLoop);
 
@@ -81,11 +103,64 @@ function gameLoop() {
 		DrawRectangle(platform.x, platform.y, platform.width, platform.height);
 	SetFillColor(prev);
 
+	SetFillColor("black");
 	DrawRectangle(player.x, player.y, 100, player.sit ? 100 : 200);
+
+	if (player.direction == 1) {
+		const angle = Clamp(
+			Math.atan2(
+				player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
+				player.xMouse - (player.x + 30) - 15 / 2
+			),
+			-Math.PI / 2 + 0.4,
+			Math.PI / 2 - 0.4
+		);
+		SetFillColor("red");
+		DrawRectangleWithAngle(
+			player.x + 30,
+			player.y + (player.sit ? 50 : 120),
+			200,
+			5,
+			-angle,
+			-50 / 2,
+			-5 / 2
+		);
+	} else {
+		console.log(
+			Math.atan2(
+				player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
+				player.xMouse - (player.x + 30) - 15 / 2
+			)
+		);
+
+		let angle = -Math.atan2(
+			player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
+			player.xMouse - (player.x + 30) - 15 / 2
+		);
+
+		angle =
+			angle < 0
+				? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
+				: Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+
+		SetFillColor("red");
+		DrawRectangleWithAngle(
+			player.x + 70,
+			player.y + (player.sit ? 50 : 120),
+			200,
+			5,
+			angle,
+			-50 / 2,
+			-5 / 2
+		);
+	}
 }
 
 function moveRight() {
-	player.x = Math.min(player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED), 1500 - 100);
+	player.x = Math.min(
+		player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED),
+		1500 - 100
+	);
 
 	const collideOffsets = IsCollideEx();
 	if (collideOffsets !== false && collideOffsets.xOffset != 0)
@@ -93,7 +168,10 @@ function moveRight() {
 }
 
 function moveLeft() {
-	player.x = Math.max(player.x - (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED), 0);
+	player.x = Math.max(
+		player.x - (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED),
+		0
+	);
 
 	const collideOffsets = IsCollideEx();
 	if (collideOffsets !== false && collideOffsets.xOffset != 0)
@@ -103,7 +181,7 @@ function moveLeft() {
 function applyForce() {
 	if (player.verticalAcceleration == 0 && IsOnGround()) return;
 
-	player.verticalAcceleration--;
+	player.verticalAcceleration -= 3;
 	player.y = Math.max(player.y + player.verticalAcceleration, 0);
 
 	if (player.verticalAcceleration <= 0) {
