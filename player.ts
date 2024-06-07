@@ -1,20 +1,26 @@
-import { Clamp } from "./Utulites.js";
+import { Clamp } from "./utilites.js";
 import {
 	PLAYER_JUMP_FORCE,
 	PLAYER_SIT_SPEED,
 	PLAYER_WALK_SPEED,
 } from "./constants.js";
 import {
-	Clear,
-	DrawCircle,
 	DrawRectangle,
+	DrawRectangleFixed,
 	DrawRectangleWithAngle,
+	DrawText,
 	GetFillColor,
+	GetLevelPosition,
+	ProgradeLerp,
+	ResetTransform,
 	SetFillColor,
+	SetFillColorRGB,
+	SetLevelPosition,
+	levelLength,
 } from "./context.js";
 
 const player = {
-	x: 0,
+	x: 900,
 	y: 0,
 	xMouse: 0,
 	yMouse: 0,
@@ -34,15 +40,21 @@ const platforms = [
 	},
 	{
 		x: 900,
-		y: 120,
+		y: 220,
 		width: 200,
 		height: 25,
 	},
 	{
-		x: 1100,
+		x: 1500,
 		y: 200,
 		width: 80,
 		height: 30,
+	},
+	{
+		x: 2000 - 25,
+		y: 350,
+		width: 25,
+		height: 100,
 	},
 ];
 
@@ -84,19 +96,41 @@ addEventListener("mousemove", (e) => {
 	player.xMouse = e.x;
 	player.yMouse = 750 - e.y;
 
-	player.direction = e.x > player.x + 50 ? 1 : -1;
+	player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
 });
 
 function gameLoop() {
 	window.requestAnimationFrame(gameLoop);
+	ResetTransform();
 
-	applyForce();
+	// PHYSICS
+	applyVForce();
 
+	// LOGIC
 	if (player.movingLeft) moveLeft();
 	else if (player.movingRight) moveRight();
 
-	Clear();
+	const levelPosition = levelLength * (player.x / (levelLength - 100));
+	SetLevelPosition(levelPosition);
+	ProgradeLerp();
 
+	// GUI
+	SetFillColorRGB(50, 50, 50);
+	DrawRectangleFixed(0, 0, levelLength, 750);
+
+	SetFillColor("black");
+	DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
+	DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
+	DrawRectangleFixed(1500 / 2 - 260 / 2, 750 - 20 - 10, 260, 15);
+	SetFillColor("white");
+	DrawRectangleFixed(
+		1500 / 2 - 250 / 2 + 200 * (player.x / (levelLength - 100)),
+		750 - 25 - 10,
+		50,
+		25
+	);
+
+	// RENDER
 	const prev = GetFillColor();
 	SetFillColor("blue");
 	for (const platform of platforms)
@@ -107,10 +141,10 @@ function gameLoop() {
 	DrawRectangle(player.x, player.y, 100, player.sit ? 100 : 200);
 
 	if (player.direction == 1) {
-		const angle = Clamp(
+		const angle = -Clamp(
 			Math.atan2(
 				player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
-				player.xMouse - (player.x + 30) - 15 / 2
+				player.xMouse - (player.x + 30 - GetLevelPosition()) - 15 / 2
 			),
 			-Math.PI / 2 + 0.4,
 			Math.PI / 2 - 0.4
@@ -121,21 +155,14 @@ function gameLoop() {
 			player.y + (player.sit ? 50 : 120),
 			200,
 			5,
-			-angle,
+			angle,
 			-50 / 2,
 			-5 / 2
 		);
 	} else {
-		console.log(
-			Math.atan2(
-				player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
-				player.xMouse - (player.x + 30) - 15 / 2
-			)
-		);
-
 		let angle = -Math.atan2(
 			player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2),
-			player.xMouse - (player.x + 30) - 15 / 2
+			player.xMouse - (player.x + 70 - GetLevelPosition()) - 15 / 2
 		);
 
 		angle =
@@ -159,7 +186,7 @@ function gameLoop() {
 function moveRight() {
 	player.x = Math.min(
 		player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED),
-		1500 - 100
+		levelLength - 100
 	);
 
 	const collideOffsets = IsCollideEx();
@@ -178,10 +205,10 @@ function moveLeft() {
 		player.x -= collideOffsets.xOffset;
 }
 
-function applyForce() {
+function applyVForce() {
 	if (player.verticalAcceleration == 0 && IsOnGround()) return;
 
-	player.verticalAcceleration -= 3;
+	player.verticalAcceleration -= player.verticalAcceleration > 0 ? 2 : 3;
 	player.y = Math.max(player.y + player.verticalAcceleration, 0);
 
 	if (player.verticalAcceleration <= 0) {
@@ -279,8 +306,6 @@ function IsStandingCollide() {
 }
 
 function IsOnGround() {
-	if (player.y <= 0) return true;
-
 	for (const platform of platforms)
 		if (
 			player.x + 100 > platform.x &&
@@ -289,12 +314,12 @@ function IsOnGround() {
 		)
 			return true;
 
+	if (player.y <= 0) return true;
+
 	return false;
 }
 
 function IsOnGroundEx(): { xOffset: number; yOffset: number } | false {
-	if (player.y <= 0) return { xOffset: 0, yOffset: player.y };
-
 	for (const platform of platforms)
 		if (
 			player.x + 100 > platform.x &&
@@ -322,6 +347,8 @@ function IsOnGroundEx(): { xOffset: number; yOffset: number } | false {
 
 			return { xOffset: xOffset, yOffset: yOffset };
 		}
+
+	if (player.y <= 0) return { xOffset: 0, yOffset: player.y };
 
 	return false;
 }
