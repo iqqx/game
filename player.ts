@@ -9,6 +9,7 @@ import {
 	DrawRectangleFixed,
 	DrawRectangleWithAngle,
 	DrawText,
+	DrawVignette,
 	GetFillColor,
 	GetLevelPosition,
 	ProgradeLerp,
@@ -181,6 +182,8 @@ function gameLoop() {
 			-5 / 2
 		);
 	}
+
+	DrawVignette();
 }
 
 function moveRight() {

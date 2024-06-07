@@ -1,6 +1,6 @@
 import { Clamp } from "./utilites.js";
 import { PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED, } from "./constants.js";
-import { DrawRectangle, DrawRectangleFixed, DrawRectangleWithAngle, GetFillColor, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
+import { DrawRectangle, DrawRectangleFixed, DrawRectangleWithAngle, DrawVignette, GetFillColor, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
 const player = {
     x: 900,
     y: 0,
@@ -119,6 +119,7 @@ function gameLoop() {
         SetFillColor("red");
         DrawRectangleWithAngle(player.x + 70, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, -5 / 2);
     }
+    DrawVignette();
 }
 function moveRight() {
     player.x = Math.min(player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED), levelLength - 100);

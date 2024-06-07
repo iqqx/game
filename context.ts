@@ -96,3 +96,21 @@ export function DrawRectangleWithAngle(
 export function DrawText(x: number, y: number, text: string) {
 	ctx.fillText(text, x, y);
 }
+
+export function DrawVignette() {
+	var outerRadius = 1500 * 0.6;
+	var innerRadius = 1500 * 0.5;
+	var grd = ctx.createRadialGradient(
+		1500 / 2,
+		750 / 2,
+		innerRadius,
+		1500 / 2,
+		750 / 2,
+		outerRadius
+	);
+	grd.addColorStop(0, "rgba(0, 0, 0, .1)");
+	grd.addColorStop(1, "rgba(0, 0, 0, .6)");
+
+	ctx.fillStyle = grd;
+	ctx.fillRect(0, 0, 1500, 750);
+}
