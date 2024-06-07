@@ -1,8 +1,8 @@
-import { Clamp } from "./utilites.js";
-import { PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED, } from "./constants.js";
-import { DrawRectangle, DrawRectangleFixed, DrawRectangleWithAngle, DrawVignette, GetFillColor, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
+import { Clamp, Color, Rectangle } from "./utilites.js";
+import { BULLET_LIFETIME, PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED, } from "./constants.js";
+import { DrawRectangle, DrawRectangleFixed, DrawRectangleWithAngle, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
 const player = {
-    x: 900,
+    x: 300,
     y: 0,
     xMouse: 0,
     yMouse: 0,
@@ -38,6 +38,14 @@ const platforms = [
         height: 100,
     },
 ];
+const bullets = [
+    {
+        x: 0,
+        y: 0,
+        angle: 0,
+        shootTimeStamp: 0,
+    },
+];
 addEventListener("keydown", (e) => {
     switch (e.code) {
         case "KeyC":
@@ -70,14 +78,46 @@ addEventListener("keyup", (e) => {
             break;
     }
 });
+addEventListener("mousedown", (e) => {
+    if (e.button === 0) {
+        if (player.direction == 1) {
+            const angle = -Clamp(Math.atan2(player.yMouse -
+                (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse -
+                (player.x + 30 - GetLevelPosition()) -
+                15 / 2), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+            bullets.push({
+                x: player.x + 30,
+                y: player.y + (player.sit ? 50 : 120),
+                angle: angle,
+                shootTimeStamp: e.timeStamp,
+            });
+        }
+        else {
+            let angle = -Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse - (player.x + 70 - GetLevelPosition()) - 15 / 2);
+            angle =
+                angle < 0
+                    ? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
+                    : Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+            bullets.push({
+                x: player.x + 70,
+                y: player.y + (player.sit ? 50 : 120),
+                angle: angle,
+                shootTimeStamp: e.timeStamp,
+            });
+        }
+    }
+});
 addEventListener("mousemove", (e) => {
     player.xMouse = e.x;
     player.yMouse = 750 - e.y;
     player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
 });
-function gameLoop() {
+function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
     ResetTransform();
+    // Задний фон
+    SetFillColorRGB(50, 50, 50);
+    DrawRectangleFixed(0, 0, levelLength, 750);
     // PHYSICS
     applyVForce();
     // LOGIC
@@ -89,20 +129,35 @@ function gameLoop() {
     SetLevelPosition(levelPosition);
     ProgradeLerp();
     // GUI
-    SetFillColorRGB(50, 50, 50);
-    DrawRectangleFixed(0, 0, levelLength, 750);
     SetFillColor("black");
     DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
     DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
     DrawRectangleFixed(1500 / 2 - 260 / 2, 750 - 20 - 10, 260, 15);
     SetFillColor("white");
+    DrawText(10, 10, timeStamp.toString());
     DrawRectangleFixed(1500 / 2 - 250 / 2 + 200 * (player.x / (levelLength - 100)), 750 - 25 - 10, 50, 25);
     // RENDER
-    const prev = GetFillColor();
+    // platforms
     SetFillColor("blue");
     for (const platform of platforms)
         DrawRectangle(platform.x, platform.y, platform.width, platform.height);
-    SetFillColor(prev);
+    // bullets
+    const bulletColor0 = new Color(255, 255, 255, 5);
+    const bulletColor1 = new Color(255, 255, 255, 50);
+    for (let i = 0; i < bullets.length; i++) {
+        // unordered remove
+        if (timeStamp - bullets[i].shootTimeStamp >= BULLET_LIFETIME)
+            if (bullets.length > 1)
+                bullets[i] = bullets.pop();
+            else
+                bullets.pop();
+        else
+            DrawRectangleWithGradientAndAngle(new Rectangle(bullets[i].x, bullets[i].y, 1500, 2), [
+                (timeStamp - bullets[i].shootTimeStamp) / BULLET_LIFETIME,
+                bulletColor0,
+            ], [1, bulletColor1], bullets[i].angle, -50 / 2 + 200, -5 / 2);
+    }
+    // ИГРОК
     SetFillColor("black");
     DrawRectangle(player.x, player.y, 100, player.sit ? 100 : 200);
     if (player.direction == 1) {
@@ -119,6 +174,7 @@ function gameLoop() {
         SetFillColor("red");
         DrawRectangleWithAngle(player.x + 70, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, -5 / 2);
     }
+    // POST PROCESSING
     DrawVignette();
 }
 function moveRight() {
@@ -255,4 +311,4 @@ function jump() {
         return;
     player.verticalAcceleration = PLAYER_JUMP_FORCE;
 }
-gameLoop();
+gameLoop(0);

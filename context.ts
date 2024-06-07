@@ -1,4 +1,4 @@
-import { Clamp, Lerp } from "./utilites.js";
+import { Clamp, Color, Lerp, Rectangle } from "./utilites.js";
 
 const ctx = (
 	document.getElementById("main-canvas") as HTMLCanvasElement
@@ -113,4 +113,83 @@ export function DrawVignette() {
 
 	ctx.fillStyle = grd;
 	ctx.fillRect(0, 0, 1500, 750);
+}
+
+export function DrawAntiVignette() {
+	var outerRadius = 1500 * 0.6;
+	var innerRadius = 1500 * 0.5;
+	var grd = ctx.createRadialGradient(
+		1500 / 2,
+		750 / 2,
+		innerRadius,
+		1500 / 2,
+		750 / 2,
+		outerRadius
+	);
+	grd.addColorStop(0, "rgba(255, 255, 255, .1)");
+	grd.addColorStop(1, "rgba(255, 255, 255, .4)");
+
+	ctx.fillStyle = grd;
+	ctx.fillRect(0, 0, 1500, 750);
+}
+
+export function SetGradientFill(start: Color, end: Color) {
+	const grd = ctx.createLinearGradient(500, 0, 600, 0);
+
+	grd.addColorStop(0, start.toString());
+	grd.addColorStop(1, end.toString());
+
+	ctx.fillStyle = grd;
+}
+
+export function DrawRectangleWithGradient(
+	rect: Rectangle,
+	start: Color,
+	end: Color
+) {
+	const grd = ctx.createLinearGradient(
+		rect.X - levelPosition,
+		ctx.canvas.height - rect.Height - rect.Y,
+		rect.X - levelPosition + rect.Width,
+		ctx.canvas.height - rect.Height - rect.Y + rect.Height
+	);
+
+	grd.addColorStop(0, start.toString());
+	grd.addColorStop(1, end.toString());
+
+	ctx.fillStyle = grd;
+	DrawRectangle(rect.X - levelPosition, rect.Y, rect.Width, rect.Height);
+}
+
+export function DrawRectangleWithGradientAndAngle(
+	rect: Rectangle,
+	start: [number, Color],
+	end: [number, Color],
+	angle: number,
+	xPivot: number,
+	yPivot: number
+) {
+	var prev = ctx.getTransform();
+
+	ctx.resetTransform();
+	ctx.translate(
+		rect.X - levelPosition,
+		ctx.canvas.height - rect.Height - rect.Y
+	);
+	ctx.rotate(angle);
+
+	const grd = ctx.createLinearGradient(
+		xPivot - 50,
+		yPivot,
+		xPivot + rect.Width,
+		yPivot + rect.Height
+	);
+
+	grd.addColorStop(start[0], start[1].toString());
+	grd.addColorStop(end[0], end[1].toString());
+	ctx.fillStyle = grd;
+
+	ctx.fillRect(xPivot, yPivot, rect.Width, rect.Height);
+
+	ctx.setTransform(prev);
 }
