@@ -7,13 +7,20 @@ import {
 } from "./utilites.js";
 import {
 	BULLET_LIFETIME,
+	PLAYER_HEIGHT,
 	PLAYER_JUMP_FORCE,
+	PLAYER_MAX_HEALTH,
 	PLAYER_SIT_SPEED,
+	PLAYER_WALK_FRAME_DURATION,
 	PLAYER_WALK_SPEED,
+	PLAYER_WIDTH,
 } from "./constants.js";
 import {
-	DrawAntiVignette,
 	DrawCircle,
+	DrawImage,
+	DrawImageFlipped,
+	DrawImageWithAngle,
+	DrawImageWithAngleVFlipped,
 	DrawRectangle,
 	DrawRectangleEx,
 	DrawRectangleFixed,
@@ -27,13 +34,23 @@ import {
 	ResetTransform,
 	SetFillColor,
 	SetFillColorRGB,
+	SetFillColorRGBA,
+	SetHorizontalFlip,
 	SetLevelPosition,
 	levelLength,
 } from "./context.js";
-import { player, platforms, bullets, sounds, enemies } from "./Level.js";
+import {
+	player,
+	platforms,
+	bullets,
+	sounds,
+	enemies,
+	images,
+} from "./Level.js";
 
-let intersects: { x: number; y: number }[] = [{ x: 30, y: 120 }];
+let intersects: { x: number; y: number }[] = [];
 let needDrawAntiVegnitte = 0;
+let needDrawRedVegnitte = 0;
 
 addEventListener("keydown", (e) => {
 	switch (e.code) {
@@ -75,7 +92,8 @@ addEventListener("keyup", (e) => {
 addEventListener("mousedown", (e) => {
 	player.xMouse = e.x - GetClientRectangle().left + GetLevelPosition();
 	player.yMouse = 750 - (e.y - GetClientRectangle().top);
-	player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
+	player.direction =
+		e.x > player.x + PLAYER_WIDTH / 2 - GetLevelPosition() ? 1 : -1;
 
 	if (e.button === 0) {
 		player.LMBPressed = true;
@@ -94,7 +112,8 @@ addEventListener("mousemove", (e) => {
 	player.xMouse = e.x - GetClientRectangle().left + GetLevelPosition();
 	player.yMouse = 750 - (e.y - GetClientRectangle().top);
 
-	player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
+	player.direction =
+		e.x > player.x + PLAYER_WIDTH / 2 - GetLevelPosition() ? 1 : -1;
 });
 
 function gameLoop(timeStamp: number) {
@@ -109,15 +128,31 @@ function gameLoop(timeStamp: number) {
 	applyVForce();
 
 	// LOGIC
+
+	const prevX = player.x;
 	if (player.movingLeft) moveLeft();
 	else if (player.movingRight) moveRight();
+	player.direction = player.xMouse > player.x + PLAYER_WIDTH / 2 ? 1 : -1;
+
+	if (prevX != player.x) {
+		if (
+			timeStamp - player.lastFrameTimeStamp >=
+			PLAYER_WALK_FRAME_DURATION
+		) {
+			player.frameIndex = (player.frameIndex + 1) % 4;
+			player.lastFrameTimeStamp = timeStamp;
+		}
+	} else {
+		player.frameIndex = 0;
+	}
 
 	if (player.LMBPressed && timeStamp - player.lastShootTick > 100)
 		Shoot(timeStamp);
 
-	for (const enemy of enemies) enemy.Update();
+	for (const enemy of enemies) enemy.Update(timeStamp);
 
-	const levelPosition = levelLength * (player.x / (levelLength - 100));
+	const levelPosition =
+		levelLength * (player.x / (levelLength - PLAYER_WIDTH));
 	SetLevelPosition(levelPosition);
 	ProgradeLerp();
 
@@ -149,37 +184,62 @@ function gameLoop(timeStamp: number) {
 			);
 	}
 
-	// ИГРОК
-	SetFillColor("black");
-	DrawRectangle(player.x, player.y, 100, player.sit ? 100 : 200);
+	for (const enemy of enemies) enemy.Draw();
 
-	SetFillColor("yellow");
-	for (const intersect of intersects)
-		DrawRectangle(intersect.x - 1, intersect.y - 1, 2, 2);
+	// ИГРОК
+	if (player.direction === 1) {
+		DrawImage(
+			(player.sit ? images.Player.Sit : images.Player.Walk)[
+				player.frameIndex
+			],
+			new Rectangle(
+				player.x - 25,
+				player.y,
+				PLAYER_WIDTH + 50,
+				PLAYER_HEIGHT
+			)
+		);
+	} else
+		DrawImageFlipped(
+			(player.sit ? images.Player.Sit : images.Player.Walk)[
+				player.frameIndex
+			],
+			new Rectangle(
+				player.x - 25,
+				player.y,
+				PLAYER_WIDTH + 50,
+				PLAYER_HEIGHT
+			)
+		);
 
 	if (player.direction == 1) {
 		const angle = -Clamp(
 			Math.atan2(
-				player.yMouse - (player.y + (player.sit ? 50 : 120)),
-				player.xMouse - (player.x + 30)
+				player.yMouse -
+					(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
+				player.xMouse - (player.x + PLAYER_WIDTH / 2)
 			),
 			-Math.PI / 2 + 0.4,
 			Math.PI / 2 - 0.4
 		);
-		SetFillColor("red");
-		DrawRectangleWithAngle(
-			player.x + 30,
-			player.y + (player.sit ? 50 : 120),
-			200,
-			5,
+
+		DrawImageWithAngle(
+			images.AK,
+			new Rectangle(
+				player.x + PLAYER_WIDTH / 2,
+				player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+				52 * 3.125,
+				16 * 3.125
+			),
 			angle,
-			-50 / 2,
-			5 / 2
+			-12,
+			16 * 2.4
 		);
 	} else {
 		let angle = -Math.atan2(
-			player.yMouse - (player.y + (player.sit ? 50 : 120)),
-			player.xMouse - (player.x + 70)
+			player.yMouse -
+				(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
+			player.xMouse - (player.x + PLAYER_WIDTH / 2)
 		);
 
 		angle =
@@ -187,25 +247,30 @@ function gameLoop(timeStamp: number) {
 				? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
 				: Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 
-		SetFillColor("red");
-		DrawRectangleWithAngle(
-			player.x + 70,
-			player.y + (player.sit ? 50 : 120),
-			200,
-			5,
+		DrawImageWithAngleVFlipped(
+			images.AK,
+			new Rectangle(
+				player.x + PLAYER_WIDTH / 2,
+				player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+				52 * 3.125,
+				16 * 3.125
+			),
 			angle,
-			-50 / 2,
-			5 / 2
+			-12,
+			16 * 2.4
 		);
 	}
 
-	for (const enemy of enemies) enemy.Draw();
-
 	// POST PROCESSING
+	if (needDrawRedVegnitte > 0) {
+		needDrawRedVegnitte--;
+		DrawVignette(new Color(255, 0, 0));
+	}
 	if (needDrawAntiVegnitte > 0) {
 		needDrawAntiVegnitte--;
-		DrawAntiVignette();
-	} else DrawVignette();
+		DrawVignette(new Color(100, 100, 100));
+	}
+	DrawVignette(new Color(0, 0, 0));
 
 	// GUI
 	SetFillColor("black");
@@ -215,19 +280,39 @@ function gameLoop(timeStamp: number) {
 	SetFillColor("white");
 	DrawText(10, 10, timeStamp.toString());
 	DrawRectangleFixed(
-		1500 / 2 - 250 / 2 + 200 * (player.x / (levelLength - 100)),
+		1500 / 2 -
+			250 / 2 +
+			PLAYER_HEIGHT * (player.x / (levelLength - PLAYER_WIDTH)),
 		750 - 25 - 10,
 		50,
 		25
 	);
+
+	// Heath
+	SetFillColorRGBA(new Color(255, 0, 0, 50));
+	DrawRectangleFixed(25, 25, 250, 25);
+	SetFillColorRGBA(new Color(255, 0, 0, 50));
+	DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
+
+	// Cursor
 	SetFillColor("white");
 	DrawCircle(player.xMouse - 1, player.yMouse - 1, 2);
+
+	// Game over
+	if (player.health <= 0) {
+		SetFillColorRGB(255, 0, 0);
+		DrawRectangleFixed(0, 0, 1500, 750);
+	}
+
+	SetFillColor("yellow");
+	for (const intersect of intersects)
+		DrawRectangle(intersect.x - 1, intersect.y - 1, 2, 2);
 }
 
 function moveRight() {
 	player.x = Math.min(
 		player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED),
-		levelLength - 100
+		levelLength - PLAYER_WIDTH
 	);
 
 	const collideOffsets = IsCollideEx();
@@ -278,15 +363,16 @@ function applyVForce() {
 function IsCollideEx(): { xOffset: number; yOffset: number } | false {
 	for (const platform of platforms)
 		if (
-			player.x + 100 > platform.X &&
+			player.x + PLAYER_WIDTH > platform.X &&
 			player.x < platform.X + platform.Width &&
-			player.y + (player.sit ? 100 : 200) > platform.Y &&
+			player.y + (player.sit ? 100 : PLAYER_HEIGHT) > platform.Y &&
 			player.y < platform.Y + platform.Height
 		) {
-			const xstart = player.x + 100 - platform.X;
+			const xstart = player.x + PLAYER_WIDTH - platform.X;
 			const xend = platform.X + platform.Width - player.x;
 			const ystart = platform.Y + platform.Height - player.y;
-			const yend = player.y + (player.sit ? 100 : 200) - platform.Y;
+			const yend =
+				player.y + (player.sit ? 100 : PLAYER_HEIGHT) - platform.Y;
 			let xOffset = 0;
 			let yOffset = 0;
 
@@ -323,9 +409,9 @@ function IsCollideEx(): { xOffset: number; yOffset: number } | false {
 function IsStandingCollide() {
 	for (const platform of platforms)
 		if (
-			player.x + 100 > platform.X &&
+			player.x + PLAYER_WIDTH > platform.X &&
 			player.x < platform.X + platform.Width &&
-			player.y + 200 > platform.Y &&
+			player.y + PLAYER_HEIGHT > platform.Y &&
 			player.y < platform.Y + platform.Height
 		)
 			return true;
@@ -336,7 +422,7 @@ function IsStandingCollide() {
 function IsOnGround() {
 	for (const platform of platforms)
 		if (
-			player.x + 100 > platform.X &&
+			player.x + PLAYER_WIDTH > platform.X &&
 			player.x < platform.X + platform.Width &&
 			player.y == platform.Y + platform.Height
 		)
@@ -350,14 +436,15 @@ function IsOnGround() {
 function IsOnGroundEx(): { xOffset: number; yOffset: number } | false {
 	for (const platform of platforms)
 		if (
-			player.x + 100 > platform.X &&
+			player.x + PLAYER_WIDTH > platform.X &&
 			player.x < platform.X + platform.Width &&
 			player.y <= platform.Y + platform.Height
 		) {
-			const xstart = player.x + 100 - platform.X;
+			const xstart = player.x + PLAYER_WIDTH - platform.X;
 			const xend = platform.X + platform.Width - player.x;
 			const ystart = platform.Y + platform.Height - player.y;
-			const yend = platform.Y - (player.y + (player.sit ? 100 : 200));
+			const yend =
+				platform.Y - (player.y + (player.sit ? 100 : PLAYER_HEIGHT));
 			let xOffset = 0;
 			let yOffset = 0;
 
@@ -381,12 +468,21 @@ function IsOnGroundEx(): { xOffset: number; yOffset: number } | false {
 	return false;
 }
 
+export function Attack(damage: number) {
+	player.health -= damage;
+	needDrawRedVegnitte = 5;
+
+	if (player.health <= 0) {
+	}
+}
+
 function Shoot(timeStamp: number) {
 	if (player.direction == 1) {
 		const angle = -Clamp(
 			Math.atan2(
-				player.yMouse - (player.y + (player.sit ? 50 : 120)),
-				player.xMouse - (player.x + 30)
+				player.yMouse -
+					(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
+				player.xMouse - (player.x + PLAYER_WIDTH / 2)
 			),
 			-Math.PI / 2 + 0.4,
 			Math.PI / 2 - 0.4
@@ -396,11 +492,14 @@ function Shoot(timeStamp: number) {
 		for (const platform of platforms) {
 			const intersect = GetIntersectPointWithRectangle(
 				new Line(
-					player.x + 30,
-					player.y + (player.sit ? 50 : 120),
-					player.xMouse + (player.xMouse - (player.x + 30)) * 10000,
+					player.x + PLAYER_WIDTH / 2,
+					player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+					player.xMouse +
+						(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
 					player.yMouse +
-						(player.yMouse - (player.y + (player.sit ? 50 : 120))) *
+						(player.yMouse -
+							(player.y +
+								PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
 							10000
 				),
 				platform
@@ -417,16 +516,18 @@ function Shoot(timeStamp: number) {
 		if (intersect !== undefined) intersects.push(intersect);
 
 		bullets.push({
-			x: player.x + 30,
-			y: player.y + (player.sit ? 50 : 120),
+			x: player.x + PLAYER_WIDTH / 2,
+			y: player.y + (player.sit ? 50 : PLAYER_HEIGHT * 0.75),
 			length:
 				intersect === undefined
 					? 2000
 					: Math.min(
 							Math.sqrt(
-								(player.x + 30 - intersect.x) ** 2 +
+								(player.x + PLAYER_WIDTH / 2 - intersect.x) **
+									2 +
 									(player.y +
-										(player.sit ? 50 : 120) -
+										PLAYER_HEIGHT *
+											(player.sit ? 0.25 : 0.75) -
 										intersect.y) **
 										2
 							),
@@ -437,8 +538,9 @@ function Shoot(timeStamp: number) {
 		});
 	} else {
 		let angle = -Math.atan2(
-			player.yMouse - (player.y + (player.sit ? 50 : 120)),
-			player.xMouse - (player.x + 70)
+			player.yMouse -
+				(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
+			player.xMouse - (player.x + PLAYER_WIDTH / 2)
 		);
 
 		angle =
@@ -450,11 +552,14 @@ function Shoot(timeStamp: number) {
 		for (const platform of platforms) {
 			const intersect = GetIntersectPointWithRectangle(
 				new Line(
-					player.x + 70,
-					player.y + (player.sit ? 50 : 120),
-					player.xMouse + (player.xMouse - (player.x + 70)) * 10000,
+					player.x + PLAYER_WIDTH / 2,
+					player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+					player.xMouse +
+						(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
 					player.yMouse +
-						(player.yMouse - (player.y + (player.sit ? 50 : 120))) *
+						(player.yMouse -
+							(player.y +
+								PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
 							10000
 				),
 				platform
@@ -471,16 +576,18 @@ function Shoot(timeStamp: number) {
 		if (intersect !== undefined) intersects.push(intersect);
 
 		bullets.push({
-			x: player.x + 70,
-			y: player.y + (player.sit ? 50 : 120),
+			x: player.x + PLAYER_WIDTH / 2,
+			y: player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
 			length:
 				intersect === undefined
 					? 2000
 					: Math.min(
 							Math.sqrt(
-								(player.x + 70 - intersect.x) ** 2 +
+								(player.x + PLAYER_WIDTH / 2 - intersect.x) **
+									2 +
 									(player.y +
-										(player.sit ? 50 : 120) -
+										PLAYER_HEIGHT *
+											(player.sit ? 0.25 : 0.75) -
 										intersect.y) **
 										2
 							),

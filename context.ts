@@ -3,6 +3,7 @@ import { Clamp, Color, Lerp, Rectangle } from "./utilites.js";
 const ctx = (
 	document.getElementById("main-canvas") as HTMLCanvasElement
 ).getContext("2d");
+ctx.imageSmoothingEnabled = false;
 
 export const levelLength = 2000;
 let levelPosition = 0;
@@ -18,6 +19,10 @@ export function SetFillColor(color: string | CanvasGradient | CanvasPattern) {
 
 export function SetFillColorRGB(r: number, g: number, b: number) {
 	ctx.fillStyle = `rgb(${r},${g},${b})`;
+}
+
+export function SetFillColorRGBA(color: Color) {
+	ctx.fillStyle = color.toString();
 }
 
 export function ResetTransform() {
@@ -51,6 +56,29 @@ export function DrawRectangleEx(rect: Rectangle) {
 	);
 }
 
+export function DrawImage(image: CanvasImageSource, rect: Rectangle) {
+	ctx.drawImage(
+		image,
+		rect.X - levelPosition,
+		ctx.canvas.height - rect.Height - rect.Y,
+		rect.Width,
+		rect.Height
+	);
+}
+
+export function DrawImageFlipped(image: CanvasImageSource, rect: Rectangle) {
+	ctx.save();
+	ctx.scale(-1, 1);
+	ctx.drawImage(
+		image,
+		-rect.X - rect.Width + levelPosition,
+		ctx.canvas.height - rect.Height - rect.Y,
+		rect.Width,
+		rect.Height
+	);
+	ctx.restore();
+}
+
 export function DrawRectangleFixed(
 	x: number,
 	y: number,
@@ -62,7 +90,15 @@ export function DrawRectangleFixed(
 
 export function DrawCircle(x: number, y: number, radius: number) {
 	ctx.beginPath();
-	ctx.ellipse(x - levelPosition, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
+	ctx.ellipse(
+		x - levelPosition,
+		ctx.canvas.height - radius / 2 - y,
+		radius,
+		radius,
+		0,
+		0,
+		Math.PI * 2
+	);
 	ctx.fill();
 }
 
@@ -102,11 +138,52 @@ export function DrawRectangleWithAngle(
 	ctx.setTransform(prev);
 }
 
+export function DrawImageWithAngle(
+	image: CanvasImageSource,
+	rect: Rectangle,
+	angle: number,
+	xPivot: number,
+	yPivot: number
+) {
+	var prev = ctx.getTransform();
+
+	ctx.resetTransform();
+	ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
+	ctx.rotate(angle);
+
+	ctx.drawImage(image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+
+	ctx.setTransform(prev);
+}
+
+export function DrawImageWithAngleVFlipped(
+	image: CanvasImageSource,
+	rect: Rectangle,
+	angle: number,
+	xPivot: number,
+	yPivot: number
+) {
+	ctx.save();
+
+	ctx.resetTransform();
+	ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
+	ctx.rotate(angle);
+	ctx.scale(1, -1);
+
+	ctx.drawImage(image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+
+	ctx.restore();
+}
+
+export function SetHorizontalFlip(flipped: boolean) {
+	ctx.scale(flipped ? -1 : 1, 1);
+}
+
 export function DrawText(x: number, y: number, text: string) {
 	ctx.fillText(text, x, y);
 }
 
-export function DrawVignette() {
+export function DrawVignette(color: Color) {
 	var outerRadius = 1500 * 0.6;
 	var innerRadius = 1500 * 0.5;
 	var grd = ctx.createRadialGradient(
@@ -117,26 +194,8 @@ export function DrawVignette() {
 		750 / 2,
 		outerRadius
 	);
-	grd.addColorStop(0, "rgba(0, 0, 0, .1)");
-	grd.addColorStop(1, "rgba(0, 0, 0, .6)");
-
-	ctx.fillStyle = grd;
-	ctx.fillRect(0, 0, 1500, 750);
-}
-
-export function DrawAntiVignette() {
-	var outerRadius = 1500 * 0.6;
-	var innerRadius = 1500 * 0.5;
-	var grd = ctx.createRadialGradient(
-		1500 / 2,
-		750 / 2,
-		innerRadius,
-		1500 / 2,
-		750 / 2,
-		outerRadius
-	);
-	grd.addColorStop(0, "rgba(100, 100, 100, .1)");
-	grd.addColorStop(1, "rgba(100, 100, 100, .6)");
+	grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, .1)`);
+	grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, .6)`);
 
 	ctx.fillStyle = grd;
 	ctx.fillRect(0, 0, 1500, 750);

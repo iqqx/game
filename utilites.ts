@@ -7,26 +7,26 @@ export function Lerp(start: number, end: number, t: number) {
 }
 
 export class Color {
-	private readonly _r: number;
-	private readonly _g: number;
-	private readonly _b: number;
-	private readonly _a: number;
+	public readonly R: number;
+	public readonly G: number;
+	public readonly B: number;
+	public readonly A: number;
 
 	public static readonly White = new Color(255, 255, 255, 255);
 	public static readonly Black = new Color(0, 0, 0, 255);
 	public static readonly Transparent = new Color(0, 0, 0, 0);
 
 	constructor(r: number, g: number, b: number, a = 255) {
-		this._r = r;
-		this._g = g;
-		this._b = b;
-		this._a = a;
+		this.R = r;
+		this.G = g;
+		this.B = b;
+		this.A = a;
 	}
 
 	toString() {
-		return this._a === 255
-			? `rgb(${this._r}, ${this._g}, ${this._b})`
-			: `rgba(${this._r}, ${this._g}, ${this._b}, ${this._a / 255})`;
+		return this.A === 255
+			? `rgb(${this.R}, ${this.G}, ${this.B})`
+			: `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
 	}
 }
 
@@ -92,7 +92,15 @@ export function GetIntersectPoint(
 		(w * v2 - v * w2);
 	const t = (line1.X0 - line0.X0 + v2 * t2) / v;
 
-	if (t < 0 || t > 1 || t2 < 0 || t2 > 1) return undefined;
+	if (
+		t < 0 ||
+		t > 1 ||
+		t2 < 0 ||
+		t2 > 1 ||
+		Number.isNaN(t2) ||
+		Number.isNaN(t)
+	)
+		return undefined;
 	else return { x: line1.X0 + v2 * t2, y: line1.Y0 + w2 * t2 };
 }
 
@@ -165,6 +173,8 @@ export function GetIntersectPointWithRectangle(
 		result.push(left);
 	}
 
+	if (result.length === 0) return undefined;
+
 	result.sort(
 		(a, b) =>
 			(a.x - line.X0) ** 2 +
@@ -173,4 +183,13 @@ export function GetIntersectPointWithRectangle(
 	);
 
 	return result[0];
+}
+
+export function SquareMagnitude(
+	x0: number,
+	y0: number,
+	x1: number,
+	y1: number
+): number {
+	return (x0 - x1) ** 2 + (y0 - y1) ** 2;
 }
