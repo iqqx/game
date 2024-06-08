@@ -2,8 +2,11 @@ import {
 	Clamp,
 	Color,
 	GetIntersectPointWithRectangle,
+	GetNearestIntersectWithEnemies,
+	GetNearestIntersectWithRectangles,
 	Line,
 	Rectangle,
+	SquareMagnitude,
 } from "./utilites.js";
 import {
 	BULLET_LIFETIME,
@@ -289,7 +292,7 @@ function gameLoop(timeStamp: number) {
 	);
 
 	// Heath
-	SetFillColorRGBA(new Color(255, 0, 0, 50));
+	SetFillColorRGBA(new Color(255, 0, 0, 25));
 	DrawRectangleFixed(25, 25, 250, 25);
 	SetFillColorRGBA(new Color(255, 0, 0, 50));
 	DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
@@ -477,126 +480,88 @@ export function Attack(damage: number) {
 }
 
 function Shoot(timeStamp: number) {
-	if (player.direction == 1) {
-		const angle = -Clamp(
-			Math.atan2(
-				player.yMouse -
-					(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
-				player.xMouse - (player.x + PLAYER_WIDTH / 2)
-			),
-			-Math.PI / 2 + 0.4,
-			Math.PI / 2 - 0.4
-		);
+	const hit = GetNearestIntersectWithRectangles(
+		new Line(
+			player.x + PLAYER_WIDTH / 2,
+			player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+			player.xMouse +
+				(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
+			player.yMouse +
+				(player.yMouse -
+					(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
+					10000
+		),
+		platforms
+	);
 
-		const inters: { x: number; y: number }[] = [];
-		for (const platform of platforms) {
-			const intersect = GetIntersectPointWithRectangle(
-				new Line(
+	const enemyHit = GetNearestIntersectWithEnemies(
+		new Line(
+			player.x + PLAYER_WIDTH / 2,
+			player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+			player.xMouse +
+				(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
+			player.yMouse +
+				(player.yMouse -
+					(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
+					10000
+		),
+		enemies
+	);
+
+	if (
+		(enemyHit !== undefined && hit === undefined) ||
+		(enemyHit !== undefined &&
+			hit !== undefined &&
+			SquareMagnitude(
+				player.x + PLAYER_WIDTH / 2,
+				player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+				enemyHit.x,
+				enemyHit.y
+			) <
+				SquareMagnitude(
 					player.x + PLAYER_WIDTH / 2,
 					player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
-					player.xMouse +
-						(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
-					player.yMouse +
-						(player.yMouse -
-							(player.y +
-								PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
-							10000
-				),
-				platform
-			);
+					hit.x,
+					hit.y
+				))
+	) {
+		enemyHit.enemy.TakeDamage(50);
+	}
 
-			if (intersect !== undefined) inters.push(intersect);
-		}
-		const intersect =
-			inters.length === 0
-				? undefined
-				: inters.minBy(
-						(x) => (x.x - player.x) ** 2 + (x.y - player.y) ** 2
-				  );
-		if (intersect !== undefined) intersects.push(intersect);
-
-		bullets.push({
-			x: player.x + PLAYER_WIDTH / 2,
-			y: player.y + (player.sit ? 50 : PLAYER_HEIGHT * 0.75),
-			length:
-				intersect === undefined
-					? 2000
-					: Math.min(
-							Math.sqrt(
-								(player.x + PLAYER_WIDTH / 2 - intersect.x) **
-									2 +
-									(player.y +
-										PLAYER_HEIGHT *
-											(player.sit ? 0.25 : 0.75) -
-										intersect.y) **
-										2
-							),
-							2000
-					  ),
-			angle: angle,
-			shootTimeStamp: timeStamp,
-		});
-	} else {
-		let angle = -Math.atan2(
+	const angle = (function () {
+		const angle = -Math.atan2(
 			player.yMouse -
 				(player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75)),
 			player.xMouse - (player.x + PLAYER_WIDTH / 2)
 		);
 
-		angle =
-			angle < 0
+		if (player.direction == 1)
+			return Clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+		else
+			return angle < 0
 				? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
 				: Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+	})();
 
-		const inters: { x: number; y: number }[] = [];
-		for (const platform of platforms) {
-			const intersect = GetIntersectPointWithRectangle(
-				new Line(
-					player.x + PLAYER_WIDTH / 2,
-					player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
-					player.xMouse +
-						(player.xMouse - (player.x + PLAYER_WIDTH / 2)) * 10000,
-					player.yMouse +
-						(player.yMouse -
-							(player.y +
-								PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75))) *
-							10000
-				),
-				platform
-			);
-
-			if (intersect !== undefined) inters.push(intersect);
-		}
-		const intersect =
-			inters.length === 0
-				? undefined
-				: inters.minBy(
-						(x) => (x.x - player.x) ** 2 + (x.y - player.y) ** 2
-				  );
-		if (intersect !== undefined) intersects.push(intersect);
-
-		bullets.push({
-			x: player.x + PLAYER_WIDTH / 2,
-			y: player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
-			length:
-				intersect === undefined
-					? 2000
-					: Math.min(
-							Math.sqrt(
-								(player.x + PLAYER_WIDTH / 2 - intersect.x) **
-									2 +
-									(player.y +
-										PLAYER_HEIGHT *
-											(player.sit ? 0.25 : 0.75) -
-										intersect.y) **
-										2
-							),
-							2000
-					  ),
-			angle: angle,
-			shootTimeStamp: timeStamp,
-		});
-	}
+	bullets.push({
+		x: player.x + PLAYER_WIDTH / 2,
+		y: player.y + PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75),
+		length:
+			hit === undefined
+				? 2000
+				: Math.min(
+						Math.sqrt(
+							(player.x + PLAYER_WIDTH / 2 - hit.x) ** 2 +
+								(player.y +
+									PLAYER_HEIGHT * (player.sit ? 0.25 : 0.75) -
+									hit.y) **
+									2
+						),
+						2000
+				  ),
+		angle: angle,
+		shootTimeStamp: timeStamp,
+	});
 
 	sounds.Shoot.Play(0.5);
 

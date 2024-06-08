@@ -5,7 +5,7 @@ import { PLAYER_MAX_HEALTH } from "./constants.js";
 import { Rectangle } from "./utilites.js";
 
 export const player = {
-	x: 1000,
+	x: 100,
 	y: 0,
 	xMouse: 5000,
 	yMouse: 100,
@@ -30,7 +30,8 @@ export const platforms = [
 ];
 
 export const enemies: Enemy[] = [
-	// new Rat(), new Human()
+	new Rat(),
+	//  new Human()
 ];
 
 export const bullets = [
@@ -83,6 +84,13 @@ export const images = {
 			return images;
 		})(),
 	},
+	Rat: (function () {
+		const img = new Image();
+
+		img.src = "Images/Rat.png";
+
+		return img;
+	})(),
 	AK: (function () {
 		const img = new Image();
 

@@ -1,3 +1,5 @@
+import { Enemy } from "./Enemies/Enemy";
+
 export function Clamp(n: number, min: number, max: number) {
 	return Math.min(Math.max(n, min), max);
 }
@@ -183,6 +185,118 @@ export function GetIntersectPointWithRectangle(
 	);
 
 	return result[0];
+}
+
+export function GetNearestIntersectWithRectangles(
+	line: Line,
+	rectangles: Rectangle[]
+): { x: number; y: number } | undefined {
+	const result: { x: number; y: number }[] = [];
+
+	for (const rectangle of rectangles) {
+		const top = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y + rectangle.Height,
+				rectangle.X + rectangle.Width,
+				rectangle.Y + rectangle.Height
+			)
+		);
+		const right = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X + rectangle.Width,
+				rectangle.Y,
+				rectangle.X + rectangle.Width,
+				rectangle.Y + rectangle.Height
+			)
+		);
+		const bottom = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y,
+				rectangle.X + rectangle.Width,
+				rectangle.Y
+			)
+		);
+		const left = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y,
+				rectangle.X,
+				rectangle.Y + rectangle.Height
+			)
+		);
+
+		if (top !== undefined) result.push(top);
+		if (right !== undefined) result.push(right);
+		if (bottom !== undefined) result.push(bottom);
+		if (left !== undefined) result.push(left);
+	}
+
+	return result.length === 0 ? undefined : result.minBy(	(a) =>
+		(a.x - line.X0) ** 2 +
+		(a.y - line.Y0) ** 2);
+}
+
+export function GetNearestIntersectWithEnemies(
+	line: Line,
+	enemies: Enemy[]
+): {enemy: Enemy, x: number; y: number } | undefined {
+	const result: {enemy: Enemy, x: number; y: number }[] = [];
+
+	for (const enemy of enemies) {
+		const rectangle = enemy.GetRectangle();
+
+		const top = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y + rectangle.Height,
+				rectangle.X + rectangle.Width,
+				rectangle.Y + rectangle.Height
+			)
+		);
+		const right = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X + rectangle.Width,
+				rectangle.Y,
+				rectangle.X + rectangle.Width,
+				rectangle.Y + rectangle.Height
+			)
+		);
+		const bottom = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y,
+				rectangle.X + rectangle.Width,
+				rectangle.Y
+			)
+		);
+		const left = GetIntersectPoint(
+			line,
+			new Line(
+				rectangle.X,
+				rectangle.Y,
+				rectangle.X,
+				rectangle.Y + rectangle.Height
+			)
+		);
+
+		if (top !== undefined) result.push({...top, enemy: enemy});
+		if (right !== undefined) result.push({...right, enemy: enemy});
+		if (bottom !== undefined) result.push({...bottom, enemy: enemy});
+		if (left !== undefined) result.push({...left, enemy: enemy});
+	}
+
+	return result.length === 0
+		? undefined
+		: result.minBy((a) => (a.x - line.X0) ** 2 + (a.y - line.Y0) ** 2);
 }
 
 export function SquareMagnitude(

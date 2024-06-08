@@ -1,6 +1,7 @@
 import { platforms, player } from "../Level.js";
+import { PLAYER_WIDTH } from "../constants.js";
 import { DrawRectangle, SetFillColor } from "../context.js";
-import { GetIntersectPointWithRectangle, Line } from "../utilites.js";
+import { GetIntersectPointWithRectangle, Line, Rectangle, } from "../utilites.js";
 export class Enemy {
     _x = 0;
     _y = 0;
@@ -37,19 +38,22 @@ export class Enemy {
         return { x: this._x, y: this._y };
     }
     Draw() {
+        if (this.IsDead())
+            return;
         SetFillColor("red");
         DrawRectangle(this._x, this._y, this._width, this._height);
     }
     Update(timeStamp) {
+        if (this.IsDead())
+            return;
+        this._direction = Math.sign(player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2));
+        if (Math.abs(this._x - (player.x + PLAYER_WIDTH / 2)) < 5)
+            return;
         if (this.IsSpotPlayer()) {
-            if (this._x + this._width / 2 > player.x + 50) {
-                this.MoveLeft();
-                this._direction = -1;
-            }
-            else {
+            if (this._direction == 1)
                 this.MoveRight();
-                this._direction = 1;
-            }
+            else
+                this.MoveLeft();
         }
     }
     IsCollideEx() {
@@ -87,5 +91,14 @@ export class Enemy {
                 return { xOffset: xOffset, yOffset: yOffset };
             }
         return false;
+    }
+    TakeDamage(damage) {
+        this._health -= damage;
+    }
+    GetRectangle() {
+        return new Rectangle(this._x, this._y, this._width, this._height);
+    }
+    IsDead() {
+        return this._health <= 0;
     }
 }

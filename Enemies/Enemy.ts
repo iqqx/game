@@ -1,6 +1,11 @@
 import { platforms, player } from "../Level.js";
+import { PLAYER_WIDTH } from "../constants.js";
 import { DrawRectangle, SetFillColor } from "../context.js";
-import { GetIntersectPointWithRectangle, Line } from "../utilites.js";
+import {
+	GetIntersectPointWithRectangle,
+	Line,
+	Rectangle,
+} from "../utilites.js";
 
 export abstract class Enemy {
 	protected _x = 0;
@@ -44,17 +49,17 @@ export abstract class Enemy {
 	public MoveRight() {
 		this._x += this._speed;
 
-		const collide = this.IsCollideEx()
+		const collide = this.IsCollideEx();
 		if (collide !== false && collide.xOffset !== 0)
-			this._x += collide.xOffset
+			this._x += collide.xOffset;
 	}
 
 	public MoveLeft() {
 		this._x -= this._speed;
 
-		const collide = this.IsCollideEx()
+		const collide = this.IsCollideEx();
 		if (collide !== false && collide.xOffset !== 0)
-			this._x -= collide.xOffset
+			this._x -= collide.xOffset;
 	}
 
 	public GetPosition(): { x: number; y: number } {
@@ -62,19 +67,24 @@ export abstract class Enemy {
 	}
 
 	public Draw() {
+		if (this.IsDead()) return;
+
 		SetFillColor("red");
 		DrawRectangle(this._x, this._y, this._width, this._height);
 	}
 
 	public Update(timeStamp: number) {
+		if (this.IsDead()) return;
+
+		this._direction = Math.sign(
+			player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2)
+		) as -1 | 1;
+
+		if (Math.abs(this._x - (player.x + PLAYER_WIDTH / 2)) < 5) return;
+
 		if (this.IsSpotPlayer()) {
-			if (this._x + this._width / 2 > player.x + 50) {
-				this.MoveLeft();
-				this._direction = -1;
-			} else {
-				this.MoveRight();
-				this._direction = 1;
-			}
+			if (this._direction == 1) this.MoveRight();
+			else this.MoveLeft();
 		}
 	}
 
@@ -121,5 +131,17 @@ export abstract class Enemy {
 			}
 
 		return false;
+	}
+
+	public TakeDamage(damage: number) {
+		this._health -= damage;
+	}
+
+	public GetRectangle() {
+		return new Rectangle(this._x, this._y, this._width, this._height);
+	}
+
+	public IsDead() {
+		return this._health <= 0;
 	}
 }

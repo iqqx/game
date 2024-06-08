@@ -116,6 +116,46 @@ export function GetIntersectPointWithRectangle(line, rectangle) {
         ((b.x - line.X0) ** 2 + (b.y - line.Y0) ** 2));
     return result[0];
 }
+export function GetNearestIntersectWithRectangles(line, rectangles) {
+    const result = [];
+    for (const rectangle of rectangles) {
+        const top = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y + rectangle.Height, rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height));
+        const right = GetIntersectPoint(line, new Line(rectangle.X + rectangle.Width, rectangle.Y, rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height));
+        const bottom = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y, rectangle.X + rectangle.Width, rectangle.Y));
+        const left = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y, rectangle.X, rectangle.Y + rectangle.Height));
+        if (top !== undefined)
+            result.push(top);
+        if (right !== undefined)
+            result.push(right);
+        if (bottom !== undefined)
+            result.push(bottom);
+        if (left !== undefined)
+            result.push(left);
+    }
+    return result.length === 0 ? undefined : result.minBy((a) => (a.x - line.X0) ** 2 +
+        (a.y - line.Y0) ** 2);
+}
+export function GetNearestIntersectWithEnemies(line, enemies) {
+    const result = [];
+    for (const enemy of enemies) {
+        const rectangle = enemy.GetRectangle();
+        const top = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y + rectangle.Height, rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height));
+        const right = GetIntersectPoint(line, new Line(rectangle.X + rectangle.Width, rectangle.Y, rectangle.X + rectangle.Width, rectangle.Y + rectangle.Height));
+        const bottom = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y, rectangle.X + rectangle.Width, rectangle.Y));
+        const left = GetIntersectPoint(line, new Line(rectangle.X, rectangle.Y, rectangle.X, rectangle.Y + rectangle.Height));
+        if (top !== undefined)
+            result.push({ ...top, enemy: enemy });
+        if (right !== undefined)
+            result.push({ ...right, enemy: enemy });
+        if (bottom !== undefined)
+            result.push({ ...bottom, enemy: enemy });
+        if (left !== undefined)
+            result.push({ ...left, enemy: enemy });
+    }
+    return result.length === 0
+        ? undefined
+        : result.minBy((a) => (a.x - line.X0) ** 2 + (a.y - line.Y0) ** 2);
+}
 export function SquareMagnitude(x0, y0, x1, y1) {
     return (x0 - x1) ** 2 + (y0 - y1) ** 2;
 }
