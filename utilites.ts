@@ -64,6 +64,20 @@ export function UnorderedRemove<T>(array: Array<T>, index: number) {
 	return element;
 }
 
+declare global {
+	interface Array<T> {
+		minBy(by: (element: T) => number): T;
+	}
+}
+
+Array.prototype.minBy = function <T>(this: T[], by: (element: T) => number): T {
+	let min = this[0];
+
+	for (const element of this) if (by(element) < by(min)) min = element;
+
+	return min;
+};
+
 export function GetIntersectPoint(
 	line0: Line,
 	line1: Line

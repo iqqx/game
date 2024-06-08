@@ -1,3 +1,4 @@
+import { Rat } from "./Enemies/Rat.js";
 import { Rectangle } from "./utilites.js";
 export const player = {
     x: 0,
@@ -19,6 +20,7 @@ export const platforms = [
     new Rectangle(1500, 200, 80, 30),
     new Rectangle(2000 - 25, 350, 25, 100),
 ];
+export const enemies = [new Rat()];
 export const bullets = [
     {
         x: 0,

@@ -1,7 +1,7 @@
 import { Clamp, Color, GetIntersectPointWithRectangle, Line, Rectangle, } from "./utilites.js";
 import { BULLET_LIFETIME, PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED, } from "./constants.js";
 import { DrawAntiVignette, DrawCircle, DrawRectangle, DrawRectangleEx, DrawRectangleFixed, DrawRectangleWithAngle, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetClientRectangle, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
-import { player, platforms, bullets, sounds } from "./Level.js";
+import { player, platforms, bullets, sounds, enemies } from "./Level.js";
 let intersects = [{ x: 30, y: 120 }];
 let needDrawAntiVegnitte = 0;
 addEventListener("keydown", (e) => {
@@ -73,17 +73,11 @@ function gameLoop(timeStamp) {
         moveRight();
     if (player.LMBPressed && timeStamp - player.lastShootTick > 100)
         Shoot(timeStamp);
+    for (const enemy of enemies)
+        enemy.Update();
     const levelPosition = levelLength * (player.x / (levelLength - 100));
     SetLevelPosition(levelPosition);
     ProgradeLerp();
-    // GUI
-    SetFillColor("black");
-    DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
-    DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
-    DrawRectangleFixed(1500 / 2 - 260 / 2, 750 - 20 - 10, 260, 15);
-    SetFillColor("white");
-    DrawText(10, 10, timeStamp.toString());
-    DrawRectangleFixed(1500 / 2 - 250 / 2 + 200 * (player.x / (levelLength - 100)), 750 - 25 - 10, 50, 25);
     // RENDER
     // platforms
     SetFillColor("blue");
@@ -125,8 +119,8 @@ function gameLoop(timeStamp) {
         SetFillColor("red");
         DrawRectangleWithAngle(player.x + 70, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, 5 / 2);
     }
-    SetFillColor("white");
-    DrawCircle(player.xMouse - 1, player.yMouse - 1, 2);
+    for (const enemy of enemies)
+        enemy.Draw();
     // POST PROCESSING
     if (needDrawAntiVegnitte > 0) {
         needDrawAntiVegnitte--;
@@ -134,6 +128,16 @@ function gameLoop(timeStamp) {
     }
     else
         DrawVignette();
+    // GUI
+    SetFillColor("black");
+    DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
+    DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
+    DrawRectangleFixed(1500 / 2 - 260 / 2, 750 - 20 - 10, 260, 15);
+    SetFillColor("white");
+    DrawText(10, 10, timeStamp.toString());
+    DrawRectangleFixed(1500 / 2 - 250 / 2 + 200 * (player.x / (levelLength - 100)), 750 - 25 - 10, 50, 25);
+    SetFillColor("white");
+    DrawCircle(player.xMouse - 1, player.yMouse - 1, 2);
 }
 function moveRight() {
     player.x = Math.min(player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED), levelLength - 100);
@@ -258,16 +262,19 @@ function IsOnGroundEx() {
 function Shoot(timeStamp) {
     if (player.direction == 1) {
         const angle = -Clamp(Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120)), player.xMouse - (player.x + 30)), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
-        let intersect;
+        const inters = [];
         for (const platform of platforms) {
-            intersect = GetIntersectPointWithRectangle(new Line(player.x + 30, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 30)) * 10000, player.yMouse +
+            const intersect = GetIntersectPointWithRectangle(new Line(player.x + 30, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 30)) * 10000, player.yMouse +
                 (player.yMouse - (player.y + (player.sit ? 50 : 120))) *
                     10000), platform);
-            if (intersect !== undefined) {
-                intersects.push(intersect);
-                break;
-            }
+            if (intersect !== undefined)
+                inters.push(intersect);
         }
+        const intersect = inters.length === 0
+            ? undefined
+            : inters.minBy((x) => (x.x - player.x) ** 2 + (x.y - player.y) ** 2);
+        if (intersect !== undefined)
+            intersects.push(intersect);
         bullets.push({
             x: player.x + 30,
             y: player.y + (player.sit ? 50 : 120),
@@ -288,16 +295,19 @@ function Shoot(timeStamp) {
             angle < 0
                 ? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
                 : Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
-        let intersect;
+        const inters = [];
         for (const platform of platforms) {
-            intersect = GetIntersectPointWithRectangle(new Line(player.x + 70, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 70)) * 10000, player.yMouse +
+            const intersect = GetIntersectPointWithRectangle(new Line(player.x + 70, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 70)) * 10000, player.yMouse +
                 (player.yMouse - (player.y + (player.sit ? 50 : 120))) *
                     10000), platform);
-            if (intersect !== undefined) {
-                intersects.push(intersect);
-                break;
-            }
+            if (intersect !== undefined)
+                inters.push(intersect);
         }
+        const intersect = inters.length === 0
+            ? undefined
+            : inters.minBy((x) => (x.x - player.x) ** 2 + (x.y - player.y) ** 2);
+        if (intersect !== undefined)
+            intersects.push(intersect);
         bullets.push({
             x: player.x + 70,
             y: player.y + (player.sit ? 50 : 120),

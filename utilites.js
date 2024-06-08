@@ -53,6 +53,13 @@ export function UnorderedRemove(array, index) {
     array[index] = array.pop();
     return element;
 }
+Array.prototype.minBy = function (by) {
+    let min = this[0];
+    for (const element of this)
+        if (by(element) < by(min))
+            min = element;
+    return min;
+};
 export function GetIntersectPoint(line0, line1) {
     const v = line0.X1 - line0.X0;
     const w = line0.Y1 - line0.Y0;
