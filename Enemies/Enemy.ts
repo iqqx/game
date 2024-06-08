@@ -1,5 +1,5 @@
 import { platforms, player } from "../Level.js";
-import { PLAYER_WIDTH } from "../constants.js";
+import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
 import { DrawRectangle, SetFillColor } from "../context.js";
 import {
 	GetIntersectPointWithRectangle,
@@ -35,8 +35,8 @@ export abstract class Enemy {
 					new Line(
 						this._x + this._width / 2,
 						this._y + this._height / 2,
-						player.x + 50,
-						player.y + 100
+						player.x + PLAYER_WIDTH / 2,
+						player.y + (player.sit ? PLAYER_HEIGHT / 2 : PLAYER_HEIGHT)
 					),
 					platform
 				) !== undefined

@@ -1,5 +1,5 @@
 import { platforms, player } from "../Level.js";
-import { PLAYER_WIDTH } from "../constants.js";
+import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
 import { DrawRectangle, SetFillColor } from "../context.js";
 import { GetIntersectPointWithRectangle, Line, Rectangle, } from "../utilites.js";
 export class Enemy {
@@ -18,7 +18,7 @@ export class Enemy {
     }
     IsSpotPlayer() {
         for (const platform of platforms)
-            if (GetIntersectPointWithRectangle(new Line(this._x + this._width / 2, this._y + this._height / 2, player.x + 50, player.y + 100), platform) !== undefined)
+            if (GetIntersectPointWithRectangle(new Line(this._x + this._width / 2, this._y + this._height / 2, player.x + PLAYER_WIDTH / 2, player.y + (player.sit ? PLAYER_HEIGHT / 2 : PLAYER_HEIGHT)), platform) !== undefined)
                 return false;
         return true;
     }

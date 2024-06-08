@@ -30,8 +30,8 @@ export const platforms = [
 ];
 
 export const enemies: Enemy[] = [
-	new Rat(),
-	//  new Human()
+	// new Rat(),
+	 new Human()
 ];
 
 export const bullets = [

@@ -1,4 +1,4 @@
-import { Rat } from "./Enemies/Rat.js";
+import { Human } from "./Enemies/Human.js";
 import { PLAYER_MAX_HEALTH } from "./constants.js";
 import { Rectangle } from "./utilites.js";
 export const player = {
@@ -25,8 +25,8 @@ export const platforms = [
     new Rectangle(2000 - 25, 350, 25, 100),
 ];
 export const enemies = [
-    new Rat(),
-    //  new Human()
+    // new Rat(),
+    new Human()
 ];
 export const bullets = [
     {

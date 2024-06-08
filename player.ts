@@ -190,7 +190,7 @@ function gameLoop(timeStamp: number) {
 	for (const enemy of enemies) enemy.Draw();
 
 	// ИГРОК
-	if (player.direction === 1) {
+	if (player.direction === 1) 
 		DrawImage(
 			(player.sit ? images.Player.Sit : images.Player.Walk)[
 				player.frameIndex
@@ -201,8 +201,8 @@ function gameLoop(timeStamp: number) {
 				PLAYER_WIDTH + 50,
 				PLAYER_HEIGHT
 			)
-		);
-	} else
+		)
+	 else
 		DrawImageFlipped(
 			(player.sit ? images.Player.Sit : images.Player.Walk)[
 				player.frameIndex
@@ -273,7 +273,7 @@ function gameLoop(timeStamp: number) {
 		needDrawAntiVegnitte--;
 		DrawVignette(new Color(100, 100, 100));
 	}
-	DrawVignette(new Color(0, 0, 0));
+	DrawVignette(new Color(255 - 255 * (player.health / PLAYER_MAX_HEALTH), 0, 0));
 
 	// GUI
 	SetFillColor("black");
@@ -292,10 +292,10 @@ function gameLoop(timeStamp: number) {
 	);
 
 	// Heath
-	SetFillColorRGBA(new Color(255, 0, 0, 25));
-	DrawRectangleFixed(25, 25, 250, 25);
-	SetFillColorRGBA(new Color(255, 0, 0, 50));
-	DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
+	// SetFillColorRGBA(new Color(255, 0, 0, 25));
+	// DrawRectangleFixed(25, 25, 250, 25);
+	// SetFillColorRGBA(new Color(255, 0, 0, 50));
+	// DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
 
 	// Cursor
 	SetFillColor("white");

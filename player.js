@@ -1,6 +1,6 @@
 import { Clamp, Color, GetNearestIntersectWithEnemies, GetNearestIntersectWithRectangles, Line, Rectangle, SquareMagnitude, } from "./utilites.js";
 import { BULLET_LIFETIME, PLAYER_HEIGHT, PLAYER_JUMP_FORCE, PLAYER_MAX_HEALTH, PLAYER_SIT_SPEED, PLAYER_WALK_FRAME_DURATION, PLAYER_WALK_SPEED, PLAYER_WIDTH, } from "./constants.js";
-import { DrawCircle, DrawImage, DrawImageFlipped, DrawImageWithAngle, DrawImageWithAngleVFlipped, DrawRectangle, DrawRectangleEx, DrawRectangleFixed, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetClientRectangle, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetFillColorRGBA, SetLevelPosition, levelLength, } from "./context.js";
+import { DrawCircle, DrawImage, DrawImageFlipped, DrawImageWithAngle, DrawImageWithAngleVFlipped, DrawRectangle, DrawRectangleEx, DrawRectangleFixed, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetClientRectangle, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
 import { player, platforms, bullets, sounds, enemies, images, } from "./Level.js";
 let intersects = [];
 let needDrawAntiVegnitte = 0;
@@ -117,9 +117,8 @@ function gameLoop(timeStamp) {
     for (const enemy of enemies)
         enemy.Draw();
     // ИГРОК
-    if (player.direction === 1) {
+    if (player.direction === 1)
         DrawImage((player.sit ? images.Player.Sit : images.Player.Walk)[player.frameIndex], new Rectangle(player.x - 25, player.y, PLAYER_WIDTH + 50, PLAYER_HEIGHT));
-    }
     else
         DrawImageFlipped((player.sit ? images.Player.Sit : images.Player.Walk)[player.frameIndex], new Rectangle(player.x - 25, player.y, PLAYER_WIDTH + 50, PLAYER_HEIGHT));
     if (player.direction == 1) {
@@ -145,7 +144,7 @@ function gameLoop(timeStamp) {
         needDrawAntiVegnitte--;
         DrawVignette(new Color(100, 100, 100));
     }
-    DrawVignette(new Color(0, 0, 0));
+    DrawVignette(new Color(255 - 255 * (player.health / PLAYER_MAX_HEALTH), 0, 0));
     // GUI
     SetFillColor("black");
     DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
@@ -157,10 +156,10 @@ function gameLoop(timeStamp) {
         250 / 2 +
         PLAYER_HEIGHT * (player.x / (levelLength - PLAYER_WIDTH)), 750 - 25 - 10, 50, 25);
     // Heath
-    SetFillColorRGBA(new Color(255, 0, 0, 25));
-    DrawRectangleFixed(25, 25, 250, 25);
-    SetFillColorRGBA(new Color(255, 0, 0, 50));
-    DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
+    // SetFillColorRGBA(new Color(255, 0, 0, 25));
+    // DrawRectangleFixed(25, 25, 250, 25);
+    // SetFillColorRGBA(new Color(255, 0, 0, 50));
+    // DrawRectangleFixed(25, 25, 250 * (player.health / PLAYER_MAX_HEALTH), 25);
     // Cursor
     SetFillColor("white");
     DrawCircle(player.xMouse - 1, player.yMouse - 1, 2);
