@@ -36,16 +36,127 @@ export class Rectangle {
 	public readonly Width: number;
 	public readonly Height: number;
 
-	constructor(x: number, y: number, width: number, height:number) {
+	constructor(x: number, y: number, width: number, height: number) {
 		this.X = x;
 		this.Y = y;
 		this.Width = width;
-		this.Height = height
+		this.Height = height;
+	}
+}
+
+export class Line {
+	public readonly X0: number;
+	public readonly Y0: number;
+	public readonly X1: number;
+	public readonly Y1: number;
+
+	constructor(x0: number, y0: number, x1: number, y1: number) {
+		this.X0 = x0;
+		this.Y0 = y0;
+		this.X1 = x1;
+		this.Y1 = y1;
 	}
 }
 
 export function UnorderedRemove<T>(array: Array<T>, index: number) {
 	const element = array[index];
-	array[index] = array.pop()
+	array[index] = array.pop();
 	return element;
+}
+
+export function GetIntersectPoint(
+	line0: Line,
+	line1: Line
+): { x: number; y: number } | undefined {
+	const v = line0.X1 - line0.X0;
+	const w = line0.Y1 - line0.Y0;
+	const v2 = line1.X1 - line1.X0;
+	const w2 = line1.Y1 - line1.Y0;
+
+	const t2 =
+		(-w * line1.X0 + w * line0.X0 + v * line1.Y0 - v * line0.Y0) /
+		(w * v2 - v * w2);
+	const t = (line1.X0 - line0.X0 + v2 * t2) / v;
+
+	if (t < 0 || t > 1 || t2 < 0 || t2 > 1) return undefined;
+	else return { x: line1.X0 + v2 * t2, y: line1.Y0 + w2 * t2 };
+}
+
+export function GetIntersectPointWithRectangle(
+	line: Line,
+	rectangle: Rectangle
+): { x: number; y: number } | undefined {
+	const result: { x: number; y: number }[] = [];
+
+	const top = GetIntersectPoint(
+		line,
+		new Line(
+			rectangle.X,
+			rectangle.Y + rectangle.Height,
+			rectangle.X + rectangle.Width,
+			rectangle.Y + rectangle.Height
+		)
+	);
+	const right = GetIntersectPoint(
+		line,
+		new Line(
+			rectangle.X + rectangle.Width,
+			rectangle.Y,
+			rectangle.X + rectangle.Width,
+			rectangle.Y + rectangle.Height
+		)
+	);
+	const bottom = GetIntersectPoint(
+		line,
+		new Line(
+			rectangle.X,
+			rectangle.Y,
+			rectangle.X + rectangle.Width,
+			rectangle.Y
+		)
+	);
+	const left = GetIntersectPoint(
+		line,
+		new Line(
+			rectangle.X,
+			rectangle.Y,
+			rectangle.X,
+			rectangle.Y + rectangle.Height
+		)
+	);
+
+	// console.log("/////////////////");
+	if (top !== undefined) {
+		// console.log(`TOP: ${top.x}, ${top.y} => ${top.x ** 2 + top.y ** 2}`);
+		result.push(top);
+	}
+	if (right !== undefined) {
+		// console.log(
+		// 	`RIGHT: ${right.x}, ${right.y} => ${right.x ** 2 + right.y ** 2}`
+		// );
+		result.push(right);
+	}
+	if (bottom !== undefined) {
+		// console.log(
+		// 	`BOTTOM: ${bottom.x}, ${bottom.y} => ${
+		// 		bottom.x ** 2 + bottom.y ** 2
+		// 	}`
+		// );
+		result.push(bottom);
+	}
+	if (left !== undefined) {
+		// console.log(
+		// 	`LEFT: ${left.x}, ${left.y} => ${left.x ** 2 + left.y ** 2}`
+		// );
+		result.push(left);
+	}
+
+	result.sort(
+		(a, b) =>
+			(a.x - line.X0) ** 2 +
+			(a.y - line.Y0) ** 2 -
+			((b.x - line.X0) ** 2 + (b.y - line.Y0) ** 2)
+	);
+
+	return result[0];
 }

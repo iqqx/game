@@ -1,51 +1,9 @@
-import { Clamp, Color, Rectangle } from "./utilites.js";
+import { Clamp, Color, GetIntersectPointWithRectangle, Line, Rectangle, } from "./utilites.js";
 import { BULLET_LIFETIME, PLAYER_JUMP_FORCE, PLAYER_SIT_SPEED, PLAYER_WALK_SPEED, } from "./constants.js";
-import { DrawRectangle, DrawRectangleFixed, DrawRectangleWithAngle, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
-const player = {
-    x: 300,
-    y: 0,
-    xMouse: 0,
-    yMouse: 0,
-    direction: 1,
-    sit: false,
-    movingLeft: false,
-    movingRight: false,
-    verticalAcceleration: 0,
-};
-const platforms = [
-    {
-        x: 300,
-        y: 0,
-        width: 300,
-        height: 25,
-    },
-    {
-        x: 900,
-        y: 220,
-        width: 200,
-        height: 25,
-    },
-    {
-        x: 1500,
-        y: 200,
-        width: 80,
-        height: 30,
-    },
-    {
-        x: 2000 - 25,
-        y: 350,
-        width: 25,
-        height: 100,
-    },
-];
-const bullets = [
-    {
-        x: 0,
-        y: 0,
-        angle: 0,
-        shootTimeStamp: 0,
-    },
-];
+import { DrawAntiVignette, DrawCircle, DrawRectangle, DrawRectangleEx, DrawRectangleFixed, DrawRectangleWithAngle, DrawRectangleWithGradientAndAngle, DrawText, DrawVignette, GetClientRectangle, GetLevelPosition, ProgradeLerp, ResetTransform, SetFillColor, SetFillColorRGB, SetLevelPosition, levelLength, } from "./context.js";
+import { player, platforms, bullets, sounds } from "./Level.js";
+let intersects = [{ x: 30, y: 120 }];
+let needDrawAntiVegnitte = 0;
 addEventListener("keydown", (e) => {
     switch (e.code) {
         case "KeyC":
@@ -61,6 +19,9 @@ addEventListener("keydown", (e) => {
             break;
         case "KeyD":
             player.movingRight = true;
+            break;
+        case "KeyX":
+            intersects = [];
             break;
         default:
             break;
@@ -79,37 +40,22 @@ addEventListener("keyup", (e) => {
     }
 });
 addEventListener("mousedown", (e) => {
+    player.xMouse = e.x - GetClientRectangle().left + GetLevelPosition();
+    player.yMouse = 750 - (e.y - GetClientRectangle().top);
+    player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
     if (e.button === 0) {
-        if (player.direction == 1) {
-            const angle = -Clamp(Math.atan2(player.yMouse -
-                (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse -
-                (player.x + 30 - GetLevelPosition()) -
-                15 / 2), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
-            bullets.push({
-                x: player.x + 30,
-                y: player.y + (player.sit ? 50 : 120),
-                angle: angle,
-                shootTimeStamp: e.timeStamp,
-            });
-        }
-        else {
-            let angle = -Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse - (player.x + 70 - GetLevelPosition()) - 15 / 2);
-            angle =
-                angle < 0
-                    ? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
-                    : Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
-            bullets.push({
-                x: player.x + 70,
-                y: player.y + (player.sit ? 50 : 120),
-                angle: angle,
-                shootTimeStamp: e.timeStamp,
-            });
-        }
+        player.LMBPressed = true;
+        Shoot(e.timeStamp);
+    }
+});
+addEventListener("mouseup", (e) => {
+    if (e.button === 0) {
+        player.LMBPressed = false;
     }
 });
 addEventListener("mousemove", (e) => {
-    player.xMouse = e.x;
-    player.yMouse = 750 - e.y;
+    player.xMouse = e.x - GetClientRectangle().left + GetLevelPosition();
+    player.yMouse = 750 - (e.y - GetClientRectangle().top);
     player.direction = e.x > player.x + 50 - GetLevelPosition() ? 1 : -1;
 });
 function gameLoop(timeStamp) {
@@ -125,6 +71,8 @@ function gameLoop(timeStamp) {
         moveLeft();
     else if (player.movingRight)
         moveRight();
+    if (player.LMBPressed && timeStamp - player.lastShootTick > 100)
+        Shoot(timeStamp);
     const levelPosition = levelLength * (player.x / (levelLength - 100));
     SetLevelPosition(levelPosition);
     ProgradeLerp();
@@ -140,42 +88,52 @@ function gameLoop(timeStamp) {
     // platforms
     SetFillColor("blue");
     for (const platform of platforms)
-        DrawRectangle(platform.x, platform.y, platform.width, platform.height);
+        DrawRectangleEx(platform);
     // bullets
     const bulletColor0 = new Color(255, 255, 255, 5);
     const bulletColor1 = new Color(255, 255, 255, 50);
     for (let i = 0; i < bullets.length; i++) {
-        // unordered remove
         if (timeStamp - bullets[i].shootTimeStamp >= BULLET_LIFETIME)
             if (bullets.length > 1)
+                // unordered remove
                 bullets[i] = bullets.pop();
             else
                 bullets.pop();
         else
-            DrawRectangleWithGradientAndAngle(new Rectangle(bullets[i].x, bullets[i].y, 1500, 2), [
+            DrawRectangleWithGradientAndAngle(new Rectangle(bullets[i].x, bullets[i].y, bullets[i].length, 2), [
                 (timeStamp - bullets[i].shootTimeStamp) / BULLET_LIFETIME,
                 bulletColor0,
-            ], [1, bulletColor1], bullets[i].angle, -50 / 2 + 200, -5 / 2);
+            ], [1, bulletColor1], bullets[i].angle, 0, 1);
     }
     // ИГРОК
     SetFillColor("black");
     DrawRectangle(player.x, player.y, 100, player.sit ? 100 : 200);
+    SetFillColor("yellow");
+    for (const intersect of intersects)
+        DrawRectangle(intersect.x - 1, intersect.y - 1, 2, 2);
     if (player.direction == 1) {
-        const angle = -Clamp(Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse - (player.x + 30 - GetLevelPosition()) - 15 / 2), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+        const angle = -Clamp(Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120)), player.xMouse - (player.x + 30)), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
         SetFillColor("red");
-        DrawRectangleWithAngle(player.x + 30, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, -5 / 2);
+        DrawRectangleWithAngle(player.x + 30, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, 5 / 2);
     }
     else {
-        let angle = -Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120) - 5 / 2), player.xMouse - (player.x + 70 - GetLevelPosition()) - 15 / 2);
+        let angle = -Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120)), player.xMouse - (player.x + 70));
         angle =
             angle < 0
                 ? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
                 : Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
         SetFillColor("red");
-        DrawRectangleWithAngle(player.x + 70, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, -5 / 2);
+        DrawRectangleWithAngle(player.x + 70, player.y + (player.sit ? 50 : 120), 200, 5, angle, -50 / 2, 5 / 2);
     }
+    SetFillColor("white");
+    DrawCircle(player.xMouse - 1, player.yMouse - 1, 2);
     // POST PROCESSING
-    DrawVignette();
+    if (needDrawAntiVegnitte > 0) {
+        needDrawAntiVegnitte--;
+        DrawAntiVignette();
+    }
+    else
+        DrawVignette();
 }
 function moveRight() {
     player.x = Math.min(player.x + (player.sit ? PLAYER_SIT_SPEED : PLAYER_WALK_SPEED), levelLength - 100);
@@ -211,31 +169,22 @@ function applyVForce() {
         }
     }
 }
-function IsCollide() {
-    for (const platform of platforms)
-        if (player.x + 100 > platform.x &&
-            player.x < platform.x + platform.width &&
-            player.y + (player.sit ? 100 : 200) > platform.y &&
-            player.y < platform.y + platform.height)
-            return true;
-    return false;
-}
 function IsCollideEx() {
     for (const platform of platforms)
-        if (player.x + 100 > platform.x &&
-            player.x < platform.x + platform.width &&
-            player.y + (player.sit ? 100 : 200) > platform.y &&
-            player.y < platform.y + platform.height) {
-            const xstart = player.x + 100 - platform.x;
-            const xend = platform.x + platform.width - player.x;
-            const ystart = platform.y + platform.height - player.y;
-            const yend = player.y + (player.sit ? 100 : 200) - platform.y;
+        if (player.x + 100 > platform.X &&
+            player.x < platform.X + platform.Width &&
+            player.y + (player.sit ? 100 : 200) > platform.Y &&
+            player.y < platform.Y + platform.Height) {
+            const xstart = player.x + 100 - platform.X;
+            const xend = platform.X + platform.Width - player.x;
+            const ystart = platform.Y + platform.Height - player.y;
+            const yend = player.y + (player.sit ? 100 : 200) - platform.Y;
             let xOffset = 0;
             let yOffset = 0;
             if (xstart > 0 &&
                 xend > 0 &&
-                xend < platform.width &&
-                xstart < platform.width)
+                xend < platform.Width &&
+                xstart < platform.Width)
                 xOffset = 0;
             else if (xstart > 0 && (xend < 0 || xstart < xend))
                 xOffset = xstart;
@@ -243,8 +192,8 @@ function IsCollideEx() {
                 xOffset = -xend;
             if (ystart > 0 &&
                 yend > 0 &&
-                yend < platform.height &&
-                ystart < platform.height)
+                yend < platform.Height &&
+                ystart < platform.Height)
                 yOffset = 0;
             else if (ystart > 0 && (yend < 0 || ystart < yend))
                 yOffset = ystart;
@@ -258,18 +207,18 @@ function IsCollideEx() {
 }
 function IsStandingCollide() {
     for (const platform of platforms)
-        if (player.x + 100 > platform.x &&
-            player.x < platform.x + platform.width &&
-            player.y + 200 > platform.y &&
-            player.y < platform.y + platform.height)
+        if (player.x + 100 > platform.X &&
+            player.x < platform.X + platform.Width &&
+            player.y + 200 > platform.Y &&
+            player.y < platform.Y + platform.Height)
             return true;
     return false;
 }
 function IsOnGround() {
     for (const platform of platforms)
-        if (player.x + 100 > platform.x &&
-            player.x < platform.x + platform.width &&
-            player.y == platform.y + platform.height)
+        if (player.x + 100 > platform.X &&
+            player.x < platform.X + platform.Width &&
+            player.y == platform.Y + platform.Height)
             return true;
     if (player.y <= 0)
         return true;
@@ -277,13 +226,13 @@ function IsOnGround() {
 }
 function IsOnGroundEx() {
     for (const platform of platforms)
-        if (player.x + 100 > platform.x &&
-            player.x < platform.x + platform.width &&
-            player.y <= platform.y + platform.height) {
-            const xstart = player.x + 100 - platform.x;
-            const xend = platform.x + platform.width - player.x;
-            const ystart = platform.y + platform.height - player.y;
-            const yend = platform.y - (player.y + (player.sit ? 100 : 200));
+        if (player.x + 100 > platform.X &&
+            player.x < platform.X + platform.Width &&
+            player.y <= platform.Y + platform.Height) {
+            const xstart = player.x + 100 - platform.X;
+            const xend = platform.X + platform.Width - player.x;
+            const ystart = platform.Y + platform.Height - player.y;
+            const yend = platform.Y - (player.y + (player.sit ? 100 : 200));
             let xOffset = 0;
             let yOffset = 0;
             if (xstart > 0 && xend > 0)
@@ -305,6 +254,67 @@ function IsOnGroundEx() {
     if (player.y <= 0)
         return { xOffset: 0, yOffset: player.y };
     return false;
+}
+function Shoot(timeStamp) {
+    if (player.direction == 1) {
+        const angle = -Clamp(Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120)), player.xMouse - (player.x + 30)), -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+        let intersect;
+        for (const platform of platforms) {
+            intersect = GetIntersectPointWithRectangle(new Line(player.x + 30, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 30)) * 10000, player.yMouse +
+                (player.yMouse - (player.y + (player.sit ? 50 : 120))) *
+                    10000), platform);
+            if (intersect !== undefined) {
+                intersects.push(intersect);
+                break;
+            }
+        }
+        bullets.push({
+            x: player.x + 30,
+            y: player.y + (player.sit ? 50 : 120),
+            length: intersect === undefined
+                ? 2000
+                : Math.min(Math.sqrt((player.x + 30 - intersect.x) ** 2 +
+                    (player.y +
+                        (player.sit ? 50 : 120) -
+                        intersect.y) **
+                        2), 2000),
+            angle: angle,
+            shootTimeStamp: timeStamp,
+        });
+    }
+    else {
+        let angle = -Math.atan2(player.yMouse - (player.y + (player.sit ? 50 : 120)), player.xMouse - (player.x + 70));
+        angle =
+            angle < 0
+                ? Clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
+                : Clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+        let intersect;
+        for (const platform of platforms) {
+            intersect = GetIntersectPointWithRectangle(new Line(player.x + 70, player.y + (player.sit ? 50 : 120), player.xMouse + (player.xMouse - (player.x + 70)) * 10000, player.yMouse +
+                (player.yMouse - (player.y + (player.sit ? 50 : 120))) *
+                    10000), platform);
+            if (intersect !== undefined) {
+                intersects.push(intersect);
+                break;
+            }
+        }
+        bullets.push({
+            x: player.x + 70,
+            y: player.y + (player.sit ? 50 : 120),
+            length: intersect === undefined
+                ? 2000
+                : Math.min(Math.sqrt((player.x + 70 - intersect.x) ** 2 +
+                    (player.y +
+                        (player.sit ? 50 : 120) -
+                        intersect.y) **
+                        2), 2000),
+            angle: angle,
+            shootTimeStamp: timeStamp,
+        });
+    }
+    sounds.Shoot.Play(0.5);
+    needDrawAntiVegnitte = 5;
+    player.lastShootTick = timeStamp;
 }
 function jump() {
     if (!IsOnGround() || player.sit)

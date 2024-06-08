@@ -42,6 +42,15 @@ export function DrawRectangle(
 	);
 }
 
+export function DrawRectangleEx(rect: Rectangle) {
+	ctx.fillRect(
+		rect.X - levelPosition,
+		ctx.canvas.height - rect.Y - rect.Height,
+		rect.Width,
+		rect.Height
+	);
+}
+
 export function DrawRectangleFixed(
 	x: number,
 	y: number,
@@ -53,7 +62,7 @@ export function DrawRectangleFixed(
 
 export function DrawCircle(x: number, y: number, radius: number) {
 	ctx.beginPath();
-	ctx.ellipse(x - levelPosition, y, radius, radius, 0, 0, Math.PI * 2);
+	ctx.ellipse(x - levelPosition, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
 	ctx.fill();
 }
 
@@ -86,9 +95,9 @@ export function DrawRectangleWithAngle(
 	var prev = ctx.getTransform();
 
 	ctx.resetTransform();
-	ctx.translate(x - levelPosition, ctx.canvas.height - height - y);
+	ctx.translate(x - levelPosition, ctx.canvas.height - y);
 	ctx.rotate(angle);
-	ctx.fillRect(xPivot, yPivot, width, height);
+	ctx.fillRect(xPivot, yPivot - height, width, height);
 
 	ctx.setTransform(prev);
 }
@@ -126,20 +135,11 @@ export function DrawAntiVignette() {
 		750 / 2,
 		outerRadius
 	);
-	grd.addColorStop(0, "rgba(255, 255, 255, .1)");
-	grd.addColorStop(1, "rgba(255, 255, 255, .4)");
+	grd.addColorStop(0, "rgba(100, 100, 100, .1)");
+	grd.addColorStop(1, "rgba(100, 100, 100, .6)");
 
 	ctx.fillStyle = grd;
 	ctx.fillRect(0, 0, 1500, 750);
-}
-
-export function SetGradientFill(start: Color, end: Color) {
-	const grd = ctx.createLinearGradient(500, 0, 600, 0);
-
-	grd.addColorStop(0, start.toString());
-	grd.addColorStop(1, end.toString());
-
-	ctx.fillStyle = grd;
 }
 
 export function DrawRectangleWithGradient(
@@ -169,27 +169,28 @@ export function DrawRectangleWithGradientAndAngle(
 	xPivot: number,
 	yPivot: number
 ) {
-	var prev = ctx.getTransform();
-
-	ctx.resetTransform();
-	ctx.translate(
-		rect.X - levelPosition,
-		ctx.canvas.height - rect.Height - rect.Y
-	);
-	ctx.rotate(angle);
-
 	const grd = ctx.createLinearGradient(
-		xPivot - 50,
-		yPivot,
-		xPivot + rect.Width,
-		yPivot + rect.Height
+		xPivot,
+		yPivot - rect.Height,
+		rect.Width,
+		rect.Height
 	);
 
 	grd.addColorStop(start[0], start[1].toString());
 	grd.addColorStop(end[0], end[1].toString());
 	ctx.fillStyle = grd;
 
-	ctx.fillRect(xPivot, yPivot, rect.Width, rect.Height);
+	DrawRectangleWithAngle(
+		rect.X,
+		rect.Y,
+		rect.Width,
+		rect.Height,
+		angle,
+		xPivot,
+		yPivot
+	);
+}
 
-	ctx.setTransform(prev);
+export function GetClientRectangle() {
+	return ctx.canvas.getBoundingClientRect();
 }

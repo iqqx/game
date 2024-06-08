@@ -21,12 +21,15 @@ export function Translate(x, y) {
 export function DrawRectangle(x, y, width, height) {
     ctx.fillRect(x - levelPosition, ctx.canvas.height - y - height, width, height);
 }
+export function DrawRectangleEx(rect) {
+    ctx.fillRect(rect.X - levelPosition, ctx.canvas.height - rect.Y - rect.Height, rect.Width, rect.Height);
+}
 export function DrawRectangleFixed(x, y, width, height) {
     ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
 }
 export function DrawCircle(x, y, radius) {
     ctx.beginPath();
-    ctx.ellipse(x - levelPosition, y, radius, radius, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - levelPosition, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
     ctx.fill();
 }
 export function Clear() {
@@ -45,9 +48,9 @@ export function ProgradeLerp() {
 export function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
     var prev = ctx.getTransform();
     ctx.resetTransform();
-    ctx.translate(x - levelPosition, ctx.canvas.height - height - y);
+    ctx.translate(x - levelPosition, ctx.canvas.height - y);
     ctx.rotate(angle);
-    ctx.fillRect(xPivot, yPivot, width, height);
+    ctx.fillRect(xPivot, yPivot - height, width, height);
     ctx.setTransform(prev);
 }
 export function DrawText(x, y, text) {
@@ -66,16 +69,10 @@ export function DrawAntiVignette() {
     var outerRadius = 1500 * 0.6;
     var innerRadius = 1500 * 0.5;
     var grd = ctx.createRadialGradient(1500 / 2, 750 / 2, innerRadius, 1500 / 2, 750 / 2, outerRadius);
-    grd.addColorStop(0, "rgba(255, 255, 255, .1)");
-    grd.addColorStop(1, "rgba(255, 255, 255, .4)");
+    grd.addColorStop(0, "rgba(100, 100, 100, .1)");
+    grd.addColorStop(1, "rgba(100, 100, 100, .6)");
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 1500, 750);
-}
-export function SetGradientFill(start, end) {
-    const grd = ctx.createLinearGradient(500, 0, 600, 0);
-    grd.addColorStop(0, start.toString());
-    grd.addColorStop(1, end.toString());
-    ctx.fillStyle = grd;
 }
 export function DrawRectangleWithGradient(rect, start, end) {
     const grd = ctx.createLinearGradient(rect.X - levelPosition, ctx.canvas.height - rect.Height - rect.Y, rect.X - levelPosition + rect.Width, ctx.canvas.height - rect.Height - rect.Y + rect.Height);
@@ -85,14 +82,12 @@ export function DrawRectangleWithGradient(rect, start, end) {
     DrawRectangle(rect.X - levelPosition, rect.Y, rect.Width, rect.Height);
 }
 export function DrawRectangleWithGradientAndAngle(rect, start, end, angle, xPivot, yPivot) {
-    var prev = ctx.getTransform();
-    ctx.resetTransform();
-    ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Height - rect.Y);
-    ctx.rotate(angle);
-    const grd = ctx.createLinearGradient(xPivot - 50, yPivot, xPivot + rect.Width, yPivot + rect.Height);
+    const grd = ctx.createLinearGradient(xPivot, yPivot - rect.Height, rect.Width, rect.Height);
     grd.addColorStop(start[0], start[1].toString());
     grd.addColorStop(end[0], end[1].toString());
     ctx.fillStyle = grd;
-    ctx.fillRect(xPivot, yPivot, rect.Width, rect.Height);
-    ctx.setTransform(prev);
+    DrawRectangleWithAngle(rect.X, rect.Y, rect.Width, rect.Height, angle, xPivot, yPivot);
+}
+export function GetClientRectangle() {
+    return ctx.canvas.getBoundingClientRect();
 }
