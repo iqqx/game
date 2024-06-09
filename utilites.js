@@ -229,7 +229,7 @@ export class Platform extends GameObject {
     }
     Render() {
         Canvas.SetFillColor(Color.Black);
-        Canvas.DrawRectangle(this._x, this._y, this._width, this._height);
+        Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
     }
 }
 export class Vector2 {
@@ -259,6 +259,8 @@ export class Scene {
         Scene.Current = this;
         this._gameObjects = [
             player,
+            new Platform(0, 750, Length, 100),
+            new Platform(Length, 0, 100, 1000),
             new Platform(0, -100, Length, 100),
             new Platform(-100, 0, 100, 1000),
         ];
@@ -318,8 +320,9 @@ export class Scene {
                     (b.position.Y - from.Y) ** 2));
     }
     Update(dt) {
-        const plr = this.Player.GetCollider();
-        this._levelPosition = Lerp(this._levelPosition, Math.clamp(plr.X - 1500 / 2 - plr.Width / 2, 0, this.Length - 1500), dt);
+        const plrPos = this.Player.GetPosition();
+        const plrSize = this.Player.GetCollider();
+        this._levelPosition = Lerp(this._levelPosition, Math.clamp(plrPos.X - 1500 / 2 - plrSize.Width / 2, 0, this.Length - 1500), dt / 500);
         for (const object of this._gameObjects)
             object.Update(dt);
     }
@@ -328,6 +331,9 @@ export class Scene {
         Canvas.DrawRectangleFixed(0, 0, this.Length, 750);
         for (const object of this._gameObjects)
             object.Render();
+    }
+    RenderOverlay() {
+        this.Player.RenderOverlay();
     }
     Instantiate(object) {
         const index = this._gameObjects.push(object) - 1;
@@ -354,6 +360,6 @@ export class Bullet extends GameObject {
             this.Destroy();
     }
     Render() {
-        Canvas.DrawRectangleWithGradientAndAngle(new Rectangle(this._x, this._y, this._length, 2), [this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0], [1, Bullet._bulletColor1], this._angle, 0, 1);
+        Canvas.DrawRectangleWithGradientAndAngle(new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._length, 2), [this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0], [1, Bullet._bulletColor1], this._angle, 0, 1);
     }
 }

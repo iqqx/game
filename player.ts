@@ -215,7 +215,7 @@ export class Player extends Entity {
 					this._frameIndex
 				],
 				new Rectangle(
-					this._x - 25,
+					this._x - 25 - Scene.Current.GetLevelPosition(),
 					this._y,
 					this._width + 50,
 					this._height
@@ -225,7 +225,9 @@ export class Player extends Entity {
 			Canvas.DrawImageWithAngle(
 				Player._AK,
 				new Rectangle(
-					this._x + this._width / 2,
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
 					this._y + this._height * (this._sit ? 0.25 : 0.75),
 					52 * 3.125,
 					16 * 3.125
@@ -240,7 +242,7 @@ export class Player extends Entity {
 					this._frameIndex
 				],
 				new Rectangle(
-					this._x - 25,
+					this._x - 25 - Scene.Current.GetLevelPosition(),
 					this._y,
 					this._width + 50,
 					this._height
@@ -250,7 +252,9 @@ export class Player extends Entity {
 			Canvas.DrawImageWithAngleVFlipped(
 				Player._AK,
 				new Rectangle(
-					this._x + this._width / 2,
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
 					this._y + this._height * (this._sit ? 0.25 : 0.75),
 					52 * 3.125,
 					16 * 3.125
@@ -260,8 +264,9 @@ export class Player extends Entity {
 				16 * 2.4
 			);
 		}
+	}
 
-		// GUI
+	public RenderOverlay() {
 		// SetFillColor("black");
 		// DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
 		// DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
@@ -278,7 +283,11 @@ export class Player extends Entity {
 		// );
 
 		Canvas.SetFillColor(Color.White);
-		Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+		Canvas.DrawCircle(
+			this._xTarget - 1 - Scene.Current.GetLevelPosition(),
+			this._yTarget - 1,
+			2
+		);
 
 		// POSTPROCCES
 		if (this._needDrawRedVegnitte > 0) {
@@ -296,6 +305,12 @@ export class Player extends Entity {
 
 	public GetPosition() {
 		return new Vector2(this._x, this._y);
+	}
+
+	public override Jump() {
+		if (!this._grounded || this._sit) return;
+
+		this._verticalAcceleration = this._jumpForce;
 	}
 
 	private Shoot() {

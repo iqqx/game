@@ -1,6 +1,7 @@
 import { Canvas } from "../context.js";
+import { Tag } from "../Enums.js";
 import { Player } from "../Player.js";
-import { Bullet, Scene, Rectangle } from "../utilites.js";
+import { Bullet, Scene, Rectangle, Vector2 } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
 export class Human extends Enemy {
     static _deathSound = new Audio("Sounds/human_death.mp3");
@@ -32,6 +33,8 @@ export class Human extends Enemy {
         this._y = y;
     }
     Update(dt) {
+        if (!this.IsSpotPlayer())
+            return;
         super.Update(dt);
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
@@ -62,6 +65,14 @@ export class Human extends Enemy {
             Canvas.DrawImageFlipped(Human._frames.Walk[0], new Rectangle(this._x, this._y, this._width, this._height));
             Canvas.DrawImageWithAngleVFlipped(Player._AK, new Rectangle(this._x + this._width / 2, this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), -this._angle, -12, 16 * 2.4);
         }
+    }
+    IsSpotPlayer() {
+        const plrPos = Scene.Current.Player.GetPosition();
+        const plrSize = Scene.Current.Player.GetCollider();
+        const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * 0.75), new Vector2(plrPos.X - this._x, plrPos.Y +
+            plrSize.Height * 0.9 -
+            (this._y + this._height * 0.75)), 1000, Tag.Player | Tag.Platform);
+        return hits !== undefined && hits[0].instance instanceof Player;
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);

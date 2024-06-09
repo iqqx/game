@@ -155,14 +155,19 @@ export class Player extends Entity {
     }
     Render() {
         if (this._direction == 1) {
-            Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25, this._y, this._width + 50, this._height));
-            Canvas.DrawImageWithAngle(Player._AK, new Rectangle(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition(), this._y, this._width + 50, this._height));
+            Canvas.DrawImageWithAngle(Player._AK, new Rectangle(this._x +
+                this._width / 2 -
+                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
         }
         else {
-            Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25, this._y, this._width + 50, this._height));
-            Canvas.DrawImageWithAngleVFlipped(Player._AK, new Rectangle(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition(), this._y, this._width + 50, this._height));
+            Canvas.DrawImageWithAngleVFlipped(Player._AK, new Rectangle(this._x +
+                this._width / 2 -
+                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
         }
-        // GUI
+    }
+    RenderOverlay() {
         // SetFillColor("black");
         // DrawRectangleFixed(1500 / 2 - 250 / 2, 750 - 25 - 10, 250, 25);
         // DrawRectangleFixed(1500 / 2 - 240 / 2, 750 - 25 - 15, 240, 35);
@@ -178,7 +183,7 @@ export class Player extends Entity {
         // 	25
         // );
         Canvas.SetFillColor(Color.White);
-        Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+        Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
         // POSTPROCCES
         if (this._needDrawRedVegnitte > 0) {
             this._needDrawRedVegnitte--;
@@ -192,6 +197,11 @@ export class Player extends Entity {
     }
     GetPosition() {
         return new Vector2(this._x, this._y);
+    }
+    Jump() {
+        if (!this._grounded || this._sit)
+            return;
+        this._verticalAcceleration = this._jumpForce;
     }
     Shoot() {
         const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 1500, Tag.Enemy | Tag.Platform);

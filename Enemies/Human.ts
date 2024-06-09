@@ -1,6 +1,7 @@
 import { Canvas } from "../context.js";
+import { Tag } from "../Enums.js";
 import { Player } from "../Player.js";
-import { Bullet, Scene, Rectangle } from "../utilites.js";
+import { Bullet, Scene, Rectangle, Vector2 } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
 
 export class Human extends Enemy {
@@ -41,6 +42,8 @@ export class Human extends Enemy {
 	}
 
 	override Update(dt: number): void {
+		if (!this.IsSpotPlayer()) return;
+
 		super.Update(dt);
 
 		const plrPos = Scene.Current.Player.GetPosition();
@@ -109,6 +112,28 @@ export class Human extends Enemy {
 				16 * 2.4
 			);
 		}
+	}
+
+	override IsSpotPlayer(): boolean {
+		const plrPos = Scene.Current.Player.GetPosition();
+		const plrSize = Scene.Current.Player.GetCollider();
+
+		const hits = Scene.Current.Raycast(
+			new Vector2(
+				this._x + this._width / 2,
+				this._y + this._height * 0.75
+			),
+			new Vector2(
+				plrPos.X - this._x,
+				plrPos.Y +
+					plrSize.Height * 0.9 -
+					(this._y + this._height * 0.75)
+			),
+			1000,
+			Tag.Player | Tag.Platform
+		);
+
+		return hits !== undefined && hits[0].instance instanceof Player;
 	}
 
 	override TakeDamage(damage: number): void {

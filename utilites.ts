@@ -313,7 +313,12 @@ export class Platform extends GameObject {
 
 	override Render(): void {
 		Canvas.SetFillColor(Color.Black);
-		Canvas.DrawRectangle(this._x, this._y, this._width, this._height);
+		Canvas.DrawRectangle(
+			this._x - Scene.Current.GetLevelPosition(),
+			this._y,
+			this._width,
+			this._height
+		);
 	}
 }
 
@@ -358,6 +363,8 @@ export class Scene {
 
 		this._gameObjects = [
 			player,
+			new Platform(0, 750, Length, 100),
+			new Platform(Length, 0, 100, 1000),
 			new Platform(0, -100, Length, 100),
 			new Platform(-100, 0, 100, 1000),
 		];
@@ -464,11 +471,17 @@ export class Scene {
 	}
 
 	public Update(dt: number) {
-		const plr = this.Player.GetCollider();
+		const plrPos = this.Player.GetPosition();
+		const plrSize = this.Player.GetCollider();
+
 		this._levelPosition = Lerp(
 			this._levelPosition,
-			Math.clamp(plr.X - 1500 / 2 - plr.Width / 2, 0, this.Length - 1500),
-			dt
+			Math.clamp(
+				plrPos.X - 1500 / 2 - plrSize.Width / 2,
+				0,
+				this.Length - 1500
+			),
+			dt / 500
 		);
 
 		for (const object of this._gameObjects) object.Update(dt);
@@ -479,6 +492,10 @@ export class Scene {
 		Canvas.DrawRectangleFixed(0, 0, this.Length, 750);
 
 		for (const object of this._gameObjects) object.Render();
+	}
+
+	public RenderOverlay() {
+		this.Player.RenderOverlay();
 	}
 
 	public Instantiate(object: GameObject) {
@@ -514,7 +531,12 @@ export class Bullet extends GameObject {
 
 	override Render(): void {
 		Canvas.DrawRectangleWithGradientAndAngle(
-			new Rectangle(this._x, this._y, this._length, 2),
+			new Rectangle(
+				this._x - Scene.Current.GetLevelPosition(),
+				this._y,
+				this._length,
+				2
+			),
 			[this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0],
 			[1, Bullet._bulletColor1],
 			this._angle,

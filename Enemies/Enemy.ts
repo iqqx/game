@@ -19,8 +19,8 @@ export abstract class Enemy extends Entity {
 		const hits = Scene.Current.Raycast(
 			new Vector2(this._x, this._y),
 			new Vector2(plrPos.X - this._x, plrPos.Y - this._y),
-			500,
-			Tag.Player
+			1000,
+			Tag.Player | Tag.Platform
 		);
 
 		return hits !== undefined && hits[0].instance instanceof Player;
@@ -36,9 +36,7 @@ export abstract class Enemy extends Entity {
 
 		if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5) return;
 
-		if (this.IsSpotPlayer()) {
-			if (this._direction == 1) this.MoveRight();
-			else this.MoveLeft();
-		}
+		if (this._direction == 1) this.MoveRight();
+		else this.MoveLeft();
 	}
 }
