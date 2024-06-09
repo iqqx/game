@@ -57,22 +57,40 @@ export class Line {
     }
 }
 export function GetIntersectPoint(line0, line1) {
-    const v = line0.X1 - line0.X0;
-    const w = line0.Y1 - line0.Y0;
-    const v2 = line1.X1 - line1.X0;
-    const w2 = line1.Y1 - line1.Y0;
-    const t2 = (-w * line1.X0 + w * line0.X0 + v * line1.Y0 - v * line0.Y0) /
-        (w * v2 - v * w2);
-    const t = (line1.X0 - line0.X0 + v2 * t2) / v;
-    if (t < 0 ||
-        t > 1 ||
-        t2 < 0 ||
-        t2 > 1 ||
-        Number.isNaN(t2) ||
-        Number.isNaN(t))
+    // not work
+    // const v = line0.X1 - line0.X0;
+    // const w = line0.Y1 - line0.Y0;
+    // const v2 = line1.X1 - line1.X0;
+    // const w2 = line1.Y1 - line1.Y0;
+    // const t2 =
+    // 	(-w * line1.X0 + w * line0.X0 + v * line1.Y0 - v * line0.Y0) /
+    // 	(w * v2 - v * w2);
+    // const t = (line1.X0 - line0.X0 + v2 * t2) / v;
+    // if (t2 < 0 || t2 > 1) return undefined;
+    // if (!Number.isNaN(t) && (t < 0 || t > 1)) return undefined;
+    // return new Vector2(line1.X0 + v2 * t2, line1.Y0 + w2 * t2);
+    // new
+    const denominator = (line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) -
+        (line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
+    if (denominator == 0) {
+        //   if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0 && (x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)
+        //     System.Console.WriteLine("Отрезки пересекаются (совпадают)");
+        //   else
+        //     System.Console.WriteLine("Отрезки не пересекаются (параллельны)");
         return undefined;
-    else
-        return new Vector2(line1.X0 + v2 * t2, line1.Y0 + w2 * t2);
+    }
+    else {
+        const numerator_a = (line1.X1 - line0.X1) * (line1.Y1 - line1.Y0) -
+            (line1.X1 - line1.X0) * (line1.Y1 - line0.Y1);
+        const numerator_b = (line0.X0 - line0.X1) * (line1.Y1 - line0.Y1) -
+            (line1.X1 - line0.X1) * (line0.Y0 - line0.Y1);
+        const Ua = numerator_a / denominator;
+        const Ub = numerator_b / denominator;
+        if (Ua >= 0 && Ua <= 1 && Ub >= 0 && Ub <= 1)
+            return new Vector2(line1.X0 * Ub + line1.X1 * (1 - Ub), line1.Y0 * Ub + line1.Y1 * (1 - Ub));
+        else
+            return undefined;
+    }
 }
 export function SquareMagnitude(x0, y0, x1, y1) {
     return (x0 - x1) ** 2 + (y0 - y1) ** 2;
@@ -146,6 +164,7 @@ export class GameObject {
 export class Vector2 {
     X;
     Y;
+    static Down = new Vector2(0, -1);
     constructor(X, Y) {
         this.X = X;
         this.Y = Y;

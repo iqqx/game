@@ -41,7 +41,7 @@ export class Scene {
 
 	public GetCollide(who: GameObject, tag?: Tag) {
 		for (const object of this._gameObjects) {
-			if (tag !== undefined && object.Tag !== tag) continue;
+			if (tag !== undefined && (object.Tag & tag) === 0) continue;
 
 			const collide = GameObject.GetCollide(who, object);
 
@@ -53,7 +53,7 @@ export class Scene {
 
 	public IsCollide(who: GameObject, tag?: Tag) {
 		for (const object of this._gameObjects) {
-			if (tag !== undefined && object.Tag !== tag) continue;
+			if (tag !== undefined && (object.Tag & tag) === 0) continue;
 
 			const collide = GameObject.IsCollide(who, object);
 

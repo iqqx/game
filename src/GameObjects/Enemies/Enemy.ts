@@ -22,7 +22,7 @@ export abstract class Enemy extends Entity {
 			new Vector2(this._x, this._y),
 			new Vector2(plrPos.X - this._x, plrPos.Y - this._y),
 			1000,
-			Tag.Player | Tag.Platform
+			Tag.Player | Tag.Wall
 		);
 
 		return hits !== undefined && hits[0].instance instanceof Player;

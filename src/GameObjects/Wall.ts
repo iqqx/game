@@ -7,7 +7,7 @@ export class Wall extends GameObject {
 	constructor(x: number, y: number, width: number, height: number) {
 		super(width, height);
 
-		this.Tag = Tag.Platform;
+		this.Tag = Tag.Wall;
 		this._x = x;
 		this._y = y;
 

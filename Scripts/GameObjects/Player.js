@@ -60,8 +60,7 @@ export class Player extends Entity {
                     }
                     else {
                         this._collider = new Rectangle(0, 0, this._width, this._height);
-                        if (Scene.Current.IsCollide(this, Tag.Platform) !==
-                            false)
+                        if (Scene.Current.IsCollide(this, Tag.Wall) !== false)
                             this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
                         else {
                             this._sit = false;
@@ -74,6 +73,9 @@ export class Player extends Entity {
                     break;
                 case "KeyA":
                     this._movingLeft = true;
+                    break;
+                case "KeyS":
+                    this.TryDown();
                     break;
                 case "KeyD":
                     this._movingRight = true;
@@ -206,8 +208,11 @@ export class Player extends Entity {
             return;
         this._verticalAcceleration = this._jumpForce;
     }
+    TryDown() {
+        console.log(Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(0, -1), 1, Tag.Platform));
+    }
     Shoot() {
-        const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 1500, Tag.Enemy | Tag.Platform);
+        const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 1500, Tag.Enemy | Tag.Wall);
         const hit = hits === undefined ? undefined : hits[0];
         if (hit !== undefined && hit.instance instanceof Enemy)
             hit.instance.TakeDamage(50);
