@@ -1,72 +1,90 @@
-import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
-import { DrawImage, DrawImageFlipped, DrawImageWithAngle, DrawImageWithAngleVFlipped, } from "../context.js";
-import { bullets, enemies, images, platforms, player, sounds, } from "../Level.js";
-import { Attack } from "../player.js";
-import { GetNearestIntersectWithEnemies, GetNearestIntersectWithRectangles, Line, Rectangle, SquareMagnitude, } from "../utilites.js";
+import { Canvas } from "../context.js";
+import { Player } from "../Player.js";
+import { Bullet, Scene, Rectangle } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
 export class Human extends Enemy {
     static _deathSound = new Audio("Sounds/human_death.mp3");
-    _lastShootTick = 0;
+    static _frames = {
+        Walk: (function () {
+            const images = [];
+            for (let i = 0; i < 4; i++) {
+                const img = new Image();
+                img.src = `Images/Player_${i}.png`;
+                images.push(img);
+            }
+            return images;
+        })(),
+        Sit: (function () {
+            const images = [];
+            for (let i = 0; i < 4; i++) {
+                const img = new Image();
+                img.src = `Images/Player_sit_${i}.png`;
+                images.push(img);
+            }
+            return images;
+        })(),
+    };
     _angle = 0;
-    constructor() {
+    _shootCooldown = 0;
+    constructor(x, y) {
         super(100, 200, 1, 100);
-        this._x = 1300;
+        this._x = x;
+        this._y = y;
     }
-    Update(timeStamp) {
-        if (this.IsDead())
-            return;
-        super.Update(timeStamp);
-        this._angle = Math.atan2(player.y +
-            (player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9) -
-            (this._y + this._height * 0.75), player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2));
-        if (timeStamp - this._lastShootTick > 1000 && this.IsSpotPlayer())
-            this.Shoot(timeStamp);
+    Update(dt) {
+        super.Update(dt);
+        const plrPos = Scene.Current.Player.GetPosition();
+        const plrSize = Scene.Current.Player.GetCollider();
+        this._angle = (() => {
+            const angle = -Math.atan2(plrPos.Y +
+                plrSize.Height * 0.9 -
+                (this._y + this._height * 0.75), plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
+            if (this._direction == 1)
+                return -Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+            else
+                return angle < 0
+                    ? -Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
+                    : -Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+        })();
+        if (this._shootCooldown <= 0) {
+            if (this.IsSpotPlayer())
+                this.Shoot();
+        }
+        else
+            this._shootCooldown -= dt;
     }
-    Draw() {
-        if (this.IsDead())
-            return;
+    Render() {
         if (this._direction === 1) {
-            DrawImage(images.Player.Walk[0], new Rectangle(this._x, this._y, this._width, this._height));
-            DrawImageWithAngle(images.AK, new Rectangle(this._x + this._width / 2, this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            Canvas.DrawImage(Human._frames.Walk[0], new Rectangle(this._x, this._y, this._width, this._height));
+            Canvas.DrawImageWithAngle(Player._AK, new Rectangle(this._x + this._width / 2, this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
         }
         else {
-            DrawImageFlipped(images.Player.Walk[0], new Rectangle(this._x, this._y, this._width, this._height));
-            DrawImageWithAngleVFlipped(images.AK, new Rectangle(this._x + this._width / 2, this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), -this._angle, -12, 16 * 2.4);
+            Canvas.DrawImageFlipped(Human._frames.Walk[0], new Rectangle(this._x, this._y, this._width, this._height));
+            Canvas.DrawImageWithAngleVFlipped(Player._AK, new Rectangle(this._x + this._width / 2, this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), -this._angle, -12, 16 * 2.4);
         }
     }
     TakeDamage(damage) {
-        if (this.IsDead())
-            return;
         super.TakeDamage(damage);
         if (this._health <= 0) {
+            this.Destroy();
             const s = Human._deathSound.cloneNode();
             s.volume = 0.25;
             s.play();
         }
     }
-    Shoot(timeStamp) {
-        const hit = GetNearestIntersectWithRectangles(new Line(this._x + this._width / 2, this._y + this._height * 0.75, player.x + PLAYER_WIDTH / 2, player.y +
-            (player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9)), platforms);
-        const enemyHit = GetNearestIntersectWithEnemies(new Line(this._x + this._width / 2, this._y + this._height * 0.75, player.x + PLAYER_WIDTH / 2, player.y +
-            (player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9)), enemies);
-        if ((enemyHit !== undefined && hit === undefined) ||
-            (enemyHit !== undefined &&
-                hit !== undefined &&
-                SquareMagnitude(this._x + this._width / 2, this._y + this._height * 0.75, enemyHit.x, enemyHit.y) <
-                    SquareMagnitude(this._x + this._width / 2, this._y + this._height * 0.75, hit.x, hit.y))) {
-            Attack(1);
-        }
-        bullets.push({
-            x: this._x + this._width / 2,
-            y: this._y + this._height * 0.75,
-            length: hit === undefined
-                ? 2000
-                : Math.min(Math.sqrt((this._x + this._width / 2 - hit.x) ** 2 +
-                    (this._y + this._height * 0.75 - hit.y) ** 2), 2000),
-            angle: -this._angle,
-            shootTimeStamp: timeStamp,
-        });
-        sounds.Shoot.Play(0.5);
-        this._lastShootTick = timeStamp;
+    Shoot() {
+        const plrPos = Scene.Current.Player.GetPosition();
+        const plrSize = Scene.Current.Player.GetCollider();
+        Scene.Current.Instantiate(new Bullet(this._x + this._width / 2, this._y + this._height * 0.75, Math.sqrt((this._x +
+            this._width / 2 -
+            (plrPos.X + plrSize.Width / 2)) **
+            2 +
+            (this._y +
+                this._height * 0.75 -
+                (plrPos.Y + plrSize.Height * 0.9)) **
+                2), -this._angle));
+        Scene.Current.Player.TakeDamage(20);
+        // sounds.Shoot.Play(0.5);
+        this._shootCooldown = 200;
     }
 }

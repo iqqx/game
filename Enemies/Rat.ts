@@ -1,8 +1,5 @@
-import { images, player } from "../Level.js";
-import { PLAYER_WIDTH } from "../constants.js";
-import { DrawImage, DrawImageFlipped } from "../context.js";
-import { Attack } from "../player.js";
-import { Rectangle, SquareMagnitude } from "../utilites.js";
+import { Canvas } from "../context.js";
+import { Scene, Rectangle } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
 
 export class Rat extends Enemy {
@@ -10,64 +7,71 @@ export class Rat extends Enemy {
 	public static readonly AttackCooldown = 500;
 	private static readonly _attackSound = new Audio("Sounds/rat_attack.mp3");
 	private static readonly _deathSound = new Audio("Sounds/rat_death.mp3");
+	private static readonly _frames = {
+		Idle: (function () {
+			const img = new Image();
 
-	private _lastAttackTimeStamp = 0;
+			img.src = `Images/Rat.png`;
 
-	constructor() {
+			return img;
+		})(),
+	};
+
+	private _attackCooldown = 0;
+
+	constructor(x: number, y: number) {
 		super(50, 25, 2, 5);
 
-		this._x = 1000;
+		this._x = x;
+		this._y = y;
 	}
 
-	override Update(timeStamp: number): void {
-		if(this.IsDead())
-			return;
+	override Update(dt: number): void {
+		super.Update(dt);
 
-		super.Update(timeStamp);
+		const plrPos = Scene.Current.Player.GetPosition();
+		const plrSize = Scene.Current.Player.GetCollider();
 
-		if (
-			timeStamp - this._lastAttackTimeStamp >= Rat.AttackCooldown &&
-			Math.abs(
-				this._x +
-					(this._direction === 1 ? this._width : 0) -
-					(player.x + (this._direction === 1 ? PLAYER_WIDTH : 0))
-			) <= this._width
-			&& this._y == player.y
-		) {
-			this._lastAttackTimeStamp = timeStamp;
+		if (this._attackCooldown <= 0) {
+			if (
+				Math.abs(
+					this._x +
+						(this._direction === 1 ? this._width : 0) -
+						(plrPos.X + (this._direction === 1 ? plrSize.Width : 0))
+				) <= this._width &&
+				this._y == plrPos.Y
+			) {
+				this._attackCooldown = Rat.AttackCooldown;
 
-			Attack(Rat.Damage);
+				Scene.Current.Player.TakeDamage(Rat.Damage);
 
-			const s = Rat._attackSound.cloneNode() as HTMLAudioElement;
-			s.volume = 0.5;
-			s.play();
-		}
+				const s = Rat._attackSound.cloneNode() as HTMLAudioElement;
+				s.volume = 0.5;
+				s.play();
+			}
+		} else this._attackCooldown -= dt;
 	}
 
-	override Draw(): void {
-		if(this.IsDead())
-			return;
-
+	override Render(): void {
 		if (this._direction === 1) {
-			DrawImage(
-				images.Rat,
+			Canvas.DrawImage(
+				Rat._frames.Idle,
 				new Rectangle(this._x, this._y, this._width, this._height)
 			);
 		} else {
-			DrawImageFlipped(
-				images.Rat,
+			Canvas.DrawImageFlipped(
+				Rat._frames.Idle,
 				new Rectangle(this._x, this._y, this._width, this._height)
 			);
 		}
 	}
 
 	override TakeDamage(damage: number): void {
-		if(this.IsDead())
-			return;
-
 		super.TakeDamage(damage);
 
 		if (this._health <= 0) {
+			this.Destroy();
+
 			const s = Rat._deathSound.cloneNode() as HTMLAudioElement;
 			s.volume = 0.25;
 			s.play();

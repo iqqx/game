@@ -1,147 +1,44 @@
-import { platforms, player } from "../Level.js";
-import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
-import { DrawRectangle, SetFillColor } from "../context.js";
-import {
-	GetIntersectPointWithRectangle,
-	Line,
-	Rectangle,
-} from "../utilites.js";
+import { Tag } from "../Enums.js";
+import { Player } from "../Player.js";
+import { Entity, Scene, Vector2 } from "../utilites.js";
 
-export abstract class Enemy {
-	protected _x = 0;
-	protected _y = 0;
-	protected _health: number;
-	protected _direction: -1 | 1 = 1;
-	protected readonly _width: number;
-	protected readonly _height: number;
-	protected readonly _speed: number;
-
+export abstract class Enemy extends Entity {
 	constructor(
 		width: number,
 		height: number,
 		speed: number,
 		maxHealth: number
 	) {
-		this._width = width;
-		this._height = height;
-		this._speed = speed;
-		this._health = maxHealth;
+		super(width, height, speed, maxHealth);
+		this.Tag = Tag.Enemy;
 	}
 
-	public IsSpotPlayer(): boolean {
-		for (const platform of platforms)
-			if (
-				GetIntersectPointWithRectangle(
-					new Line(
-						this._x + this._width / 2,
-						this._y + this._height / 2,
-						player.x + PLAYER_WIDTH / 2,
-						player.y + (player.sit ? PLAYER_HEIGHT / 2 : PLAYER_HEIGHT)
-					),
-					platform
-				) !== undefined
-			)
-				return false;
+	protected IsSpotPlayer(): boolean {
+		const plrPos = Scene.Current.Player.GetPosition();
 
-		return true;
+		const hits = Scene.Current.Raycast(
+			new Vector2(this._x, this._y),
+			new Vector2(plrPos.X - this._x, plrPos.Y - this._y),
+			500,
+			Tag.Player
+		);
+
+		return hits !== undefined && hits[0].instance instanceof Player;
 	}
 
-	public MoveRight() {
-		this._x += this._speed;
-
-		const collide = this.IsCollideEx();
-		if (collide !== false && collide.xOffset !== 0)
-			this._x += collide.xOffset;
-	}
-
-	public MoveLeft() {
-		this._x -= this._speed;
-
-		const collide = this.IsCollideEx();
-		if (collide !== false && collide.xOffset !== 0)
-			this._x -= collide.xOffset;
-	}
-
-	public GetPosition(): { x: number; y: number } {
-		return { x: this._x, y: this._y };
-	}
-
-	public Draw() {
-		if (this.IsDead()) return;
-
-		SetFillColor("red");
-		DrawRectangle(this._x, this._y, this._width, this._height);
-	}
-
-	public Update(timeStamp: number) {
-		if (this.IsDead()) return;
+	public Update(dt: number) {
+		const plrPos = Scene.Current.Player.GetPosition();
+		const plrSize = Scene.Current.Player.GetCollider();
 
 		this._direction = Math.sign(
-			player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2)
+			plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)
 		) as -1 | 1;
 
-		if (Math.abs(this._x - (player.x + PLAYER_WIDTH / 2)) < 5) return;
+		if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5) return;
 
 		if (this.IsSpotPlayer()) {
 			if (this._direction == 1) this.MoveRight();
 			else this.MoveLeft();
 		}
-	}
-
-	public IsCollideEx(): { xOffset: number; yOffset: number } | false {
-		for (const platform of platforms)
-			if (
-				this._x + this._width > platform.X &&
-				this._x < platform.X + platform.Width &&
-				this._y + this._height > platform.Y &&
-				this._y < platform.Y + platform.Height
-			) {
-				const xstart = this._x + this._width - platform.X;
-				const xend = platform.X + platform.Width - this._x;
-				const ystart = platform.Y + platform.Height - this._y;
-				const yend = this._y + this._height - platform.Y;
-				let xOffset = 0;
-				let yOffset = 0;
-
-				if (
-					xstart > 0 &&
-					xend > 0 &&
-					xend < platform.Width &&
-					xstart < platform.Width
-				)
-					xOffset = 0;
-				else if (xstart > 0 && (xend < 0 || xstart < xend))
-					xOffset = xstart;
-				else if (xend > 0) xOffset = -xend;
-
-				if (
-					ystart > 0 &&
-					yend > 0 &&
-					yend < platform.Height &&
-					ystart < platform.Height
-				)
-					yOffset = 0;
-				else if (ystart > 0 && (yend < 0 || ystart < yend))
-					yOffset = ystart;
-				else if (yend > 0) yOffset = -yend;
-
-				if (xOffset == 0 && yOffset == 0) return false;
-
-				return { xOffset: xOffset, yOffset: yOffset };
-			}
-
-		return false;
-	}
-
-	public TakeDamage(damage: number) {
-		this._health -= damage;
-	}
-
-	public GetRectangle() {
-		return new Rectangle(this._x, this._y, this._width, this._height);
-	}
-
-	public IsDead() {
-		return this._health <= 0;
 	}
 }

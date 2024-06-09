@@ -1,69 +1,85 @@
-import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
-import {
-	DrawImage,
-	DrawImageFlipped,
-	DrawImageWithAngle,
-	DrawImageWithAngleVFlipped,
-} from "../context.js";
-import {
-	bullets,
-	enemies,
-	images,
-	platforms,
-	player,
-	sounds,
-} from "../Level.js";
-import { Attack } from "../player.js";
-import {
-	Clamp,
-	GetNearestIntersectWithEnemies,
-	GetNearestIntersectWithRectangles,
-	Line,
-	Rectangle,
-	SquareMagnitude,
-} from "../utilites.js";
+import { Canvas } from "../context.js";
+import { Player } from "../Player.js";
+import { Bullet, Scene, Rectangle } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
-import { Rat } from "./Rat.js";
 
 export class Human extends Enemy {
 	private static readonly _deathSound = new Audio("Sounds/human_death.mp3");
+	private static readonly _frames = {
+		Walk: (function () {
+			const images: HTMLImageElement[] = [];
 
-	private _lastShootTick = 0;
+			for (let i = 0; i < 4; i++) {
+				const img = new Image();
+				img.src = `Images/Player_${i}.png`;
+				images.push(img);
+			}
+
+			return images;
+		})(),
+		Sit: (function () {
+			const images: HTMLImageElement[] = [];
+
+			for (let i = 0; i < 4; i++) {
+				const img = new Image();
+				img.src = `Images/Player_sit_${i}.png`;
+				images.push(img);
+			}
+
+			return images;
+		})(),
+	};
+
 	private _angle = 0;
+	private _shootCooldown = 0;
 
-	constructor() {
+	constructor(x: number, y: number) {
 		super(100, 200, 1, 100);
 
-		this._x = 1300;
+		this._x = x;
+		this._y = y;
 	}
 
-	override Update(timeStamp: number): void {
-		if (this.IsDead()) return;
+	override Update(dt: number): void {
+		super.Update(dt);
 
-		super.Update(timeStamp);
+		const plrPos = Scene.Current.Player.GetPosition();
+		const plrSize = Scene.Current.Player.GetCollider();
 
-		this._angle = Math.atan2(
-			player.y +
-				(player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9) -
-				(this._y + this._height * 0.75),
-			player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2)
-		);
+		this._angle = (() => {
+			const angle = -Math.atan2(
+				plrPos.Y +
+					plrSize.Height * 0.9 -
+					(this._y + this._height * 0.75),
+				plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)
+			);
 
-		if (timeStamp - this._lastShootTick > 1000 && this.IsSpotPlayer())
-			this.Shoot(timeStamp);
+			if (this._direction == 1)
+				return -Math.clamp(
+					angle,
+					-Math.PI / 2 + 0.4,
+					Math.PI / 2 - 0.4
+				);
+			else
+				return angle < 0
+					? -Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4)
+					: -Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+		})();
+
+		if (this._shootCooldown <= 0) {
+			if (this.IsSpotPlayer()) this.Shoot();
+		} else this._shootCooldown -= dt;
 	}
 
-	override Draw(): void {
-		if (this.IsDead()) return;
-
+	override Render(): void {
 		if (this._direction === 1) {
-			DrawImage(
-				images.Player.Walk[0],
+			Canvas.DrawImage(
+				Human._frames.Walk[0],
 				new Rectangle(this._x, this._y, this._width, this._height)
 			);
 
-			DrawImageWithAngle(
-				images.AK,
+			Canvas.DrawImageWithAngle(
+				Player._AK,
 				new Rectangle(
 					this._x + this._width / 2,
 					this._y + this._height * 0.75,
@@ -75,13 +91,13 @@ export class Human extends Enemy {
 				16 * 2.4
 			);
 		} else {
-			DrawImageFlipped(
-				images.Player.Walk[0],
+			Canvas.DrawImageFlipped(
+				Human._frames.Walk[0],
 				new Rectangle(this._x, this._y, this._width, this._height)
 			);
 
-			DrawImageWithAngleVFlipped(
-				images.AK,
+			Canvas.DrawImageWithAngleVFlipped(
+				Player._AK,
 				new Rectangle(
 					this._x + this._width / 2,
 					this._y + this._height * 0.75,
@@ -96,79 +112,44 @@ export class Human extends Enemy {
 	}
 
 	override TakeDamage(damage: number): void {
-		if (this.IsDead()) return;
-
 		super.TakeDamage(damage);
 
 		if (this._health <= 0) {
+			this.Destroy();
+
 			const s = Human._deathSound.cloneNode() as HTMLAudioElement;
 			s.volume = 0.25;
 			s.play();
 		}
 	}
 
-	private Shoot(timeStamp: number) {
-		const hit = GetNearestIntersectWithRectangles(
-			new Line(
+	private Shoot() {
+		const plrPos = Scene.Current.Player.GetPosition();
+		const plrSize = Scene.Current.Player.GetCollider();
+
+		Scene.Current.Instantiate(
+			new Bullet(
 				this._x + this._width / 2,
 				this._y + this._height * 0.75,
-				player.x + PLAYER_WIDTH / 2,
-				player.y +
-					(player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9)
-			),
-			platforms
+				Math.sqrt(
+					(this._x +
+						this._width / 2 -
+						(plrPos.X + plrSize.Width / 2)) **
+						2 +
+						(this._y +
+							this._height * 0.75 -
+							(plrPos.Y + plrSize.Height * 0.9)) **
+							2
+				),
+
+				-this._angle
+			)
 		);
 
-		const enemyHit = GetNearestIntersectWithEnemies(
-			new Line(
-				this._x + this._width / 2,
-				this._y + this._height * 0.75,
-				player.x + PLAYER_WIDTH / 2,
-				player.y +
-					(player.sit ? PLAYER_HEIGHT * 0.4 : PLAYER_HEIGHT * 0.9)
-			),
-			enemies
-		);
+		Scene.Current.Player.TakeDamage(20);
 
-		if (
-			(enemyHit !== undefined && hit === undefined) ||
-			(enemyHit !== undefined &&
-				hit !== undefined &&
-				SquareMagnitude(
-					this._x + this._width / 2,
-					this._y + this._height * 0.75,
-					enemyHit.x,
-					enemyHit.y
-				) <
-					SquareMagnitude(
-						this._x + this._width / 2,
-						this._y + this._height * 0.75,
-						hit.x,
-						hit.y
-					))
-		) {
-			Attack(1);
-		}
+		// sounds.Shoot.Play(0.5);
 
-		bullets.push({
-			x: this._x + this._width / 2,
-			y: this._y + this._height * 0.75,
-			length:
-				hit === undefined
-					? 2000
-					: Math.min(
-							Math.sqrt(
-								(this._x + this._width / 2 - hit.x) ** 2 +
-									(this._y + this._height * 0.75 - hit.y) ** 2
-							),
-							2000
-					  ),
-			angle: -this._angle,
-			shootTimeStamp: timeStamp,
-		});
-
-		sounds.Shoot.Play(0.5);
-
-		this._lastShootTick = timeStamp;
+		this._shootCooldown = 200;
 	}
 }

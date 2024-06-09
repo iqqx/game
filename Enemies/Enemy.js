@@ -1,53 +1,21 @@
-import { platforms, player } from "../Level.js";
-import { PLAYER_HEIGHT, PLAYER_WIDTH } from "../constants.js";
-import { DrawRectangle, SetFillColor } from "../context.js";
-import { GetIntersectPointWithRectangle, Line, Rectangle, } from "../utilites.js";
-export class Enemy {
-    _x = 0;
-    _y = 0;
-    _health;
-    _direction = 1;
-    _width;
-    _height;
-    _speed;
+import { Tag } from "../Enums.js";
+import { Player } from "../Player.js";
+import { Entity, Scene, Vector2 } from "../utilites.js";
+export class Enemy extends Entity {
     constructor(width, height, speed, maxHealth) {
-        this._width = width;
-        this._height = height;
-        this._speed = speed;
-        this._health = maxHealth;
+        super(width, height, speed, maxHealth);
+        this.Tag = Tag.Enemy;
     }
     IsSpotPlayer() {
-        for (const platform of platforms)
-            if (GetIntersectPointWithRectangle(new Line(this._x + this._width / 2, this._y + this._height / 2, player.x + PLAYER_WIDTH / 2, player.y + (player.sit ? PLAYER_HEIGHT / 2 : PLAYER_HEIGHT)), platform) !== undefined)
-                return false;
-        return true;
+        const plrPos = Scene.Current.Player.GetPosition();
+        const hits = Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 500, Tag.Player);
+        return hits !== undefined && hits[0].instance instanceof Player;
     }
-    MoveRight() {
-        this._x += this._speed;
-        const collide = this.IsCollideEx();
-        if (collide !== false && collide.xOffset !== 0)
-            this._x += collide.xOffset;
-    }
-    MoveLeft() {
-        this._x -= this._speed;
-        const collide = this.IsCollideEx();
-        if (collide !== false && collide.xOffset !== 0)
-            this._x -= collide.xOffset;
-    }
-    GetPosition() {
-        return { x: this._x, y: this._y };
-    }
-    Draw() {
-        if (this.IsDead())
-            return;
-        SetFillColor("red");
-        DrawRectangle(this._x, this._y, this._width, this._height);
-    }
-    Update(timeStamp) {
-        if (this.IsDead())
-            return;
-        this._direction = Math.sign(player.x + PLAYER_WIDTH / 2 - (this._x + this._width / 2));
-        if (Math.abs(this._x - (player.x + PLAYER_WIDTH / 2)) < 5)
+    Update(dt) {
+        const plrPos = Scene.Current.Player.GetPosition();
+        const plrSize = Scene.Current.Player.GetCollider();
+        this._direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
+        if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5)
             return;
         if (this.IsSpotPlayer()) {
             if (this._direction == 1)
@@ -55,50 +23,5 @@ export class Enemy {
             else
                 this.MoveLeft();
         }
-    }
-    IsCollideEx() {
-        for (const platform of platforms)
-            if (this._x + this._width > platform.X &&
-                this._x < platform.X + platform.Width &&
-                this._y + this._height > platform.Y &&
-                this._y < platform.Y + platform.Height) {
-                const xstart = this._x + this._width - platform.X;
-                const xend = platform.X + platform.Width - this._x;
-                const ystart = platform.Y + platform.Height - this._y;
-                const yend = this._y + this._height - platform.Y;
-                let xOffset = 0;
-                let yOffset = 0;
-                if (xstart > 0 &&
-                    xend > 0 &&
-                    xend < platform.Width &&
-                    xstart < platform.Width)
-                    xOffset = 0;
-                else if (xstart > 0 && (xend < 0 || xstart < xend))
-                    xOffset = xstart;
-                else if (xend > 0)
-                    xOffset = -xend;
-                if (ystart > 0 &&
-                    yend > 0 &&
-                    yend < platform.Height &&
-                    ystart < platform.Height)
-                    yOffset = 0;
-                else if (ystart > 0 && (yend < 0 || ystart < yend))
-                    yOffset = ystart;
-                else if (yend > 0)
-                    yOffset = -yend;
-                if (xOffset == 0 && yOffset == 0)
-                    return false;
-                return { xOffset: xOffset, yOffset: yOffset };
-            }
-        return false;
-    }
-    TakeDamage(damage) {
-        this._health -= damage;
-    }
-    GetRectangle() {
-        return new Rectangle(this._x, this._y, this._width, this._height);
-    }
-    IsDead() {
-        return this._health <= 0;
     }
 }

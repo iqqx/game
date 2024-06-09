@@ -5,3 +5,9 @@ export var EnemyType;
     EnemyType[EnemyType["Red"] = 2] = "Red";
     EnemyType[EnemyType["Green"] = 3] = "Green";
 })(EnemyType || (EnemyType = {}));
+export var Tag;
+(function (Tag) {
+    Tag[Tag["Player"] = 1] = "Player";
+    Tag[Tag["Enemy"] = 2] = "Enemy";
+    Tag[Tag["Platform"] = 4] = "Platform";
+})(Tag || (Tag = {}));
