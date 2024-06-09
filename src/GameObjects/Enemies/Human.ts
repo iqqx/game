@@ -1,7 +1,9 @@
-import { Canvas } from "../context.js";
-import { Tag } from "../Enums.js";
+import { Tag } from "../../Enums.js";
+import { Scene } from "../../Scene.js";
+import { Canvas } from "../../Context.js";
+import { Rectangle, Vector2 } from "../../Utilites.js";
+import { Bullet } from "../Bullet.js";
 import { Player } from "../Player.js";
-import { Bullet, Scene, Rectangle, Vector2 } from "../utilites.js";
 import { Enemy } from "./Enemy.js";
 
 export class Human extends Enemy {

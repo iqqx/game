@@ -9,4 +9,5 @@ export enum Tag {
 	Player = 1,
 	Enemy = 2,
 	Platform = 4,
+	Wall = 8,
 }

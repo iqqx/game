@@ -1,7 +1,10 @@
+import { Tag } from "../Enums.js";
+import { Scene } from "../Scene.js";
+import { Canvas } from "../Context.js";
+import { Rectangle, Color, Vector2 } from "../Utilites.js";
+import { Bullet } from "./Bullet.js";
 import { Enemy } from "./Enemies/Enemy.js";
-import { Tag } from "./Enums.js";
-import { Canvas } from "./context.js";
-import { Bullet, Color, Entity, Rectangle, Scene, Vector2, } from "./utilites.js";
+import { Entity } from "./Entity.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
     _timeToNextShoot = 0;

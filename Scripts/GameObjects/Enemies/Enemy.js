@@ -1,6 +1,8 @@
-import { Tag } from "../Enums.js";
+import { Tag } from "../../Enums.js";
+import { Scene } from "../../Scene.js";
+import { Vector2 } from "../../Utilites.js";
+import { Entity } from "../Entity.js";
 import { Player } from "../Player.js";
-import { Entity, Scene, Vector2 } from "../utilites.js";
 export class Enemy extends Entity {
     constructor(width, height, speed, maxHealth) {
         super(width, height, speed, maxHealth);

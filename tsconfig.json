@@ -3,6 +3,8 @@
         "moduleResolution": "Bundler",
         "target": "ESNext",
         "module": "ESNext",
-        "incremental": true
+        "incremental": true,
+        "outDir": "scripts",
+        "rootDir": "src"
     }
 }

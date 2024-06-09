@@ -1,5 +1,6 @@
-import { Canvas } from "../context.js";
-import { Scene, Rectangle } from "../utilites.js";
+import { Scene } from "../../Scene.js";
+import { Canvas } from "../../Context.js";
+import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 export class Rat extends Enemy {
     static Damage = 10;

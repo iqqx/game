@@ -1,4 +1,4 @@
-import { Color, Rectangle } from "./utilites.js";
+import { Color, Rectangle } from "./Utilites.js";
 
 const ctx = (
 	document.getElementById("main-canvas") as HTMLCanvasElement

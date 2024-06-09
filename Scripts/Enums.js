@@ -10,4 +10,5 @@ export var Tag;
     Tag[Tag["Player"] = 1] = "Player";
     Tag[Tag["Enemy"] = 2] = "Enemy";
     Tag[Tag["Platform"] = 4] = "Platform";
+    Tag[Tag["Wall"] = 8] = "Wall";
 })(Tag || (Tag = {}));
