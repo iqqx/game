@@ -47,6 +47,11 @@ export class Player extends Entity {
         img.src = "Images/Gun.png";
         return img;
     })();
+    static _KNIFE = (function () {
+        const img = new Image();
+        img.src = "Images/Images/pixil-frame-0.png";
+        return img;
+    })();
     constructor() {
         super(50, 200, Player._speed, 100);
         this.Tag = Tag.Player;
@@ -223,42 +228,6 @@ export class Player extends Entity {
         }
         Canvas.SetFillColor(new Color(255, 0, 0));
         Canvas.DrawCircle(1000 / 2 + (this._active - 1) * 50, 750 - 45, 20);
-        // switch (this._active) {
-        // 	case 1:
-        // 		break;
-        // 	case 2:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 50, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 3:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 100, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 4:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 150, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 5:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 200, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 6:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 250, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 7:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 300, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 8:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 350, 750 - 50 - 10, 25);
-        // 		break;
-        // 	case 9:
-        // 		Canvas.SetFillColor(new Color(0, 255, 0));
-        // 		Canvas.DrawCircle(1000 / 2 - 50 + 400, 750 - 50 - 10, 25);
-        // 		break;
-        // }
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
         // POSTPROCCES
@@ -269,6 +238,10 @@ export class Player extends Entity {
         if (this._needDrawAntiVegnitte > 0) {
             this._needDrawAntiVegnitte--;
             Canvas.DrawVignette(new Color(100, 100, 100));
+            Canvas.SetFillColor(Color.Red);
+            Canvas.DrawRectangleWithAngle(this._x + this._width / 2 + Math.cos(this._angle) * 150, this._y +
+                this._height * (this._sit ? 0.25 : 0.75) -
+                Math.sin(this._angle) * 150, 150, 100, this._angle, 0, 50);
         }
         Canvas.DrawVignette(new Color(255 - 255 * (this._health / this._maxHealth), 0, 0));
     }
@@ -285,17 +258,25 @@ export class Player extends Entity {
     }
     Shoot() {
         const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 1500, Tag.Enemy | Tag.Wall);
+        // Canvas.SetFillColor
+        // x + cos (angle) * 30
         const hit = hits === undefined ? undefined : hits[0];
         if (hit !== undefined && hit.instance instanceof Enemy)
             hit.instance.TakeDamage(50);
-        Scene.Current.Instantiate(new Bullet(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75), hit === undefined
+        Scene.Current.Instantiate(new Bullet(this._x + this._width / 2 + Math.cos(this._angle) * 200, this._y +
+            this._height * (this._sit ? 0.25 : 0.75) -
+            Math.sin(this._angle) * 200, hit === undefined
             ? 2000
-            : Math.min(Math.sqrt((this._x + this._width / 2 - hit.position.X) **
+            : Math.min(Math.sqrt((this._x +
+                this._width / 2 -
+                hit.position.X +
+                Math.cos(this._angle) * 200) **
                 2 +
                 (this._y +
                     this._height *
                         (this._sit ? 0.25 : 0.75) -
-                    hit.position.Y) **
+                    hit.position.Y -
+                    Math.sin(this._angle) * 200) **
                     2), 2000), this._angle));
         // sounds.Shoot.Play(0.5);
         this._needDrawAntiVegnitte = 5;

@@ -80,13 +80,20 @@ export class Human extends Enemy {
 		if (this._direction === 1) {
 			Canvas.DrawImage(
 				Human._frames.Walk[0],
-				new Rectangle(this._x, this._y, this._width, this._height)
+				new Rectangle(
+					this._x - Scene.Current.GetLevelPosition(),
+					this._y,
+					this._width,
+					this._height
+				)
 			);
 
 			Canvas.DrawImageWithAngle(
 				Player._AK,
 				new Rectangle(
-					this._x + this._width / 2,
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
 					this._y + this._height * 0.75,
 					52 * 3.125,
 					16 * 3.125
@@ -98,13 +105,20 @@ export class Human extends Enemy {
 		} else {
 			Canvas.DrawImageFlipped(
 				Human._frames.Walk[0],
-				new Rectangle(this._x, this._y, this._width, this._height)
+				new Rectangle(
+					this._x - Scene.Current.GetLevelPosition(),
+					this._y,
+					this._width,
+					this._height
+				)
 			);
 
 			Canvas.DrawImageWithAngleVFlipped(
 				Player._AK,
 				new Rectangle(
-					this._x + this._width / 2,
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
 					this._y + this._height * 0.75,
 					52 * 3.125,
 					16 * 3.125
