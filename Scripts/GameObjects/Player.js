@@ -13,9 +13,9 @@ export class Player extends Entity {
     _angle = 1;
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
-    _selectedSlot = 0;
+    _selectedSlot = null;
     _inventory = [new AK(), new M4A1()];
-    _weapon = this._inventory[0];
+    _weapon = null;
     _hasInteraction = null;
     _interacting = null;
     _im = true;
@@ -44,8 +44,14 @@ export class Player extends Entity {
             return images;
         })(),
         Hands: {
-            Left: LoadImage("Images/Player_left_hand.png"),
-            Right: LoadImage("Images/Player_right_hand.png"),
+            Left: {
+                Weaponed: LoadImage("Images/Player_left_hand.png"),
+                Empty: LoadImage("Images/Player_hand_empty.png"),
+            },
+            Right: {
+                Weaponed: LoadImage("Images/Player_right_hand.png"),
+                Empty: LoadImage("Images/Player_hand_empty.png"),
+            },
         },
     };
     constructor() {
@@ -209,24 +215,32 @@ export class Player extends Entity {
     }
     Render() {
         if (this._direction == 1) {
-            Canvas.DrawImageWithAngle(Player._frames.Hands.Left, new Rectangle(this._x +
+            Canvas.DrawImageWithAngle(this._weapon === null
+                ? Player._frames.Hands.Left.Empty
+                : Player._frames.Hands.Left.Weaponed, new Rectangle(this._x +
                 this._width / 2 -
                 Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
             Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition(), this._y, this._width + 50, this._height));
             this._weapon?.Render();
-            Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x +
+            Canvas.DrawImageWithAngle(this._weapon === null
+                ? Player._frames.Hands.Left.Empty
+                : Player._frames.Hands.Right.Weaponed, new Rectangle(this._x +
                 this._width / 2 -
-                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle - (this._weapon === null ? -Math.PI / 4 : 0), -12, 16 * 2.4);
         }
         else {
-            Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x +
+            Canvas.DrawImageWithAngleVFlipped(this._weapon === null
+                ? Player._frames.Hands.Left.Empty
+                : Player._frames.Hands.Right.Weaponed, new Rectangle(this._x +
                 this._width / 2 -
                 Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
             Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition(), this._y, this._width + 50, this._height));
             this._weapon?.Render();
-            Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Left, new Rectangle(this._x +
+            Canvas.DrawImageWithAngleVFlipped(this._weapon === null
+                ? Player._frames.Hands.Left.Empty
+                : Player._frames.Hands.Left.Weaponed, new Rectangle(this._x +
                 this._width / 2 -
-                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+                Scene.Current.GetLevelPosition(), this._y + this._height * (this._sit ? 0.25 : 0.75), 52 * 3.125, 16 * 3.125), this._angle - (this._weapon === null ? -Math.PI / 4 : 0), -12, 16 * 2.4);
         }
     }
     RenderOverlay() {
@@ -303,8 +317,15 @@ export class Player extends Entity {
         return new Vector2(this._x, this._y);
     }
     SelectSlot(slot) {
+        if (slot === this._selectedSlot) {
+            this._selectedSlot = null;
+            this._weapon = null;
+            return;
+        }
         if (slot <= 1)
             this._weapon = this._inventory[slot];
+        else
+            this._weapon = null;
         this._selectedSlot = slot;
     }
     Jump() {

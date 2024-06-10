@@ -13,8 +13,7 @@ import { AK } from "../Assets/Weapons/AK.js";
 import { M4A1 } from "../Assets/Weapons/M4A1.js";
 import { Weapon } from "../Weapon.js";
 import { Character } from "./QuestGivers/Character.js";
-import { KillTask, Quest } from "../Quest.js";
-import { Morshu } from "./QuestGivers/Morshu.js";
+import { Quest } from "../Quest.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
@@ -24,7 +23,7 @@ export class Player extends Entity {
 	private _angle = 1;
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
-	private _selectedSlot: 0 | 1 | 2 | 3 | 4 | 5 = 0;
+	private _selectedSlot: 0 | 1 | 2 | 3 | 4 | 5 | null = null;
 	private _inventory: [
 		Weapon?,
 		Weapon?,
@@ -33,7 +32,7 @@ export class Player extends Entity {
 		GameObject?,
 		GameObject?
 	] = [new AK(), new M4A1()];
-	private _weapon: Weapon | undefined = this._inventory[0];
+	private _weapon: Weapon | null = null;
 	private _hasInteraction: Character | null = null;
 	private _interacting: Character | null = null;
 	private _im = true;
@@ -67,8 +66,14 @@ export class Player extends Entity {
 			return images;
 		})(),
 		Hands: {
-			Left: LoadImage("Images/Player_left_hand.png"),
-			Right: LoadImage("Images/Player_right_hand.png"),
+			Left: {
+				Weaponed: LoadImage("Images/Player_left_hand.png"),
+				Empty: LoadImage("Images/Player_hand_empty.png"),
+			},
+			Right: {
+				Weaponed: LoadImage("Images/Player_right_hand.png"),
+				Empty: LoadImage("Images/Player_hand_empty.png"),
+			},
 		},
 	};
 
@@ -282,7 +287,9 @@ export class Player extends Entity {
 	public override Render() {
 		if (this._direction == 1) {
 			Canvas.DrawImageWithAngle(
-				Player._frames.Hands.Left,
+				this._weapon === null
+					? Player._frames.Hands.Left.Empty
+					: Player._frames.Hands.Left.Weaponed,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -311,7 +318,9 @@ export class Player extends Entity {
 			this._weapon?.Render();
 
 			Canvas.DrawImageWithAngle(
-				Player._frames.Hands.Right,
+				this._weapon === null
+					? Player._frames.Hands.Left.Empty
+					: Player._frames.Hands.Right.Weaponed,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -320,13 +329,15 @@ export class Player extends Entity {
 					52 * 3.125,
 					16 * 3.125
 				),
-				this._angle,
+				this._angle - (this._weapon === null ? -Math.PI / 4 : 0),
 				-12,
 				16 * 2.4
 			);
 		} else {
 			Canvas.DrawImageWithAngleVFlipped(
-				Player._frames.Hands.Right,
+				this._weapon === null
+					? Player._frames.Hands.Left.Empty
+					: Player._frames.Hands.Right.Weaponed,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -355,7 +366,9 @@ export class Player extends Entity {
 			this._weapon?.Render();
 
 			Canvas.DrawImageWithAngleVFlipped(
-				Player._frames.Hands.Left,
+				this._weapon === null
+					? Player._frames.Hands.Left.Empty
+					: Player._frames.Hands.Left.Weaponed,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -364,7 +377,7 @@ export class Player extends Entity {
 					52 * 3.125,
 					16 * 3.125
 				),
-				this._angle,
+				this._angle - (this._weapon === null ? -Math.PI / 4 : 0),
 				-12,
 				16 * 2.4
 			);
@@ -516,7 +529,15 @@ export class Player extends Entity {
 	}
 
 	private SelectSlot(slot: 0 | 1 | 2 | 3 | 4 | 5) {
+		if (slot === this._selectedSlot) {
+			this._selectedSlot = null;
+			this._weapon = null;
+
+			return;
+		}
+
 		if (slot <= 1) this._weapon = this._inventory[slot as 0 | 1];
+		else this._weapon = null;
 
 		this._selectedSlot = slot;
 	}
