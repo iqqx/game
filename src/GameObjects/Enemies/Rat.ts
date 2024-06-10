@@ -57,12 +57,12 @@ export class Rat extends Enemy {
 		if (this._direction === 1) {
 			Canvas.DrawImage(
 				Rat._frames.Idle,
-				new Rectangle(this._x, this._y, this._width, this._height)
+				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height)
 			);
 		} else {
 			Canvas.DrawImageFlipped(
 				Rat._frames.Idle,
-				new Rectangle(this._x, this._y, this._width, this._height)
+				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height)
 			);
 		}
 	}

@@ -132,7 +132,7 @@ export class Human extends Enemy {
 					(this._y + this._height * 0.75)
 			),
 			1000,
-			Tag.Player | Tag.Platform
+			Tag.Player | Tag.Wall
 		);
 
 		return hits !== undefined && hits[0].instance instanceof Player;

@@ -19,8 +19,8 @@ export abstract class Enemy extends Entity {
 		const plrPos = Scene.Current.Player.GetPosition();
 
 		const hits = Scene.Current.Raycast(
-			new Vector2(this._x, this._y),
-			new Vector2(plrPos.X - this._x, plrPos.Y - this._y),
+			new Vector2(this._x, this._y + 1),
+			new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1),
 			1000,
 			Tag.Player | Tag.Wall
 		);
@@ -29,6 +29,8 @@ export abstract class Enemy extends Entity {
 	}
 
 	public Update(dt: number) {
+		if (!this.IsSpotPlayer()) return
+
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 

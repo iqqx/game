@@ -57,19 +57,6 @@ export class Line {
     }
 }
 export function GetIntersectPoint(line0, line1) {
-    // not work
-    // const v = line0.X1 - line0.X0;
-    // const w = line0.Y1 - line0.Y0;
-    // const v2 = line1.X1 - line1.X0;
-    // const w2 = line1.Y1 - line1.Y0;
-    // const t2 =
-    // 	(-w * line1.X0 + w * line0.X0 + v * line1.Y0 - v * line0.Y0) /
-    // 	(w * v2 - v * w2);
-    // const t = (line1.X0 - line0.X0 + v2 * t2) / v;
-    // if (t2 < 0 || t2 > 1) return undefined;
-    // if (!Number.isNaN(t) && (t < 0 || t > 1)) return undefined;
-    // return new Vector2(line1.X0 + v2 * t2, line1.Y0 + w2 * t2);
-    // new
     const denominator = (line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) -
         (line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
     if (denominator == 0) {

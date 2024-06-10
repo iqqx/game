@@ -11,9 +11,10 @@ export class Player extends Entity {
     _frameIndex = 0;
     _LMBPressed = false;
     _sit = false;
-    _angle = 0;
+    _angle = 1;
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
+    _active = 1;
     static _speed = 5;
     static _firerate = 150;
     static _animationFrameDuration = 125;
@@ -70,6 +71,33 @@ export class Player extends Entity {
                     break;
                 case "Space":
                     this.Jump();
+                    break;
+                case "Digit1":
+                    this._active = 1;
+                    break;
+                case "Digit2":
+                    this._active = 2;
+                    break;
+                case "Digit3":
+                    this._active = 3;
+                    break;
+                case "Digit4":
+                    this._active = 4;
+                    break;
+                case "Digit5":
+                    this._active = 5;
+                    break;
+                case "Digit6":
+                    this._active = 6;
+                    break;
+                case "Digit7":
+                    this._active = 7;
+                    break;
+                case "Digit8":
+                    this._active = 8;
+                    break;
+                case "Digit9":
+                    this._active = 9;
                     break;
                 case "KeyA":
                     this._movingLeft = true;
@@ -187,6 +215,50 @@ export class Player extends Entity {
         // 	50,
         // 	25
         // );
+        for (let i = 0; i < 9; i++) {
+            Canvas.SetFillColor(new Color(255, 255, 255));
+            Canvas.DrawRectangle(1000 / 2 - 50 / 2 + i * 50, 750 - 50 - 10, 50, 50);
+            Canvas.SetFillColor(new Color(0, 0, 0));
+            Canvas.DrawRectangle(1000 / 2 - 50 / 2 + i * 50, 750 - 50 - 10, 1, 50);
+        }
+        Canvas.SetFillColor(new Color(255, 0, 0));
+        Canvas.DrawCircle(1000 / 2 + (this._active - 1) * 50, 750 - 45, 20);
+        // switch (this._active) {
+        // 	case 1:
+        // 		break;
+        // 	case 2:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 50, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 3:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 100, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 4:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 150, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 5:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 200, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 6:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 250, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 7:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 300, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 8:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 / 2 + 350, 750 - 50 - 10, 25);
+        // 		break;
+        // 	case 9:
+        // 		Canvas.SetFillColor(new Color(0, 255, 0));
+        // 		Canvas.DrawCircle(1000 / 2 - 50 + 400, 750 - 50 - 10, 25);
+        // 		break;
+        // }
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
         // POSTPROCCES

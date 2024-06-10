@@ -73,7 +73,7 @@ export class Human extends Enemy {
         const plrSize = Scene.Current.Player.GetCollider();
         const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * 0.75), new Vector2(plrPos.X - this._x, plrPos.Y +
             plrSize.Height * 0.9 -
-            (this._y + this._height * 0.75)), 1000, Tag.Player | Tag.Platform);
+            (this._y + this._height * 0.75)), 1000, Tag.Player | Tag.Wall);
         return hits !== undefined && hits[0].instance instanceof Player;
     }
     TakeDamage(damage) {
