@@ -6,6 +6,7 @@ import { Fireball } from "./GameObjects/Fireball.js";
 import { Scene } from "./Scene.js";
 import { Rectangle, Vector2 } from "./Utilites.js";
 export class Weapon {
+    Icon;
     _image;
     _fireSound;
     _fireCooldown;
@@ -14,7 +15,8 @@ export class Weapon {
     _position = Vector2.Zero;
     _angle = 0;
     _secondsToCooldown = 0;
-    constructor(image, fireSound, fireCooldown, damage, spread) {
+    constructor(icon, image, fireSound, fireCooldown, damage, spread) {
+        this.Icon = icon;
         this._image = image;
         this._fireSound = fireSound;
         this._fireCooldown = fireCooldown;
@@ -28,11 +30,9 @@ export class Weapon {
     }
     Render() {
         if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
-            Canvas.DrawImageWithAngleVFlipped(this._image, new Rectangle(this._position.X -
-                Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            Canvas.DrawImageWithAngleVFlipped(this._image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
         else
-            Canvas.DrawImageWithAngle(this._image, new Rectangle(this._position.X -
-                Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            Canvas.DrawImageWithAngle(this._image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
     }
     TryShoot() {
         if (this._secondsToCooldown > 0)

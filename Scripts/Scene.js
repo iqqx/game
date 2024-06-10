@@ -1,16 +1,18 @@
 import { Wall } from "./GameObjects/Wall.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Line, GetIntersectPoint, Lerp, Color, } from "./Utilites.js";
+import { GameObject, Line, GetIntersectPoint, Lerp, } from "./Utilites.js";
 export class Scene {
     static Current;
     _gameObjects;
     Player;
     Length;
+    _background;
     _levelPosition = 0;
     Time = 0;
-    constructor(player, Length) {
+    constructor(player, Length, background) {
         this.Length = Length;
         this.Player = player;
+        this._background = background;
         Scene.Current = this;
         this._gameObjects = [
             player,
@@ -83,8 +85,7 @@ export class Scene {
         this.Time = time;
     }
     Render() {
-        Canvas.SetFillColor(new Color(50, 50, 50));
-        Canvas.DrawRectangle(0, 0, this.Length, 750);
+        Canvas.DrawBackground(this._background);
         for (const object of this._gameObjects)
             object.Render();
     }

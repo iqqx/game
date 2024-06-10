@@ -7,7 +7,8 @@ import { Scene } from "./Scene.js";
 import { Rectangle, Sound, Vector2 } from "./Utilites.js";
 
 export abstract class Weapon {
-	private readonly _image;
+	public readonly Icon: HTMLImageElement;
+	private readonly _image: HTMLImageElement;
 
 	private readonly _fireSound: Sound;
 	private readonly _fireCooldown: number;
@@ -19,12 +20,14 @@ export abstract class Weapon {
 	private _secondsToCooldown: number = 0;
 
 	constructor(
+		icon: HTMLImageElement,
 		image: HTMLImageElement,
 		fireSound: Sound,
 		fireCooldown: number,
 		damage: number,
 		spread: number
 	) {
+		this.Icon = icon;
 		this._image = image;
 		this._fireSound = fireSound;
 		this._fireCooldown = fireCooldown;
@@ -43,26 +46,33 @@ export abstract class Weapon {
 		if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
 			Canvas.DrawImageWithAngleVFlipped(
 				this._image,
-				new Rectangle(this._position.X-
-					Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125),
-					this._angle,
+				new Rectangle(
+					this._position.X - Scene.Current.GetLevelPosition(),
+					this._position.Y,
+					52 * 3.125,
+					16 * 3.125
+				),
+				this._angle,
 				-12,
 				16 * 2.4
 			);
 		else
 			Canvas.DrawImageWithAngle(
 				this._image,
-				new Rectangle(this._position.X-
-					Scene.Current.GetLevelPosition(), this._position.Y, 52 * 3.125, 16 * 3.125),
-					this._angle,
+				new Rectangle(
+					this._position.X - Scene.Current.GetLevelPosition(),
+					this._position.Y,
+					52 * 3.125,
+					16 * 3.125
+				),
+				this._angle,
 				-12,
 				16 * 2.4
 			);
 	}
 
 	public TryShoot(): boolean {
-		if (this._secondsToCooldown > 0)
-			return false;
+		if (this._secondsToCooldown > 0) return false;
 		this._secondsToCooldown = this._fireCooldown;
 
 		const dir = this._angle - (Math.random() - 0.5) * this._spread;

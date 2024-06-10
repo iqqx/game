@@ -18,6 +18,6 @@ export class Fireball extends GameObject {
             this.Destroy();
     }
     Render() {
-        Canvas.DrawImageWithAngle(Fireball._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 150, 100), this._angle, 0, 50);
+        Canvas.DrawImageWithAngle(Fireball._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 50), this._angle, 0, 25);
     }
 }

@@ -4,8 +4,9 @@ import { Platform } from "./GameObjects/Platform.js";
 import { Player } from "./GameObjects/Player.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Scene } from "./Scene.js";
+import { LoadImage } from "./Utilites.js";
 
-const scene = new Scene(new Player(), 2000);
+const scene = new Scene(new Player(), 2000, LoadImage("Images/Level_1.png"));
 
 scene.Instantiate(new Wall(500, 120, 25, 100));
 scene.Instantiate(new Wall(800, 0, 50, 100));

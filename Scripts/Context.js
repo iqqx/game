@@ -1,3 +1,5 @@
+import { Scene } from "./Scene.js";
+import { Vector2 } from "./Utilites.js";
 const ctx = document.getElementById("main-canvas").getContext("2d");
 ctx.imageSmoothingEnabled = false;
 export var Canvas;
@@ -6,6 +8,11 @@ export var Canvas;
         ctx.fillStyle = color.toString();
     }
     Canvas.SetFillColor = SetFillColor;
+    function SetStroke(color, width) {
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = width;
+    }
+    Canvas.SetStroke = SetStroke;
     function ResetTransform() {
         ctx.resetTransform();
     }
@@ -21,30 +28,47 @@ export var Canvas;
     }
     Canvas.DrawRectangle = DrawRectangle;
     function DrawRectangleEx(rect) {
-        ctx.fillRect(
-        // rect.X - levelPosition,
-        rect.X, ctx.canvas.height - rect.Y - rect.Height, rect.Width, rect.Height);
+        ctx.beginPath();
+        ctx.rect(rect.X, ctx.canvas.height - rect.Y - rect.Height, rect.Width, rect.Height);
+        ctx.fill();
+        ctx.stroke();
     }
     Canvas.DrawRectangleEx = DrawRectangleEx;
+    function DrawRectangleRounded(rect, round) {
+        ctx.beginPath();
+        ctx.roundRect(rect.X, ctx.canvas.height - rect.Y, rect.Width, -rect.Height, round);
+        ctx.fill();
+    }
+    Canvas.DrawRectangleRounded = DrawRectangleRounded;
     function DrawImage(image, rect) {
         ctx.drawImage(image, 
         // rect.X - levelPosition,
         rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
     }
     Canvas.DrawImage = DrawImage;
+    function DrawBackground(image) {
+        ctx.drawImage(image, Scene.Current.GetLevelPosition(), 0, GetSize().X, image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
+    }
+    Canvas.DrawBackground = DrawBackground;
+    function GetSize() {
+        return new Vector2(ctx.canvas.width, ctx.canvas.height);
+    }
+    Canvas.GetSize = GetSize;
+    function DrawImageProportional(image, rect) {
+        const ratio = Math.min(rect.Height, rect.Width) /
+            Math.max(image.naturalWidth, image.naturalHeight);
+        const newHeight = image.naturalHeight * ratio;
+        const offsetY = (rect.Height - newHeight) / 2;
+        ctx.drawImage(image, rect.X, ctx.canvas.height - rect.Height - rect.Y + offsetY, rect.Width * ratio, newHeight);
+    }
+    Canvas.DrawImageProportional = DrawImageProportional;
     function DrawImageFlipped(image, rect) {
         ctx.save();
         ctx.scale(-1, 1);
-        ctx.drawImage(image, 
-        // -rect.X - rect.Width + levelPosition,
-        -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+        ctx.drawImage(image, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
         ctx.restore();
     }
     Canvas.DrawImageFlipped = DrawImageFlipped;
-    function DrawRectangleFixed(x, y, width, height) {
-        ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
-    }
-    Canvas.DrawRectangleFixed = DrawRectangleFixed;
     function DrawCircle(x, y, radius) {
         ctx.beginPath();
         ctx.ellipse(
@@ -53,13 +77,6 @@ export var Canvas;
         ctx.fill();
     }
     Canvas.DrawCircle = DrawCircle;
-    function Clear() {
-        ctx.resetTransform();
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    }
-    Canvas.Clear = Clear;
-    function SetLevelPosition(position) { }
-    Canvas.SetLevelPosition = SetLevelPosition;
     function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
         var prev = ctx.getTransform();
         ctx.resetTransform();

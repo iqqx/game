@@ -10,6 +10,7 @@ import {
 	GetIntersectPoint,
 	Lerp,
 	Color,
+	Rectangle,
 } from "./Utilites.js";
 
 export class Scene {
@@ -18,12 +19,15 @@ export class Scene {
 	private readonly _gameObjects: GameObject[];
 	public readonly Player: Player;
 	public readonly Length: number;
+	private readonly _background: HTMLImageElement;
+
 	private _levelPosition = 0;
 	public Time = 0;
 
-	constructor(player: Player, Length: number) {
+	constructor(player: Player, Length: number, background: HTMLImageElement) {
 		this.Length = Length;
 		this.Player = player;
+		this._background = background;
 
 		Scene.Current = this;
 
@@ -156,8 +160,7 @@ export class Scene {
 	}
 
 	public Render() {
-		Canvas.SetFillColor(new Color(50, 50, 50));
-		Canvas.DrawRectangle(0, 0, this.Length, 750);
+		Canvas.DrawBackground(this._background);
 
 		for (const object of this._gameObjects) object.Render();
 	}

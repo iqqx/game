@@ -1,4 +1,5 @@
-import { Color, Rectangle } from "./Utilites.js";
+import { Scene } from "./Scene.js";
+import { Color, Rectangle, Vector2 } from "./Utilites.js";
 
 const ctx = (
 	document.getElementById("main-canvas") as HTMLCanvasElement
@@ -8,6 +9,11 @@ ctx.imageSmoothingEnabled = false;
 export namespace Canvas {
 	export function SetFillColor(color: Color) {
 		ctx.fillStyle = color.toString();
+	}
+
+	export function SetStroke(color: Color, width: number) {
+		ctx.strokeStyle = color.toString();
+		ctx.lineWidth = width;
 	}
 
 	export function ResetTransform() {
@@ -34,13 +40,27 @@ export namespace Canvas {
 	}
 
 	export function DrawRectangleEx(rect: Rectangle) {
-		ctx.fillRect(
-			// rect.X - levelPosition,
+		ctx.beginPath();
+		ctx.rect(
 			rect.X,
 			ctx.canvas.height - rect.Y - rect.Height,
 			rect.Width,
 			rect.Height
 		);
+		ctx.fill();
+		ctx.stroke();
+	}
+
+	export function DrawRectangleRounded(rect: Rectangle, round: number) {
+		ctx.beginPath();
+		ctx.roundRect(
+			rect.X,
+			ctx.canvas.height - rect.Y,
+			rect.Width,
+			-rect.Height,
+			round
+		);
+		ctx.fill();
 	}
 
 	export function DrawImage(image: CanvasImageSource, rect: Rectangle) {
@@ -54,6 +74,45 @@ export namespace Canvas {
 		);
 	}
 
+	export function DrawBackground(image: HTMLImageElement) {
+		ctx.drawImage(
+			image,
+			Scene.Current.GetLevelPosition(),
+			0,
+			GetSize().X,
+			image.naturalHeight,
+			0,
+			0,
+			GetSize().X,
+			GetSize().Y
+		);
+	}
+
+	export function GetSize() {
+		return new Vector2(ctx.canvas.width, ctx.canvas.height);
+	}
+
+	export function DrawImageProportional(
+		image: HTMLImageElement,
+		rect: Rectangle
+	) {
+		const ratio =
+			Math.min(rect.Height, rect.Width) /
+			Math.max(image.naturalWidth, image.naturalHeight);
+
+		const newHeight = image.naturalHeight * ratio;
+
+		const offsetY = (rect.Height - newHeight) / 2;
+
+		ctx.drawImage(
+			image,
+			rect.X,
+			ctx.canvas.height - rect.Height - rect.Y + offsetY,
+			rect.Width * ratio,
+			newHeight
+		);
+	}
+
 	export function DrawImageFlipped(
 		image: CanvasImageSource,
 		rect: Rectangle
@@ -62,22 +121,12 @@ export namespace Canvas {
 		ctx.scale(-1, 1);
 		ctx.drawImage(
 			image,
-			// -rect.X - rect.Width + levelPosition,
 			-rect.X - rect.Width,
 			ctx.canvas.height - rect.Height - rect.Y,
 			rect.Width,
 			rect.Height
 		);
 		ctx.restore();
-	}
-
-	export function DrawRectangleFixed(
-		x: number,
-		y: number,
-		width: number,
-		height: number
-	) {
-		ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
 	}
 
 	export function DrawCircle(x: number, y: number, radius: number) {
@@ -94,13 +143,6 @@ export namespace Canvas {
 		);
 		ctx.fill();
 	}
-
-	export function Clear() {
-		ctx.resetTransform();
-		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-	}
-
-	export function SetLevelPosition(position: number) {}
 
 	export function DrawRectangleWithAngle(
 		x: number,
