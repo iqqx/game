@@ -16,7 +16,7 @@ export class Player extends Entity {
     _needDrawRedVegnitte = 0;
     _active = 1;
     static _speed = 5;
-    static _firerate = 150;
+    static _firerate = 200;
     static _animationFrameDuration = 125;
     static _sitHeightModifier = 0.5;
     static _sitSpeedModifier = 0.75;
@@ -47,9 +47,9 @@ export class Player extends Entity {
         img.src = "Images/Gun.png";
         return img;
     })();
-    static _KNIFE = (function () {
+    static _FIRE = (function () {
         const img = new Image();
-        img.src = "Images/Images/pixil-frame-0.png";
+        img.src = "Images/fire.png";
         return img;
     })();
     constructor() {
@@ -239,11 +239,17 @@ export class Player extends Entity {
             this._needDrawAntiVegnitte--;
             Canvas.DrawVignette(new Color(100, 100, 100));
             Canvas.SetFillColor(Color.Red);
-            Canvas.DrawRectangleWithAngle(this._x + this._width / 2 + Math.cos(this._angle) * 150, this._y +
+            Canvas.DrawImageWithAngle(Player._FIRE, new Rectangle(this._x +
+                this._width / 2 +
+                Math.cos(this._angle) * 150 -
+                Scene.Current.GetLevelPosition(), this._y +
                 this._height * (this._sit ? 0.25 : 0.75) -
-                Math.sin(this._angle) * 150, 150, 100, this._angle, 0, 50);
+                Math.sin(this._angle) * 150, 150, 100), this._angle, 0, 50);
         }
         Canvas.DrawVignette(new Color(255 - 255 * (this._health / this._maxHealth), 0, 0));
+        Canvas.SetFillColor(Color.Red);
+        if (this._health <= 0)
+            Canvas.DrawRectangle(0, 0, 1500, 750);
     }
     GetPosition() {
         return new Vector2(this._x, this._y);
@@ -257,7 +263,8 @@ export class Player extends Entity {
         console.log(Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(0, -1), 1, Tag.Platform));
     }
     Shoot() {
-        const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 1500, Tag.Enemy | Tag.Wall);
+        const dir = this._angle + (Math.random() - 0.5) / 5;
+        const hits = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, Tag.Enemy | Tag.Wall);
         // Canvas.SetFillColor
         // x + cos (angle) * 30
         const hit = hits === undefined ? undefined : hits[0];
@@ -277,7 +284,7 @@ export class Player extends Entity {
                         (this._sit ? 0.25 : 0.75) -
                     hit.position.Y -
                     Math.sin(this._angle) * 200) **
-                    2), 2000), this._angle));
+                    2), 2000), dir));
         // sounds.Shoot.Play(0.5);
         this._needDrawAntiVegnitte = 5;
         this._timeToNextShoot = Player._firerate;

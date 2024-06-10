@@ -14,6 +14,7 @@ export class Enemy extends Entity {
         return hits !== undefined && hits[0].instance instanceof Player;
     }
     Update(dt) {
+        this.ApplyVForce();
         if (!this.IsSpotPlayer())
             return;
         const plrPos = Scene.Current.Player.GetPosition();

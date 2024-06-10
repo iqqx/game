@@ -82,7 +82,7 @@ export class Scene {
     }
     Render() {
         Canvas.SetFillColor(new Color(50, 50, 50));
-        Canvas.DrawRectangleFixed(0, 0, this.Length, 750);
+        Canvas.DrawRectangle(0, 0, this.Length, 750);
         for (const object of this._gameObjects)
             object.Render();
     }

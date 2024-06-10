@@ -29,6 +29,8 @@ export abstract class Enemy extends Entity {
 	}
 
 	public Update(dt: number) {
+		this.ApplyVForce()
+
 		if (!this.IsSpotPlayer()) return
 
 		const plrPos = Scene.Current.Player.GetPosition();

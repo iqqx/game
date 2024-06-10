@@ -33,11 +33,12 @@ export class Human extends Enemy {
         super(100, 200, 1, 100);
         this._x = x;
         this._y = y;
+        this._collider = new Rectangle(this._x, this._y, this._width - 50, this._height);
     }
     Update(dt) {
+        super.Update(dt);
         if (!this.IsSpotPlayer())
             return;
-        super.Update(dt);
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
         this._angle = (() => {
@@ -100,7 +101,7 @@ export class Human extends Enemy {
                 this._height * 0.75 -
                 (plrPos.Y + plrSize.Height * 0.9)) **
                 2), -this._angle));
-        Scene.Current.Player.TakeDamage(20);
+        Scene.Current.Player.TakeDamage(1);
         // sounds.Shoot.Play(0.5);
         this._shootCooldown = 200;
     }

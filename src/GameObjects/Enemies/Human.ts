@@ -41,12 +41,19 @@ export class Human extends Enemy {
 
 		this._x = x;
 		this._y = y;
+
+		this._collider = new Rectangle(
+			this._x,
+			this._y,
+			this._width - 50,
+			this._height
+		);
 	}
 
 	override Update(dt: number): void {
+		super.Update(dt);
 		if (!this.IsSpotPlayer()) return;
 
-		super.Update(dt);
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
@@ -187,7 +194,7 @@ export class Human extends Enemy {
 			)
 		);
 
-		Scene.Current.Player.TakeDamage(20);
+		Scene.Current.Player.TakeDamage(1);
 
 		// sounds.Shoot.Play(0.5);
 

@@ -19,7 +19,7 @@ export class Player extends Entity {
 	private _active = 1;
 
 	private static readonly _speed = 5;
-	private static readonly _firerate = 150;
+	private static readonly _firerate = 200;
 	private static readonly _animationFrameDuration = 125;
 	private static readonly _sitHeightModifier = 0.5;
 	private static readonly _sitSpeedModifier = 0.75;
@@ -58,9 +58,9 @@ export class Player extends Entity {
 
 		return img;
 	})();
-	public static readonly _KNIFE = (function () {
+	public static readonly _FIRE = (function () {
 		const img = new Image();
-		img.src = "Images/Images/pixil-frame-0.png";
+		img.src = "Images/fire.png";
 		return img;
 	})();
 
@@ -347,13 +347,19 @@ export class Player extends Entity {
 			this._needDrawAntiVegnitte--;
 			Canvas.DrawVignette(new Color(100, 100, 100));
 			Canvas.SetFillColor(Color.Red);
-			Canvas.DrawRectangleWithAngle(
-				this._x + this._width / 2 + Math.cos(this._angle) * 150,
-				this._y +
-					this._height * (this._sit ? 0.25 : 0.75) -
-					Math.sin(this._angle) * 150,
-				150,
-				100,
+			Canvas.DrawImageWithAngle(
+				Player._FIRE,
+				new Rectangle(
+					this._x +
+						this._width / 2 +
+						Math.cos(this._angle) * 150 -
+						Scene.Current.GetLevelPosition(),
+					this._y +
+						this._height * (this._sit ? 0.25 : 0.75) -
+						Math.sin(this._angle) * 150,
+					150,
+					100
+				),
 				this._angle,
 				0,
 				50
@@ -362,6 +368,9 @@ export class Player extends Entity {
 		Canvas.DrawVignette(
 			new Color(255 - 255 * (this._health / this._maxHealth), 0, 0)
 		);
+
+		Canvas.SetFillColor(Color.Red);
+		if (this._health <= 0) Canvas.DrawRectangle(0, 0, 1500, 750);
 	}
 
 	public GetPosition() {
@@ -386,12 +395,14 @@ export class Player extends Entity {
 	}
 
 	private Shoot() {
+		const dir = this._angle + (Math.random() - 0.5) / 5
+
 		const hits = Scene.Current.Raycast(
 			new Vector2(
 				this._x + this._width / 2,
 				this._y + this._height * (this._sit ? 0.25 : 0.75)
 			),
-			new Vector2(Math.cos(this._angle), -Math.sin(this._angle)),
+			new Vector2(Math.cos(dir), -Math.sin(dir)),
 			1500,
 			Tag.Enemy | Tag.Wall
 		);
@@ -428,7 +439,7 @@ export class Player extends Entity {
 							),
 							2000
 					  ),
-				this._angle
+					  dir
 			)
 		);
 

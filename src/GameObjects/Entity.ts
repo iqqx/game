@@ -65,7 +65,7 @@ export class Entity extends GameObject {
 		this._verticalAcceleration = this._jumpForce;
 	}
 
-	private ApplyVForce() {
+	protected ApplyVForce() {
 		this._verticalAcceleration -= this._verticalAcceleration > 0 ? 2 : 3;
 		this._y += this._verticalAcceleration;
 
