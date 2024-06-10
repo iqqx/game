@@ -29,8 +29,8 @@ export class Human extends Enemy {
     };
     _angle = 0;
     _shootCooldown = 0;
-    constructor(x, y) {
-        super(100, 200, 1, 100);
+    constructor(x, y, type) {
+        super(100, 200, 1, 100, type);
         this._x = x;
         this._y = y;
         this._collider = new Rectangle(this._x, this._y, this._width - 50, this._height);
@@ -107,6 +107,7 @@ export class Human extends Enemy {
         super.TakeDamage(damage);
         if (this._health <= 0) {
             this.Destroy();
+            Scene.Current.Player.OnKilled(this._type);
             const s = Human._deathSound.cloneNode();
             s.volume = 0.25;
             s.play();

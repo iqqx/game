@@ -80,13 +80,24 @@ export var Canvas;
     function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
         var prev = ctx.getTransform();
         ctx.resetTransform();
-        // ctx.translate(x - levelPosition, ctx.canvas.height - y);
         ctx.translate(x, ctx.canvas.height - y);
         ctx.rotate(angle);
         ctx.fillRect(xPivot, yPivot - height, width, height);
         ctx.setTransform(prev);
     }
     Canvas.DrawRectangleWithAngle = DrawRectangleWithAngle;
+    function DrawRectangleWithAngleAndStroke(x, y, width, height, angle, xPivot, yPivot) {
+        var prev = ctx.getTransform();
+        ctx.resetTransform();
+        ctx.translate(x, ctx.canvas.height - y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.rect(xPivot, yPivot - height, width, height);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setTransform(prev);
+    }
+    Canvas.DrawRectangleWithAngleAndStroke = DrawRectangleWithAngleAndStroke;
     function DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
         ctx.save();
         ctx.resetTransform();
@@ -136,7 +147,6 @@ export var Canvas;
         grd.addColorStop(0, start.toString());
         grd.addColorStop(1, end.toString());
         ctx.fillStyle = grd;
-        // DrawRectangle(rect.X - levelPosition, rect.Y, rect.Width, rect.Height);
         DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height);
     }
     Canvas.DrawRectangleWithGradient = DrawRectangleWithGradient;

@@ -6,8 +6,9 @@ export enum EnemyType {
 }
 
 export enum Tag {
-	Player = 1,
-	Enemy = 2,
-	Platform = 4,
-	Wall = 8,
+	Player = 2 ** 0,
+	Enemy = 2 ** 1,
+	Platform = 2 ** 2,
+	Wall = 2 ** 3,
+	NPC = 2 ** 4,
 }

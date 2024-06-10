@@ -1,17 +1,22 @@
-import { Tag } from "../../Enums.js";
+import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Vector2 } from "../../Utilites.js";
 import { Entity } from "../Entity.js";
 import { Player } from "../Player.js";
 
 export abstract class Enemy extends Entity {
+	protected readonly _type: EnemyType;
+
 	constructor(
 		width: number,
 		height: number,
 		speed: number,
-		maxHealth: number
+		maxHealth: number,
+		type: EnemyType
 	) {
 		super(width, height, speed, maxHealth);
+
+		this._type = type;
 		this.Tag = Tag.Enemy;
 	}
 
@@ -29,9 +34,9 @@ export abstract class Enemy extends Entity {
 	}
 
 	public Update(dt: number) {
-		this.ApplyVForce()
+		this.ApplyVForce();
 
-		if (!this.IsSpotPlayer()) return
+		if (!this.IsSpotPlayer()) return;
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();

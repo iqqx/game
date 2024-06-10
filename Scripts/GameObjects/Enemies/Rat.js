@@ -2,6 +2,7 @@ import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
+import { EnemyType } from "../../Enums.js";
 export class Rat extends Enemy {
     static Damage = 10;
     static AttackCooldown = 500;
@@ -16,7 +17,7 @@ export class Rat extends Enemy {
     };
     _attackCooldown = 0;
     constructor(x, y) {
-        super(50, 25, 2, 5);
+        super(50, 25, 2, 5, EnemyType.Rat);
         this._x = x;
         this._y = y;
     }

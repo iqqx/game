@@ -9,16 +9,16 @@ export class Scene {
     _background;
     _levelPosition = 0;
     Time = 0;
-    constructor(player, Length, background) {
-        this.Length = Length;
+    constructor(player, background) {
+        this.Length = background.naturalWidth;
         this.Player = player;
         this._background = background;
         Scene.Current = this;
         this._gameObjects = [
             player,
-            new Wall(0, 750, Length, 100),
-            new Wall(Length, 0, 100, 1000),
-            new Wall(0, -100, Length, 100),
+            new Wall(0, 750, this.Length, 100),
+            new Wall(this.Length, 0, 100, 1000),
+            new Wall(0, -100, this.Length, 100),
             new Wall(-100, 0, 100, 1000),
         ];
     }
@@ -91,6 +91,9 @@ export class Scene {
     }
     RenderOverlay() {
         this.Player.RenderOverlay();
+    }
+    GetByTag(tag) {
+        return this._gameObjects.filter((x) => x.Tag == tag);
     }
     Instantiate(object) {
         const index = this._gameObjects.push(object) - 1;

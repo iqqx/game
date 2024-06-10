@@ -156,10 +156,33 @@ export namespace Canvas {
 		var prev = ctx.getTransform();
 
 		ctx.resetTransform();
-		// ctx.translate(x - levelPosition, ctx.canvas.height - y);
 		ctx.translate(x, ctx.canvas.height - y);
 		ctx.rotate(angle);
+
 		ctx.fillRect(xPivot, yPivot - height, width, height);
+
+		ctx.setTransform(prev);
+	}
+
+	export function DrawRectangleWithAngleAndStroke(
+		x: number,
+		y: number,
+		width: number,
+		height: number,
+		angle: number,
+		xPivot: number,
+		yPivot: number
+	) {
+		var prev = ctx.getTransform();
+
+		ctx.resetTransform();
+		ctx.translate(x, ctx.canvas.height - y);
+		ctx.rotate(angle);
+
+		ctx.beginPath();
+		ctx.rect(xPivot, yPivot - height, width, height);
+		ctx.fill();
+		ctx.stroke();
 
 		ctx.setTransform(prev);
 	}
@@ -265,7 +288,7 @@ export namespace Canvas {
 		grd.addColorStop(1, end.toString());
 
 		ctx.fillStyle = grd;
-		// DrawRectangle(rect.X - levelPosition, rect.Y, rect.Width, rect.Height);
+
 		DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height);
 	}
 

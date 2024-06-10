@@ -19,6 +19,7 @@ export class Color {
     static White = new Color(255, 255, 255, 255);
     static Black = new Color(0, 0, 0, 255);
     static Red = new Color(255, 0, 0, 255);
+    static Yellow = new Color(255, 255, 0, 255);
     static Transparent = new Color(0, 0, 0, 0);
     constructor(r, g, b, a = 255) {
         this.R = r;
@@ -100,6 +101,9 @@ export class GameObject {
     }
     GetPosition() {
         return new Vector2(this._x, this._y);
+    }
+    GetSize() {
+        return new Vector2(this._width, this._height);
     }
     Update(dt) { }
     Render() { }

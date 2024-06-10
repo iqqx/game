@@ -13,9 +13,13 @@ export class Player extends Entity {
     _angle = 1;
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
-    _weapon = undefined;
     _selectedSlot = 0;
     _inventory = [new AK(), new M4A1()];
+    _weapon = this._inventory[0];
+    _hasInteraction = null;
+    _interacting = null;
+    _im = true;
+    _quests = [];
     static _speed = 5;
     static _animationFrameDuration = 125;
     static _sitHeightModifier = 0.5;
@@ -92,6 +96,21 @@ export class Player extends Entity {
                     break;
                 case "KeyS":
                     this.TryDown();
+                    break;
+                case "KeyE":
+                    if (this._interacting !== null) {
+                        const next = this._interacting.Continue();
+                        if (next !== true) {
+                            this._interacting = null;
+                            this._hasInteraction = null;
+                            this._quests.push(next);
+                        }
+                        else {
+                            this._im = !this._im;
+                        }
+                    }
+                    else if (this._hasInteraction !== null)
+                        this._interacting = this._hasInteraction;
                     break;
                 case "KeyD":
                     this._movingRight = true;
@@ -170,6 +189,21 @@ export class Player extends Entity {
                     : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
         })();
         this._weapon?.Update(dt, new Vector2(this._x + this._width / 2, this._y + this._height * (this._sit ? 0.25 : 0.75)), this._angle);
+        if (this._interacting === null) {
+            this._hasInteraction = null;
+            Scene.Current.GetByTag(Tag.NPC).forEach((npc) => {
+                const distance = (this._x +
+                    this._width / 2 -
+                    (npc.GetPosition().X + npc.GetSize().X / 2)) **
+                    2 +
+                    (this._y +
+                        this._height / 2 -
+                        (npc.GetPosition().Y + npc.GetSize().Y / 2)) **
+                        2;
+                if (distance < 20000)
+                    this._hasInteraction = npc;
+            });
+        }
         if (this._LMBPressed)
             this.Shoot();
     }
@@ -215,6 +249,29 @@ export class Player extends Entity {
                         2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
             }
         }
+        if (this._hasInteraction) {
+            Canvas.SetFillColor(new Color(70, 70, 70));
+            Canvas.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
+            Canvas.SetFillColor(Color.White);
+            Canvas.DrawTextEx(1500 / 2 - 200 / 2 + 5, 750 - 70, "Поговорить с Моршу   [E]", 16);
+        }
+        if (this._interacting !== null) {
+            Canvas.SetFillColor(new Color(70, 70, 70));
+            Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
+            Canvas.SetFillColor(Color.White);
+            Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._im ? "Я" : "Моршу", 24);
+            Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, this._interacting.Talk(), 16);
+            Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]", 16);
+        }
+        this._quests.forEach((quest) => {
+            Canvas.SetStroke(Color.Yellow, 5);
+            Canvas.SetFillColor(quest.Tasks[0].IsCompleted() ? Color.Yellow : Color.Transparent);
+            Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 350, 20, 20, Math.PI / 4, -10, 0);
+            Canvas.SetFillColor(Color.White);
+            Canvas.DrawTextEx(50, 350, quest.Tasks[0].IsCompleted()
+                ? "Возвращайтесь к Моршу"
+                : quest.Tasks[0].toString(), 24);
+        });
         // POSTPROCCES
         if (this._needDrawRedVegnitte > 0) {
             this._needDrawRedVegnitte--;
@@ -238,6 +295,9 @@ export class Player extends Entity {
         // Canvas.DrawTextEx(400,500,"PLAY",32);
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
+    }
+    OnKilled(type) {
+        this._quests.forEach((x) => x.OnKilled(type));
     }
     GetPosition() {
         return new Vector2(this._x, this._y);

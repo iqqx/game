@@ -35,6 +35,7 @@ export class Color {
 	public static readonly White = new Color(255, 255, 255, 255);
 	public static readonly Black = new Color(0, 0, 0, 255);
 	public static readonly Red = new Color(255, 0, 0, 255);
+	public static readonly Yellow = new Color(255, 255, 0, 255);
 	public static readonly Transparent = new Color(0, 0, 0, 0);
 
 	constructor(r: number, g: number, b: number, a = 255) {
@@ -142,6 +143,10 @@ export class GameObject {
 
 	public GetPosition() {
 		return new Vector2(this._x, this._y);
+	}
+
+	public GetSize() {
+		return new Vector2(this._width, this._height);
 	}
 
 	public Update(dt: number) {}

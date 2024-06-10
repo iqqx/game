@@ -1,4 +1,4 @@
-import { Tag } from "../../Enums.js";
+import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Vector2 } from "../../Utilites.js";
@@ -36,8 +36,8 @@ export class Human extends Enemy {
 	private _angle = 0;
 	private _shootCooldown = 0;
 
-	constructor(x: number, y: number) {
-		super(100, 200, 1, 100);
+	constructor(x: number, y: number, type: EnemyType) {
+		super(100, 200, 1, 100, type);
 
 		this._x = x;
 		this._y = y;
@@ -53,7 +53,6 @@ export class Human extends Enemy {
 	override Update(dt: number): void {
 		super.Update(dt);
 		if (!this.IsSpotPlayer()) return;
-
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
@@ -164,6 +163,8 @@ export class Human extends Enemy {
 
 		if (this._health <= 0) {
 			this.Destroy();
+
+			Scene.Current.Player.OnKilled(this._type);
 
 			const s = Human._deathSound.cloneNode() as HTMLAudioElement;
 			s.volume = 0.25;

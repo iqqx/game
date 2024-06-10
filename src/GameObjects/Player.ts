@@ -1,4 +1,4 @@
-import { Tag } from "../Enums.js";
+import { EnemyType, Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
 import {
@@ -12,6 +12,9 @@ import { Entity } from "./Entity.js";
 import { AK } from "../Assets/Weapons/AK.js";
 import { M4A1 } from "../Assets/Weapons/M4A1.js";
 import { Weapon } from "../Weapon.js";
+import { Character } from "./QuestGivers/Character.js";
+import { KillTask, Quest } from "../Quest.js";
+import { Morshu } from "./QuestGivers/Morshu.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
@@ -21,7 +24,6 @@ export class Player extends Entity {
 	private _angle = 1;
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
-	private _weapon: Weapon | undefined = undefined;
 	private _selectedSlot: 0 | 1 | 2 | 3 | 4 | 5 = 0;
 	private _inventory: [
 		Weapon?,
@@ -31,6 +33,11 @@ export class Player extends Entity {
 		GameObject?,
 		GameObject?
 	] = [new AK(), new M4A1()];
+	private _weapon: Weapon | undefined = this._inventory[0];
+	private _hasInteraction: Character | null = null;
+	private _interacting: Character | null = null;
+	private _im = true;
+	private _quests: Quest[] = [];
 
 	private static readonly _speed = 5;
 	private static readonly _animationFrameDuration = 125;
@@ -134,6 +141,22 @@ export class Player extends Entity {
 				case "KeyS":
 					this.TryDown();
 					break;
+				case "KeyE":
+					if (this._interacting !== null) {
+						const next = this._interacting.Continue();
+
+						if (next !== true) {
+							this._interacting = null;
+							this._hasInteraction = null;
+
+							this._quests.push(next);
+						} else {
+							this._im = !this._im;
+						}
+					} else if (this._hasInteraction !== null)
+						this._interacting = this._hasInteraction;
+
+					break;
 				case "KeyD":
 					this._movingRight = true;
 					break;
@@ -234,6 +257,24 @@ export class Player extends Entity {
 			),
 			this._angle
 		);
+
+		if (this._interacting === null) {
+			this._hasInteraction = null;
+
+			Scene.Current.GetByTag(Tag.NPC).forEach((npc) => {
+				const distance =
+					(this._x +
+						this._width / 2 -
+						(npc.GetPosition().X + npc.GetSize().X / 2)) **
+						2 +
+					(this._y +
+						this._height / 2 -
+						(npc.GetPosition().Y + npc.GetSize().Y / 2)) **
+						2;
+
+				if (distance < 20000) this._hasInteraction = npc as Character;
+			});
+		}
 
 		if (this._LMBPressed) this.Shoot();
 	}
@@ -369,6 +410,68 @@ export class Player extends Entity {
 			}
 		}
 
+		if (this._hasInteraction) {
+			Canvas.SetFillColor(new Color(70, 70, 70));
+			Canvas.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
+			Canvas.SetFillColor(Color.White);
+			Canvas.DrawTextEx(
+				1500 / 2 - 200 / 2 + 5,
+				750 - 70,
+				"Поговорить с Моршу   [E]",
+				16
+			);
+		}
+
+		if (this._interacting !== null) {
+			Canvas.SetFillColor(new Color(70, 70, 70));
+			Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
+			Canvas.SetFillColor(Color.White);
+			Canvas.DrawTextEx(
+				1500 / 2 - 500 / 2 + 30,
+				750 - 150 - 20,
+				this._im ? "Я" : "Моршу",
+				24
+			);
+			Canvas.DrawTextEx(
+				1500 / 2 - 500 / 2 + 5,
+				750 - 150 + 10,
+				this._interacting.Talk(),
+				16
+			);
+			Canvas.DrawTextEx(
+				1500 / 2 - 500 / 2 + 5,
+				750 - 60,
+				"Продолжить   [E]",
+				16
+			);
+		}
+
+		this._quests.forEach((quest) => {
+			Canvas.SetStroke(Color.Yellow, 5);
+			Canvas.SetFillColor(
+				quest.Tasks[0].IsCompleted() ? Color.Yellow : Color.Transparent
+			);
+			Canvas.DrawRectangleWithAngleAndStroke(
+				20,
+				750 - 350,
+				20,
+				20,
+				Math.PI / 4,
+				-10,
+				0
+			);
+
+			Canvas.SetFillColor(Color.White);
+			Canvas.DrawTextEx(
+				50,
+				350,
+				quest.Tasks[0].IsCompleted()
+					? "Возвращайтесь к Моршу"
+					: quest.Tasks[0].toString(),
+				24
+			);
+		});
+
 		// POSTPROCCES
 		if (this._needDrawRedVegnitte > 0) {
 			this._needDrawRedVegnitte--;
@@ -402,6 +505,10 @@ export class Player extends Entity {
 			this._yTarget - 1,
 			2
 		);
+	}
+
+	public OnKilled(type: EnemyType) {
+		this._quests.forEach((x) => x.OnKilled(type));
 	}
 
 	public GetPosition() {

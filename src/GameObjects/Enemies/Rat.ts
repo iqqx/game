@@ -1,7 +1,8 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import {  Rectangle } from "../../Utilites.js";
+import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
+import { EnemyType } from "../../Enums.js";
 
 export class Rat extends Enemy {
 	public static readonly Damage = 10;
@@ -21,7 +22,7 @@ export class Rat extends Enemy {
 	private _attackCooldown = 0;
 
 	constructor(x: number, y: number) {
-		super(50, 25, 2, 5);
+		super(50, 25, 2, 5, EnemyType.Rat);
 
 		this._x = x;
 		this._y = y;
@@ -57,12 +58,22 @@ export class Rat extends Enemy {
 		if (this._direction === 1) {
 			Canvas.DrawImage(
 				Rat._frames.Idle,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height)
+				new Rectangle(
+					this._x - Scene.Current.GetLevelPosition(),
+					this._y,
+					this._width,
+					this._height
+				)
 			);
 		} else {
 			Canvas.DrawImageFlipped(
 				Rat._frames.Idle,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height)
+				new Rectangle(
+					this._x - Scene.Current.GetLevelPosition(),
+					this._y,
+					this._width,
+					this._height
+				)
 			);
 		}
 	}

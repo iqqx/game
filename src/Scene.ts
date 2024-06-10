@@ -9,8 +9,6 @@ import {
 	Line,
 	GetIntersectPoint,
 	Lerp,
-	Color,
-	Rectangle,
 } from "./Utilites.js";
 
 export class Scene {
@@ -24,8 +22,8 @@ export class Scene {
 	private _levelPosition = 0;
 	public Time = 0;
 
-	constructor(player: Player, Length: number, background: HTMLImageElement) {
-		this.Length = Length;
+	constructor(player: Player, background: HTMLImageElement) {
+		this.Length = background.naturalWidth;
 		this.Player = player;
 		this._background = background;
 
@@ -33,9 +31,9 @@ export class Scene {
 
 		this._gameObjects = [
 			player,
-			new Wall(0, 750, Length, 100),
-			new Wall(Length, 0, 100, 1000),
-			new Wall(0, -100, Length, 100),
+			new Wall(0, 750, this.Length, 100),
+			new Wall(this.Length, 0, 100, 1000),
+			new Wall(0, -100, this.Length, 100),
 			new Wall(-100, 0, 100, 1000),
 		];
 	}
@@ -167,6 +165,10 @@ export class Scene {
 
 	public RenderOverlay() {
 		this.Player.RenderOverlay();
+	}
+
+	public GetByTag(tag: Tag) {
+		return this._gameObjects.filter((x) => x.Tag == tag);
 	}
 
 	public Instantiate(object: GameObject) {

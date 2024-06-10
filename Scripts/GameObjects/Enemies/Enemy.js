@@ -4,8 +4,10 @@ import { Vector2 } from "../../Utilites.js";
 import { Entity } from "../Entity.js";
 import { Player } from "../Player.js";
 export class Enemy extends Entity {
-    constructor(width, height, speed, maxHealth) {
+    _type;
+    constructor(width, height, speed, maxHealth, type) {
         super(width, height, speed, maxHealth);
+        this._type = type;
         this.Tag = Tag.Enemy;
     }
     IsSpotPlayer() {
