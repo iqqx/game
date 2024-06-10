@@ -228,8 +228,6 @@ export class Player extends Entity {
         }
         Canvas.SetFillColor(new Color(255, 0, 0));
         Canvas.DrawCircle(1000 / 2 + (this._active - 1) * 50, 750 - 45, 20);
-        Canvas.SetFillColor(Color.White);
-        Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
         // POSTPROCCES
         if (this._needDrawRedVegnitte > 0) {
             this._needDrawRedVegnitte--;
@@ -250,6 +248,16 @@ export class Player extends Entity {
         Canvas.SetFillColor(Color.Red);
         if (this._health <= 0)
             Canvas.DrawRectangle(0, 0, 1500, 750);
+        Canvas.SetFillColor(new Color(50, 50, 50));
+        Canvas.DrawRectangle(0, 0, 1500, 750);
+        Canvas.SetFillColor(Color.Black);
+        Canvas.DrawTextEx(500, 200, "STALKER 2", 162);
+        Canvas.SetFillColor(new Color(25, 25, 25));
+        Canvas.DrawRectangle(300, 200, 300, 150);
+        Canvas.SetFillColor(Color.White);
+        Canvas.DrawTextEx(400, 500, "PLAY", 32);
+        Canvas.SetFillColor(Color.White);
+        Canvas.DrawCircle(this._xTarget - 1 - Scene.Current.GetLevelPosition(), this._yTarget - 1, 2);
     }
     GetPosition() {
         return new Vector2(this._x, this._y);

@@ -95,6 +95,11 @@ export var Canvas;
         ctx.fillText(text, x, y);
     }
     Canvas.DrawText = DrawText;
+    function DrawTextEx(x, y, text, size) {
+        ctx.font = size + 'px arial';
+        ctx.fillText(text, x, y);
+    }
+    Canvas.DrawTextEx = DrawTextEx;
     function DrawVignette(color) {
         var outerRadius = 1500 * 0.6;
         var innerRadius = 1500 * 0.5;

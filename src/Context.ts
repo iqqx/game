@@ -177,6 +177,11 @@ export namespace Canvas {
 		ctx.fillText(text, x, y);
 	}
 
+	export function DrawTextEx(x: number, y: number, text: string, size: number) {
+		ctx.font =  size + 'px arial'
+		ctx.fillText(text, x, y);
+	}
+
 	export function DrawVignette(color: Color) {
 		var outerRadius = 1500 * 0.6;
 		var innerRadius = 1500 * 0.5;
