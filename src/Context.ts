@@ -129,7 +129,7 @@ export namespace Canvas {
 		xPivot: number,
 		yPivot: number
 	) {
-		var prev = ctx.getTransform();
+		ctx.save();
 
 		ctx.resetTransform();
 		// ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
@@ -144,7 +144,7 @@ export namespace Canvas {
 			rect.Height
 		);
 
-		ctx.setTransform(prev);
+		ctx.restore();
 	}
 
 	export function DrawImageWithAngleVFlipped(
@@ -177,8 +177,13 @@ export namespace Canvas {
 		ctx.fillText(text, x, y);
 	}
 
-	export function DrawTextEx(x: number, y: number, text: string, size: number) {
-		ctx.font =  size + 'px arial'
+	export function DrawTextEx(
+		x: number,
+		y: number,
+		text: string,
+		size: number
+	) {
+		ctx.font = size + "px arial";
 		ctx.fillText(text, x, y);
 	}
 

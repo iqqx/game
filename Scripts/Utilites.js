@@ -152,6 +152,7 @@ export class Vector2 {
     X;
     Y;
     static Down = new Vector2(0, -1);
+    static Zero = new Vector2(0, 0);
     constructor(X, Y) {
         this.X = X;
         this.Y = Y;
@@ -163,4 +164,19 @@ export class Vector2 {
     GetLength() {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
+}
+export function LoadImage(source) {
+    const img = new Image();
+    img.src = source;
+    return img;
+}
+export function LoadSound(source) {
+    const s = new Audio(source);
+    return {
+        Play: (volume) => {
+            const c = s.cloneNode();
+            c.volume = volume;
+            c.play();
+        },
+    };
 }

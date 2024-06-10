@@ -95,20 +95,20 @@ export class Human extends Enemy {
 				)
 			);
 
-			Canvas.DrawImageWithAngle(
-				Player._AK,
-				new Rectangle(
-					this._x +
-						this._width / 2 -
-						Scene.Current.GetLevelPosition(),
-					this._y + this._height * 0.75,
-					52 * 3.125,
-					16 * 3.125
-				),
-				this._angle,
-				-12,
-				16 * 2.4
-			);
+			// Canvas.DrawImageWithAngle(
+			// 	Player._AK,
+			// 	new Rectangle(
+			// 		this._x +
+			// 			this._width / 2 -
+			// 			Scene.Current.GetLevelPosition(),
+			// 		this._y + this._height * 0.75,
+			// 		52 * 3.125,
+			// 		16 * 3.125
+			// 	),
+			// 	this._angle,
+			// 	-12,
+			// 	16 * 2.4
+			// );
 		} else {
 			Canvas.DrawImageFlipped(
 				Human._frames.Walk[0],
@@ -120,20 +120,20 @@ export class Human extends Enemy {
 				)
 			);
 
-			Canvas.DrawImageWithAngleVFlipped(
-				Player._AK,
-				new Rectangle(
-					this._x +
-						this._width / 2 -
-						Scene.Current.GetLevelPosition(),
-					this._y + this._height * 0.75,
-					52 * 3.125,
-					16 * 3.125
-				),
-				-this._angle,
-				-12,
-				16 * 2.4
-			);
+			// Canvas.DrawImageWithAngleVFlipped(
+			// 	Player._AK,
+			// 	new Rectangle(
+			// 		this._x +
+			// 			this._width / 2 -
+			// 			Scene.Current.GetLevelPosition(),
+			// 		this._y + this._height * 0.75,
+			// 		52 * 3.125,
+			// 		16 * 3.125
+			// 	),
+			// 	-this._angle,
+			// 	-12,
+			// 	16 * 2.4
+			// );
 		}
 	}
 

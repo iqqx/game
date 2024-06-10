@@ -71,13 +71,13 @@ export var Canvas;
     }
     Canvas.DrawRectangleWithAngle = DrawRectangleWithAngle;
     function DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
-        var prev = ctx.getTransform();
+        ctx.save();
         ctx.resetTransform();
         // ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
         ctx.translate(rect.X, ctx.canvas.height - rect.Y);
         ctx.rotate(angle);
         ctx.drawImage(image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
-        ctx.setTransform(prev);
+        ctx.restore();
     }
     Canvas.DrawImageWithAngle = DrawImageWithAngle;
     function DrawImageWithAngleVFlipped(image, rect, angle, xPivot, yPivot) {
@@ -96,7 +96,7 @@ export var Canvas;
     }
     Canvas.DrawText = DrawText;
     function DrawTextEx(x, y, text, size) {
-        ctx.font = size + 'px arial';
+        ctx.font = size + "px arial";
         ctx.fillText(text, x, y);
     }
     Canvas.DrawTextEx = DrawTextEx;

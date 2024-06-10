@@ -19,6 +19,7 @@ export class Scene {
 	public readonly Player: Player;
 	public readonly Length: number;
 	private _levelPosition = 0;
+	public Time = 0;
 
 	constructor(player: Player, Length: number) {
 		this.Length = Length;
@@ -135,7 +136,7 @@ export class Scene {
 			  );
 	}
 
-	public Update(dt: number) {
+	public Update(time: number) {
 		const plrPos = this.Player.GetPosition();
 		const plrSize = this.Player.GetCollider();
 
@@ -146,10 +147,12 @@ export class Scene {
 				0,
 				this.Length - 1500
 			),
-			dt / 500
+			0.2
 		);
 
-		for (const object of this._gameObjects) object.Update(dt);
+		for (const object of this._gameObjects) object.Update(time - this.Time);
+
+		this.Time = time;
 	}
 
 	public Render() {

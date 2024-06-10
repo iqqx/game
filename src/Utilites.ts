@@ -210,6 +210,7 @@ export class Vector2 {
 	public readonly Y: number;
 
 	public static readonly Down = new Vector2(0, -1);
+	public static readonly Zero = new Vector2(0, 0);
 
 	constructor(X: number, Y: number) {
 		this.X = X;
@@ -230,4 +231,28 @@ export class Vector2 {
 export type RaycastHit = {
 	instance: GameObject;
 	position: Vector2;
+};
+
+export function LoadImage(source: string) {
+	const img = new Image();
+
+	img.src = source;
+
+	return img;
+}
+
+export function LoadSound(source: string): Sound {
+	const s = new Audio(source);
+
+	return {
+		Play: (volume: number) => {
+			const c = s.cloneNode() as HTMLAudioElement;
+			c.volume = volume;
+			c.play();
+		},
+	};
+}
+
+export type Sound = {
+	Play: (volume: number) => void;
 };

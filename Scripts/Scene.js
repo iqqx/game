@@ -7,6 +7,7 @@ export class Scene {
     Player;
     Length;
     _levelPosition = 0;
+    Time = 0;
     constructor(player, Length) {
         this.Length = Length;
         this.Player = player;
@@ -73,12 +74,13 @@ export class Scene {
                 ((b.position.X - from.X) ** 2 +
                     (b.position.Y - from.Y) ** 2));
     }
-    Update(dt) {
+    Update(time) {
         const plrPos = this.Player.GetPosition();
         const plrSize = this.Player.GetCollider();
-        this._levelPosition = Lerp(this._levelPosition, Math.clamp(plrPos.X - 1500 / 2 - plrSize.Width / 2, 0, this.Length - 1500), dt / 500);
+        this._levelPosition = Lerp(this._levelPosition, Math.clamp(plrPos.X - 1500 / 2 - plrSize.Width / 2, 0, this.Length - 1500), 0.2);
         for (const object of this._gameObjects)
-            object.Update(dt);
+            object.Update(time - this.Time);
+        this.Time = time;
     }
     Render() {
         Canvas.SetFillColor(new Color(50, 50, 50));

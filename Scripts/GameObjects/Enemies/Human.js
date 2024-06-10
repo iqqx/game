@@ -62,15 +62,37 @@ export class Human extends Enemy {
     Render() {
         if (this._direction === 1) {
             Canvas.DrawImage(Human._frames.Walk[0], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
-            Canvas.DrawImageWithAngle(Player._AK, new Rectangle(this._x +
-                this._width / 2 -
-                Scene.Current.GetLevelPosition(), this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), this._angle, -12, 16 * 2.4);
+            // Canvas.DrawImageWithAngle(
+            // 	Player._AK,
+            // 	new Rectangle(
+            // 		this._x +
+            // 			this._width / 2 -
+            // 			Scene.Current.GetLevelPosition(),
+            // 		this._y + this._height * 0.75,
+            // 		52 * 3.125,
+            // 		16 * 3.125
+            // 	),
+            // 	this._angle,
+            // 	-12,
+            // 	16 * 2.4
+            // );
         }
         else {
             Canvas.DrawImageFlipped(Human._frames.Walk[0], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
-            Canvas.DrawImageWithAngleVFlipped(Player._AK, new Rectangle(this._x +
-                this._width / 2 -
-                Scene.Current.GetLevelPosition(), this._y + this._height * 0.75, 52 * 3.125, 16 * 3.125), -this._angle, -12, 16 * 2.4);
+            // Canvas.DrawImageWithAngleVFlipped(
+            // 	Player._AK,
+            // 	new Rectangle(
+            // 		this._x +
+            // 			this._width / 2 -
+            // 			Scene.Current.GetLevelPosition(),
+            // 		this._y + this._height * 0.75,
+            // 		52 * 3.125,
+            // 		16 * 3.125
+            // 	),
+            // 	-this._angle,
+            // 	-12,
+            // 	16 * 2.4
+            // );
         }
     }
     IsSpotPlayer() {

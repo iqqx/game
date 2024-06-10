@@ -1,14 +1,16 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Rectangle, Color, Vector2 } from "../Utilites.js";
+import { Rectangle, Color, Vector2, LoadImage } from "../Utilites.js";
 import { Bullet } from "./Bullet.js";
 import { Enemy } from "./Enemies/Enemy.js";
 import { Entity } from "./Entity.js";
+import { AK } from "../Assets/Weapons/AK.js";
+import { M4A1 } from "../Assets/Weapons/M4A1.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
-	private _timeToNextShoot = 0;
+	// private _timeToNextShoot = 0;
 	private _frameIndex = 0;
 	private _LMBPressed = false;
 	private _sit = false;
@@ -16,7 +18,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 
-	private _active = 1;
+	private _active: 0 | 1 | 2 | 3 | 4 | 5 = 0;
 
 	private static readonly _speed = 5;
 	private static readonly _firerate = 200;
@@ -46,23 +48,13 @@ export class Player extends Entity {
 
 			return images;
 		})(),
+		Hands: {
+			Left: LoadImage("Images/Player_left_hand.png"),
+			Right: LoadImage("Images/Player_right_hand.png"),
+		},
 	};
-	// private static readonly _sounds = {
 
-	// }
-
-	public static readonly _AK = (function () {
-		const img = new Image();
-
-		img.src = "Images/Gun.png";
-
-		return img;
-	})();
-	public static readonly _FIRE = (function () {
-		const img = new Image();
-		img.src = "Images/fire.png";
-		return img;
-	})();
+	private _weapon = new M4A1();
 
 	constructor() {
 		super(50, 200, Player._speed, 100);
@@ -110,31 +102,24 @@ export class Player extends Entity {
 					this.Jump();
 					break;
 				case "Digit1":
-					this._active = 1;
+					this._weapon = new AK();
+					this._active = 0;
 					break;
 				case "Digit2":
-					this._active = 2;
+					this._active = 1;
+					this._weapon = new M4A1();
 					break;
 				case "Digit3":
-					this._active = 3;
+					this._active = 2;
 					break;
 				case "Digit4":
-					this._active = 4;
+					this._active = 3;
 					break;
 				case "Digit5":
-					this._active = 5;
+					this._active = 4;
 					break;
 				case "Digit6":
-					this._active = 6;
-					break;
-				case "Digit7":
-					this._active = 7;
-					break;
-				case "Digit8":
-					this._active = 8;
-					break;
-				case "Digit9":
-					this._active = 9;
+					this._active = 5;
 					break;
 				case "KeyA":
 					this._movingLeft = true;
@@ -234,12 +219,35 @@ export class Player extends Entity {
 					: Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 		})();
 
-		if (this._LMBPressed && this._timeToNextShoot <= 0) this.Shoot();
-		else this._timeToNextShoot -= dt;
+		this._weapon.Update(
+			dt,
+			new Vector2(
+				this._x + this._width / 2,
+				this._y + this._height * (this._sit ? 0.25 : 0.75)
+			),
+			this._angle
+		);
+
+		if (this._LMBPressed) this.Shoot();
 	}
 
 	public override Render() {
 		if (this._direction == 1) {
+			Canvas.DrawImageWithAngle(
+				Player._frames.Hands.Left,
+				new Rectangle(
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
+					this._y + this._height * (this._sit ? 0.25 : 0.75),
+					52 * 3.125,
+					16 * 3.125
+				),
+				this._angle,
+				-12,
+				16 * 2.4
+			);
+
 			Canvas.DrawImage(
 				(this._sit ? Player._frames.Sit : Player._frames.Walk)[
 					this._frameIndex
@@ -252,8 +260,10 @@ export class Player extends Entity {
 				)
 			);
 
+			this._weapon.Render();
+
 			Canvas.DrawImageWithAngle(
-				Player._AK,
+				Player._frames.Hands.Right,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -267,6 +277,21 @@ export class Player extends Entity {
 				16 * 2.4
 			);
 		} else {
+			Canvas.DrawImageWithAngleVFlipped(
+				Player._frames.Hands.Right,
+				new Rectangle(
+					this._x +
+						this._width / 2 -
+						Scene.Current.GetLevelPosition(),
+					this._y + this._height * (this._sit ? 0.25 : 0.75),
+					52 * 3.125,
+					16 * 3.125
+				),
+				this._angle,
+				-12,
+				16 * 2.4
+			);
+
 			Canvas.DrawImageFlipped(
 				(this._sit ? Player._frames.Sit : Player._frames.Walk)[
 					this._frameIndex
@@ -279,8 +304,10 @@ export class Player extends Entity {
 				)
 			);
 
+			this._weapon.Render();
+
 			Canvas.DrawImageWithAngleVFlipped(
-				Player._AK,
+				Player._frames.Hands.Left,
 				new Rectangle(
 					this._x +
 						this._width / 2 -
@@ -331,8 +358,6 @@ export class Player extends Entity {
 		Canvas.SetFillColor(new Color(255, 0, 0));
 		Canvas.DrawCircle(1000 / 2 + (this._active - 1) * 50, 750 - 45, 20);
 
-
-
 		// POSTPROCCES
 		if (this._needDrawRedVegnitte > 0) {
 			this._needDrawRedVegnitte--;
@@ -342,40 +367,40 @@ export class Player extends Entity {
 			this._needDrawAntiVegnitte--;
 			Canvas.DrawVignette(new Color(100, 100, 100));
 			Canvas.SetFillColor(Color.Red);
-			Canvas.DrawImageWithAngle(
-				Player._FIRE,
-				new Rectangle(
-					this._x +
-						this._width / 2 +
-						Math.cos(this._angle) * 150 -
-						Scene.Current.GetLevelPosition(),
-					this._y +
-						this._height * (this._sit ? 0.25 : 0.75) -
-						Math.sin(this._angle) * 150,
-					150,
-					100
-				),
-				this._angle,
-				0,
-				50
-			);
+			// Canvas.DrawImageWithAngle(
+			// 	Player._FIRE,
+			// 	new Rectangle(
+			// 		this._x +
+			// 			this._width / 2 +
+			// 			Math.cos(this._angle) * 150 -
+			// 			Scene.Current.GetLevelPosition(),
+			// 		this._y +
+			// 			this._height * (this._sit ? 0.25 : 0.75) -
+			// 			Math.sin(this._angle) * 150,
+			// 		150,
+			// 		100
+			// 	),
+			// 	this._angle,
+			// 	0,
+			// 	50
+			// );
 		}
 		Canvas.DrawVignette(
 			new Color(255 - 255 * (this._health / this._maxHealth), 0, 0)
 		);
 
-		Canvas.SetFillColor(Color.Red);
-		if (this._health <= 0) Canvas.DrawRectangle(0, 0, 1500, 750);
+		// Canvas.SetFillColor(Color.Red);
+		// if (this._health <= 0) Canvas.DrawRectangle(0, 0, 1500, 750);
 
-		Canvas.SetFillColor(new Color(50, 50, 50));
-		Canvas.DrawRectangle(0, 0, 1500, 750);
-		Canvas.SetFillColor(Color.Black);
-		Canvas.DrawTextEx(500,200,"STALKER 2",162)
+		// Canvas.SetFillColor(new Color(50, 50, 50));
+		// Canvas.DrawRectangle(0, 0, 1500, 750);
+		// Canvas.SetFillColor(Color.Black);
+		// Canvas.DrawTextEx(500,200,"STALKER 2",162)
 
-		Canvas.SetFillColor(new Color(25,25,25));
-		Canvas.DrawRectangle(300,200,300,150);
-		Canvas.SetFillColor(Color.White);
-		Canvas.DrawTextEx(400,500,"PLAY",32);
+		// Canvas.SetFillColor(new Color(25,25,25));
+		// Canvas.DrawRectangle(300,200,300,150);
+		// Canvas.SetFillColor(Color.White);
+		// Canvas.DrawTextEx(400,500,"PLAY",32);
 
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawCircle(
@@ -383,7 +408,6 @@ export class Player extends Entity {
 			this._yTarget - 1,
 			2
 		);
-		
 	}
 
 	public GetPosition() {
@@ -408,58 +432,57 @@ export class Player extends Entity {
 	}
 
 	private Shoot() {
-		const dir = this._angle + (Math.random() - 0.5) / 5
+		if (!this._weapon.TryShoot()) return;
 
-		const hits = Scene.Current.Raycast(
-			new Vector2(
-				this._x + this._width / 2,
-				this._y + this._height * (this._sit ? 0.25 : 0.75)
-			),
-			new Vector2(Math.cos(dir), -Math.sin(dir)),
-			1500,
-			Tag.Enemy | Tag.Wall
-		);
+		// const dir = this._angle - (Math.random() - 0.5) * 0.01;
 
-		// Canvas.SetFillColor
-		// x + cos (angle) * 30
+		// const hits = Scene.Current.Raycast(
+		// 	new Vector2(
+		// 		this._x + this._width / 2,
+		// 		this._y + this._height * (this._sit ? 0.25 : 0.75)
+		// 	),
+		// 	new Vector2(Math.cos(dir), -Math.sin(dir)),
+		// 	1500,
+		// 	Tag.Enemy | Tag.Wall
+		// );
 
-		const hit = hits === undefined ? undefined : hits[0];
+		// const hit = hits === undefined ? undefined : hits[0];
 
-		if (hit !== undefined && hit.instance instanceof Enemy)
-			hit.instance.TakeDamage(50);
+		// if (hit !== undefined && hit.instance instanceof Enemy)
+		// 	hit.instance.TakeDamage(50);
 
-		Scene.Current.Instantiate(
-			new Bullet(
-				this._x + this._width / 2 + Math.cos(this._angle) * 200,
-				this._y +
-					this._height * (this._sit ? 0.25 : 0.75) -
-					Math.sin(this._angle) * 200,
-				hit === undefined
-					? 2000
-					: Math.min(
-							Math.sqrt(
-								(this._x +
-									this._width / 2 -
-									hit.position.X +
-									Math.cos(this._angle) * 200) **
-									2 +
-									(this._y +
-										this._height *
-											(this._sit ? 0.25 : 0.75) -
-										hit.position.Y -
-										Math.sin(this._angle) * 200) **
-										2
-							),
-							2000
-					  ),
-					  dir
-			)
-		);
+		// Scene.Current.Instantiate(
+		// 	new Bullet(
+		// 		this._x + this._width / 2 + Math.cos(dir) * 200,
+		// 		this._y +
+		// 			this._height * (this._sit ? 0.25 : 0.75) -
+		// 			Math.sin(dir) * 200,
+		// 		hit === undefined
+		// 			? 2000
+		// 			: Math.min(
+		// 					Math.sqrt(
+		// 						(this._x +
+		// 							this._width / 2 -
+		// 							hit.position.X +
+		// 							Math.cos(dir) * 200) **
+		// 							2 +
+		// 							(this._y +
+		// 								this._height *
+		// 									(this._sit ? 0.25 : 0.75) -
+		// 								hit.position.Y -
+		// 								Math.sin(dir) * 200) **
+		// 								2
+		// 					),
+		// 					2000
+		// 			  ),
+		// 		dir
+		// 	)
+		// );
 
 		// sounds.Shoot.Play(0.5);
 
-		this._needDrawAntiVegnitte = 5;
-		this._timeToNextShoot = Player._firerate;
+		this._needDrawAntiVegnitte = 2;
+		// this._timeToNextShoot = Player._firerate;
 	}
 
 	override TakeDamage(damage: number): void {
