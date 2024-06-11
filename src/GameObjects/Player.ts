@@ -56,6 +56,7 @@ export class Player extends Entity {
 			switch (e.code) {
 				case "KeyC":
 					if (this._sit === false) {
+						this._frameIndex = 0;
 						this._sit = true;
 
 						this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
@@ -64,8 +65,9 @@ export class Player extends Entity {
 					} else {
 						this._collider = new Rectangle(0, 0, this._width, this._height);
 
-						if (Scene.Current.IsCollide(this, Tag.Wall) !== false) this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
-						else {
+						if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
+							this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
+						} else {
 							this._sit = false;
 							this._speed = Player._speed;
 						}
@@ -94,10 +96,10 @@ export class Player extends Entity {
 					this.SelectSlot(5);
 					break;
 				case "KeyA":
-					this._movingDirection = -1;
+					this._movingLeft = true;
 					break;
 				case "KeyD":
-					this._movingDirection = 1;
+					this._movingRight = true;
 					break;
 				case "KeyS":
 					this.TryDown();
@@ -125,10 +127,10 @@ export class Player extends Entity {
 		addEventListener("keyup", (e) => {
 			switch (e.code) {
 				case "KeyA":
-					this._movingDirection = 0;
+					this._movingLeft = false;
 					break;
 				case "KeyD":
-					this._movingDirection = 0;
+					this._movingRight = false;
 					break;
 				default:
 					break;
@@ -229,7 +231,7 @@ export class Player extends Entity {
 					(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
 				);
 
-			if (this._movingDirection !== 0)
+			if (this._movingLeft || this._movingRight)
 				Canvas.DrawImage(
 					(this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex],
 					new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() + 15, this._y, this._width + 50, this._height)
@@ -312,7 +314,7 @@ export class Player extends Entity {
 					Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
 				);
 
-			if (this._movingDirection !== 0)
+			if (this._movingLeft || this._movingRight)
 				Canvas.DrawImageFlipped(
 					(this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex],
 					new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() - 15, this._y, this._width + 50, this._height)
@@ -388,13 +390,13 @@ export class Player extends Entity {
 			Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]", 16);
 		}
 
-		this._quests.forEach((quest) => {
+		this._quests.forEach((quest, i) => {
 			Canvas.SetStroke(Color.Yellow, 5);
 			Canvas.SetFillColor(quest.Tasks[0].IsCompleted() ? Color.Yellow : Color.Transparent);
-			Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 350, 20, 20, Math.PI / 4, -10, 0);
+			Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 350 - i * 50, 20, 20, Math.PI / 4, -10, 0);
 
 			Canvas.SetFillColor(Color.White);
-			Canvas.DrawTextEx(50, 350, quest.Tasks[0].IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString(), 24);
+			Canvas.DrawTextEx(50, 350 + i * 50, quest.Tasks[0].IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString(), 24);
 		});
 
 		// POSTPROCCES

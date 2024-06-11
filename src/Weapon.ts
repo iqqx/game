@@ -2,6 +2,7 @@ import { Canvas } from "./Context.js";
 import { Tag } from "./Enums.js";
 import { Bullet } from "./GameObjects/Bullet.js";
 import { Enemy } from "./GameObjects/Enemies/Enemy.js";
+import { Entity } from "./GameObjects/Entity.js";
 import { Fireball } from "./GameObjects/Fireball.js";
 import { Scene } from "./Scene.js";
 import { Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
@@ -96,14 +97,14 @@ export abstract class Weapon {
 		}
 	}
 
-	public TryShoot(): boolean {
+	public TryShoot(tag = Tag.Enemy): boolean {
 		if (this._secondsToCooldown > 0) return false;
 		this._secondsToCooldown = this._fireCooldown;
 
 		const dir = this._angle - (Math.random() - 0.5) * this._spread;
-		const hit = Scene.Current.Raycast(this._position, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, Tag.Enemy | Tag.Wall)[0];
+		const hit = Scene.Current.Raycast(this._position, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
 
-		if (hit !== undefined && hit.instance instanceof Enemy) hit.instance.TakeDamage(this._damage);
+		if (hit !== undefined && hit.instance instanceof Entity) hit.instance.TakeDamage(this._damage);
 
 		Scene.Current.Instantiate(
 			new Bullet(

@@ -1,7 +1,7 @@
 import { Canvas } from "./Context.js";
 import { Tag } from "./Enums.js";
 import { Bullet } from "./GameObjects/Bullet.js";
-import { Enemy } from "./GameObjects/Enemies/Enemy.js";
+import { Entity } from "./GameObjects/Entity.js";
 import { Fireball } from "./GameObjects/Fireball.js";
 import { Scene } from "./Scene.js";
 import { Rectangle, Vector2 } from "./Utilites.js";
@@ -51,13 +51,13 @@ export class Weapon {
                 Canvas.DrawImageWithAngle(this._image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this._image.Scale, 30 * this._image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
         }
     }
-    TryShoot() {
+    TryShoot(tag = Tag.Enemy) {
         if (this._secondsToCooldown > 0)
             return false;
         this._secondsToCooldown = this._fireCooldown;
         const dir = this._angle - (Math.random() - 0.5) * this._spread;
-        const hit = Scene.Current.Raycast(this._position, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, Tag.Enemy | Tag.Wall)[0];
-        if (hit !== undefined && hit.instance instanceof Enemy)
+        const hit = Scene.Current.Raycast(this._position, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
+        if (hit !== undefined && hit.instance instanceof Entity)
             hit.instance.TakeDamage(this._damage);
         Scene.Current.Instantiate(new Bullet(this._position.X + Math.cos(dir) * this._width, this._position.Y - Math.sin(dir) * this._width, hit === undefined
             ? 2000

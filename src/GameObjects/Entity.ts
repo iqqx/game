@@ -7,38 +7,30 @@ export class Entity extends GameObject {
 	protected _speed: number;
 	protected _direction: -1 | 1 = 1;
 	protected _health: number;
-	protected _movingDirection: -1|0|1 = 0;
+	protected _movingLeft = false;
+	protected _movingRight = false;
 	protected _verticalAcceleration = 0;
 	protected _grounded = true;
 	protected _jumpForce = 25;
 	protected _xTarget = 0;
 	protected _yTarget = 0;
 
-	constructor(
-		width: number,
-		height: number,
-		speed: number,
-		maxHealth: number
-	) {
+	constructor(width: number, height: number, speed: number, maxHealth: number) {
 		super(width, height);
 
 		this._speed = Math.clamp(speed, 0, Number.MAX_VALUE);
 		this._health = Math.clamp(maxHealth, 1, Number.MAX_VALUE);
 		this._maxHealth = this._health;
 
-		this._collider = new Rectangle(
-			this._x,
-			this._y,
-			this._width,
-			this._height
-		);
+		this._collider = new Rectangle(this._x, this._y, this._width, this._height);
 	}
 
 	public override Update(dt: number) {
 		this.ApplyVForce();
 
-		if (this._movingDirection === -1) this.MoveLeft();
-		else if (this._movingDirection === 1) this.MoveRight();
+		if (this._movingLeft) this.MoveLeft();
+		else if (this._movingRight) this.MoveRight();
+
 		this._direction = this._xTarget > this._x + this._width / 2 ? 1 : -1;
 	}
 
@@ -46,16 +38,14 @@ export class Entity extends GameObject {
 		this._x += this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.position.X != 0)
-			this._x -= collideOffsets.position.X;
+		if (collideOffsets !== false && collideOffsets.position.X != 0) this._x -= collideOffsets.position.X;
 	}
 
 	public MoveLeft() {
 		this._x -= this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.position.X != 0)
-			this._x -= collideOffsets.position.X;
+		if (collideOffsets !== false && collideOffsets.position.X != 0) this._x -= collideOffsets.position.X;
 	}
 
 	public Jump() {
@@ -70,10 +60,7 @@ export class Entity extends GameObject {
 
 		if (this._verticalAcceleration <= 0) {
 			// падаем
-			const offsets = Scene.Current.GetCollide(
-				this,
-				Tag.Wall | Tag.Platform
-			);
+			const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
 
 			if (offsets !== false && offsets.position.Y !== 0) {
 				{
