@@ -46,9 +46,7 @@ export class Color {
 	}
 
 	toString() {
-		return this.A === 255
-			? `rgb(${this.R}, ${this.G}, ${this.B})`
-			: `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
+		return this.A === 255 ? `rgb(${this.R}, ${this.G}, ${this.B})` : `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
 	}
 }
 
@@ -80,13 +78,8 @@ export class Line {
 	}
 }
 
-export function GetIntersectPoint(
-	line0: Line,
-	line1: Line
-): Vector2 | undefined {
-	const denominator =
-		(line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) -
-		(line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
+export function GetIntersectPoint(line0: Line, line1: Line): Vector2 | undefined {
+	const denominator = (line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) - (line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
 
 	if (denominator == 0) {
 		//   if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0 && (x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)
@@ -96,30 +89,17 @@ export function GetIntersectPoint(
 
 		return undefined;
 	} else {
-		const numerator_a =
-			(line1.X1 - line0.X1) * (line1.Y1 - line1.Y0) -
-			(line1.X1 - line1.X0) * (line1.Y1 - line0.Y1);
-		const numerator_b =
-			(line0.X0 - line0.X1) * (line1.Y1 - line0.Y1) -
-			(line1.X1 - line0.X1) * (line0.Y0 - line0.Y1);
+		const numerator_a = (line1.X1 - line0.X1) * (line1.Y1 - line1.Y0) - (line1.X1 - line1.X0) * (line1.Y1 - line0.Y1);
+		const numerator_b = (line0.X0 - line0.X1) * (line1.Y1 - line0.Y1) - (line1.X1 - line0.X1) * (line0.Y0 - line0.Y1);
 		const Ua = numerator_a / denominator;
 		const Ub = numerator_b / denominator;
 
-		if (Ua >= 0 && Ua <= 1 && Ub >= 0 && Ub <= 1)
-			return new Vector2(
-				line1.X0 * Ub + line1.X1 * (1 - Ub),
-				line1.Y0 * Ub + line1.Y1 * (1 - Ub)
-			);
+		if (Ua >= 0 && Ua <= 1 && Ub >= 0 && Ub <= 1) return new Vector2(line1.X0 * Ub + line1.X1 * (1 - Ub), line1.Y0 * Ub + line1.Y1 * (1 - Ub));
 		else return undefined;
 	}
 }
 
-export function SquareMagnitude(
-	x0: number,
-	y0: number,
-	x1: number,
-	y1: number
-): number {
+export function SquareMagnitude(x0: number, y0: number, x1: number, y1: number): number {
 	return (x0 - x1) ** 2 + (y0 - y1) ** 2;
 }
 
@@ -171,10 +151,7 @@ export class GameObject {
 		);
 	}
 
-	public static GetCollide(
-		who: GameObject,
-		other: GameObject
-	): RaycastHit | false {
+	public static GetCollide(who: GameObject, other: GameObject): RaycastHit | false {
 		if (this.IsCollide(who, other) === false) return false;
 
 		const xstart = who._x + who._width - other._x;
@@ -184,23 +161,11 @@ export class GameObject {
 		let xOffset = 0;
 		let yOffset = 0;
 
-		if (
-			xstart > 0 &&
-			xend > 0 &&
-			xend < other._width &&
-			xstart < other._width
-		)
-			xOffset = 0;
+		if (xstart > 0 && xend > 0 && xend < other._width && xstart < other._width) xOffset = 0;
 		else if (xstart > 0 && (xend < 0 || xstart < xend)) xOffset = xstart;
 		else if (xend > 0) xOffset = -xend;
 
-		if (
-			ystart > 0 &&
-			yend > 0 &&
-			yend < other._height &&
-			ystart < other._height
-		)
-			yOffset = 0;
+		if (ystart > 0 && yend > 0 && yend < other._height && ystart < other._height) yOffset = 0;
 		else if (ystart > 0 && (yend < 0 || ystart < yend)) yOffset = ystart;
 		else if (yend > 0) yOffset = -yend;
 
@@ -238,12 +203,22 @@ export type RaycastHit = {
 	position: Vector2;
 };
 
-export function LoadImage(source: string) {
+export type Sprite = {
+	readonly Image: HTMLImageElement;
+	readonly BoundingBox: Rectangle;
+	readonly Scale: number;
+};
+
+export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {
 	const img = new Image();
 
 	img.src = source;
 
-	return img;
+	return {
+		Image: img,
+		BoundingBox: boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight),
+		Scale: scale ?? 1,
+	};
 }
 
 export function LoadSound(source: string): Sound {

@@ -1,6 +1,6 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Rectangle } from "../../Utilites.js";
+import { LoadImage, Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
 export class Rat extends Enemy {
@@ -9,11 +9,7 @@ export class Rat extends Enemy {
     static _attackSound = new Audio("Sounds/rat_attack.mp3");
     static _deathSound = new Audio("Sounds/rat_death.mp3");
     static _frames = {
-        Idle: (function () {
-            const img = new Image();
-            img.src = `Images/Rat.png`;
-            return img;
-        })(),
+        Idle: LoadImage(`Images/Rat.png`),
     };
     _attackCooldown = 0;
     constructor(x, y) {

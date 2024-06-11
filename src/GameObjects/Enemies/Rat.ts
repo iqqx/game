@@ -1,6 +1,6 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Rectangle } from "../../Utilites.js";
+import { LoadImage, Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
 
@@ -10,13 +10,7 @@ export class Rat extends Enemy {
 	private static readonly _attackSound = new Audio("Sounds/rat_attack.mp3");
 	private static readonly _deathSound = new Audio("Sounds/rat_death.mp3");
 	private static readonly _frames = {
-		Idle: (function () {
-			const img = new Image();
-
-			img.src = `Images/Rat.png`;
-
-			return img;
-		})(),
+		Idle: LoadImage(`Images/Rat.png`),
 	};
 
 	private _attackCooldown = 0;

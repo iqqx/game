@@ -1,16 +1,13 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle } from "../Utilites.js";
-import { Platform } from "./Platform.js";
-import { Wall } from "./Wall.js";
 
 export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
 	protected _speed: number;
 	protected _direction: -1 | 1 = 1;
 	protected _health: number;
-	protected _movingLeft = false;
-	protected _movingRight = false;
+	protected _movingDirection: -1|0|1 = 0;
 	protected _verticalAcceleration = 0;
 	protected _grounded = true;
 	protected _jumpForce = 25;
@@ -40,8 +37,8 @@ export class Entity extends GameObject {
 	public override Update(dt: number) {
 		this.ApplyVForce();
 
-		if (this._movingLeft) this.MoveLeft();
-		else if (this._movingRight) this.MoveRight();
+		if (this._movingDirection === -1) this.MoveLeft();
+		else if (this._movingDirection === 1) this.MoveRight();
 		this._direction = this._xTarget > this._x + this._width / 2 ? 1 : -1;
 	}
 

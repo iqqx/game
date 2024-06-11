@@ -22,9 +22,7 @@ export var Canvas;
     }
     Canvas.Translate = Translate;
     function DrawRectangle(x, y, width, height) {
-        ctx.fillRect(
-        // x - levelPosition,
-        x, ctx.canvas.height - y - height, width, height);
+        ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
     }
     Canvas.DrawRectangle = DrawRectangle;
     function DrawRectangleEx(rect) {
@@ -41,14 +39,12 @@ export var Canvas;
     }
     Canvas.DrawRectangleRounded = DrawRectangleRounded;
     function DrawImage(image, rect) {
-        ctx.drawImage(image, 
-        // rect.X - levelPosition,
-        rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
     }
     Canvas.DrawImage = DrawImage;
     function DrawBackground(image) {
-        const ratio = image.naturalHeight / ctx.canvas.height;
-        ctx.drawImage(image, Scene.Current.GetLevelPosition() * ratio, 0, GetSize().X * ratio, image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
+        const ratio = image.Image.naturalHeight / ctx.canvas.height;
+        ctx.drawImage(image.Image, Scene.Current.GetLevelPosition() * ratio, 0, GetSize().X * ratio, image.Image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
     }
     Canvas.DrawBackground = DrawBackground;
     function GetSize() {
@@ -56,8 +52,7 @@ export var Canvas;
     }
     Canvas.GetSize = GetSize;
     function DrawImageProportional(image, rect) {
-        const ratio = Math.min(rect.Height, rect.Width) /
-            Math.max(image.naturalWidth, image.naturalHeight);
+        const ratio = Math.min(rect.Height, rect.Width) / Math.max(image.naturalWidth, image.naturalHeight);
         const newHeight = image.naturalHeight * ratio;
         const offsetY = (rect.Height - newHeight) / 2;
         ctx.drawImage(image, rect.X, ctx.canvas.height - rect.Height - rect.Y + offsetY, rect.Width * ratio, newHeight);
@@ -66,7 +61,7 @@ export var Canvas;
     function DrawImageFlipped(image, rect) {
         ctx.save();
         ctx.scale(-1, 1);
-        ctx.drawImage(image, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
         ctx.restore();
     }
     Canvas.DrawImageFlipped = DrawImageFlipped;
@@ -99,13 +94,16 @@ export var Canvas;
         ctx.setTransform(prev);
     }
     Canvas.DrawRectangleWithAngleAndStroke = DrawRectangleWithAngleAndStroke;
+    function DrawImageEx() { }
+    Canvas.DrawImageEx = DrawImageEx;
     function DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
         ctx.save();
         ctx.resetTransform();
         // ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
         ctx.translate(rect.X, ctx.canvas.height - rect.Y);
         ctx.rotate(angle);
-        ctx.drawImage(image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+        // ctx.drawImage(image.Image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
         ctx.restore();
     }
     Canvas.DrawImageWithAngle = DrawImageWithAngle;
@@ -113,10 +111,9 @@ export var Canvas;
         ctx.save();
         ctx.resetTransform();
         ctx.translate(rect.X, ctx.canvas.height - rect.Y);
-        // ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
         ctx.rotate(angle);
         ctx.scale(1, -1);
-        ctx.drawImage(image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
         ctx.restore();
     }
     Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;

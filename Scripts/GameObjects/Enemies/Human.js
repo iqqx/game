@@ -1,7 +1,7 @@
 import { Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Rectangle, Vector2 } from "../../Utilites.js";
+import { LoadImage, Rectangle, Vector2 } from "../../Utilites.js";
 import { Bullet } from "../Bullet.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
@@ -10,20 +10,14 @@ export class Human extends Enemy {
     static _frames = {
         Walk: (function () {
             const images = [];
-            for (let i = 0; i < 4; i++) {
-                const img = new Image();
-                img.src = `Images/Player_${i}.png`;
-                images.push(img);
-            }
+            for (let i = 0; i < 4; i++)
+                images.push(LoadImage(`Images/Player_${i}.png`));
             return images;
         })(),
         Sit: (function () {
             const images = [];
-            for (let i = 0; i < 4; i++) {
-                const img = new Image();
-                img.src = `Images/Player_sit_${i}.png`;
-                images.push(img);
-            }
+            for (let i = 0; i < 4; i++)
+                images.push(LoadImage(`Images/Player_sit_${i}.png`));
             return images;
         })(),
     };

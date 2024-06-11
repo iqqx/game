@@ -6,8 +6,7 @@ export class Entity extends GameObject {
     _speed;
     _direction = 1;
     _health;
-    _movingLeft = false;
-    _movingRight = false;
+    _movingDirection = 0;
     _verticalAcceleration = 0;
     _grounded = true;
     _jumpForce = 25;
@@ -22,9 +21,9 @@ export class Entity extends GameObject {
     }
     Update(dt) {
         this.ApplyVForce();
-        if (this._movingLeft)
+        if (this._movingDirection === -1)
             this.MoveLeft();
-        else if (this._movingRight)
+        else if (this._movingDirection === 1)
             this.MoveRight();
         this._direction = this._xTarget > this._x + this._width / 2 ? 1 : -1;
     }

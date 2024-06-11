@@ -1,6 +1,6 @@
 import { Wall } from "./GameObjects/Wall.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Line, GetIntersectPoint, Lerp, } from "./Utilites.js";
+import { GameObject, Line, GetIntersectPoint, Lerp } from "./Utilites.js";
 export class Scene {
     static Current;
     _gameObjects;
@@ -10,19 +10,11 @@ export class Scene {
     _levelPosition = 0;
     Time = 0;
     constructor(player, background) {
-        this.Length =
-            background.naturalWidth *
-                (Canvas.GetSize().Y / background.naturalHeight);
+        this.Length = background.Image.naturalWidth * (Canvas.GetSize().Y / background.Image.naturalHeight);
         this.Player = player;
         this._background = background;
         Scene.Current = this;
-        this._gameObjects = [
-            player,
-            new Wall(0, 750, this.Length, 100),
-            new Wall(this.Length, 0, 100, 1000),
-            new Wall(0, -100, this.Length, 100),
-            new Wall(-100, 0, 100, 1000),
-        ];
+        this._gameObjects = [player, new Wall(0, 750, this.Length, 100), new Wall(this.Length, 0, 100, 1000), new Wall(0, -100, this.Length, 100), new Wall(-100, 0, 100, 1000)];
     }
     GetLevelPosition() {
         return this._levelPosition;
@@ -71,12 +63,7 @@ export class Scene {
             if (left !== undefined)
                 result.push({ position: left, instance: object });
         }
-        return result.length === 0
-            ? undefined
-            : result.sort((a, b) => (a.position.X - from.X) ** 2 +
-                (a.position.Y - from.Y) ** 2 -
-                ((b.position.X - from.X) ** 2 +
-                    (b.position.Y - from.Y) ** 2));
+        return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
     }
     Update(time) {
         const plrPos = this.Player.GetPosition();
@@ -98,7 +85,7 @@ export class Scene {
         return this._gameObjects.filter((x) => x.Tag == tag);
     }
     Instantiate(object) {
-        const index = this._gameObjects.push(object) - 1;
-        object.OnDestroy = () => this._gameObjects.splice(index);
+        this._gameObjects.push(object);
+        object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
     }
 }

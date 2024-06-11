@@ -28,9 +28,7 @@ export class Color {
         this.A = a;
     }
     toString() {
-        return this.A === 255
-            ? `rgb(${this.R}, ${this.G}, ${this.B})`
-            : `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
+        return this.A === 255 ? `rgb(${this.R}, ${this.G}, ${this.B})` : `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
     }
 }
 export class Rectangle {
@@ -58,8 +56,7 @@ export class Line {
     }
 }
 export function GetIntersectPoint(line0, line1) {
-    const denominator = (line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) -
-        (line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
+    const denominator = (line1.Y1 - line1.Y0) * (line0.X0 - line0.X1) - (line1.X1 - line1.X0) * (line0.Y0 - line0.Y1);
     if (denominator == 0) {
         //   if ((x1 * y2 - x2 * y1) * (x4 - x3) - (x3 * y4 - x4 * y3) * (x2 - x1) == 0 && (x1 * y2 - x2 * y1) * (y4 - y3) - (x3 * y4 - x4 * y3) * (y2 - y1) == 0)
         //     System.Console.WriteLine("Отрезки пересекаются (совпадают)");
@@ -68,10 +65,8 @@ export function GetIntersectPoint(line0, line1) {
         return undefined;
     }
     else {
-        const numerator_a = (line1.X1 - line0.X1) * (line1.Y1 - line1.Y0) -
-            (line1.X1 - line1.X0) * (line1.Y1 - line0.Y1);
-        const numerator_b = (line0.X0 - line0.X1) * (line1.Y1 - line0.Y1) -
-            (line1.X1 - line0.X1) * (line0.Y0 - line0.Y1);
+        const numerator_a = (line1.X1 - line0.X1) * (line1.Y1 - line1.Y0) - (line1.X1 - line1.X0) * (line1.Y1 - line0.Y1);
+        const numerator_b = (line0.X0 - line0.X1) * (line1.Y1 - line0.Y1) - (line1.X1 - line0.X1) * (line0.Y0 - line0.Y1);
         const Ua = numerator_a / denominator;
         const Ub = numerator_b / denominator;
         if (Ua >= 0 && Ua <= 1 && Ub >= 0 && Ub <= 1)
@@ -129,19 +124,13 @@ export class GameObject {
         const yend = who._y + who._height - other._y;
         let xOffset = 0;
         let yOffset = 0;
-        if (xstart > 0 &&
-            xend > 0 &&
-            xend < other._width &&
-            xstart < other._width)
+        if (xstart > 0 && xend > 0 && xend < other._width && xstart < other._width)
             xOffset = 0;
         else if (xstart > 0 && (xend < 0 || xstart < xend))
             xOffset = xstart;
         else if (xend > 0)
             xOffset = -xend;
-        if (ystart > 0 &&
-            yend > 0 &&
-            yend < other._height &&
-            ystart < other._height)
+        if (ystart > 0 && yend > 0 && yend < other._height && ystart < other._height)
             yOffset = 0;
         else if (ystart > 0 && (yend < 0 || ystart < yend))
             yOffset = ystart;
@@ -169,10 +158,14 @@ export class Vector2 {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
 }
-export function LoadImage(source) {
+export function LoadImage(source, boundingBox, scale) {
     const img = new Image();
     img.src = source;
-    return img;
+    return {
+        Image: img,
+        BoundingBox: boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight),
+        Scale: scale ?? 1,
+    };
 }
 export function LoadSound(source) {
     const s = new Audio(source);
