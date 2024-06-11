@@ -66,7 +66,6 @@ export namespace Canvas {
 	export function DrawImage(image: CanvasImageSource, rect: Rectangle) {
 		ctx.drawImage(
 			image,
-			// rect.X - levelPosition,
 			rect.X,
 			ctx.canvas.height - rect.Height - rect.Y,
 			rect.Width,
@@ -75,11 +74,13 @@ export namespace Canvas {
 	}
 
 	export function DrawBackground(image: HTMLImageElement) {
+		const ratio = image.naturalHeight / ctx.canvas.height;
+
 		ctx.drawImage(
 			image,
-			Scene.Current.GetLevelPosition(),
+			Scene.Current.GetLevelPosition() * ratio,
 			0,
-			GetSize().X,
+			GetSize().X * ratio,
 			image.naturalHeight,
 			0,
 			0,

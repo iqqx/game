@@ -174,7 +174,7 @@ export class GameObject {
 	public static GetCollide(
 		who: GameObject,
 		other: GameObject
-	): Vector2 | false {
+	): RaycastHit | false {
 		if (this.IsCollide(who, other) === false) return false;
 
 		const xstart = who._x + who._width - other._x;
@@ -206,7 +206,7 @@ export class GameObject {
 
 		if (xOffset == 0 && yOffset == 0) return false;
 
-		return new Vector2(xOffset, yOffset);
+		return { instance: other, position: new Vector2(xOffset, yOffset) };
 	}
 }
 

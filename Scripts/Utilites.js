@@ -149,7 +149,7 @@ export class GameObject {
             yOffset = -yend;
         if (xOffset == 0 && yOffset == 0)
             return false;
-        return new Vector2(xOffset, yOffset);
+        return { instance: other, position: new Vector2(xOffset, yOffset) };
     }
 }
 export class Vector2 {

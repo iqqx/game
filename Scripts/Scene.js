@@ -10,7 +10,9 @@ export class Scene {
     _levelPosition = 0;
     Time = 0;
     constructor(player, background) {
-        this.Length = background.naturalWidth;
+        this.Length =
+            background.naturalWidth *
+                (Canvas.GetSize().Y / background.naturalHeight);
         this.Player = player;
         this._background = background;
         Scene.Current = this;

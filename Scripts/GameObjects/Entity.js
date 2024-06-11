@@ -31,14 +31,14 @@ export class Entity extends GameObject {
     MoveRight() {
         this._x += this._speed;
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-        if (collideOffsets !== false && collideOffsets.X != 0)
-            this._x -= collideOffsets.X;
+        if (collideOffsets !== false && collideOffsets.position.X != 0)
+            this._x -= collideOffsets.position.X;
     }
     MoveLeft() {
         this._x -= this._speed;
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-        if (collideOffsets !== false && collideOffsets.X != 0)
-            this._x -= collideOffsets.X;
+        if (collideOffsets !== false && collideOffsets.position.X != 0)
+            this._x -= collideOffsets.position.X;
     }
     Jump() {
         if (!this._grounded)
@@ -51,10 +51,12 @@ export class Entity extends GameObject {
         if (this._verticalAcceleration <= 0) {
             // падаем
             const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
-            if (offsets !== false && offsets.Y !== 0) {
-                this._verticalAcceleration = 0;
-                this._grounded = true;
-                this._y += offsets.Y;
+            if (offsets !== false && offsets.position.Y !== 0) {
+                {
+                    this._verticalAcceleration = 0;
+                    this._grounded = true;
+                    this._y += offsets.position.Y;
+                }
             }
         }
         else if (this._verticalAcceleration > 0) {
@@ -63,7 +65,7 @@ export class Entity extends GameObject {
             const offsets = Scene.Current.GetCollide(this, Tag.Wall);
             if (offsets !== false) {
                 this._verticalAcceleration = 0;
-                this._y += offsets.Y;
+                this._y += offsets.position.Y;
                 return;
             }
         }

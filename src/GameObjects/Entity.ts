@@ -1,6 +1,8 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle } from "../Utilites.js";
+import { Platform } from "./Platform.js";
+import { Wall } from "./Wall.js";
 
 export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
@@ -47,16 +49,16 @@ export class Entity extends GameObject {
 		this._x += this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.X != 0)
-			this._x -= collideOffsets.X;
+		if (collideOffsets !== false && collideOffsets.position.X != 0)
+			this._x -= collideOffsets.position.X;
 	}
 
 	public MoveLeft() {
 		this._x -= this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.X != 0)
-			this._x -= collideOffsets.X;
+		if (collideOffsets !== false && collideOffsets.position.X != 0)
+			this._x -= collideOffsets.position.X;
 	}
 
 	public Jump() {
@@ -76,11 +78,13 @@ export class Entity extends GameObject {
 				Tag.Wall | Tag.Platform
 			);
 
-			if (offsets !== false && offsets.Y !== 0) {
-				this._verticalAcceleration = 0;
+			if (offsets !== false && offsets.position.Y !== 0) {
+				{
+					this._verticalAcceleration = 0;
 
-				this._grounded = true;
-				this._y += offsets.Y;
+					this._grounded = true;
+					this._y += offsets.position.Y;
+				}
 			}
 		} else if (this._verticalAcceleration > 0) {
 			// взлетаем
@@ -90,7 +94,7 @@ export class Entity extends GameObject {
 			if (offsets !== false) {
 				this._verticalAcceleration = 0;
 
-				this._y += offsets.Y;
+				this._y += offsets.position.Y;
 
 				return;
 			}

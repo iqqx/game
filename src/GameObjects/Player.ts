@@ -557,10 +557,14 @@ export class Player extends Entity {
 				Tag.Platform
 			)
 		);
+
+		this._y--;
+
+		console.log(Scene.Current.GetCollide(this, Tag.Platform | Tag.Wall));
 	}
 
 	private Shoot() {
-		if (this._weapon !== undefined && this._weapon.TryShoot())
+		if (this._weapon !== null && this._weapon.TryShoot())
 			this._needDrawAntiVegnitte = 2;
 	}
 

@@ -23,7 +23,9 @@ export class Scene {
 	public Time = 0;
 
 	constructor(player: Player, background: HTMLImageElement) {
-		this.Length = background.naturalWidth;
+		this.Length =
+			background.naturalWidth *
+			(Canvas.GetSize().Y / background.naturalHeight);
 		this.Player = player;
 		this._background = background;
 

@@ -335,9 +335,11 @@ export class Player extends Entity {
     }
     TryDown() {
         console.log(Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(0, -1), 1, Tag.Platform));
+        this._y--;
+        console.log(Scene.Current.GetCollide(this, Tag.Platform | Tag.Wall));
     }
     Shoot() {
-        if (this._weapon !== undefined && this._weapon.TryShoot())
+        if (this._weapon !== null && this._weapon.TryShoot())
             this._needDrawAntiVegnitte = 2;
     }
     TakeDamage(damage) {

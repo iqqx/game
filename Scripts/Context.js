@@ -47,7 +47,8 @@ export var Canvas;
     }
     Canvas.DrawImage = DrawImage;
     function DrawBackground(image) {
-        ctx.drawImage(image, Scene.Current.GetLevelPosition(), 0, GetSize().X, image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
+        const ratio = image.naturalHeight / ctx.canvas.height;
+        ctx.drawImage(image, Scene.Current.GetLevelPosition() * ratio, 0, GetSize().X * ratio, image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
     }
     Canvas.DrawBackground = DrawBackground;
     function GetSize() {
