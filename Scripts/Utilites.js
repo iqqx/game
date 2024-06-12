@@ -161,10 +161,13 @@ export class Vector2 {
 export function LoadImage(source, boundingBox, scale) {
     const img = new Image();
     img.src = source;
+    boundingBox ??= new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
+    scale ??= 1;
     return {
         Image: img,
-        BoundingBox: boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight),
-        Scale: scale ?? 1,
+        BoundingBox: boundingBox,
+        Scale: scale,
+        ScaledSize: new Vector2(boundingBox.Width * scale, boundingBox.Height * scale),
     };
 }
 export function LoadSound(source) {

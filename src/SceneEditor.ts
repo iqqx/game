@@ -28,7 +28,6 @@ export class SceneEditor {
 			switch (e.code) {
 				case "Digit1":
 					this._selectedType = 0;
-					1231233;
 					break;
 				case "Digit2":
 					this._selectedType = 1;

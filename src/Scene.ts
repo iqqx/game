@@ -84,7 +84,7 @@ export class Scene {
 		const plrPos = this.Player.GetPosition();
 		const plrTargetRaw = this.Player.GetTarget();
 
-		this._levelPosition = Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1);
+		this._levelPosition = Math.round(Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
 
 		for (const object of this._gameObjects) object.Update(time - this.Time);
 
@@ -99,7 +99,7 @@ export class Scene {
 
 	public RenderOverlay() {
 		Canvas.SwitchLayer(false);
-		
+
 		Canvas.EraseRectangle(0, 0, 1500, 750);
 		this.Player.RenderOverlay();
 		Canvas.SwitchLayer(true);

@@ -11,4 +11,5 @@ export enum Tag {
 	Platform = 2 ** 2,
 	Wall = 2 ** 3,
 	NPC = 2 ** 4,
+	Pickable = 2 ** 5,
 }

@@ -57,7 +57,17 @@ export namespace Canvas {
 	}
 
 	export function DrawImage(image: Sprite, rect: Rectangle) {
-		ctx.drawImage(image.Image, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+		ctx.drawImage(
+			image.Image,
+			image.BoundingBox.X,
+			image.BoundingBox.Y,
+			image.BoundingBox.Width,
+			image.BoundingBox.Height,
+			rect.X,
+			ctx.canvas.height - rect.Height - rect.Y,
+			rect.Width,
+			rect.Height
+		);
 	}
 
 	export function DrawBackground(image: Sprite, offset: number) {
@@ -83,7 +93,17 @@ export namespace Canvas {
 	export function DrawImageFlipped(image: Sprite, rect: Rectangle) {
 		ctx.save();
 		ctx.scale(-1, 1);
-		ctx.drawImage(image.Image, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+		ctx.drawImage(
+			image.Image,
+			image.BoundingBox.X,
+			image.BoundingBox.Y,
+			image.BoundingBox.Width,
+			image.BoundingBox.Height,
+			-rect.X - rect.Width,
+			ctx.canvas.height - rect.Height - rect.Y,
+			rect.Width,
+			rect.Height
+		);
 		ctx.restore();
 	}
 

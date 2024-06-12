@@ -56,7 +56,7 @@ export var Canvas;
     }
     Canvas.DrawRectangleRounded = DrawRectangleRounded;
     function DrawImage(image, rect) {
-        ctx.drawImage(image.Image, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
     }
     Canvas.DrawImage = DrawImage;
     function DrawBackground(image, offset) {
@@ -78,7 +78,7 @@ export var Canvas;
     function DrawImageFlipped(image, rect) {
         ctx.save();
         ctx.scale(-1, 1);
-        ctx.drawImage(image.Image, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
         ctx.restore();
     }
     Canvas.DrawImageFlipped = DrawImageFlipped;

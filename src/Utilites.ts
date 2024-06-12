@@ -206,18 +206,22 @@ export type RaycastHit = {
 export type Sprite = {
 	readonly Image: HTMLImageElement;
 	readonly BoundingBox: Rectangle;
+	readonly ScaledSize: Vector2;
 	readonly Scale: number;
 };
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {
 	const img = new Image();
-
 	img.src = source;
+
+	boundingBox ??= new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
+	scale ??= 1;
 
 	return {
 		Image: img,
-		BoundingBox: boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight),
-		Scale: scale ?? 1,
+		BoundingBox: boundingBox,
+		Scale: scale,
+		ScaledSize: new Vector2(boundingBox.Width * scale, boundingBox.Height * scale),
 	};
 }
 

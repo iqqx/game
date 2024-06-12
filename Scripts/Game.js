@@ -1,3 +1,5 @@
+import { Backpack } from "./Assets/Items/Backpack.js";
+import { AK } from "./Assets/Weapons/AK.js";
 import { Platform } from "./GameObjects/Platform.js";
 import { Player } from "./GameObjects/Player.js";
 import { Wall } from "./GameObjects/Wall.js";
@@ -16,6 +18,9 @@ scene.Instantiate(new Wall(71, 618, 11380, 73));
 scene.Instantiate(new Wall(3795, 164, 303, 77));
 scene.Instantiate(new Wall(3863, 230, 200, 46));
 scene.Instantiate(new Wall(4088, 163, 44, 45));
+scene.Instantiate(new Wall(500, 250, 50, 45));
+scene.Instantiate(new Wall(550, 255, 50, 45));
+scene.Instantiate(new Backpack(900, 170, [new AK()]));
 function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
     scene.Update(timeStamp);
