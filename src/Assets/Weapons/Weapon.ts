@@ -1,29 +1,35 @@
-import { Canvas } from "./Context.js";
-import { Tag } from "./Enums.js";
-import { Bullet } from "./GameObjects/Bullet.js";
-import { Enemy } from "./GameObjects/Enemies/Enemy.js";
-import { Entity } from "./GameObjects/Entity.js";
-import { Fireball } from "./GameObjects/Fireball.js";
-import { Scene } from "./Scene.js";
-import { Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
+import { Canvas } from "../../Context.js";
+import { Tag } from "../../Enums.js";
+import { Bullet } from "../../GameObjects/Bullet.js";
+import { Entity } from "../../GameObjects/Entity.js";
+import { Fireball } from "../../GameObjects/Fireball.js";
+import { Scene } from "../../Scene.js";
+import { Sprite, Sound, Vector2, Rectangle, LoadSound } from "../../Utilites.js";
+import { Item } from "../Items/Item.js";
 
-export abstract class Weapon {
-	public readonly Sprites: { readonly Icon: Sprite; readonly Image: Sprite };
-	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound };
+export abstract class Weapon implements Item {
+	public readonly Icon: Sprite;
+	public readonly Sprites: { readonly Image: Sprite };
+	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound };
 
 	private readonly _fireCooldown: number;
+	private readonly _reloadTime: number;
 	private readonly _damage: number;
 	private readonly _spread: number;
 	private readonly _width: number;
 	private readonly _handOffset: Vector2;
 	private readonly _muzzleOffset: Vector2;
+	private readonly _maxAmmoClip: number = 30;
+	private readonly _automatic;
 
 	public readonly Heavy: boolean;
-	public readonly Automatic: boolean;
+	public Automatic: boolean;
 
+	private _loadedAmmo: number = 5;
 	private _position: Vector2 = Vector2.Zero;
 	private _angle: number = 0;
 	private _secondsToCooldown: number = 0;
+	private _secondsToReload: number = 0;
 
 	constructor(
 		images: { Icon: Sprite; Image: Sprite },
@@ -33,17 +39,23 @@ export abstract class Weapon {
 		spread: number,
 		heavy: boolean,
 		auto: boolean,
+		reloadTime: number,
+		clip: number,
 		handOffset: Vector2,
 		muzzleOffset: Vector2
 	) {
+		this.Icon = images.Icon;
 		this.Sprites = images;
-		this._sounds = sounds;
+		this._sounds = { ...sounds, EmptyFire: LoadSound("Sounds/shoot_without.mp3"), Reload: LoadSound("Sounds/reload.wav") };
 		this._fireCooldown = fireCooldown;
 		this._damage = damage;
 		this._spread = spread;
 		(this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
 
+		this._reloadTime = reloadTime;
+		this._maxAmmoClip = clip;
 		this.Heavy = heavy;
+		this._automatic = auto;
 		this.Automatic = auto;
 
 		this._width = 30 * (this.Sprites.Image.BoundingBox.Width / this.Sprites.Image.BoundingBox.Height);
@@ -52,6 +64,15 @@ export abstract class Weapon {
 	public Update(dt: number, position: Vector2, angle: number) {
 		this._position = position;
 		this._angle = angle;
+
+		if (this._secondsToReload > 0) {
+			this._secondsToReload -= dt;
+
+			if (this._secondsToReload <= 0) {
+				this._loadedAmmo = this._maxAmmoClip + 1;
+				this.Automatic = this._automatic;
+			}
+		}
 
 		this._secondsToCooldown -= dt;
 	}
@@ -94,8 +115,25 @@ export abstract class Weapon {
 		}
 	}
 
+	public Reload() {
+		if (this._secondsToReload > 0) return;
+
+		this._secondsToReload = this._reloadTime;
+		this._sounds.Reload.Play(0.5);
+	}
+
 	public TryShoot(tag = Tag.Enemy): boolean {
-		if (this._secondsToCooldown > 0) return false;
+		if (this._secondsToCooldown > 0 || this._secondsToReload > 0) {
+			return false;
+		} else if (this._loadedAmmo <= 0) {
+			this._sounds.EmptyFire.Play(0.5);
+
+			this._secondsToCooldown = this._fireCooldown;
+			this.Automatic = false;
+
+			return false;
+		}
+
 		this._secondsToCooldown = this._fireCooldown;
 
 		const muzzlePosition = new Vector2(
@@ -120,6 +158,7 @@ export abstract class Weapon {
 
 		Scene.Current.Instantiate(new Fireball(muzzlePosition.X, muzzlePosition.Y, this._angle, this._muzzleOffset));
 
+		this._loadedAmmo--;
 		this._sounds.Fire.Play(0.5);
 
 		setTimeout(() => {

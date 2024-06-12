@@ -17,7 +17,7 @@ export class Backpack extends GameObject {
         Canvas.DrawImage(Backpack._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, Backpack._image.ScaledSize.X, Backpack._image.ScaledSize.Y));
     }
     Pickup() {
-        Backpack._sound.Play(.5);
+        Backpack._sound.Play(0.5);
         this.Destroy();
         return this._content;
     }

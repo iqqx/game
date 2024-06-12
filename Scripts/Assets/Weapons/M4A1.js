@@ -1,5 +1,5 @@
 import { LoadImage, LoadSound, Vector2 } from "../../Utilites.js";
-import { Weapon } from "../../Weapon.js";
+import { Weapon } from "./Weapon.js";
 export class M4A1 extends Weapon {
     static _sprites = {
         Icon: LoadImage("Images/M4A1-icon.png"),

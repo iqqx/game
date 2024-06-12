@@ -1,15 +1,14 @@
 import { EnemyType, Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Rectangle, Color, Vector2, LoadImage, GameObject, Sprite } from "../Utilites.js";
+import { Rectangle, Color, Vector2, LoadImage } from "../Utilites.js";
 import { Entity } from "./Entity.js";
-import { AK } from "../Assets/Weapons/AK.js";
-import { M4A1 } from "../Assets/Weapons/M4A1.js";
-import { Weapon } from "../Weapon.js";
 import { Character } from "./QuestGivers/Character.js";
 import { Quest } from "../Quest.js";
 import { Glock } from "../Assets/Weapons/Glock.js";
 import { Backpack } from "../Assets/Items/Backpack.js";
+import { Item } from "../Assets/Items/Item.js";
+import { Weapon } from "../Assets/Weapons/Weapon.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
@@ -20,7 +19,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedSlot: 0 | 1 | 2 | 3 | 4 | 5 | null = null;
-	private _inventory: [Weapon?, Weapon?, GameObject?, GameObject?, GameObject?, GameObject?] = [new Glock()];
+	private _inventory: [Weapon?, Weapon?, Item?, Item?, Item?, Item?] = [new Glock()];
 	private _weapon: Weapon | null = null;
 	private _hasInteraction: Character | null = null;
 	private _interacting: Character | null = null;
@@ -115,6 +114,9 @@ export class Player extends Entity {
 				case "KeyS":
 					this.TryDown();
 					break;
+				case "KeyR":
+					this._weapon?.Reload();
+					break;
 				case "KeyE":
 					if (this._interacting !== null) {
 						const next = this._interacting.Continue();
@@ -141,7 +143,7 @@ export class Player extends Entity {
 									const content = pickup.Pickup();
 
 									this._inventory[1] = content[0];
-									for (let i = 2; i < 4; i++) this._inventory[i + 2] = content[i + 1];
+									for (let i = 0; i < 4; i++) this._inventory[i + 2] = content[i + 1];
 								}
 							}
 						});
@@ -441,7 +443,7 @@ export class Player extends Entity {
 				Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), 750 - 50 - 10, 50, 50));
 
 				if (this._inventory[i] !== undefined)
-					Canvas.DrawImage(this._inventory[i as 0 | 1].Sprites.Icon, new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+					Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
 			}
 		} else {
 			Canvas.DrawRectangle(1500 / 2 - 60 / 2, 750 - 5, 60, -60);
@@ -451,7 +453,7 @@ export class Player extends Entity {
 
 			Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 50 / 2, 750 - 50 - 10, 50, 50));
 
-			if (this._inventory[0] !== undefined) Canvas.DrawImage(this._inventory[0].Sprites.Icon, new Rectangle(1500 / 2 - 50 / 2 + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+			if (this._inventory[0] !== undefined) Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(1500 / 2 - 50 / 2 + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
 		}
 
 		if (this._interacting !== null) {

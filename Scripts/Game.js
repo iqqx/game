@@ -1,4 +1,5 @@
 import { Backpack } from "./Assets/Items/Backpack.js";
+import { Vodka } from "./Assets/Items/Vodka.js";
 import { AK } from "./Assets/Weapons/AK.js";
 import { Platform } from "./GameObjects/Platform.js";
 import { Player } from "./GameObjects/Player.js";
@@ -20,7 +21,7 @@ scene.Instantiate(new Wall(3863, 230, 200, 46));
 scene.Instantiate(new Wall(4088, 163, 44, 45));
 scene.Instantiate(new Wall(500, 250, 50, 45));
 scene.Instantiate(new Wall(550, 255, 50, 45));
-scene.Instantiate(new Backpack(900, 170, [new AK()]));
+scene.Instantiate(new Backpack(900, 170, [new AK(), new Vodka()]));
 function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
     scene.Update(timeStamp);

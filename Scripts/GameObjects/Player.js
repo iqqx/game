@@ -103,6 +103,9 @@ export class Player extends Entity {
                 case "KeyS":
                     this.TryDown();
                     break;
+                case "KeyR":
+                    this._weapon?.Reload();
+                    break;
                 case "KeyE":
                     if (this._interacting !== null) {
                         const next = this._interacting.Continue();
@@ -126,7 +129,7 @@ export class Player extends Entity {
                                     this._hasBackpack = true;
                                     const content = pickup.Pickup();
                                     this._inventory[1] = content[0];
-                                    for (let i = 2; i < 4; i++)
+                                    for (let i = 0; i < 4; i++)
                                         this._inventory[i + 2] = content[i + 1];
                                 }
                             }
@@ -258,7 +261,7 @@ export class Player extends Entity {
                     Canvas.SetStroke(new Color(200, 200, 200), 2);
                 Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), 750 - 50 - 10, 50, 50));
                 if (this._inventory[i] !== undefined)
-                    Canvas.DrawImage(this._inventory[i].Sprites.Icon, new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+                    Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
             }
         }
         else {
@@ -269,7 +272,7 @@ export class Player extends Entity {
                 Canvas.SetStroke(new Color(155, 155, 155), 1);
             Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 50 / 2, 750 - 50 - 10, 50, 50));
             if (this._inventory[0] !== undefined)
-                Canvas.DrawImage(this._inventory[0].Sprites.Icon, new Rectangle(1500 / 2 - 50 / 2 + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+                Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(1500 / 2 - 50 / 2 + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
         }
         if (this._interacting !== null) {
             Canvas.SetFillColor(new Color(70, 70, 70));
