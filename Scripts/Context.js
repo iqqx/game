@@ -1,4 +1,3 @@
-import { Scene } from "./Scene.js";
 import { Vector2 } from "./Utilites.js";
 const ctx = document.getElementById("main-canvas").getContext("2d");
 ctx.imageSmoothingEnabled = false;
@@ -42,9 +41,9 @@ export var Canvas;
         ctx.drawImage(image.Image, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
     }
     Canvas.DrawImage = DrawImage;
-    function DrawBackground(image) {
+    function DrawBackground(image, offset) {
         const ratio = image.Image.naturalHeight / ctx.canvas.height;
-        ctx.drawImage(image.Image, Scene.Current.GetLevelPosition() * ratio, 0, GetSize().X * ratio, image.Image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
+        ctx.drawImage(image.Image, Math.round(offset * ratio), 0, Math.round(ctx.canvas.width * ratio), image.Image.naturalHeight, 0, 0, ctx.canvas.width, ctx.canvas.height);
     }
     Canvas.DrawBackground = DrawBackground;
     function GetSize() {
@@ -67,9 +66,7 @@ export var Canvas;
     Canvas.DrawImageFlipped = DrawImageFlipped;
     function DrawCircle(x, y, radius) {
         ctx.beginPath();
-        ctx.ellipse(
-        // x - levelPosition,
-        x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
         ctx.fill();
     }
     Canvas.DrawCircle = DrawCircle;

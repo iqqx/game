@@ -40,10 +40,12 @@ export class Player extends Entity {
             Right: LoadImage("Images/Player/Arm_right.png", new Rectangle(4, 14, 11, 8), 3),
         },
     };
-    constructor() {
+    constructor(x, y) {
         super(40, 100, Player._speed, 100);
-        this.Direction = -1;
-        this._xTarget = 100;
+        this._x = x;
+        this._y = y;
+        this._xTarget = 800;
+        this._yTarget = y;
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this._width, this._height);
         addEventListener("keydown", (e) => {

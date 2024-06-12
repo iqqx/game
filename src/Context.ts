@@ -1,4 +1,3 @@
-import { Scene } from "./Scene.js";
 import { Color, Rectangle, Sprite, Vector2 } from "./Utilites.js";
 
 const ctx = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
@@ -43,10 +42,10 @@ export namespace Canvas {
 		ctx.drawImage(image.Image, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
 	}
 
-	export function DrawBackground(image: Sprite) {
+	export function DrawBackground(image: Sprite, offset: number) {
 		const ratio = image.Image.naturalHeight / ctx.canvas.height;
 
-		ctx.drawImage(image.Image, Scene.Current.GetLevelPosition() * ratio, 0, GetSize().X * ratio, image.Image.naturalHeight, 0, 0, GetSize().X, GetSize().Y);
+		ctx.drawImage(image.Image, Math.round(offset * ratio), 0, Math.round(ctx.canvas.width * ratio), image.Image.naturalHeight, 0, 0, ctx.canvas.width, ctx.canvas.height);
 	}
 
 	export function GetSize() {
@@ -72,16 +71,7 @@ export namespace Canvas {
 
 	export function DrawCircle(x: number, y: number, radius: number) {
 		ctx.beginPath();
-		ctx.ellipse(
-			// x - levelPosition,
-			x,
-			ctx.canvas.height - radius / 2 - y,
-			radius,
-			radius,
-			0,
-			0,
-			Math.PI * 2
-		);
+		ctx.ellipse(x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
 		ctx.fill();
 	}
 

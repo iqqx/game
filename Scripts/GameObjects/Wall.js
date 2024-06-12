@@ -1,7 +1,5 @@
-import { Rectangle, Color, GameObject } from "../Utilites.js";
+import { Rectangle, GameObject } from "../Utilites.js";
 import { Tag } from "../Enums.js";
-import { Canvas } from "../Context.js";
-import { Scene } from "../Scene.js";
 export class Wall extends GameObject {
     constructor(x, y, width, height) {
         super(width, height);
@@ -11,7 +9,7 @@ export class Wall extends GameObject {
         this._collider = new Rectangle(0, 0, width, height);
     }
     Render() {
-        Canvas.SetFillColor(Color.Black);
-        Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
+        // Canvas.SetFillColor(new Color(255, 255, 0, 100));
+        // Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
     }
 }

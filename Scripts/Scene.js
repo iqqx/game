@@ -1,4 +1,3 @@
-import { Wall } from "./GameObjects/Wall.js";
 import { Canvas } from "./Context.js";
 import { GameObject, Line, GetIntersectPoint, Lerp } from "./Utilites.js";
 export class Scene {
@@ -14,7 +13,7 @@ export class Scene {
         this.Player = player;
         this._background = background;
         Scene.Current = this;
-        this._gameObjects = [player, new Wall(0, 750, this.Length, 100), new Wall(this.Length, 0, 100, 1000), new Wall(0, -100, this.Length, 100), new Wall(-100, 0, 100, 1000)];
+        this._gameObjects = [player];
     }
     GetLevelPosition() {
         return this._levelPosition;
@@ -74,7 +73,7 @@ export class Scene {
         this.Time = time;
     }
     Render() {
-        Canvas.DrawBackground(this._background);
+        Canvas.DrawBackground(this._background, this._levelPosition);
         for (const object of this._gameObjects)
             object.Render();
     }

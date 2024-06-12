@@ -1,6 +1,5 @@
 import { Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
-import { Wall } from "./GameObjects/Wall.js";
 import { Canvas } from "./Context.js";
 import { GameObject, Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, Color } from "./Utilites.js";
 
@@ -22,7 +21,7 @@ export class Scene {
 
 		Scene.Current = this;
 
-		this._gameObjects = [player, new Wall(0, 750, this.Length, 100), new Wall(this.Length, 0, 100, 1000), new Wall(0, -100, this.Length, 100), new Wall(-100, 0, 100, 1000)];
+		this._gameObjects = [player];
 	}
 
 	public GetLevelPosition() {
@@ -93,7 +92,7 @@ export class Scene {
 	}
 
 	public Render() {
-		Canvas.DrawBackground(this._background);
+		Canvas.DrawBackground(this._background, this._levelPosition);
 
 		for (const object of this._gameObjects) object.Render();
 	}

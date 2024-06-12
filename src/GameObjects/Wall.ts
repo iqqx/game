@@ -15,12 +15,7 @@ export class Wall extends GameObject {
 	}
 
 	override Render(): void {
-		Canvas.SetFillColor(Color.Black);
-		Canvas.DrawRectangle(
-			this._x - Scene.Current.GetLevelPosition(),
-			this._y,
-			this._width,
-			this._height
-		);
+		// Canvas.SetFillColor(new Color(255, 255, 0, 100));
+		// Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
 	}
 }

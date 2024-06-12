@@ -15,12 +15,12 @@ export class Platform extends GameObject {
 	}
 
 	override Render(): void {
-		Canvas.SetFillColor(new Color(100, 50, 50));
-		Canvas.DrawRectangle(
-			this._x - Scene.Current.GetLevelPosition(),
-			this._y,
-			this._width,
-			this._height
-		);
+		// Canvas.SetFillColor(new Color(100, 50, 50, 100));
+		// Canvas.DrawRectangle(
+		// 	this._x - Scene.Current.GetLevelPosition(),
+		// 	this._y,
+		// 	this._width,
+		// 	this._height
+		// );
 	}
 }
