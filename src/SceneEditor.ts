@@ -264,7 +264,8 @@ export class SceneEditor {
 		Canvas.SetFillColor(new Color(0, 0, 0));
 		Canvas.DrawRectangle(0, Canvas.GetSize().Y, 500, -50);
 		Canvas.SetFillColor(new Color(255, 255, 255));
-		Canvas.DrawTextEx(
+		Canvas.SetFont(24);
+		Canvas.DrawText(
 			5,
 			25,
 			(() => {
@@ -276,17 +277,17 @@ export class SceneEditor {
 					case 2:
 						return "Platform";
 				}
-			})(),
-			24
+			})()
 		);
 
 		if (this._selectedRectangle !== null) {
-			Canvas.DrawTextEx(100, 20, "z: Изменить тип.", 16);
-			Canvas.DrawTextEx(100, 35, "x: Удалить.", 16);
+			Canvas.SetFont(16);
+			Canvas.DrawText(100, 20, "z: Изменить тип.");
+			Canvas.DrawText(100, 35, "x: Удалить.");
 
-			if (this._shiftPressed) Canvas.DrawTextEx(250, 20, "Стрелочки: Изменить размер.", 16);
-			else Canvas.DrawTextEx(250, 20, "Стрелочки: Изменить положение.", 16);
-		} else Canvas.DrawTextEx(100, 20, "c: Преобразовать.", 16);
+			if (this._shiftPressed) Canvas.DrawText(250, 20, "Стрелочки: Изменить размер.");
+			else Canvas.DrawText(250, 20, "Стрелочки: Изменить положение.");
+		} else Canvas.DrawText(100, 20, "c: Преобразовать.");
 
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);

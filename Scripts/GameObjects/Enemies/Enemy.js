@@ -12,8 +12,8 @@ export class Enemy extends Entity {
     }
     IsSpotPlayer() {
         const plrPos = Scene.Current.Player.GetPosition();
-        const hits = Scene.Current.Raycast(new Vector2(this._x, this._y + 1), new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1), 1000, Tag.Player | Tag.Wall);
-        return hits !== undefined && hits[0].instance instanceof Player;
+        const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + 1), new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1), 1000, Tag.Player | Tag.Wall)[0];
+        return hit.instance instanceof Player;
     }
     Update(dt) {
         this.ApplyVForce();

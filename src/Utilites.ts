@@ -240,3 +240,7 @@ export function LoadSound(source: string): Sound {
 export type Sound = {
 	Play: (volume: number) => void;
 };
+
+export interface IPickapable {
+	readonly OnPickup?: () => void;
+}

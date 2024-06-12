@@ -1,4 +1,5 @@
 import { EnemyType } from "./Enums.js";
+import { Scene } from "./Scene.js";
 export class Quest {
     Title;
     Giver;
@@ -12,6 +13,9 @@ export class Quest {
         for (const task of this.Tasks)
             if (task instanceof KillTask && task.EnemyType === type)
                 task.Count();
+    }
+    IsCompleted() {
+        return this.Tasks.every((x) => x.IsCompleted());
     }
 }
 class Task {
@@ -33,5 +37,13 @@ export class KillTask extends Task {
     }
     toString() {
         return `Убей ${this._last} ${EnemyType[this.EnemyType]}`;
+    }
+}
+export class HasItemTask extends Task {
+    IsCompleted() {
+        return Scene.Current.Player.HasBackpack;
+    }
+    toString() {
+        return this.IsCompleted() ? "Отдай рюкзак Моршу" : "Забери рюкзак";
     }
 }

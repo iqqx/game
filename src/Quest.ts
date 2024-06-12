@@ -1,5 +1,7 @@
+import { Item } from "./Assets/Items/Item.js";
 import { EnemyType } from "./Enums.js";
 import { Character } from "./GameObjects/QuestGivers/Character.js";
+import { Scene } from "./Scene.js";
 
 export class Quest {
 	public readonly Title: string;
@@ -13,9 +15,11 @@ export class Quest {
 	}
 
 	public OnKilled(type: EnemyType) {
-		for (const task of this.Tasks)
-			if (task instanceof KillTask && task.EnemyType === type)
-				task.Count();
+		for (const task of this.Tasks) if (task instanceof KillTask && task.EnemyType === type) task.Count();
+	}
+
+	public IsCompleted() {
+		return this.Tasks.every((x) => x.IsCompleted());
 	}
 }
 
@@ -46,5 +50,15 @@ export class KillTask extends Task {
 
 	public override toString() {
 		return `Убей ${this._last} ${EnemyType[this.EnemyType]}`;
+	}
+}
+
+export class HasItemTask extends Task {
+	IsCompleted(): boolean {
+		return Scene.Current.Player.HasBackpack;
+	}
+
+	public override toString() {
+		return this.IsCompleted() ? "Отдай рюкзак Моршу" : "Забери рюкзак";
 	}
 }

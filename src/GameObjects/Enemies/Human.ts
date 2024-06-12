@@ -200,14 +200,14 @@ export class Human extends Enemy {
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 
-		const hits = Scene.Current.Raycast(
+		const hit = Scene.Current.Raycast(
 			new Vector2(this._x + this._width / 2, this._y + this._height * 0.4),
 			new Vector2(plrPos.X - this._x, plrPos.Y + plrSize.Height * 0.9 - (this._y + this._height * 0.4)),
 			1000,
 			Tag.Player | Tag.Wall
-		);
+		)[0];
 
-		return hits !== undefined && hits[0].instance instanceof Player;
+		return hit !== undefined && hit.instance instanceof Player;
 	}
 
 	override TakeDamage(damage: number): void {

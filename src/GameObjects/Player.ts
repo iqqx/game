@@ -3,7 +3,7 @@ import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
 import { Rectangle, Color, Vector2, LoadImage } from "../Utilites.js";
 import { Entity } from "./Entity.js";
-import { Character } from "./QuestGivers/Character.js";
+import { Character, Dialog } from "./QuestGivers/Character.js";
 import { Quest } from "../Quest.js";
 import { Glock } from "../Assets/Weapons/Glock.js";
 import { Backpack } from "../Assets/Items/Backpack.js";
@@ -23,10 +23,10 @@ export class Player extends Entity {
 	private _weapon: Weapon | null = null;
 	private _hasInteraction: Character | null = null;
 	private _interacting: Character | null = null;
-	private _im = true;
-	private _quests: Quest[] = [];
-	private _hasBackpack = false;
+	public readonly Quests: Quest[] = [];
+	public HasBackpack = false;
 	private _armHeight: 0.5 | 0.65 = 0.65;
+	private _dialog: Dialog | null = null;
 
 	private static readonly _name = "Володя";
 	private static readonly _speed = 5;
@@ -119,19 +119,20 @@ export class Player extends Entity {
 					this._weapon?.Reload();
 					break;
 				case "KeyE":
-					if (this._interacting !== null) {
-						const next = this._interacting.Continue();
+					if (this._interacting !== null && this._dialog !== null) {
+						this._dialog.State++;
 
-						if (next !== true) {
+						if (this._dialog.Messages.length == this._dialog.State) {
+							if (this._dialog.Quest !== undefined) this.Quests.push(this._dialog.Quest);
+
 							this._interacting = null;
 							this._hasInteraction = null;
-
-							this._quests.push(next);
-						} else {
-							this._im = !this._im;
+							this._dialog = null;
 						}
-					} else if (this._hasInteraction !== null) this._interacting = this._hasInteraction;
-					else {
+					} else if (this._hasInteraction !== null) {
+						this._interacting = this._hasInteraction;
+						this._dialog = this._interacting.GetDialog();
+					} else {
 						Scene.Current.GetByTag(Tag.Pickable).forEach((pickup) => {
 							const distance =
 								(this._x + this._width / 2 - (pickup.GetPosition().X + pickup.GetSize().X / 2)) ** 2 +
@@ -139,7 +140,7 @@ export class Player extends Entity {
 
 							if (distance < 20000) {
 								if (pickup instanceof Backpack) {
-									this._hasBackpack = true;
+									this.HasBackpack = true;
 
 									const content = pickup.Pickup();
 
@@ -287,7 +288,7 @@ export class Player extends Entity {
 					new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.X / ratio, this._height)
 				);
 
-			if (this._hasBackpack)
+			if (this.HasBackpack)
 				Canvas.DrawImage(
 					Player._frames.Backpack,
 					new Rectangle(
@@ -394,7 +395,7 @@ export class Player extends Entity {
 					)
 				);
 
-			if (this._hasBackpack)
+			if (this.HasBackpack)
 				Canvas.DrawImageFlipped(
 					Player._frames.Backpack,
 					new Rectangle(
@@ -438,43 +439,45 @@ export class Player extends Entity {
 	}
 
 	public RenderOverlay() {
-		Canvas.SetFillColor(new Color(70, 70, 70, 100));
-		if (this._hasBackpack) {
-			Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, Canvas.GetSize().Y - 5, 340, -60);
-			Canvas.SetFillColor(new Color(30, 30, 30));
+		if (this._interacting === null && this._dialog === null) {
+			Canvas.SetFillColor(new Color(70, 70, 70, 100));
+			if (this.HasBackpack) {
+				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, Canvas.GetSize().Y - 5, 340, -60);
+				Canvas.SetFillColor(new Color(30, 30, 30));
 
-			for (let i = 0; i < 6; i++) {
-				Canvas.SetStroke(new Color(155, 155, 155), 1);
-				if (i == this._selectedSlot) Canvas.SetStroke(new Color(200, 200, 200), 2);
+				for (let i = 0; i < 6; i++) {
+					Canvas.SetStroke(new Color(155, 155, 155), 1);
+					if (i == this._selectedSlot) Canvas.SetStroke(new Color(200, 200, 200), 2);
 
-				Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), Canvas.GetSize().Y - 50 - 10, 50, 50));
+					Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), Canvas.GetSize().Y - 50 - 10, 50, 50));
 
-				if (this._inventory[i] !== undefined)
-					Canvas.DrawImage(
-						this._inventory[i].Icon,
-						new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4)
-					);
+					if (this._inventory[i] !== undefined)
+						Canvas.DrawImage(
+							this._inventory[i].Icon,
+							new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4)
+						);
+				}
+			} else {
+				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, Canvas.GetSize().Y - 5, 60, -60);
+
+				if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
+				else Canvas.SetStroke(new Color(155, 155, 155), 1);
+
+				Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, Canvas.GetSize().Y - 50 - 10, 50, 50));
+
+				if (this._inventory[0] !== undefined)
+					Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4));
 			}
-		} else {
-			Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, Canvas.GetSize().Y - 5, 60, -60);
-
-			if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
-			else Canvas.SetStroke(new Color(155, 155, 155), 1);
-
-			Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, Canvas.GetSize().Y - 50 - 10, 50, 50));
-
-			if (this._inventory[0] !== undefined)
-				Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4));
 		}
 
-		if (this._interacting !== null) {
+		if (this._interacting !== null && this._dialog !== null) {
 			Canvas.SetFillColor(new Color(70, 70, 70));
 			Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
 			Canvas.SetFillColor(Color.White);
 			Canvas.SetFont(24);
-			Canvas.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._im ? Player._name : "Моршу");
+			Canvas.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._dialog.State % 2 === 0 ? Player._name : "Моршу");
 			Canvas.SetFont(16);
-			Canvas.DrawTextInRectangle(this._interacting.Talk(), new Rectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, 0, 0));
+			Canvas.DrawTextInRectangle(this._dialog.Messages[this._dialog.State], new Rectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, 0, 0));
 			Canvas.DrawText(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]");
 		} else if (this._hasInteraction) {
 			Canvas.SetFillColor(new Color(70, 70, 70));
@@ -484,14 +487,16 @@ export class Player extends Entity {
 			Canvas.DrawText(1500 / 2 - 200 / 2 + 5, 750 - 70, "Поговорить с Моршу   [E]");
 		}
 
-		this._quests.forEach((quest, i) => {
-			Canvas.SetStroke(Color.Yellow, 5);
-			Canvas.SetFillColor(quest.Tasks[0].IsCompleted() ? Color.Yellow : Color.Transparent);
-			Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 350 - i * 50, 20, 20, Math.PI / 4, -10, 0);
+		this.Quests.forEach((quest, i) => {
+			Canvas.SetStroke(Color.Yellow, 2);
+			Canvas.SetFillColor(quest.IsCompleted() ? Color.Yellow : Color.Transparent);
+			Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 330 - i * 60, 10, 10, Math.PI / 4, -10, 0);
 
 			Canvas.SetFillColor(Color.White);
 			Canvas.SetFont(24);
-			Canvas.DrawText(50, 350 + i * 50, quest.Tasks[0].IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
+			Canvas.DrawText(10, 300 + i * 60, quest.Title);
+			Canvas.SetFont(16);
+			Canvas.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
 		});
 
 		// POSTPROCCES
@@ -524,7 +529,7 @@ export class Player extends Entity {
 	}
 
 	public OnKilled(type: EnemyType) {
-		this._quests.forEach((x) => x.OnKilled(type));
+		this.Quests.forEach((x) => x.OnKilled(type));
 	}
 
 	public GetPosition() {
@@ -532,7 +537,7 @@ export class Player extends Entity {
 	}
 
 	private SelectSlot(slot: 0 | 1 | 2 | 3 | 4 | 5) {
-		if (slot > 0 && !this._hasBackpack) return;
+		if (slot > 0 && !this.HasBackpack) return;
 
 		if (slot === this._selectedSlot) {
 			this._selectedSlot = null;

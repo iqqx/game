@@ -7,13 +7,7 @@ import { Player } from "../Player.js";
 export abstract class Enemy extends Entity {
 	protected readonly _type: EnemyType;
 
-	constructor(
-		width: number,
-		height: number,
-		speed: number,
-		maxHealth: number,
-		type: EnemyType
-	) {
+	constructor(width: number, height: number, speed: number, maxHealth: number, type: EnemyType) {
 		super(width, height, speed, maxHealth);
 
 		this._type = type;
@@ -23,14 +17,9 @@ export abstract class Enemy extends Entity {
 	protected IsSpotPlayer(): boolean {
 		const plrPos = Scene.Current.Player.GetPosition();
 
-		const hits = Scene.Current.Raycast(
-			new Vector2(this._x, this._y + 1),
-			new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1),
-			1000,
-			Tag.Player | Tag.Wall
-		);
+		const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + 1), new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1), 1000, Tag.Player | Tag.Wall)[0];
 
-		return hits !== undefined && hits[0].instance instanceof Player;
+		return hit.instance instanceof Player;
 	}
 
 	public Update(dt: number) {
@@ -41,9 +30,7 @@ export abstract class Enemy extends Entity {
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 
-		this.Direction = Math.sign(
-			plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)
-		) as -1 | 1;
+		this.Direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)) as -1 | 1;
 
 		if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5) return;
 
