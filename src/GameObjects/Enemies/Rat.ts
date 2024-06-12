@@ -32,8 +32,8 @@ export class Rat extends Enemy {
 			if (
 				Math.abs(
 					this._x +
-						(this._direction === 1 ? this._width : 0) -
-						(plrPos.X + (this._direction === 1 ? plrSize.Width : 0))
+						(this.Direction === 1 ? this._width : 0) -
+						(plrPos.X + (this.Direction === 1 ? plrSize.Width : 0))
 				) <= this._width &&
 				this._y == plrPos.Y
 			) {
@@ -49,7 +49,7 @@ export class Rat extends Enemy {
 	}
 
 	override Render(): void {
-		if (this._direction === 1) {
+		if (this.Direction === 1) {
 			Canvas.DrawImage(
 				Rat._frames.Idle,
 				new Rectangle(

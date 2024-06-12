@@ -67,8 +67,8 @@ export class Scene {
     }
     Update(time) {
         const plrPos = this.Player.GetPosition();
-        const plrSize = this.Player.GetCollider();
-        this._levelPosition = Lerp(this._levelPosition, Math.clamp(plrPos.X - 1500 / 2 - plrSize.Width / 2, 0, this.Length - 1500), 0.2);
+        const plrTargetRaw = this.Player.GetTarget();
+        this._levelPosition = Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1);
         for (const object of this._gameObjects)
             object.Update(time - this.Time);
         this.Time = time;

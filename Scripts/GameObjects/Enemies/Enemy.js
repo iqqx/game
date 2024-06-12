@@ -21,10 +21,10 @@ export class Enemy extends Entity {
             return;
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
-        this._direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
+        this.Direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
         if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5)
             return;
-        if (this._direction == 1)
+        if (this.Direction == 1)
             this.MoveRight();
         else
             this.MoveLeft();

@@ -1,19 +1,20 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
-import { GameObject, Rectangle } from "../Utilites.js";
+import { GameObject, Rectangle, Vector2 } from "../Utilites.js";
 
 export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
 	protected _speed: number;
-	protected _direction: -1 | 1 = 1;
 	protected _health: number;
 	protected _movingLeft = false;
 	protected _movingRight = false;
 	protected _verticalAcceleration = 0;
 	protected _grounded = true;
-	protected _jumpForce = 25;
+	protected _jumpForce = 20;
 	protected _xTarget = 0;
 	protected _yTarget = 0;
+
+	public Direction: -1 | 1 = 1;
 
 	constructor(width: number, height: number, speed: number, maxHealth: number) {
 		super(width, height);
@@ -31,7 +32,7 @@ export class Entity extends GameObject {
 		if (this._movingLeft) this.MoveLeft();
 		else if (this._movingRight) this.MoveRight();
 
-		this._direction = this._xTarget > this._x + this._width / 2 ? 1 : -1;
+		this.Direction = this._xTarget > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 	}
 
 	public MoveRight() {
@@ -87,5 +88,9 @@ export class Entity extends GameObject {
 
 	public TakeDamage(damage: number) {
 		this._health -= damage;
+	}
+
+	public GetTarget() {
+		return new Vector2(this._xTarget, this._yTarget);
 	}
 }

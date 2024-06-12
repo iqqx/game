@@ -33,7 +33,7 @@ export class Human extends Enemy {
 		this._x = x;
 		this._y = y;
 
-		this._collider = new Rectangle(this._x, this._y, this._width - 50, this._height);
+		this._collider = new Rectangle(this._x, this._y, this._width, this._height);
 	}
 
 	override Update(dt: number): void {
@@ -49,7 +49,7 @@ export class Human extends Enemy {
 		this._angle = (() => {
 			const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this._height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
 
-			if (this._direction == 1) return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+			if (this.Direction == 1) return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
 			else return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 		})();
 
@@ -57,7 +57,7 @@ export class Human extends Enemy {
 	}
 
 	override Render(): void {
-		if (this._direction == 1) {
+		if (this.Direction == 1) {
 			if (this._weapon === null)
 				Canvas.DrawImageWithAngle(
 					Human._frames.Hands.Right,
