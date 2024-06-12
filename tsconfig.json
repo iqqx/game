@@ -5,7 +5,7 @@
         "module": "ESNext",
         "types": ["node"],
         "incremental": true,
-        "outDir": "scripts",
+        "outDir": "Scripts",
         "rootDir": "src"
     }
 }
