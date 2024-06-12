@@ -7,21 +7,20 @@ export class Scene {
 	public static Current: Scene;
 
 	private readonly _gameObjects: GameObject[];
-	public readonly Player: Player;
 	public readonly Length: number;
 	private readonly _background: Sprite;
 
+	public Player: Player;
 	private _levelPosition = 0;
 	public Time = 0;
 
-	constructor(player: Player, background: Sprite) {
+	constructor(background: Sprite) {
 		this.Length = background.Image.naturalWidth * (Canvas.GetSize().Y / background.Image.naturalHeight);
-		this.Player = player;
 		this._background = background;
 
 		Scene.Current = this;
 
-		this._gameObjects = [player];
+		this._gameObjects = [];
 	}
 
 	public GetLevelPosition() {
@@ -100,7 +99,7 @@ export class Scene {
 	public RenderOverlay() {
 		Canvas.SwitchLayer(false);
 
-		Canvas.EraseRectangle(0, 0, 1500, 750);
+		Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
 		this.Player.RenderOverlay();
 		Canvas.SwitchLayer(true);
 	}
@@ -111,6 +110,8 @@ export class Scene {
 
 	public Instantiate(object: GameObject) {
 		this._gameObjects.push(object);
+
+		if (object instanceof Player) this.Player = object;
 
 		object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
 	}

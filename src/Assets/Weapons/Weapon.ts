@@ -54,6 +54,7 @@ export abstract class Weapon implements Item {
 
 		this._reloadTime = reloadTime;
 		this._maxAmmoClip = clip;
+		this._loadedAmmo = clip
 		this.Heavy = heavy;
 		this._automatic = auto;
 		this.Automatic = auto;

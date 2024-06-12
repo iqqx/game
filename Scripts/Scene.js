@@ -1,19 +1,19 @@
+import { Player } from "./GameObjects/Player.js";
 import { Canvas } from "./Context.js";
 import { GameObject, Line, GetIntersectPoint, Lerp } from "./Utilites.js";
 export class Scene {
     static Current;
     _gameObjects;
-    Player;
     Length;
     _background;
+    Player;
     _levelPosition = 0;
     Time = 0;
-    constructor(player, background) {
+    constructor(background) {
         this.Length = background.Image.naturalWidth * (Canvas.GetSize().Y / background.Image.naturalHeight);
-        this.Player = player;
         this._background = background;
         Scene.Current = this;
-        this._gameObjects = [player];
+        this._gameObjects = [];
     }
     GetLevelPosition() {
         return this._levelPosition;
@@ -79,7 +79,7 @@ export class Scene {
     }
     RenderOverlay() {
         Canvas.SwitchLayer(false);
-        Canvas.EraseRectangle(0, 0, 1500, 750);
+        Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
         this.Player.RenderOverlay();
         Canvas.SwitchLayer(true);
     }
@@ -88,6 +88,8 @@ export class Scene {
     }
     Instantiate(object) {
         this._gameObjects.push(object);
+        if (object instanceof Player)
+            this.Player = object;
         object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
     }
 }

@@ -1,6 +1,7 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle, Vector2 } from "../Utilites.js";
+import { Platform } from "./Platform.js";
 export class Entity extends GameObject {
     _maxHealth;
     _speed;
@@ -46,6 +47,7 @@ export class Entity extends GameObject {
         this._verticalAcceleration = this._jumpForce;
     }
     ApplyVForce() {
+        const prevY = this._y;
         this._verticalAcceleration -= this._verticalAcceleration > 0 ? 2 : 3;
         this._y += this._verticalAcceleration;
         if (this._verticalAcceleration <= 0) {
@@ -53,6 +55,8 @@ export class Entity extends GameObject {
             const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
             if (offsets !== false && offsets.position.Y !== 0) {
                 {
+                    if (offsets.instance instanceof Platform && (offsets.position.Y < 0 || prevY < offsets.instance.GetPosition().Y + offsets.instance.GetCollider().Height))
+                        return;
                     this._verticalAcceleration = 0;
                     this._grounded = true;
                     this._y += offsets.position.Y;

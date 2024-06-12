@@ -1,6 +1,7 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle, Vector2 } from "../Utilites.js";
+import { Platform } from "./Platform.js";
 
 export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
@@ -56,6 +57,7 @@ export class Entity extends GameObject {
 	}
 
 	protected ApplyVForce() {
+		const prevY = this._y;
 		this._verticalAcceleration -= this._verticalAcceleration > 0 ? 2 : 3;
 		this._y += this._verticalAcceleration;
 
@@ -65,6 +67,8 @@ export class Entity extends GameObject {
 
 			if (offsets !== false && offsets.position.Y !== 0) {
 				{
+					if (offsets.instance instanceof Platform && (offsets.position.Y < 0 || prevY < offsets.instance.GetPosition().Y + offsets.instance.GetCollider().Height)) return;
+
 					this._verticalAcceleration = 0;
 
 					this._grounded = true;

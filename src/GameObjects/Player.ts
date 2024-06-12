@@ -28,6 +28,7 @@ export class Player extends Entity {
 	private _hasBackpack = false;
 	private _armHeight: 0.5 | 0.65 = 0.65;
 
+	private static readonly _name = "Володя";
 	private static readonly _speed = 5;
 	private static readonly _animationFrameDuration = 50;
 	private static readonly _sitHeightModifier = 0.85;
@@ -168,8 +169,10 @@ export class Player extends Entity {
 		});
 
 		addEventListener("mousedown", (e) => {
-			this._xTarget = e.x;
-			this._yTarget = 750 - e.y;
+			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
+
+			this._xTarget = e.offsetX;
+			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 
@@ -181,14 +184,18 @@ export class Player extends Entity {
 		});
 
 		addEventListener("mouseup", (e) => {
+			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
+
 			if (e.button === 0) {
 				this._LMBPressed = false;
 			}
 		});
 
 		addEventListener("mousemove", (e) => {
-			this._xTarget = e.x;
-			this._yTarget = 750 - e.y;
+			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
+
+			this._xTarget = e.offsetX;
+			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 		});
@@ -433,41 +440,48 @@ export class Player extends Entity {
 	public RenderOverlay() {
 		Canvas.SetFillColor(new Color(70, 70, 70, 100));
 		if (this._hasBackpack) {
-			Canvas.DrawRectangle(1500 / 2 - 330 / 2 - 10, 750 - 5, 340, -60);
+			Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, Canvas.GetSize().Y - 5, 340, -60);
 			Canvas.SetFillColor(new Color(30, 30, 30));
 
 			for (let i = 0; i < 6; i++) {
 				Canvas.SetStroke(new Color(155, 155, 155), 1);
 				if (i == this._selectedSlot) Canvas.SetStroke(new Color(200, 200, 200), 2);
 
-				Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), 750 - 50 - 10, 50, 50));
+				Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), Canvas.GetSize().Y - 50 - 10, 50, 50));
 
 				if (this._inventory[i] !== undefined)
-					Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(1500 / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+					Canvas.DrawImage(
+						this._inventory[i].Icon,
+						new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4)
+					);
 			}
 		} else {
-			Canvas.DrawRectangle(1500 / 2 - 60 / 2, 750 - 5, 60, -60);
+			Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, Canvas.GetSize().Y - 5, 60, -60);
 
 			if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
 			else Canvas.SetStroke(new Color(155, 155, 155), 1);
 
-			Canvas.DrawRectangleEx(new Rectangle(1500 / 2 - 50 / 2, 750 - 50 - 10, 50, 50));
+			Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, Canvas.GetSize().Y - 50 - 10, 50, 50));
 
-			if (this._inventory[0] !== undefined) Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(1500 / 2 - 50 / 2 + 2, 750 - 50 - 10 + 2, 50 - 4, 50 - 4));
+			if (this._inventory[0] !== undefined)
+				Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4));
 		}
 
 		if (this._interacting !== null) {
 			Canvas.SetFillColor(new Color(70, 70, 70));
 			Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
 			Canvas.SetFillColor(Color.White);
-			Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._im ? "Я" : "Моршу", 24);
-			Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, this._interacting.Talk(), 16);
-			Canvas.DrawTextEx(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]", 16);
+			Canvas.SetFont(24);
+			Canvas.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._im ? Player._name : "Моршу");
+			Canvas.SetFont(16);
+			Canvas.DrawTextInRectangle(this._interacting.Talk(), new Rectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, 0, 0));
+			Canvas.DrawText(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]");
 		} else if (this._hasInteraction) {
 			Canvas.SetFillColor(new Color(70, 70, 70));
 			Canvas.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
 			Canvas.SetFillColor(Color.White);
-			Canvas.DrawTextEx(1500 / 2 - 200 / 2 + 5, 750 - 70, "Поговорить с Моршу   [E]", 16);
+			Canvas.SetFont(16);
+			Canvas.DrawText(1500 / 2 - 200 / 2 + 5, 750 - 70, "Поговорить с Моршу   [E]");
 		}
 
 		this._quests.forEach((quest, i) => {
@@ -476,7 +490,8 @@ export class Player extends Entity {
 			Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 350 - i * 50, 20, 20, Math.PI / 4, -10, 0);
 
 			Canvas.SetFillColor(Color.White);
-			Canvas.DrawTextEx(50, 350 + i * 50, quest.Tasks[0].IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString(), 24);
+			Canvas.SetFont(24);
+			Canvas.DrawText(50, 350 + i * 50, quest.Tasks[0].IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
 		});
 
 		// POSTPROCCES
@@ -539,11 +554,7 @@ export class Player extends Entity {
 	}
 
 	private TryDown() {
-		console.log(Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(0, -1), 1, Tag.Platform));
-
 		this._y--;
-
-		console.log(Scene.Current.GetCollide(this, Tag.Platform | Tag.Wall));
 	}
 
 	private Shoot() {

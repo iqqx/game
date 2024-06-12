@@ -10,6 +10,6 @@ export class Glock extends Weapon {
         Shell: LoadSound("Sounds/shell.mp3"),
     };
     constructor() {
-        super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 1, 30, new Vector2(40, 10), new Vector2(30, 10));
+        super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
     }
 }

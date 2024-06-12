@@ -4,8 +4,10 @@ const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).ge
 ctxMain.imageSmoothingEnabled = false;
 
 const ctxOverlay = document.createElement("canvas").getContext("2d");
-ctxOverlay.canvas.width = 1500;
-ctxOverlay.canvas.height = 750;
+// ctxOverlay.canvas.width = ctxMain.canvas.clientWidth;
+// ctxOverlay.canvas.height = ctxMain.canvas.clientHeight;
+ctxOverlay.canvas.width = ctxMain.canvas.width;
+ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
 
 let ctx = ctxMain;
@@ -13,7 +15,7 @@ let ctx = ctxMain;
 export namespace Canvas {
 	export function SwitchLayer(onMain = true) {
 		if (onMain) {
-			ctxMain.drawImage(ctxOverlay.canvas, 0, 0);
+			ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
 			ctx = ctxMain;
 		} else ctx = ctxOverlay;
 	}
@@ -169,24 +171,15 @@ export namespace Canvas {
 		ctx.restore();
 	}
 
-	export function DrawText(x: number, y: number, text: string) {
-		ctx.fillText(text, x, y);
-	}
-
-	export function DrawTextEx(x: number, y: number, text: string, size: number) {
-		ctx.font = size + "px arial";
-		ctx.fillText(text, x, y);
-	}
-
 	export function DrawVignette(color: Color) {
-		var outerRadius = 1500 * 0.6;
-		var innerRadius = 1500 * 0.5;
-		var grd = ctx.createRadialGradient(1500 / 2, 750 / 2, innerRadius, 1500 / 2, 750 / 2, outerRadius);
+		var outerRadius = ctx.canvas.width * 0.6;
+		var innerRadius = ctx.canvas.width * 0.5;
+		var grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
 		grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, .1)`);
 		grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, .6)`);
 
 		ctx.fillStyle = grd;
-		ctx.fillRect(0, 0, 1500, 750);
+		ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	}
 
 	export function DrawRectangleWithGradient(rect: Rectangle, start: Color, end: Color) {
@@ -219,5 +212,20 @@ export namespace Canvas {
 
 	export function GetClientRectangle() {
 		return ctx.canvas.getBoundingClientRect();
+	}
+
+	export function SetFont(size: number, family = "arial") {
+		ctx.font = `${size}px ${family}`;
+	}
+
+	export function DrawText(x: number, y: number, text: string) {
+		ctx.fillText(text, x, y);
+	}
+
+	export function DrawTextInRectangle(text: string, rect: Rectangle) {
+		const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
+		const lines = text.split("\n");
+
+		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], rect.X, rect.Y + i * height);
 	}
 }

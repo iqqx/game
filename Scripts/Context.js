@@ -2,15 +2,17 @@ import { Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
 ctxMain.imageSmoothingEnabled = false;
 const ctxOverlay = document.createElement("canvas").getContext("2d");
-ctxOverlay.canvas.width = 1500;
-ctxOverlay.canvas.height = 750;
+// ctxOverlay.canvas.width = ctxMain.canvas.clientWidth;
+// ctxOverlay.canvas.height = ctxMain.canvas.clientHeight;
+ctxOverlay.canvas.width = ctxMain.canvas.width;
+ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
 let ctx = ctxMain;
 export var Canvas;
 (function (Canvas) {
     function SwitchLayer(onMain = true) {
         if (onMain) {
-            ctxMain.drawImage(ctxOverlay.canvas, 0, 0);
+            ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
             ctx = ctxMain;
         }
         else
@@ -132,23 +134,14 @@ export var Canvas;
         ctx.restore();
     }
     Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;
-    function DrawText(x, y, text) {
-        ctx.fillText(text, x, y);
-    }
-    Canvas.DrawText = DrawText;
-    function DrawTextEx(x, y, text, size) {
-        ctx.font = size + "px arial";
-        ctx.fillText(text, x, y);
-    }
-    Canvas.DrawTextEx = DrawTextEx;
     function DrawVignette(color) {
-        var outerRadius = 1500 * 0.6;
-        var innerRadius = 1500 * 0.5;
-        var grd = ctx.createRadialGradient(1500 / 2, 750 / 2, innerRadius, 1500 / 2, 750 / 2, outerRadius);
+        var outerRadius = ctx.canvas.width * 0.6;
+        var innerRadius = ctx.canvas.width * 0.5;
+        var grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, .1)`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, .6)`);
         ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, 1500, 750);
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
     Canvas.DrawVignette = DrawVignette;
     function DrawRectangleWithGradient(rect, start, end) {
@@ -175,4 +168,19 @@ export var Canvas;
         return ctx.canvas.getBoundingClientRect();
     }
     Canvas.GetClientRectangle = GetClientRectangle;
+    function SetFont(size, family = "arial") {
+        ctx.font = `${size}px ${family}`;
+    }
+    Canvas.SetFont = SetFont;
+    function DrawText(x, y, text) {
+        ctx.fillText(text, x, y);
+    }
+    Canvas.DrawText = DrawText;
+    function DrawTextInRectangle(text, rect) {
+        const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
+        const lines = text.split("\n");
+        for (let i = 0; i < lines.length; i++)
+            ctx.fillText(lines[i], rect.X, rect.Y + i * height);
+    }
+    Canvas.DrawTextInRectangle = DrawTextInRectangle;
 })(Canvas || (Canvas = {}));

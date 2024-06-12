@@ -14,8 +14,10 @@ import { SceneEditor } from "./SceneEditor.js";
 import { LoadImage } from "./Utilites.js";
 
 // const scene = new SceneEditor(LoadImage("Images/Level_0.png"));
-const scene = new Scene(new Player(600, 300), LoadImage("Images/Level_0.png"));
+const scene = new Scene(LoadImage("Images/Level_0.png"));
 
+scene.Instantiate(new Player(300, 500));
+scene.Instantiate(new Morshu(500, 400));
 scene.Instantiate(new Wall(-56, -3, 156, 772));
 scene.Instantiate(new Wall(-87, 48, 7777, 124));
 scene.Instantiate(new Platform(81, 373, 590, 13));
@@ -27,8 +29,6 @@ scene.Instantiate(new Wall(71, 618, 11380, 73));
 scene.Instantiate(new Wall(3795, 164, 303, 77));
 scene.Instantiate(new Wall(3863, 230, 200, 46));
 scene.Instantiate(new Wall(4088, 163, 44, 45));
-scene.Instantiate(new Wall(500, 250, 50, 45));
-scene.Instantiate(new Wall(550, 255, 50, 45));
 scene.Instantiate(new Backpack(900, 170, [new AK(), new Vodka()]));
 
 function gameLoop(timeStamp: number) {

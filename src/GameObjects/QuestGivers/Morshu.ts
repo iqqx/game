@@ -21,15 +21,7 @@ export class Morshu extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(
-			Morshu._image,
-			new Rectangle(
-				this._x - Scene.Current.GetLevelPosition(),
-				this._y,
-				this._width,
-				this._height
-			)
-		);
+		Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
 	}
 
 	public Talk() {
@@ -37,13 +29,9 @@ export class Morshu extends Character {
 
 		switch (Morshu._completedQuests) {
 			case 0:
-				return [
-					"Привет.",
-					"Кароче, Меченый, я тебя спас и в благородство играть не буду. Выполнишь для меня пару заданий и мы в расчете.",
-					"Говори.",
-					"Убей этого челика.",
-					"Ща.",
-				][this._dialogState];
+				return ["Привет.", "Кароче, Меченый, я тебя спас и в благородство играть не буду.\nВыполнишь для меня пару заданий и мы в расчете.", "Говори.", "Убей этого челика.", "Ща."][
+					this._dialogState
+				];
 		}
 	}
 }

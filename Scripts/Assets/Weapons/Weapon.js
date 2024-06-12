@@ -35,6 +35,7 @@ export class Weapon {
         (this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
         this._reloadTime = reloadTime;
         this._maxAmmoClip = clip;
+        this._loadedAmmo = clip;
         this.Heavy = heavy;
         this._automatic = auto;
         this.Automatic = auto;
