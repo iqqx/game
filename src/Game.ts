@@ -1,5 +1,5 @@
 import { Backpack } from "./Assets/Items/Backpack.js";
-import { Vodka } from "./Assets/Items/Vodka.js";
+import { Vodka } from "./Assets/Items/Item.js";
 import { AK } from "./Assets/Weapons/AK.js";
 import { Canvas } from "./Context.js";
 import { EnemyType } from "./Enums.js";
