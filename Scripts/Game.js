@@ -1,9 +1,10 @@
 import { Platform } from "./GameObjects/Platform.js";
+import { Player } from "./GameObjects/Player.js";
 import { Wall } from "./GameObjects/Wall.js";
-import { SceneEditor } from "./SceneEditor.js";
+import { Scene } from "./Scene.js";
 import { LoadImage } from "./Utilites.js";
-const scene = new SceneEditor(LoadImage("Images/Level_0.png"));
-// const scene = new Scene(new Player(600, 300), LoadImage("Images/Level_0.png"));
+// const scene = new SceneEditor(LoadImage("Images/Level_0.png"));
+const scene = new Scene(new Player(600, 300), LoadImage("Images/Level_0.png"));
 scene.Instantiate(new Wall(-56, -3, 156, 772));
 scene.Instantiate(new Wall(-87, 48, 7777, 124));
 scene.Instantiate(new Platform(81, 373, 590, 13));

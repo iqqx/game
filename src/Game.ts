@@ -1,3 +1,4 @@
+import { Canvas } from "./Context.js";
 import { EnemyType } from "./Enums.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -9,8 +10,8 @@ import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
 import { LoadImage } from "./Utilites.js";
 
-const scene = new SceneEditor(LoadImage("Images/Level_0.png"));
-// const scene = new Scene(new Player(600, 300), LoadImage("Images/Level_0.png"));
+// const scene = new SceneEditor(LoadImage("Images/Level_0.png"));
+const scene = new Scene(new Player(600, 300), LoadImage("Images/Level_0.png"));
 
 scene.Instantiate(new Wall(-56, -3, 156, 772));
 scene.Instantiate(new Wall(-87, 48, 7777, 124));

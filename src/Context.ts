@@ -1,9 +1,27 @@
 import { Color, Rectangle, Sprite, Vector2 } from "./Utilites.js";
 
-const ctx = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
-ctx.imageSmoothingEnabled = false;
+const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
+ctxMain.imageSmoothingEnabled = false;
+
+const ctxOverlay = document.createElement("canvas").getContext("2d");
+ctxOverlay.canvas.width = 1500;
+ctxOverlay.canvas.height = 750;
+ctxOverlay.imageSmoothingEnabled = false;
+
+let ctx = ctxMain;
 
 export namespace Canvas {
+	export function SwitchLayer(onMain = true) {
+		if (onMain) {
+			ctxMain.drawImage(ctxOverlay.canvas, 0, 0);
+			ctx = ctxMain;
+		} else ctx = ctxOverlay;
+	}
+
+	export function EraseRectangle(x: number, y: number, width: number, height: number) {
+		ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+	}
+
 	export function SetFillColor(color: Color) {
 		ctx.fillStyle = color.toString();
 	}

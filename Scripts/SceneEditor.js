@@ -108,21 +108,23 @@ export class SceneEditor {
             }
         });
         addEventListener("mousedown", (e) => {
+            this._mousePosition = new Vector2(e.x - Canvas.GetClientRectangle().left, Canvas.GetClientRectangle().height - e.y + Canvas.GetClientRectangle().top);
             this._selectedRectangle = null;
             if (this._selectedType === 0) {
                 for (let i = 0; i < this._gameObjects.length; i++) {
-                    if (e.x + this._levelPosition >= this._gameObjects[i][0].X &&
-                        e.x + this._levelPosition < this._gameObjects[i][0].X + this._gameObjects[i][0].Width &&
-                        Canvas.GetSize().Y - e.y >= this._gameObjects[i][0].Y &&
-                        Canvas.GetSize().Y - e.y < this._gameObjects[i][0].Y + this._gameObjects[i][0].Height)
+                    if (this._mousePosition.X + this._levelPosition >= this._gameObjects[i][0].X &&
+                        this._mousePosition.X + this._levelPosition < this._gameObjects[i][0].X + this._gameObjects[i][0].Width &&
+                        this._mousePosition.Y >= this._gameObjects[i][0].Y &&
+                        this._mousePosition.Y < this._gameObjects[i][0].Y + this._gameObjects[i][0].Height)
                         this._selectedRectangle = i;
                 }
             }
             else {
-                this._drawingRectangle = new Rectangle(e.x + this._levelPosition, Canvas.GetSize().Y - e.y, 0, 0);
+                this._drawingRectangle = new Rectangle(this._mousePosition.X + this._levelPosition, this._mousePosition.Y, 0, 0);
             }
         });
         addEventListener("mouseup", (e) => {
+            this._mousePosition = new Vector2(e.x - Canvas.GetClientRectangle().left, Canvas.GetClientRectangle().height - e.y + Canvas.GetClientRectangle().top);
             if (this._selectedType > 0 && this._drawingRectangle !== null) {
                 if (this._drawingRectangle.Width < 0)
                     this._drawingRectangle = new Rectangle(this._drawingRectangle.X + this._drawingRectangle.Width, this._drawingRectangle.Y, -this._drawingRectangle.Width, this._drawingRectangle.Height);
@@ -133,9 +135,9 @@ export class SceneEditor {
             }
         });
         addEventListener("mousemove", (e) => {
-            this._mousePosition = new Vector2(e.x, Canvas.GetSize().Y - e.y);
+            this._mousePosition = new Vector2(e.x - Canvas.GetClientRectangle().left, Canvas.GetClientRectangle().height - e.y + Canvas.GetClientRectangle().top);
             if (this._drawingRectangle !== null)
-                this._drawingRectangle = new Rectangle(this._drawingRectangle.X, this._drawingRectangle.Y, e.x - this._drawingRectangle.X + this._levelPosition, Canvas.GetSize().Y - e.y - this._drawingRectangle.Y);
+                this._drawingRectangle = new Rectangle(this._drawingRectangle.X, this._drawingRectangle.Y, this._mousePosition.X - this._drawingRectangle.X + this._levelPosition, this._mousePosition.Y - this._drawingRectangle.Y);
         });
     }
     GetLevelPosition() {
@@ -180,6 +182,8 @@ export class SceneEditor {
         }
     }
     RenderOverlay() {
+        Canvas.SwitchLayer(false);
+        Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
         Canvas.SetFillColor(new Color(0, 0, 0));
         Canvas.DrawRectangle(0, Canvas.GetSize().Y, 500, -50);
         Canvas.SetFillColor(new Color(255, 255, 255));
@@ -205,5 +209,6 @@ export class SceneEditor {
             Canvas.DrawTextEx(100, 20, "c: Преобразовать.", 16);
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);
+        Canvas.SwitchLayer();
     }
 }

@@ -1,8 +1,26 @@
 import { Vector2 } from "./Utilites.js";
-const ctx = document.getElementById("main-canvas").getContext("2d");
-ctx.imageSmoothingEnabled = false;
+const ctxMain = document.getElementById("main-canvas").getContext("2d");
+ctxMain.imageSmoothingEnabled = false;
+const ctxOverlay = document.createElement("canvas").getContext("2d");
+ctxOverlay.canvas.width = 1500;
+ctxOverlay.canvas.height = 750;
+ctxOverlay.imageSmoothingEnabled = false;
+let ctx = ctxMain;
 export var Canvas;
 (function (Canvas) {
+    function SwitchLayer(onMain = true) {
+        if (onMain) {
+            ctxMain.drawImage(ctxOverlay.canvas, 0, 0);
+            ctx = ctxMain;
+        }
+        else
+            ctx = ctxOverlay;
+    }
+    Canvas.SwitchLayer = SwitchLayer;
+    function EraseRectangle(x, y, width, height) {
+        ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+    }
+    Canvas.EraseRectangle = EraseRectangle;
     function SetFillColor(color) {
         ctx.fillStyle = color.toString();
     }

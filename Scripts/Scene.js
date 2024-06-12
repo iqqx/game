@@ -78,7 +78,10 @@ export class Scene {
             object.Render();
     }
     RenderOverlay() {
+        Canvas.SwitchLayer(false);
+        Canvas.EraseRectangle(0, 0, 1500, 750);
         this.Player.RenderOverlay();
+        Canvas.SwitchLayer(true);
     }
     GetByTag(tag) {
         return this._gameObjects.filter((x) => x.Tag == tag);
