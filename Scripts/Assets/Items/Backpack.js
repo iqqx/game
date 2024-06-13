@@ -9,7 +9,10 @@ export class Backpack extends GameObject {
     OnPickup;
     constructor(x, y, content) {
         super(50, 50);
-        this._content = content;
+        this._content =
+            content === undefined
+                ? [null, null, null, null, null]
+                : content.map((x) => (x === undefined ? null : x));
         this.Tag = Tag.Pickable;
         this._x = x;
         this._y = y;

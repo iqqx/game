@@ -1,4 +1,3 @@
-import { Item } from "./Assets/Items/Item.js";
 import { EnemyType } from "./Enums.js";
 import { Character } from "./GameObjects/QuestGivers/Character.js";
 import { Scene } from "./Scene.js";

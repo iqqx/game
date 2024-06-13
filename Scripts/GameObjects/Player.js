@@ -5,6 +5,7 @@ import { Rectangle, Color, Vector2, LoadImage, LoadSound } from "../Utilites.js"
 import { Entity } from "./Entity.js";
 import { Glock } from "../Assets/Weapons/Glock.js";
 import { Backpack } from "../Assets/Items/Backpack.js";
+import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Box } from "./Box.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
@@ -15,7 +16,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedSlot = null;
-    _inventory = [new Glock()];
+    _inventory = [new Glock(), null, null, null, null, null];
     _weapon = null;
     _hasInteraction = null;
     _interacting = null;
@@ -25,6 +26,7 @@ export class Player extends Entity {
     _dialog = null;
     _timeFromDeath = 0;
     _openedBox = null;
+    _draggedItem = null;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -63,6 +65,7 @@ export class Player extends Entity {
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this._width, this._height);
         Player._walkSound.Speed = 1.6;
+        Player._walkSound.Apply();
         addEventListener("keydown", (e) => {
             switch (e.code) {
                 case "KeyC":
@@ -130,7 +133,7 @@ export class Player extends Entity {
                     if (this._interacting !== null && this._dialog !== null) {
                         this._dialog.State++;
                         if (this._dialog.Messages.length == this._dialog.State) {
-                            if (this._dialog.Quest !== undefined)
+                            if (this._dialog.Quest !== null)
                                 this.Quests.push(this._dialog.Quest);
                             this._interacting = null;
                             this._hasInteraction = null;
@@ -149,9 +152,8 @@ export class Player extends Entity {
                                 if (pickup instanceof Backpack) {
                                     this.HasBackpack = true;
                                     const content = pickup.Pickup();
-                                    this._inventory[1] = content[0];
-                                    for (let i = 0; i < 4; i++)
-                                        this._inventory[i + 2] = content[i + 1];
+                                    for (let i = 0; i < 5; i++)
+                                        this._inventory[i + 1] = content[i];
                                 }
                             }
                         });
@@ -188,8 +190,58 @@ export class Player extends Entity {
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (e.button === 0) {
-                this._LMBPressed = true;
-                this.Shoot();
+                const xCell = this.HasBackpack
+                    ? this._xTarget < 690
+                        ? Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2 - 5)) / 55)
+                        : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2)) / 55)
+                    : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 50 / 2)) / 55);
+                const yCell = this._openedBox === null ? Math.floor((this._yTarget - (Canvas.GetSize().Y - 10 - 50)) / 55) : Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
+                if (this._openedBox !== null) {
+                    if (this._yTarget > 460) {
+                        if (yCell === 0 && xCell >= 0 && xCell <= 5) {
+                            if (this._draggedItem === null) {
+                                this._draggedItem = this._inventory[xCell];
+                                this._inventory[xCell] = null;
+                                if (this._weapon === this._draggedItem)
+                                    this._weapon = null;
+                            }
+                            else if (this._inventory[xCell] === null && (xCell >= 2 || this._draggedItem instanceof Weapon)) {
+                                this._inventory[xCell] = this._draggedItem;
+                                this._draggedItem = null;
+                                if (this._selectedSlot === xCell && xCell < 2)
+                                    this._weapon = this._inventory[xCell];
+                            }
+                        }
+                    }
+                    else {
+                        const xCell = Math.floor((this._xTarget - (1500 / 2 - 170 / 2 + 5)) / 55);
+                        const yCell = Math.floor((this._yTarget - (750 / 2 - 170 / 2 + 5)) / 55);
+                        if (xCell < 0 || xCell > 2 || yCell < 0 || yCell > 2)
+                            return;
+                        if (this._draggedItem === null)
+                            this._draggedItem = this._openedBox.TakeItemFrom(xCell, yCell);
+                        else if (this._openedBox.TryPushItemTo(xCell, yCell, this._draggedItem))
+                            this._draggedItem = null;
+                    }
+                }
+                else if (this.HasBackpack && yCell === 0 && xCell >= 0 && xCell <= 5) {
+                    if (this._draggedItem === null) {
+                        this._draggedItem = this._inventory[xCell];
+                        this._inventory[xCell] = null;
+                        if (this._weapon === this._draggedItem)
+                            this._weapon = null;
+                    }
+                    else if (this._inventory[xCell] === null && (xCell >= 2 || this._draggedItem instanceof Weapon)) {
+                        this._inventory[xCell] = this._draggedItem;
+                        this._draggedItem = null;
+                        if (this._selectedSlot === xCell && xCell < 2)
+                            this._weapon = this._inventory[xCell];
+                    }
+                }
+                else if (this._openedBox === null) {
+                    this._LMBPressed = true;
+                    this.Shoot();
+                }
             }
         });
         addEventListener("mouseup", (e) => {
@@ -238,6 +290,12 @@ export class Player extends Entity {
                 if (distance < 20000)
                     this._hasInteraction = npc;
             });
+        }
+        if (this._openedBox !== null) {
+            const distance = (this._x + this._width / 2 - (this._openedBox.GetPosition().X + this._openedBox.GetSize().X / 2)) ** 2 +
+                (this._y + this._height / 2 - (this._openedBox.GetPosition().Y + this._openedBox.GetSize().Y / 2)) ** 2;
+            if (distance > 100 ** 2)
+                this._openedBox = null;
         }
         if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic)
             this.Shoot();
@@ -296,35 +354,64 @@ export class Player extends Entity {
                 Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, y - 5, 340, 60);
                 Canvas.SetFillColor(new Color(30, 30, 30));
                 for (let i = 0; i < 6; i++) {
-                    Canvas.SetStroke(new Color(155, 155, 155), 1);
-                    if (i == this._selectedSlot)
+                    if (this._openedBox !== null) {
+                        const xCell = this._xTarget < 690
+                            ? Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2 - 5)) / 55)
+                            : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2)) / 55);
+                        const yCell = Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
+                        if (yCell === 0 && xCell == i)
+                            Canvas.SetStroke(new Color(200, 200, 200), 2);
+                        else
+                            Canvas.SetStroke(new Color(155, 155, 155), 1);
+                    }
+                    else if (i == this._selectedSlot)
                         Canvas.SetStroke(new Color(200, 200, 200), 2);
+                    else
+                        Canvas.SetStroke(new Color(155, 155, 155), 1);
                     Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), y, 50, 50));
-                    if (this._inventory[i] !== undefined)
+                    if (this._inventory[i] !== null)
                         Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4));
                 }
             }
             else {
                 Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, y - 5, 60, 60);
-                if (this._selectedSlot === 0)
+                if (this._openedBox !== null) {
+                    const xCell = Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 50 / 2)) / 55);
+                    const yCell = Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
+                    if (yCell === 0 && xCell == 0)
+                        Canvas.SetStroke(new Color(200, 200, 200), 2);
+                    else
+                        Canvas.SetStroke(new Color(155, 155, 155), 1);
+                }
+                else if (0 == this._selectedSlot)
                     Canvas.SetStroke(new Color(200, 200, 200), 2);
                 else
                     Canvas.SetStroke(new Color(155, 155, 155), 1);
+                Canvas.SetFillColor(new Color(30, 30, 30));
                 Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, y, 50, 50));
-                if (this._inventory[0] !== undefined)
+                if (this._inventory[0] !== null)
                     Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, y + 2, 50 - 4, 50 - 4));
             }
             if (this._openedBox !== null) {
                 Canvas.SetFillColor(new Color(70, 70, 70, 200));
                 Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 170 / 2, Canvas.GetSize().Y / 2 - 170 / 2, 170, 170);
-                // if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
-                // else
-                Canvas.SetStroke(new Color(155, 155, 155), 1);
+                const xCell = Math.floor((this._xTarget - (1500 / 2 - 170 / 2 + 5)) / 55);
+                const yCell = Math.floor((this._yTarget - (750 / 2 - 170 / 2 + 5)) / 55);
                 for (let y = -1; y <= 1; y++)
-                    for (let x = -1; x <= 1; x++)
+                    for (let x = -1; x <= 1; x++) {
+                        if (xCell == x + 1 && yCell == y + 1)
+                            Canvas.SetStroke(new Color(200, 200, 200), 2);
+                        else
+                            Canvas.SetStroke(new Color(155, 155, 155), 1);
                         Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 55 * x, Canvas.GetSize().Y / 2 - 50 / 2 + 55 * y, 50, 50));
+                        const item = this._openedBox.GetItemAt((x + 1), (y + 1));
+                        if (item !== null)
+                            Canvas.DrawImage(item.Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 55 * x + 2, Canvas.GetSize().Y / 2 - 50 / 2 + 55 * y + 2, 50 - 4, 50 - 4));
+                    }
             }
         }
+        if (this._draggedItem !== null)
+            Canvas.DrawImage(this._draggedItem.Icon, new Rectangle(this._xTarget - 25, this._yTarget - 25, 50, 50));
         if (this._interacting !== null && this._dialog !== null) {
             Canvas.SetFillColor(new Color(70, 70, 70));
             Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);

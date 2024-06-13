@@ -3,18 +3,21 @@ import { Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { GameObject, IPickapable, LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
 import { Weapon } from "../Weapons/Weapon.js";
-import { Item } from "./Item.js";
+import { IItem } from "./Item.js";
 
 export class Backpack extends GameObject implements IPickapable {
 	private static readonly _image = LoadImage(`Images/Player/Drop_backpack.png`, new Rectangle(11, 13, 10, 6), 5);
 	private static readonly _sound = LoadSound("Sounds/backpack_pickup.mp3");
-	private readonly _content: [Weapon?, Item?, Item?, Item?, Item?];
+	private readonly _content: [Weapon | null, IItem | null, IItem | null, IItem | null, IItem | null];
 	public readonly OnPickup?: () => void;
 
-	constructor(x: number, y: number, content?: [Weapon?, Item?, Item?, Item?, Item?]) {
+	constructor(x: number, y: number, content?: [Weapon?, IItem?, IItem?, IItem?, IItem?]) {
 		super(50, 50);
 
-		this._content = content;
+		this._content =
+			content === undefined
+				? [null, null, null, null, null]
+				: (content.map((x) => (x === undefined ? null : x)) as [Weapon | null, IItem | null, IItem | null, IItem | null, IItem | null]);
 		this.Tag = Tag.Pickable;
 		this._x = x;
 		this._y = y;
