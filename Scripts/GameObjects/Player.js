@@ -41,7 +41,7 @@ export class Player extends Entity {
             Left: LoadImage("Images/Player/Arm_left.png", new Rectangle(4, 14, 20, 4), 3),
             Right: LoadImage("Images/Player/Arm_right.png", new Rectangle(4, 14, 11, 8), 3),
         },
-        Backpack: LoadImage(`Images/Player/backpack.png`, new Rectangle(2, 9, 13, 10), 4),
+        Backpack: LoadImage(`Images/Player/Backpack.png`, new Rectangle(2, 9, 13, 10), 4),
     };
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
