@@ -2,6 +2,7 @@ import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle, Vector2 } from "../Utilites.js";
 import { Platform } from "./Platform.js";
+import { Spikes } from "./Spikes.js";
 
 export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
@@ -36,21 +37,39 @@ export class Entity extends GameObject {
 		this.Direction = this._xTarget > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 	}
 
+	public IsAlive() {
+		return this._health > 0;
+	}
+
 	public MoveRight() {
+		if (!this.IsAlive()) return;
+
 		this._x += this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.position.X != 0) this._x -= collideOffsets.position.X;
+		if (collideOffsets !== false) {
+			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
+
+			this._x -= collideOffsets.position.X;
+		}
 	}
 
 	public MoveLeft() {
+		if (!this.IsAlive()) return;
+
 		this._x -= this._speed;
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
-		if (collideOffsets !== false && collideOffsets.position.X != 0) this._x -= collideOffsets.position.X;
+		if (collideOffsets !== false) {
+			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
+
+			this._x -= collideOffsets.position.X;
+		}
 	}
 
 	public Jump() {
+		if (!this.IsAlive()) return;
+
 		if (!this._grounded) return;
 
 		this._verticalAcceleration = this._jumpForce;
@@ -67,7 +86,8 @@ export class Entity extends GameObject {
 
 			if (offsets !== false && offsets.position.Y !== 0) {
 				{
-					if (offsets.instance instanceof Platform && (offsets.position.Y < 0 || prevY < offsets.instance.GetPosition().Y + offsets.instance.GetCollider().Height)) return;
+					if (offsets.instance instanceof Spikes) this.TakeDamage(100);
+					else if (offsets.instance instanceof Platform && (offsets.position.Y < 0 || prevY < offsets.instance.GetPosition().Y + offsets.instance.GetCollider().Height)) return;
 
 					this._verticalAcceleration = 0;
 

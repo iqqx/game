@@ -28,7 +28,13 @@ export class Weapon {
     constructor(images, sounds, fireCooldown, damage, spread, heavy, auto, reloadTime, clip, handOffset, muzzleOffset) {
         this.Icon = images.Icon;
         this.Sprites = images;
-        this._sounds = { ...sounds, EmptyFire: LoadSound("Sounds/shoot_without.mp3"), Reload: LoadSound("Sounds/reload.wav") };
+        this._sounds = {
+            ...sounds,
+            EmptyFire: LoadSound("Sounds/shoot_without.mp3"),
+            Reload: LoadSound("Sounds/reload.wav"),
+            Impact: LoadSound("Sounds/impact.mp3"),
+            Hit: LoadSound("Sounds/hitmarker.mp3"),
+        };
         this._fireCooldown = fireCooldown;
         this._damage = damage;
         this._spread = spread;
@@ -87,8 +93,13 @@ export class Weapon {
         const muzzlePosition = new Vector2(this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X), this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y));
         const dir = this._angle - (Math.random() - 0.5) * this._spread;
         const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
-        if (hit !== undefined && hit.instance instanceof Entity)
+        if (hit !== undefined && hit.instance instanceof Entity) {
             hit.instance.TakeDamage(this._damage);
+            this._sounds.Hit.Play(0.15);
+        }
+        else if (hit !== undefined) {
+            this._sounds.Impact.Play((1 - Math.sqrt((muzzlePosition.X + Math.cos(this._angle) * 100 - hit.position.X) ** 2 + (muzzlePosition.Y - Math.sin(this._angle) * 100 - hit.position.Y) ** 2) / 1500) * 0.25);
+        }
         Scene.Current.Instantiate(new Bullet(muzzlePosition.X + Math.cos(this._angle) * 100, muzzlePosition.Y - Math.sin(this._angle) * 100, hit === undefined
             ? 2000
             : Math.sqrt((muzzlePosition.X + Math.cos(this._angle) * 100 - hit.position.X) ** 2 + (muzzlePosition.Y - Math.sin(this._angle) * 100 - hit.position.Y) ** 2), dir));

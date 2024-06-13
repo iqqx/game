@@ -23,6 +23,7 @@ export class Human extends Enemy {
         },
     };
     _weapon = new AK();
+    static _visibleDistance = 500;
     _angle = 0;
     constructor(x, y, type) {
         super(50, 100, 1, 100, type);
@@ -33,18 +34,22 @@ export class Human extends Enemy {
     Update(dt) {
         super.Update(dt);
         this._weapon?.Update(dt, new Vector2(this._x + this._width / 2, this._y + this._height * 0.6), this._angle);
-        if (!this.IsSpotPlayer())
-            return;
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
-        this._angle = (() => {
-            const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this._height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
-            if (this.Direction == 1)
-                return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
-            else
-                return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
-        })();
-        this._weapon.TryShoot(Tag.Player);
+        if (Scene.Current.Player.IsMoving() === 2 &&
+            Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)) != this.Direction &&
+            (plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)) ** 2 + (plrPos.Y + plrSize.Height / 2 - (this._y + this._height / 2)) < Human._visibleDistance ** 2)
+            this.Direction *= -1;
+        if (this.IsSpotPlayer()) {
+            this._angle = (() => {
+                const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this._height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2));
+                if (this.Direction == 1)
+                    return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+                else
+                    return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+            })();
+            this._weapon.TryShoot(Tag.Player);
+        }
     }
     Render() {
         if (this.Direction == 1) {
@@ -86,8 +91,10 @@ export class Human extends Enemy {
     IsSpotPlayer() {
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
+        if (Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)) != this.Direction)
+            return false;
         const hit = Scene.Current.Raycast(new Vector2(this._x + this._width / 2, this._y + this._height * 0.4), new Vector2(plrPos.X - this._x, plrPos.Y + plrSize.Height * 0.9 - (this._y + this._height * 0.4)), 1000, Tag.Player | Tag.Wall)[0];
-        return hit !== undefined && hit.instance instanceof Player;
+        return hit !== undefined && hit.instance instanceof Player && hit.instance.IsAlive();
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);

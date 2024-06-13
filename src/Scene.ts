@@ -108,6 +108,10 @@ export class Scene {
 		return this._gameObjects.filter((x) => x.Tag == tag);
 	}
 
+	public GetByType(type: typeof GameObject) {
+		return this._gameObjects.filter((x) => x instanceof type);
+	}
+
 	public Instantiate(object: GameObject) {
 		this._gameObjects.push(object);
 

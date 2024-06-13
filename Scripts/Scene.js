@@ -86,6 +86,9 @@ export class Scene {
     GetByTag(tag) {
         return this._gameObjects.filter((x) => x.Tag == tag);
     }
+    GetByType(type) {
+        return this._gameObjects.filter((x) => x instanceof type);
+    }
     Instantiate(object) {
         this._gameObjects.push(object);
         if (object instanceof Player)

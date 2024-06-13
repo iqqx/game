@@ -1,7 +1,7 @@
 import { EnemyType, Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Rectangle, Color, Vector2, LoadImage } from "../Utilites.js";
+import { Rectangle, Color, Vector2, LoadImage, LoadSound } from "../Utilites.js";
 import { Entity } from "./Entity.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
 import { Quest } from "../Quest.js";
@@ -9,6 +9,7 @@ import { Glock } from "../Assets/Weapons/Glock.js";
 import { Backpack } from "../Assets/Items/Backpack.js";
 import { Item } from "../Assets/Items/Item.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
+import { Box } from "./Box.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
@@ -27,6 +28,8 @@ export class Player extends Entity {
 	public HasBackpack = false;
 	private _armHeight: 0.5 | 0.65 = 0.65;
 	private _dialog: Dialog | null = null;
+	private _timeFromDeath: number = 0;
+	private _openedBox: Box | null = null;
 
 	private static readonly _name = "Володя";
 	private static readonly _speed = 5;
@@ -42,13 +45,20 @@ export class Player extends Entity {
 			LoadImage(`Images/Player/Walk/4.png`, new Rectangle(0, 2, 20, 30), 3),
 			LoadImage(`Images/Player/Walk/5.png`, new Rectangle(0, 2, 20, 30), 3),
 		],
-		Sit: [LoadImage(`Images/Player/Crouch/3.png`, new Rectangle(0, 2, 20, 30), 3)],
+		Sit: [
+			LoadImage(`Images/Player/Crouch/0.png`, new Rectangle(2, 2, 18, 30), 3),
+			LoadImage(`Images/Player/Crouch/1.png`, new Rectangle(2, 2, 18, 30), 3),
+			LoadImage(`Images/Player/Crouch/2.png`, new Rectangle(2, 2, 18, 30), 3),
+			LoadImage(`Images/Player/Crouch/3.png`, new Rectangle(2, 2, 18, 30), 3),
+		],
 		Hands: {
 			Left: LoadImage("Images/Player/Arm_left.png", new Rectangle(4, 14, 20, 4), 3),
 			Right: LoadImage("Images/Player/Arm_right.png", new Rectangle(4, 14, 11, 8), 3),
 		},
 		Backpack: LoadImage(`Images/Player/Backpack.png`, new Rectangle(2, 9, 13, 10), 4),
 	};
+	private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
+	private static readonly _walkSound = LoadSound("Sounds/walk.mp3");
 
 	constructor(x: number, y: number) {
 		super(40, 100, Player._speed, 100);
@@ -56,10 +66,11 @@ export class Player extends Entity {
 		this._x = x;
 		this._y = y;
 		// this._sit = true;
-		this._xTarget = -800;
+		this._xTarget = 800;
 		this._yTarget = y;
 		this.Tag = Tag.Player;
 		this._collider = new Rectangle(0, 0, this._width, this._height);
+		Player._walkSound.Speed = 1.6;
 
 		addEventListener("keydown", (e) => {
 			switch (e.code) {
@@ -68,6 +79,8 @@ export class Player extends Entity {
 						this._frameIndex = 0;
 						this._sit = true;
 						this._armHeight = 0.5;
+						Player._walkSound.Speed = 1;
+						Player._walkSound.Apply();
 
 						this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
 
@@ -79,6 +92,8 @@ export class Player extends Entity {
 							this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
 						} else {
 							this._sit = false;
+							Player._walkSound.Speed = 1.6;
+							Player._walkSound.Apply();
 							this._armHeight = 0.65;
 							this._speed = Player._speed;
 						}
@@ -119,6 +134,11 @@ export class Player extends Entity {
 					this._weapon?.Reload();
 					break;
 				case "KeyE":
+					if (this._openedBox !== null) {
+						this._openedBox = null;
+						return;
+					}
+
 					if (this._interacting !== null && this._dialog !== null) {
 						this._dialog.State++;
 
@@ -149,6 +169,18 @@ export class Player extends Entity {
 								}
 							}
 						});
+
+						for (const box of Scene.Current.GetByType(Box)) {
+							const distance =
+								(this._x + this._width / 2 - (box.GetPosition().X + box.GetSize().X / 2)) ** 2 +
+								(this._y + this._height / 2 - (box.GetPosition().Y + box.GetSize().Y / 2)) ** 2;
+
+							if (distance < 100 ** 2) {
+								this._openedBox = box;
+
+								break;
+							}
+						}
 					}
 					break;
 				default:
@@ -205,6 +237,8 @@ export class Player extends Entity {
 	public override Update(dt: number) {
 		const prevX = this._x;
 
+		if (this._timeFromDeath > 0) this._timeFromDeath -= dt;
+
 		super.Update(dt);
 
 		if (prevX != this._x) {
@@ -212,7 +246,9 @@ export class Player extends Entity {
 
 			if (this._timeToNextFrame <= 0) {
 				this._frameIndex = (this._frameIndex + 1) % (this._sit ? Player._frames.Sit.length : Player._frames.Walk.length);
-				this._timeToNextFrame = Player._animationFrameDuration;
+				this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
+
+				Player._walkSound.PlayOriginal();
 			}
 		} else {
 			this._frameIndex = 0;
@@ -440,33 +476,45 @@ export class Player extends Entity {
 
 	public RenderOverlay() {
 		if (this._interacting === null && this._dialog === null) {
-			Canvas.SetFillColor(new Color(70, 70, 70, 100));
+			const y = this._openedBox === null ? Canvas.GetSize().Y - 10 - 50 : Canvas.GetSize().Y / 2 + 170 / 2 + 10;
+
+			Canvas.SetFillColor(new Color(70, 70, 70, 200));
+
 			if (this.HasBackpack) {
-				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, Canvas.GetSize().Y - 5, 340, -60);
+				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, y - 5, 340, 60);
 				Canvas.SetFillColor(new Color(30, 30, 30));
 
 				for (let i = 0; i < 6; i++) {
 					Canvas.SetStroke(new Color(155, 155, 155), 1);
 					if (i == this._selectedSlot) Canvas.SetStroke(new Color(200, 200, 200), 2);
 
-					Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), Canvas.GetSize().Y - 50 - 10, 50, 50));
+					Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), y, 50, 50));
 
 					if (this._inventory[i] !== undefined)
-						Canvas.DrawImage(
-							this._inventory[i].Icon,
-							new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4)
-						);
+						Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4));
 				}
 			} else {
-				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, Canvas.GetSize().Y - 5, 60, -60);
+				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, y - 5, 60, 60);
 
 				if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
 				else Canvas.SetStroke(new Color(155, 155, 155), 1);
 
-				Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, Canvas.GetSize().Y - 50 - 10, 50, 50));
+				Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, y, 50, 50));
 
-				if (this._inventory[0] !== undefined)
-					Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, Canvas.GetSize().Y - 50 - 10 + 2, 50 - 4, 50 - 4));
+				if (this._inventory[0] !== undefined) Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, y + 2, 50 - 4, 50 - 4));
+			}
+
+			if (this._openedBox !== null) {
+				Canvas.SetFillColor(new Color(70, 70, 70, 200));
+
+				Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 170 / 2, Canvas.GetSize().Y / 2 - 170 / 2, 170, 170);
+
+				// if (this._selectedSlot === 0) Canvas.SetStroke(new Color(200, 200, 200), 2);
+				// else
+				Canvas.SetStroke(new Color(155, 155, 155), 1);
+
+				for (let y = -1; y <= 1; y++)
+					for (let x = -1; x <= 1; x++) Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 55 * x, Canvas.GetSize().Y / 2 - 50 / 2 + 55 * y, 50, 50));
 			}
 		}
 
@@ -499,17 +547,23 @@ export class Player extends Entity {
 			Canvas.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
 		});
 
+		// if (this._openedBox !== null) {
+
+		// }
+
 		// POSTPROCCES
 		if (this._needDrawRedVegnitte > 0) {
 			this._needDrawRedVegnitte--;
-			Canvas.DrawVignette(new Color(255, 0, 0));
+			Canvas.DrawVignette(Color.Red);
 		}
 		if (this._needDrawAntiVegnitte > 0) {
 			this._needDrawAntiVegnitte--;
 			Canvas.DrawVignette(new Color(100, 100, 100));
-			Canvas.SetFillColor(Color.Red);
+			// Canvas.SetFillColor(Color.Red);
 		}
-		Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0));
+
+		if (this._health > 0) Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.15, 0.7);
+		else Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 1 - this._timeFromDeath / 150, 1 - this._timeFromDeath / 150 + 0.5);
 
 		// Canvas.SetFillColor(Color.Red);
 		// if (this._health <= 0) Canvas.DrawRectangle(0, 0, 1500, 750);
@@ -552,6 +606,12 @@ export class Player extends Entity {
 		this._selectedSlot = slot;
 	}
 
+	public IsMoving(): 0 | 1 | 2 {
+		if (this._movingLeft || this._movingRight) return this._sit ? 1 : 2;
+
+		return 0;
+	}
+
 	public override Jump() {
 		if (!this._grounded || this._sit) return;
 
@@ -567,7 +627,15 @@ export class Player extends Entity {
 	}
 
 	override TakeDamage(damage: number): void {
+		if (this._health <= 0) return;
+
 		this._health -= damage;
 		this._needDrawRedVegnitte = 5;
+
+		if (this._health <= 0) {
+			this._timeFromDeath = 150;
+
+			Player._deathSound.Play();
+		}
 	}
 }

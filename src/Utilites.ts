@@ -229,16 +229,33 @@ export function LoadSound(source: string): Sound {
 	const s = new Audio(source);
 
 	return {
-		Play: (volume: number) => {
-			const c = s.cloneNode() as HTMLAudioElement;
-			c.volume = volume;
-			c.play();
+		Speed: 1,
+		Volume: 1,
+		Play: function (volume?: number, speed?: number) {
+			if (volume === undefined && speed === undefined) (s.cloneNode() as HTMLAudioElement).play();
+			else {
+				const c = s.cloneNode() as HTMLAudioElement;
+				c.volume = volume ?? this.Volume;
+				c.playbackRate = speed ?? this.Speed;
+				c.play();
+			}
+		},
+		Apply: function () {
+			s.volume = this.Volume;
+			s.playbackRate = this.Speed;
+		},
+		PlayOriginal: function () {
+			s.play();
 		},
 	};
 }
 
 export type Sound = {
-	Play: (volume: number) => void;
+	PlayOriginal: () => void;
+	Play: (volume?: number, speed?: number) => void;
+	Apply: () => void;
+	Speed: number;
+	Volume: number;
 };
 
 export interface IPickapable {

@@ -173,10 +173,24 @@ export function LoadImage(source, boundingBox, scale) {
 export function LoadSound(source) {
     const s = new Audio(source);
     return {
-        Play: (volume) => {
-            const c = s.cloneNode();
-            c.volume = volume;
-            c.play();
+        Speed: 1,
+        Volume: 1,
+        Play: function (volume, speed) {
+            if (volume === undefined && speed === undefined)
+                s.cloneNode().play();
+            else {
+                const c = s.cloneNode();
+                c.volume = volume ?? this.Volume;
+                c.playbackRate = speed ?? this.Speed;
+                c.play();
+            }
+        },
+        Apply: function () {
+            s.volume = this.Volume;
+            s.playbackRate = this.Speed;
+        },
+        PlayOriginal: function () {
+            s.play();
         },
     };
 }

@@ -10,7 +10,7 @@ import { Item } from "../Items/Item.js";
 export abstract class Weapon implements Item {
 	public readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite };
-	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound };
+	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
 
 	private readonly _fireCooldown: number;
 	private readonly _reloadTime: number;
@@ -46,7 +46,13 @@ export abstract class Weapon implements Item {
 	) {
 		this.Icon = images.Icon;
 		this.Sprites = images;
-		this._sounds = { ...sounds, EmptyFire: LoadSound("Sounds/shoot_without.mp3"), Reload: LoadSound("Sounds/reload.wav") };
+		this._sounds = {
+			...sounds,
+			EmptyFire: LoadSound("Sounds/shoot_without.mp3"),
+			Reload: LoadSound("Sounds/reload.wav"),
+			Impact: LoadSound("Sounds/impact.mp3"),
+			Hit: LoadSound("Sounds/hitmarker.mp3"),
+		};
 		this._fireCooldown = fireCooldown;
 		this._damage = damage;
 		this._spread = spread;
@@ -54,7 +60,7 @@ export abstract class Weapon implements Item {
 
 		this._reloadTime = reloadTime;
 		this._maxAmmoClip = clip;
-		this._loadedAmmo = clip
+		this._loadedAmmo = clip;
 		this.Heavy = heavy;
 		this._automatic = auto;
 		this.Automatic = auto;
@@ -144,7 +150,14 @@ export abstract class Weapon implements Item {
 		const dir = this._angle - (Math.random() - 0.5) * this._spread;
 		const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
 
-		if (hit !== undefined && hit.instance instanceof Entity) hit.instance.TakeDamage(this._damage);
+		if (hit !== undefined && hit.instance instanceof Entity) {
+			hit.instance.TakeDamage(this._damage);
+			this._sounds.Hit.Play(0.15);
+		} else if (hit !== undefined) {
+			this._sounds.Impact.Play(
+				(1 - Math.sqrt((muzzlePosition.X + Math.cos(this._angle) * 100 - hit.position.X) ** 2 + (muzzlePosition.Y - Math.sin(this._angle) * 100 - hit.position.Y) ** 2) / 1500) * 0.25
+			);
+		}
 
 		Scene.Current.Instantiate(
 			new Bullet(

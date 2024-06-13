@@ -134,12 +134,12 @@ export var Canvas;
         ctx.restore();
     }
     Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;
-    function DrawVignette(color) {
+    function DrawVignette(color, startAlpha, endAlpha) {
         var outerRadius = ctx.canvas.width * 0.6;
         var innerRadius = ctx.canvas.width * 0.5;
         var grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
-        grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, .1)`);
-        grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, .6)`);
+        grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
+        grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
