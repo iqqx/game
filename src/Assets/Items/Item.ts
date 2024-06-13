@@ -1,4 +1,4 @@
-import { LoadImage, Sprite } from "../../Utilites";
+import { LoadImage, Sprite } from "../../Utilites.js";
 
 export interface Item {
 	readonly Icon: Sprite;
