@@ -1,11 +1,13 @@
+import { Vodka } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { EnemyType, Tag } from "../../Enums.js";
-import { HasItemTask, KillTask, Quest } from "../../Quest.js";
+import { PickupBackpackTask, HasItemTask, KillTask, Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { LoadImage, Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
 export class Morshu extends Character {
     static _completedQuests = 0;
+    static _isTalked = false;
     static _image = LoadImage("Images/Morshu.png");
     constructor(x, y) {
         super(200, 200);
@@ -16,7 +18,11 @@ export class Morshu extends Character {
     Render() {
         Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
     }
+    static IsTalked() {
+        return Morshu._isTalked;
+    }
     GetDialog() {
+        Morshu._isTalked = true;
         if (Scene.Current.Player.Quests.some((x) => x.Giver === Morshu && !x.IsCompleted())) {
             return {
                 State: 0,
@@ -26,8 +32,13 @@ export class Morshu extends Character {
         if (Scene.Current.Player.Quests.some((x) => x.Giver === Morshu && x.IsCompleted())) {
             const quest = Scene.Current.Player.Quests.findIndex((x) => x.Giver === Morshu && x.IsCompleted());
             Morshu._completedQuests++;
-            if (Scene.Current.Player.Quests[quest].Tasks[0] instanceof HasItemTask)
+            if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof PickupBackpackTask))
                 Scene.Current.Player.HasBackpack = false;
+            if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof HasItemTask)) {
+                const task = Scene.Current.Player.Quests[quest].Tasks.find((x) => x instanceof HasItemTask);
+                for (const item of task.NeededItems)
+                    Scene.Current.Player.RemoveItem(item);
+            }
             Scene.Current.Player.Quests.splice(quest, 1);
             switch (Morshu._completedQuests) {
                 case 1:
@@ -40,6 +51,13 @@ export class Morshu extends Character {
                         State: 0,
                         Messages: ["Отлично, тот самый рюкзак. Давай его сюда", "Хорошо. Заходи позже за новым заданием.\nПрощай.", "Пока."],
                     };
+                case 3: {
+                    Scene.Current.Player.HasBackpack = true;
+                    return {
+                        State: 0,
+                        Messages: ["СЮДА", "Отдай рюкзак", "Держи"],
+                    };
+                }
             }
         }
         switch (Morshu._completedQuests) {
@@ -68,8 +86,14 @@ export class Morshu extends Character {
                     return {
                         State: 0,
                         Messages: ["Привет.", "Здарова, там был рюкзак?", "Сэр, да, сэр.", "Отлично. Ты его забрал?", "Сэр, нет, сэр.", "Паршиво! Иди быстрее за ним быстрее!", "Сейчас."],
-                        Quest: new Quest("Рюкзак", Morshu, new HasItemTask()),
+                        Quest: new Quest("Рюкзак", Morshu, new PickupBackpackTask()),
                     };
+            case 2:
+                return {
+                    State: 0,
+                    Messages: ["Привет.", "Здарова, хочешь вернуть свой рюкзак?", "Сэр, да, сэр.", "Тогда принеси мне водки, и побыстрее.", "Сейчас"],
+                    Quest: new Quest("Опохмелится", Morshu, new HasItemTask(Vodka)),
+                };
             default:
                 return {
                     State: 0,

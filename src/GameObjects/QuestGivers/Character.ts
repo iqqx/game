@@ -1,7 +1,5 @@
-import { EnemyType } from "../../Enums.js";
-import { KillTask, Quest } from "../../Quest.js";
+import { Quest } from "../../Quest.js";
 import { GameObject } from "../../Utilites.js";
-import { Morshu } from "./Morshu.js";
 
 export class Character extends GameObject {
 	protected _dialogLength = -1;
@@ -9,6 +7,10 @@ export class Character extends GameObject {
 
 	public GetDialog(): Dialog {
 		return;
+	}
+
+	public static IsTalked() {
+		return false;
 	}
 }
 

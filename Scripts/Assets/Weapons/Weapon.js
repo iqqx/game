@@ -5,7 +5,8 @@ import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
 import { Vector2, Rectangle, LoadSound } from "../../Utilites.js";
-export class Weapon {
+import { Item } from "../Items/Item.js";
+export class Weapon extends Item {
     Icon;
     Sprites;
     _sounds;
@@ -26,6 +27,7 @@ export class Weapon {
     _secondsToCooldown = 0;
     _secondsToReload = 0;
     constructor(images, sounds, fireCooldown, damage, spread, heavy, auto, reloadTime, clip, handOffset, muzzleOffset) {
+        super();
         this.Icon = images.Icon;
         this.Sprites = images;
         this._sounds = {

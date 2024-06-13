@@ -40,10 +40,44 @@ export class KillTask extends Task {
     }
 }
 export class HasItemTask extends Task {
+    NeededItems;
+    constructor(...items) {
+        super();
+        this.NeededItems = items;
+    }
+    IsCompleted() {
+        const playerItems = Scene.Current.Player.GetItems();
+        var has = true;
+        for (const item of this.NeededItems) {
+            if (playerItems.some((x) => x instanceof item) === false) {
+                has = false;
+                break;
+            }
+        }
+        return has;
+    }
+    toString() {
+        return this.IsCompleted() ? "Возвращайся к Моршу" : `Получи ${this.NeededItems.join(", ")}`;
+    }
+}
+export class PickupBackpackTask extends Task {
     IsCompleted() {
         return Scene.Current.Player.HasBackpack;
     }
     toString() {
-        return this.IsCompleted() ? "Отдай рюкзак Моршу" : "Забери рюкзак";
+        return this.IsCompleted() ? "Отдай рюкзак Моршу" : "Подбери рюкзак";
+    }
+}
+export class TalkTask extends Task {
+    _with;
+    constructor(With) {
+        super();
+        this._with = With;
+    }
+    IsCompleted() {
+        return this._with.IsTalked();
+    }
+    toString() {
+        return this.IsCompleted() ? "Меня не должно быть видно" : "Поговори с Моршу";
     }
 }

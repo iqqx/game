@@ -83,8 +83,8 @@ scene.Instantiate(new Platform(307, 294, 27, 3));
 scene.Instantiate(new Platform(489, 276, 35, 3));
 scene.Instantiate(new Wall(12001, 338, 72, 44));
 scene.Instantiate(new Spikes(13504, 5, 368, 14));
-// scene.Instantiate(new Human(2200, 300, EnemyType.Green));
-// scene.Instantiate(new Morshu(500, 170));
+scene.Instantiate(new Human(2200, 300, EnemyType.Green));
+scene.Instantiate(new Morshu(700, 260));
 scene.Instantiate(new Backpack(600, 260));
 scene.Instantiate(
 	new Box(

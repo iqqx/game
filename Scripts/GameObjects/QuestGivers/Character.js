@@ -5,4 +5,7 @@ export class Character extends GameObject {
     GetDialog() {
         return;
     }
+    static IsTalked() {
+        return false;
+    }
 }

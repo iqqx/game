@@ -14,4 +14,7 @@ export class AK extends Weapon {
     constructor() {
         super(AK._sprites, AK._sounds, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
     }
+    static toString() {
+        return "Калак 12";
+    }
 }

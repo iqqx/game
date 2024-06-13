@@ -14,4 +14,8 @@ export class Glock extends Weapon {
 	constructor() {
 		super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
 	}
+
+	static toString(): string {
+		return "Пистолет";
+	}
 }

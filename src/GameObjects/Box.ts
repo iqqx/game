@@ -1,16 +1,16 @@
-import { IItem } from "../Assets/Items/Item.js";
+import { Item } from "../Assets/Items/Item.js";
 import { Canvas } from "../Context.js";
 import { Scene } from "../Scene.js";
 import { Color, GameObject } from "../Utilites.js";
 
 export class Box extends GameObject {
-	private readonly _items: (IItem | null)[][] = [
+	private readonly _items: (Item | null)[][] = [
 		[null, null, null],
 		[null, null, null],
 		[null, null, null],
 	];
 
-	constructor(x: number, y: number, ...items: { item: IItem; Chance: number }[]) {
+	constructor(x: number, y: number, ...items: { item: Item; Chance: number }[]) {
 		super(100, 100);
 
 		this._x = x;
@@ -40,11 +40,11 @@ export class Box extends GameObject {
 		Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 100);
 	}
 
-	public GetItemAt(x: 0 | 1 | 2, y: 0 | 1 | 2): IItem | null {
+	public GetItemAt(x: 0 | 1 | 2, y: 0 | 1 | 2): Item | null {
 		return this._items[y][x];
 	}
 
-	public TakeItemFrom(x: 0 | 1 | 2, y: 0 | 1 | 2): IItem | null {
+	public TakeItemFrom(x: 0 | 1 | 2, y: 0 | 1 | 2): Item | null {
 		if (this._items[y][x] === null) return null;
 
 		const item = this._items[y][x];
@@ -53,7 +53,7 @@ export class Box extends GameObject {
 		return item;
 	}
 
-	public TryPushItemTo(x: 0 | 1 | 2, y: 0 | 1 | 2, item: IItem): boolean {
+	public TryPushItemTo(x: 0 | 1 | 2, y: 0 | 1 | 2, item: Item): boolean {
 		if (this._items[y][x] !== null) return false;
 
 		this._items[y][x] = item;
@@ -61,7 +61,7 @@ export class Box extends GameObject {
 		return true;
 	}
 
-	public TryPushItem(item: IItem): boolean {
+	public TryPushItem(item: Item): boolean {
 		for (let y = 0; y < 3; y++) {
 			for (let x = 0; x < 3; x++) {
 				if ((this._items[y][x] = null)) {

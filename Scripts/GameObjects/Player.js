@@ -127,13 +127,15 @@ export class Player extends Entity {
                     break;
                 case "KeyE":
                     if (this._openedBox !== null) {
+                        if (this._draggedItem !== null)
+                            this._openedBox.TryPushItem(this._draggedItem);
                         this._openedBox = null;
                         return;
                     }
                     if (this._interacting !== null && this._dialog !== null) {
                         this._dialog.State++;
                         if (this._dialog.Messages.length == this._dialog.State) {
-                            if (this._dialog.Quest !== null)
+                            if (this._dialog.Quest !== undefined)
                                 this.Quests.push(this._dialog.Quest);
                             this._interacting = null;
                             this._hasInteraction = null;
@@ -205,10 +207,13 @@ export class Player extends Entity {
                                 if (this._weapon === this._draggedItem)
                                     this._weapon = null;
                             }
-                            else if (this._inventory[xCell] === null && (xCell >= 2 || this._draggedItem instanceof Weapon)) {
+                            else {
+                                const existItem = this._inventory[xCell];
+                                if (existItem === this._weapon)
+                                    this._weapon = null;
                                 this._inventory[xCell] = this._draggedItem;
-                                this._draggedItem = null;
-                                if (this._selectedSlot === xCell && xCell < 2)
+                                this._draggedItem = existItem;
+                                if (this._selectedSlot === xCell && xCell < 2 && this._inventory[xCell] instanceof Weapon)
                                     this._weapon = this._inventory[xCell];
                             }
                         }
@@ -234,7 +239,7 @@ export class Player extends Entity {
                     else if (this._inventory[xCell] === null && (xCell >= 2 || this._draggedItem instanceof Weapon)) {
                         this._inventory[xCell] = this._draggedItem;
                         this._draggedItem = null;
-                        if (this._selectedSlot === xCell && xCell < 2)
+                        if (this._selectedSlot === xCell && xCell < 2 && this._inventory[xCell] instanceof Weapon)
                             this._weapon = this._inventory[xCell];
                     }
                 }
@@ -294,8 +299,11 @@ export class Player extends Entity {
         if (this._openedBox !== null) {
             const distance = (this._x + this._width / 2 - (this._openedBox.GetPosition().X + this._openedBox.GetSize().X / 2)) ** 2 +
                 (this._y + this._height / 2 - (this._openedBox.GetPosition().Y + this._openedBox.GetSize().Y / 2)) ** 2;
-            if (distance > 100 ** 2)
+            if (distance > 100 ** 2) {
+                if (this._draggedItem !== null)
+                    this._openedBox.TryPushItem(this._draggedItem);
                 this._openedBox = null;
+            }
         }
         if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic)
             this.Shoot();
@@ -471,8 +479,20 @@ export class Player extends Entity {
     OnKilled(type) {
         this.Quests.forEach((x) => x.OnKilled(type));
     }
+    GetItems() {
+        const copy = [];
+        for (const item of this._inventory)
+            if (item !== null)
+                copy.push(item);
+        return copy;
+    }
     GetPosition() {
         return new Vector2(this._x, this._y);
+    }
+    RemoveItem(item) {
+        for (let i = 0; i < this._inventory.length; i++)
+            if (this._inventory[i] instanceof item)
+                this._inventory[i] = null;
     }
     SelectSlot(slot) {
         if (slot > 0 && !this.HasBackpack)
@@ -482,7 +502,7 @@ export class Player extends Entity {
             this._weapon = null;
             return;
         }
-        if (slot <= 1)
+        if (this._inventory[slot] instanceof Weapon)
             this._weapon = this._inventory[slot];
         else
             this._weapon = null;

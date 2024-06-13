@@ -5,9 +5,9 @@ import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
 import { Sprite, Sound, Vector2, Rectangle, LoadSound } from "../../Utilites.js";
-import { IItem } from "../Items/Item.js";
+import { Item } from "../Items/Item.js";
 
-export abstract class Weapon implements IItem {
+export abstract class Weapon extends Item {
 	public readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite };
 	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
@@ -44,6 +44,8 @@ export abstract class Weapon implements IItem {
 		handOffset: Vector2,
 		muzzleOffset: Vector2
 	) {
+		super();
+
 		this.Icon = images.Icon;
 		this.Sprites = images;
 		this._sounds = {
