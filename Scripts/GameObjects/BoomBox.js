@@ -41,7 +41,7 @@ export class AudioSource extends Interactable {
     }
     Render() {
         Canvas.SetFillColor(Color.White);
-        Canvas.DrawImageWithAngle(AudioSource._frames[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height), this._enabled ? (Math.cos(this._life / 50) - 0.5) / 10 : 0, -this.Width / 2, this.Height / 2);
+        Canvas.DrawImageWithAngle(AudioSource._frames[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height), this._enabled ? Math.cos(this._life / 50) / 10 : 0, -this.Width / 2, this.Height / 2);
     }
     GetInteractives() {
         return [this._enabled ? "выключить" : "включить", this._silent ? "прибавить" : "убавить", "переключить"];

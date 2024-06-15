@@ -84,7 +84,7 @@ scene.Instantiate(new Spikes(13504, 5, 368, 14));
 scene.Instantiate(new Morshu(700, 260));
 scene.Instantiate(new Backpack(600, 260, new Glock()));
 scene.Instantiate(new Box(400, 260, { item: new Bread(), Chance: 0.9 }, { item: new Bread(), Chance: 0.5 }, { item: new Vodka(), Chance: 1 }, { item: new AidKit(), Chance: 0.2 }, { item: new AK(), Chance: 0.3 }, { item: new Sausage(), Chance: 0.6 }, { item: new Radio(), Chance: 1 }));
-scene.Instantiate(new BoomBox(375, 310, 1000, LoadSound("Sounds/music.mp3"), LoadSound("Sounds/music-2.mp3"), LoadSound("Sounds/music-3.mp3")));
+scene.Instantiate(new BoomBox(375, 310, 1000, LoadSound("Sounds/music.mp3"), LoadSound("Sounds/music-2.mp3"), LoadSound("Sounds/music-3.mp3"), LoadSound("https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3"), LoadSound("https://pool.anison.fm/AniSonFM(320)")));
 scene.Instantiate(new Player(310, 500));
 function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);

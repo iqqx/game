@@ -100,7 +100,18 @@ scene.Instantiate(
 		{ item: new Radio(), Chance: 1 }
 	)
 );
-scene.Instantiate(new BoomBox(375, 310, 1000, LoadSound("Sounds/music.mp3"), LoadSound("Sounds/music-2.mp3"), LoadSound("Sounds/music-3.mp3")));
+scene.Instantiate(
+	new BoomBox(
+		375,
+		310,
+		1000,
+		LoadSound("Sounds/music.mp3"),
+		LoadSound("Sounds/music-2.mp3"),
+		LoadSound("Sounds/music-3.mp3"),
+		LoadSound("https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3"),
+		LoadSound("https://pool.anison.fm/AniSonFM(320)"),
+	)
+);
 scene.Instantiate(new Player(310, 500));
 
 function gameLoop(timeStamp: number) {
