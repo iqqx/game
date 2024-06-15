@@ -23,11 +23,13 @@ export class Player extends Entity {
 	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null; // new Backpack(1, 1);
 	private _weapon: Weapon | null = null;
-	private _hasInteraction: Character | null = null;
-	private _interacting: Character | null = null;
 	public readonly Quests: Quest[] = [];
 	private _armHeight: 0.5 | 0.65 = 0.65;
 	private _dialog: Dialog | null = null;
+	private _dialogState = 0;
+	private _dialogContinueHovered: boolean = false;
+	private _chars = 0;
+	private _timeToNextChar = 0;
 	private _timeFromDeath: number = 0;
 	private _openedContainer: Container | null = null;
 	private _draggedItem: Item | null = null;
@@ -62,6 +64,7 @@ export class Player extends Entity {
 	};
 	private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
 	private static readonly _walkSound = LoadSound("Sounds/walk.mp3");
+	private static readonly _dialogSound = LoadSound("Sounds/dialog.mp3");
 
 	constructor(x: number, y: number) {
 		super(40, 100, Player._speed, 100);
@@ -132,23 +135,8 @@ export class Player extends Entity {
 						}
 
 						this._openedContainer = null;
-
-						return;
-					}
-
-					if (this._interacting !== null && this._dialog !== null) {
-						this._dialog.State++;
-
-						if (this._dialog.Messages.length == this._dialog.State) {
-							if (this._dialog.Quest !== undefined) this.Quests.push(this._dialog.Quest);
-
-							this._interacting = null;
-							this._hasInteraction = null;
-							this._dialog = null;
-						}
-					} else if (this._hasInteraction !== null) {
-						this._interacting = this._hasInteraction;
-						this._dialog = this._interacting.GetDialog();
+					} else if (this._dialog !== null) {
+						this.ContinueDialog();
 					} else if (this._hoveredObject !== null) this._hoveredObject.OnInteractSelected(this._selectedInteraction);
 
 					break;
@@ -179,7 +167,11 @@ export class Player extends Entity {
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 
 			if (e.button === 0) {
-				if (this._openedContainer !== null) {
+				if (this._dialog !== null) {
+					if (this._dialog.Messages[this._dialogState].length === this._chars) this.ContinueDialog();
+
+					return;
+				} else if (this._openedContainer !== null) {
 					const hotbarY = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
 
 					if (this._yTarget < GUI.Height - hotbarY + 10) {
@@ -261,6 +253,14 @@ export class Player extends Entity {
 			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+
+			if (this._dialog !== null) {
+				this._dialogContinueHovered =
+					e.offsetX > GUI.Width / 2 + 500 / 2 - 155 &&
+					e.offsetY > GUI.Height - 200 - 95 &&
+					e.offsetX < GUI.Width / 2 + 500 / 2 - 155 + 150 &&
+					e.offsetY < GUI.Height - 200 - 95 + 35;
+			}
 		});
 
 		addEventListener("wheel", (e) => {
@@ -273,31 +273,42 @@ export class Player extends Entity {
 	}
 
 	public override Update(dt: number) {
-		const prevX = this._x;
-
 		if (this._timeFromDeath > 0) this._timeFromDeath -= dt;
+		if (this._dialog !== null && this._timeToNextChar > 0) {
+			this._timeToNextChar -= dt;
+
+			if (this._timeToNextChar <= 0) {
+				this._chars++;
+
+				Player._dialogSound.Play(0.05);
+
+				if (this._chars < this._dialog.Messages[this._dialogState].length) this._timeToNextChar = 75;
+			}
+		}
 
 		this.ApplyVForce();
 
-		if (this._movingLeft) this.MoveLeft();
-		else if (this._movingRight) this.MoveRight();
+		if (this.CanTarget()) {
+			const prevX = this._x;
 
-		if (this.CanTarget()) this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+			if (this._movingLeft) this.MoveLeft();
+			else if (this._movingRight) this.MoveRight();
 
-		if (prevX != this._x) {
-			this._timeToNextFrame -= dt;
+			this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 
-			if (this._timeToNextFrame <= 0) {
-				this._frameIndex = (this._frameIndex + 1) % (this._sit ? Player._frames.Sit.length : Player._frames.Walk.length);
-				this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
+			if (prevX != this._x) {
+				this._timeToNextFrame -= dt;
 
-				Player._walkSound.PlayOriginal();
+				if (this._timeToNextFrame <= 0) {
+					this._frameIndex = (this._frameIndex + 1) % (this._sit ? Player._frames.Sit.length : Player._frames.Walk.length);
+					this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
+
+					Player._walkSound.PlayOriginal();
+				}
+			} else {
+				this._frameIndex = 0;
 			}
-		} else {
-			this._frameIndex = 0;
-		}
 
-		if (this.CanTarget())
 			this._angle = (() => {
 				const angle = -Math.atan2(this._yTarget - (this._y + this.Height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this.Width / 2));
 
@@ -305,36 +316,14 @@ export class Player extends Entity {
 				else return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 			})();
 
-		this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
+			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
 
-		if (this._interacting === null) {
-			this._hasInteraction = null;
+			const lastHover = this._hoveredObject;
+			this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
+			if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
 
-			Scene.Current.GetByTag(Tag.NPC).forEach((npc) => {
-				const distance =
-					(this._x + this.Width / 2 - (npc.GetPosition().X + npc.GetSize().X / 2)) ** 2 + (this._y + this.Height / 2 - (npc.GetPosition().Y + npc.GetSize().Y / 2)) ** 2;
-
-				if (distance < 20000) this._hasInteraction = npc as Character;
-			});
+			if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic) this.Shoot();
 		}
-
-		if (this._openedContainer !== null) {
-			const distance =
-				(this._x + this.Width / 2 - (this._openedContainer.GetPosition().X + this._openedContainer.GetSize().X / 2)) ** 2 +
-				(this._y + this.Height / 2 - (this._openedContainer.GetPosition().Y + this._openedContainer.GetSize().Y / 2)) ** 2;
-
-			if (distance > 100 ** 2) {
-				if (this._draggedItem !== null) this._openedContainer.TryPushItem(this._draggedItem);
-
-				this._openedContainer = null;
-			}
-		}
-
-		const lastHover = this._hoveredObject;
-		this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
-		if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
-
-		if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic) this.Shoot();
 	}
 
 	public override Render() {
@@ -547,7 +536,7 @@ export class Player extends Entity {
 	}
 
 	public RenderOverlay() {
-		if (this._hoveredObject !== null && this._openedContainer === null) {
+		if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
 			const items = this._hoveredObject.GetInteractives();
 
 			GUI.SetFillColor(new Color(70, 70, 70));
@@ -568,28 +557,18 @@ export class Player extends Entity {
 			}
 		}
 
-		if (this._interacting === null && this._dialog === null) {
+		if (this._dialog === null) {
 			const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
 
 			if (this._backpack !== null) {
 				const firstXOffset = GUI.Width / 2 - 55 * 3;
 
-				GUI.SetFillColor(new Color(70, 70, 70, 200));
+				GUI.SetFillColor(new Color(70, 70, 70));
 				GUI.SetStroke(new Color(155, 155, 155), 1);
 				GUI.DrawRectangle(firstXOffset - 5, y - 5, 6 * 55 + 10, 55 + 5);
 
-				// Canvas.SetFillColor(Color.Red);
-				// Canvas.DrawRectangle(750, 0, 1, 1000);
-				// Canvas.DrawRectangle(750 - 90, 0, 1, 1000);
-				// Canvas.DrawRectangle(750 + 90, 0, 1, 1000);
-				// Canvas.DrawRectangle(750 - 180, 0, 1, 1000);
-				// Canvas.DrawRectangle(750 + 180, 0, 1, 1000);
-				// Canvas.DrawRectangle(0, 750 / 2, 10000, 1);
-				// Canvas.DrawRectangle(0, 750 / 2 + 90, 10000, 1);
-				// Canvas.DrawRectangle(0, 750 / 2 - 90, 10000, 1);
-
 				GUI.ClearStroke();
-				GUI.SetFillColor(new Color(155, 155, 155, 100));
+				GUI.SetFillColor(new Color(155, 155, 155));
 				GUI.DrawRectangle(firstXOffset + 2 * 55 - 1, y - 4, 2, 58);
 
 				const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
@@ -610,7 +589,6 @@ export class Player extends Entity {
 						if (this._inventory[i] instanceof Weapon) {
 							const loaded = (this._inventory[i] as Weapon).GetLoadedAmmo();
 							const loadedRatio = (this._inventory[i] as Weapon).GetFillClipRatio();
-							// const reload = ;
 
 							const displayAmmo = (() => {
 								if ((this._inventory[i] as Weapon).IsReloading()) return "~";
@@ -624,7 +602,7 @@ export class Player extends Entity {
 
 							GUI.SetFillColor(Color.White);
 							GUI.SetFont(12);
-							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 5, y + 46 + 2, displayAmmo);
+							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
 						}
 					} else if (i >= 2 && this._backpack.GetItemAt(i - 2, 0) !== null)
 						GUI.DrawImage(this._backpack.GetItemAt(i - 2, 0).Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
@@ -632,7 +610,7 @@ export class Player extends Entity {
 			} else {
 				const firstXOffset = GUI.Width / 2 - 52.5;
 
-				GUI.SetFillColor(new Color(70, 70, 70, 200));
+				GUI.SetFillColor(new Color(70, 70, 70));
 				GUI.SetStroke(new Color(155, 155, 155), 1);
 				GUI.DrawRectangle(firstXOffset - 5, y - 5, 2 * 55 + 5, 55 + 5);
 
@@ -655,7 +633,6 @@ export class Player extends Entity {
 						if (this._inventory[i] instanceof Weapon) {
 							const loaded = (this._inventory[i] as Weapon).GetLoadedAmmo();
 							const loadedRatio = (this._inventory[i] as Weapon).GetFillClipRatio();
-							// const reload = ;
 
 							const displayAmmo = (() => {
 								if ((this._inventory[i] as Weapon).IsReloading()) return "~";
@@ -669,7 +646,7 @@ export class Player extends Entity {
 
 							GUI.SetFillColor(Color.White);
 							GUI.SetFont(12);
-							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 5, y + 46 + 2, displayAmmo);
+							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
 						}
 					}
 				}
@@ -694,7 +671,7 @@ export class Player extends Entity {
 					for (let x = 0; x < this._openedContainer.SlotsSize.X; x++) {
 						if (xCell == x && yCell == y) GUI.SetStroke(new Color(200, 200, 200), 2);
 						else GUI.SetStroke(new Color(100, 100, 100), 1);
-						GUI.SetFillColor(new Color(30, 30, 30, 200));
+						GUI.SetFillColor(new Color(30, 30, 30));
 
 						GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
 
@@ -702,26 +679,29 @@ export class Player extends Entity {
 						if (item !== null) GUI.DrawImage(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
 					}
 			}
+		} else {
+			GUI.SetStroke(new Color(100, 100, 100), 2);
+			GUI.SetFillColor(new Color(70, 70, 70));
+			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2, GUI.Height - 200 - 100, 500, 200);
+			GUI.SetFillColor(new Color(50, 50, 50));
+			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2 + 5, GUI.Height - 200 - 95, 335, 35);
+			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2 + 5, GUI.Height - 150 - 100 - 5, 490, 150);
+
+			if (this._dialogContinueHovered) GUI.SetFillColor(new Color(75, 75, 75));
+
+			if (this._dialog.Messages[this._dialogState].length === this._chars) GUI.DrawRectangle(GUI.Width / 2 + 500 / 2 - 155, GUI.Height - 200 - 95, 150, 35);
+
+			GUI.SetFillColor(Color.White);
+			GUI.SetFont(24);
+			GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 70, this._dialogState % 2 === 0 ? Player._name : "Моршу");
+			GUI.SetFont(16);
+			// GUI.DrawTextWrapped(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235, this._dialog.Messages[this._dialogState].slice(0, this._chars), 490);
+			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235);
+
+			if (this._dialog.Messages[this._dialogState].length === this._chars) GUI.DrawTextCenter("ПРОДОЛЖИТЬ", GUI.Width / 2 + 500 / 2 - 140, GUI.Height - 200 - 72, 120);
 		}
 
 		if (this._draggedItem !== null) GUI.DrawImage(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
-
-		if (this._interacting !== null && this._dialog !== null) {
-			Canvas.SetFillColor(new Color(70, 70, 70));
-			Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
-			Canvas.SetFillColor(Color.White);
-			GUI.SetFont(24);
-			GUI.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._dialog.State % 2 === 0 ? Player._name : "Моршу");
-			GUI.SetFont(16);
-			GUI.DrawTextInRectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, this._dialog.Messages[this._dialog.State]);
-			GUI.DrawText(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]");
-		} else if (this._hasInteraction) {
-			GUI.SetFillColor(new Color(70, 70, 70));
-			GUI.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
-			GUI.SetFillColor(Color.White);
-			GUI.SetFont(16);
-			GUI.DrawText(1500 / 2 - 200 / 2, 50, "Поговорить с Моршу   [E]");
-		}
 
 		this.Quests.forEach((quest, i) => {
 			Canvas.SetStroke(Color.Yellow, 2);
@@ -811,8 +791,27 @@ export class Player extends Entity {
 		} else if (this._backpack !== null) return this._backpack.TakeItemFrom(x - 2, 0);
 	}
 
+	public SpeakWith(character: Character) {
+		this._dialogState = 0;
+		this._timeToNextChar = 75;
+		this._dialog = character.GetDialog();
+	}
+
+	private ContinueDialog() {
+		this._dialogState++;
+
+		if (this._dialog.Messages.length == this._dialogState) {
+			if (this._dialog.Quest !== undefined) this.Quests.push(this._dialog.Quest);
+
+			this._dialog = null;
+		} else {
+			this._chars = 0;
+			this._timeToNextChar = 75;
+		}
+	}
+
 	public CanTarget() {
-		return this._openedContainer === null;
+		return this._openedContainer === null && this._dialog === null;
 	}
 
 	public PutBackpack(backpack: Backpack) {

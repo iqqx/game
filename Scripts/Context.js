@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
 ctxMain.imageSmoothingEnabled = false;
@@ -7,9 +8,9 @@ const ctxOverlay = document.createElement("canvas").getContext("2d");
 ctxOverlay.canvas.width = ctxMain.canvas.width;
 ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
-var ctx = ctxMain;
-var fillStyle;
-var strokeStyle;
+let ctx = ctxMain;
+let fillStyle;
+let strokeStyle;
 export var Canvas;
 (function (Canvas) {
     function SwitchLayer(onMain = true) {
@@ -116,7 +117,7 @@ export var Canvas;
     }
     Canvas.DrawCircle = DrawCircle;
     function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
-        var prev = ctx.getTransform();
+        const prev = ctx.getTransform();
         ctx.resetTransform();
         ctx.translate(x, ctx.canvas.height - y);
         ctx.rotate(angle);
@@ -125,7 +126,7 @@ export var Canvas;
     }
     Canvas.DrawRectangleWithAngle = DrawRectangleWithAngle;
     function DrawRectangleWithAngleAndStroke(x, y, width, height, angle, xPivot, yPivot) {
-        var prev = ctx.getTransform();
+        const prev = ctx.getTransform();
         ctx.resetTransform();
         ctx.translate(x, ctx.canvas.height - y);
         ctx.rotate(angle);
@@ -160,9 +161,9 @@ export var Canvas;
     }
     Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;
     function DrawVignette(color, startAlpha, endAlpha) {
-        var outerRadius = ctx.canvas.width * 0.6;
-        var innerRadius = ctx.canvas.width * 0.5;
-        var grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
+        const outerRadius = ctx.canvas.width * 0.6;
+        const innerRadius = ctx.canvas.width * 0.5;
+        const grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
         ctx.fillStyle = grd;
@@ -218,7 +219,8 @@ export var GUI;
     }
     GUI.ClearStroke = ClearStroke;
     function SetFont(size) {
-        ctx.font = `${size}px arial`;
+        ctx.font = `${size}px Consolas`; // Monospace
+        ctx.letterSpacing = "2px";
     }
     GUI.SetFont = SetFont;
     function DrawRectangle(x, y, width, height) {
@@ -234,18 +236,46 @@ export var GUI;
         ctx.fillText(text, x, y);
     }
     GUI.DrawText = DrawText;
+    function DrawTextWithBreakes(text, x, y) {
+        const height = ctx.measureText("|").actualBoundingBoxAscent + ctx.measureText("|").actualBoundingBoxDescent;
+        const lines = text.split("\n");
+        for (let i = 0; i < lines.length; i++)
+            ctx.fillText(lines[i], x, y + i * height);
+    }
+    GUI.DrawTextWithBreakes = DrawTextWithBreakes;
     function DrawTextCenter(text, x, y, width) {
         const textWidth = ctx.measureText(text).width;
         ctx.fillText(text, x + (width - textWidth) / 2, y);
     }
     GUI.DrawTextCenter = DrawTextCenter;
-    function DrawTextInRectangle(x, y, text, maxWidth) {
+    function DrawTextClamped(x, y, text, maxWidth) {
         const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
-        const lines = text.split("\n");
-        for (let i = 0; i < lines.length; i++)
-            ctx.fillText(lines[i], x, y + i * height);
+        const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
+        for (let i = 0; i < Math.ceil(text.length / lineCount); i++)
+            ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
     }
-    GUI.DrawTextInRectangle = DrawTextInRectangle;
+    GUI.DrawTextClamped = DrawTextClamped;
+    function DrawTextWrapped(x, y, text, maxWidth) {
+        const height = ctx.measureText("0").actualBoundingBoxAscent + ctx.measureText("0").actualBoundingBoxDescent;
+        // const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
+        const words = text.split(" ");
+        const lines = [];
+        let added = 0;
+        for (let l = 0; l < 50; l++) {
+            let lastSpace = maxWidth;
+            for (let i = 0; i < 50; i++) {
+                lastSpace -= ctx.measureText(words[added + i] + " ").width;
+                if (lastSpace < 0 || words.length < added + i) {
+                    lines.push(words.slice(added, added + i).join(" "));
+                    added += i;
+                    break;
+                }
+            }
+            ctx.fillText(lines[l], x, y + l * height * 2);
+        }
+        // for (let i = 0; i < Math.ceil(text.length / lineCount); i++) ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
+    }
+    GUI.DrawTextWrapped = DrawTextWrapped;
     function DrawImage(image, x, y, width, height) {
         ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
     }

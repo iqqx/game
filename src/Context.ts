@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { Color, Rectangle, Sprite, Vector2 } from "./Utilites.js";
 
 const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
@@ -10,10 +11,10 @@ ctxOverlay.canvas.width = ctxMain.canvas.width;
 ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
 
-var ctx = ctxMain;
+let ctx = ctxMain;
 
-var fillStyle: string | CanvasGradient | CanvasPattern | null;
-var strokeStyle: [string | CanvasGradient | CanvasPattern, number] | null;
+let fillStyle: string | CanvasGradient | CanvasPattern | null;
+let strokeStyle: [string | CanvasGradient | CanvasPattern, number] | null;
 
 export namespace Canvas {
 	export function SwitchLayer(onMain = true) {
@@ -151,7 +152,7 @@ export namespace Canvas {
 	}
 
 	export function DrawRectangleWithAngle(x: number, y: number, width: number, height: number, angle: number, xPivot: number, yPivot: number) {
-		var prev = ctx.getTransform();
+		const prev = ctx.getTransform();
 
 		ctx.resetTransform();
 		ctx.translate(x, ctx.canvas.height - y);
@@ -163,7 +164,7 @@ export namespace Canvas {
 	}
 
 	export function DrawRectangleWithAngleAndStroke(x: number, y: number, width: number, height: number, angle: number, xPivot: number, yPivot: number) {
-		var prev = ctx.getTransform();
+		const prev = ctx.getTransform();
 
 		ctx.resetTransform();
 		ctx.translate(x, ctx.canvas.height - y);
@@ -207,9 +208,9 @@ export namespace Canvas {
 	}
 
 	export function DrawVignette(color: Color, startAlpha?: number, endAlpha?: number) {
-		var outerRadius = ctx.canvas.width * 0.6;
-		var innerRadius = ctx.canvas.width * 0.5;
-		var grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
+		const outerRadius = ctx.canvas.width * 0.6;
+		const innerRadius = ctx.canvas.width * 0.5;
+		const grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
 		grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
 		grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
 
@@ -276,7 +277,8 @@ export namespace GUI {
 	}
 
 	export function SetFont(size: number) {
-		ctx.font = `${size}px arial`;
+		ctx.font = `${size}px Consolas`; // Monospace
+		ctx.letterSpacing = "2px";
 	}
 
 	export function DrawRectangle(x: number, y: number, width: number, height: number) {
@@ -292,17 +294,50 @@ export namespace GUI {
 		ctx.fillText(text, x, y);
 	}
 
+	export function DrawTextWithBreakes(text: string, x: number, y: number) {
+		const height = ctx.measureText("|").actualBoundingBoxAscent + ctx.measureText("|").actualBoundingBoxDescent;
+		const lines = text.split("\n");
+
+		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, y + i * height);
+	}
+
 	export function DrawTextCenter(text: string, x: number, y: number, width: number) {
 		const textWidth = ctx.measureText(text).width;
 
 		ctx.fillText(text, x + (width - textWidth) / 2, y);
 	}
 
-	export function DrawTextInRectangle(x: number, y: number, text: string, maxWidth?: number) {
+	export function DrawTextClamped(x: number, y: number, text: string, maxWidth: number) {
 		const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
-		const lines = text.split("\n");
+		const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
 
-		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, y + i * height);
+		for (let i = 0; i < Math.ceil(text.length / lineCount); i++) ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
+	}
+
+	export function DrawTextWrapped(x: number, y: number, text: string, maxWidth: number) {
+		const height = ctx.measureText("0").actualBoundingBoxAscent + ctx.measureText("0").actualBoundingBoxDescent;
+		// const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
+		const words = text.split(" ");
+		const lines: string[] = [];
+		let added = 0;
+
+		for (let l = 0; l < 50; l++) {
+			let lastSpace = maxWidth;
+
+			for (let i = 0; i < 50; i++) {
+				lastSpace -= ctx.measureText(words[added + i] + " ").width;
+
+				if (lastSpace < 0 || words.length < added + i) {
+					lines.push(words.slice(added, added + i).join(" "));
+					added += i;
+					break;
+				}
+			}
+
+			ctx.fillText(lines[l], x, y + l * height * 2);
+		}
+
+		// for (let i = 0; i < Math.ceil(text.length / lineCount); i++) ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
 	}
 
 	export function DrawImage(image: Sprite, x: number, y: number, width: number, height: number) {
