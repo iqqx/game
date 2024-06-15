@@ -172,10 +172,24 @@ export class Player extends Entity {
         addEventListener("mousedown", (e) => {
             if (e.target.tagName !== "CANVAS")
                 return;
+            if (this._hoveredObject !== null) {
+                if (e.offsetX > this._xTarget - 75 && e.offsetX < this._xTarget - 75 + 150)
+                    if (e.offsetY > 750 - this._yTarget + 50 && e.offsetY < 750 - this._yTarget + 50 + 25 * this._hoveredObject.GetInteractives().length) {
+                        const cell = Math.floor((e.offsetY - (750 - this._yTarget + 50)) / 25);
+                        if (cell >= 0 && cell < this._hoveredObject.GetInteractives().length) {
+                            this._hoveredObject.OnInteractSelected(cell);
+                            return;
+                        }
+                    }
+            }
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (e.button === 0) {
+                const lastHover = this._hoveredObject;
+                this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
+                if (lastHover === null && this._hoveredObject !== null)
+                    this._selectedInteraction = 0;
                 if (this._dialog !== null) {
                     if (this._dialog.Messages[this._dialogState].length === this._chars)
                         this.ContinueDialog();
@@ -256,6 +270,8 @@ export class Player extends Entity {
         });
         addEventListener("mousemove", (e) => {
             if (e.target.tagName !== "CANVAS")
+                return;
+            if (e.sourceCapabilities.firesTouchEvents === true)
                 return;
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
