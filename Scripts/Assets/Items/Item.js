@@ -7,6 +7,12 @@ export class Vodka extends Item {
         return "Водка";
     }
 }
+export class Radio extends Item {
+    Icon = LoadImage("Images/Items/Radio.png");
+    static toString() {
+        return "Радио";
+    }
+}
 export class AidKit extends Item {
     Icon = LoadImage("Images/Items/FirstAid.png");
     static toString() {

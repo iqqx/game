@@ -30,7 +30,7 @@ export abstract class Enemy extends Entity {
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 
-		this.Direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this._width / 2)) as -1 | 1;
+		this.Direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2)) as -1 | 1;
 
 		if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5) return;
 

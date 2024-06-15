@@ -20,7 +20,7 @@ export class Entity extends GameObject {
         this._speed = Math.clamp(speed, 0, Number.MAX_VALUE);
         this._health = Math.clamp(maxHealth, 1, Number.MAX_VALUE);
         this._maxHealth = this._health;
-        this._collider = new Rectangle(this._x, this._y, this._width, this._height);
+        this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
     }
     Update(dt) {
         this.ApplyVForce();
@@ -28,7 +28,7 @@ export class Entity extends GameObject {
             this.MoveLeft();
         else if (this._movingRight)
             this.MoveRight();
-        this.Direction = this._xTarget > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+        this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
     }
     IsAlive() {
         return this._health > 0;

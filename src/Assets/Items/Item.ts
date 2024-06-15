@@ -12,6 +12,14 @@ export class Vodka extends Item {
 	}
 }
 
+export class Radio extends Item {
+	public readonly Icon = LoadImage("Images/Items/Radio.png");
+
+	static toString(): string {
+		return "Радио";
+	}
+}
+
 export class AidKit extends Item {
 	public readonly Icon = LoadImage("Images/Items/FirstAid.png");
 

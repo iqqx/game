@@ -1,19 +1,17 @@
-import { Backpack } from "./Assets/Items/Backpack.js";
-import { AidKit, Bread, Vodka } from "./Assets/Items/Item.js";
+import { Backpack } from "./Assets/Containers/Backpack.js";
+import { AidKit, Bread, Radio, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AK } from "./Assets/Weapons/AK.js";
-import { Canvas } from "./Context.js";
 import { EnemyType } from "./Enums.js";
-import { Box } from "./GameObjects/Box.js";
+import { Box } from "./Assets/Containers/Box.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
-import { Rat } from "./GameObjects/Enemies/Rat.js";
 import { Platform } from "./GameObjects/Platform.js";
 import { Player } from "./GameObjects/Player.js";
 import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
 import { Spikes } from "./GameObjects/Spikes.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Scene } from "./Scene.js";
-import { SceneEditor } from "./SceneEditor.js";
-import { LoadImage } from "./Utilites.js";
+import { IsImagesLoaded, LoadImage } from "./Utilites.js";
+import { Glock } from "./Assets/Weapons/Glock.js";
 
 const scene = new Scene(LoadImage("Images/Level_1.png"));
 
@@ -85,7 +83,7 @@ scene.Instantiate(new Wall(12001, 338, 72, 44));
 scene.Instantiate(new Spikes(13504, 5, 368, 14));
 scene.Instantiate(new Human(2200, 300, EnemyType.Green));
 scene.Instantiate(new Morshu(700, 260));
-scene.Instantiate(new Backpack(600, 260));
+scene.Instantiate(new Backpack(600, 260, new Glock()));
 scene.Instantiate(
 	new Box(
 		400,
@@ -94,7 +92,9 @@ scene.Instantiate(
 		{ item: new Bread(), Chance: 0.5 },
 		{ item: new Vodka(), Chance: 1 },
 		{ item: new AidKit(), Chance: 0.2 },
-		{ item: new AK(), Chance: 0.3 }
+		{ item: new AK(), Chance: 0.3 },
+		{ item: new Sausage(), Chance: 0.6 },
+		{ item: new Radio(), Chance: 1 }
 	)
 );
 scene.Instantiate(new Player(300, 500));
@@ -107,4 +107,13 @@ function gameLoop(timeStamp: number) {
 	scene.RenderOverlay();
 }
 
-gameLoop(0);
+function loadLoop() {
+	const n = window.requestAnimationFrame(loadLoop);
+
+	if (!IsImagesLoaded()) return;
+
+	window.cancelAnimationFrame(n);
+	gameLoop(0);
+}
+
+loadLoop();

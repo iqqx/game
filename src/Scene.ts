@@ -1,26 +1,25 @@
 import { Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, Color } from "./Utilites.js";
+import { GameObject, Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, Interactable } from "./Utilites.js";
 
 export class Scene {
 	public static Current: Scene;
 
-	private readonly _gameObjects: GameObject[];
-	public readonly Length: number;
+	private readonly _gameObjects: GameObject[] = [];
+	private readonly _interactableGameObjects: Interactable[] = [];
+
 	private readonly _background: Sprite;
 
+	public static readonly Player: Player;
 	public Player: Player;
 	private _levelPosition = 0;
 	public Time = 0;
 
 	constructor(background: Sprite) {
-		this.Length = background.Image.naturalWidth * (Canvas.GetSize().Y / background.Image.naturalHeight);
 		this._background = background;
 
 		Scene.Current = this;
-
-		this._gameObjects = [];
 	}
 
 	public GetLevelPosition() {
@@ -79,11 +78,25 @@ export class Scene {
 		return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
 	}
 
-	public Update(time: number) {
-		const plrPos = this.Player.GetPosition();
-		const plrTargetRaw = this.Player.GetTarget();
+	public GetInteractiveAt(x: number, y: number): Interactable | null {
+		for (const object of this._interactableGameObjects) {
+			const playerCenter = this.Player.GetCenter();
+			const position = object.GetRectangle();
 
-		this._levelPosition = Math.round(Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
+			if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 * 100) continue;
+			if (x > position.X && x < position.X + position.Width && y > position.Y && y < position.Y + position.Height) return object;
+		}
+
+		return null;
+	}
+
+	public Update(time: number) {
+		if (this.Player.CanTarget()) {
+			const plrPos = this.Player.GetPosition();
+			const plrTargetRaw = this.Player.GetTarget();
+
+			this._levelPosition = Math.round(Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
+		}
 
 		for (const object of this._gameObjects) object.Update(time - this.Time);
 
@@ -115,8 +128,18 @@ export class Scene {
 	public Instantiate(object: GameObject) {
 		this._gameObjects.push(object);
 
-		if (object instanceof Player) this.Player = object;
+		if (object instanceof Player) {
+			this.Player = object;
+			(Scene.Player as unknown) = object;
+		}
 
-		object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
+		if (object instanceof Interactable) {
+			this._interactableGameObjects.push(object);
+
+			object.OnDestroy = () => {
+				this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
+				this._interactableGameObjects.splice(this._interactableGameObjects.indexOf(object), 1);
+			};
+		} else object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
 	}
 }

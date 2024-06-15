@@ -10,7 +10,10 @@ ctxOverlay.canvas.width = ctxMain.canvas.width;
 ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
 
-let ctx = ctxMain;
+var ctx = ctxMain;
+
+var fillStyle: string | CanvasGradient | CanvasPattern | null;
+var strokeStyle: [string | CanvasGradient | CanvasPattern, number] | null;
 
 export namespace Canvas {
 	export function SwitchLayer(onMain = true) {
@@ -26,11 +29,39 @@ export namespace Canvas {
 
 	export function SetFillColor(color: Color) {
 		ctx.fillStyle = color.toString();
+
+		fillStyle = color.toString();
+	}
+
+	export function ClearFillColor() {
+		fillStyle = null;
+	}
+
+	export function ClearStroke() {
+		strokeStyle = null;
 	}
 
 	export function SetStroke(color: Color, width: number) {
 		ctx.strokeStyle = color.toString();
 		ctx.lineWidth = width;
+
+		strokeStyle = [color.toString(), width];
+	}
+
+	export function SetFillRadialGradient(rect: Rectangle, start: Color, end: Color) {
+		const grd = ctx.createRadialGradient(
+			rect.X + rect.Width / 2,
+			ctx.canvas.height - rect.Height * 0.5 - rect.Y,
+			0,
+			rect.X + rect.Width / 2,
+			ctx.canvas.height - rect.Height * 0.5 - rect.Y,
+			Math.max(rect.Width, rect.Height) * 2
+		);
+
+		grd.addColorStop(0, start.toString());
+		grd.addColorStop(1, end.toString());
+
+		ctx.fillStyle = grd;
 	}
 
 	export function ResetTransform() {
@@ -41,15 +72,19 @@ export namespace Canvas {
 		ctx.translate(x, y);
 	}
 
+	export function ClearRectangle(x: number, y: number, width: number, height: number) {
+		ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+	}
+
 	export function DrawRectangle(x: number, y: number, width: number, height: number) {
 		ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
 	}
 
 	export function DrawRectangleEx(rect: Rectangle) {
 		ctx.beginPath();
-		ctx.rect(rect.X, ctx.canvas.height - rect.Y - rect.Height, rect.Width, rect.Height);
-		ctx.fill();
-		ctx.stroke();
+		ctx.rect(rect.X, ctx.canvas.height - rect.Y, rect.Width, -rect.Height);
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
 	}
 
 	export function DrawRectangleRounded(rect: Rectangle, round: number) {
@@ -213,19 +248,64 @@ export namespace Canvas {
 	export function GetClientRectangle() {
 		return ctx.canvas.getBoundingClientRect();
 	}
+}
 
-	export function SetFont(size: number, family = "arial") {
-		ctx.font = `${size}px ${family}`;
+export namespace GUI {
+	export const Width = ctxOverlay.canvas.width;
+	export const Height = ctxOverlay.canvas.height;
+
+	export function SetFillColor(color: Color) {
+		ctx.fillStyle = color.toString();
+
+		fillStyle = color.toString();
+	}
+
+	export function SetStroke(color: Color, width: number) {
+		ctx.strokeStyle = color.toString();
+		ctx.lineWidth = width;
+
+		strokeStyle = [color.toString(), width];
+	}
+
+	export function ClearFillColor() {
+		fillStyle = null;
+	}
+
+	export function ClearStroke() {
+		strokeStyle = null;
+	}
+
+	export function SetFont(size: number) {
+		ctx.font = `${size}px arial`;
+	}
+
+	export function DrawRectangle(x: number, y: number, width: number, height: number) {
+		ctx.beginPath();
+
+		ctx.rect(x, y, width, height);
+
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
 	}
 
 	export function DrawText(x: number, y: number, text: string) {
 		ctx.fillText(text, x, y);
 	}
 
-	export function DrawTextInRectangle(text: string, rect: Rectangle) {
+	export function DrawTextCenter(text: string, x: number, y: number, width: number) {
+		const textWidth = ctx.measureText(text).width;
+
+		ctx.fillText(text, x + (width - textWidth) / 2, y);
+	}
+
+	export function DrawTextInRectangle(x: number, y: number, text: string, maxWidth?: number) {
 		const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
 		const lines = text.split("\n");
 
-		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], rect.X, rect.Y + i * height);
+		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, y + i * height);
+	}
+
+	export function DrawImage(image: Sprite, x: number, y: number, width: number, height: number) {
+		ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
 	}
 }

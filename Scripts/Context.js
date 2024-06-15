@@ -7,7 +7,9 @@ const ctxOverlay = document.createElement("canvas").getContext("2d");
 ctxOverlay.canvas.width = ctxMain.canvas.width;
 ctxOverlay.canvas.height = ctxMain.canvas.height;
 ctxOverlay.imageSmoothingEnabled = false;
-let ctx = ctxMain;
+var ctx = ctxMain;
+var fillStyle;
+var strokeStyle;
 export var Canvas;
 (function (Canvas) {
     function SwitchLayer(onMain = true) {
@@ -25,13 +27,30 @@ export var Canvas;
     Canvas.EraseRectangle = EraseRectangle;
     function SetFillColor(color) {
         ctx.fillStyle = color.toString();
+        fillStyle = color.toString();
     }
     Canvas.SetFillColor = SetFillColor;
+    function ClearFillColor() {
+        fillStyle = null;
+    }
+    Canvas.ClearFillColor = ClearFillColor;
+    function ClearStroke() {
+        strokeStyle = null;
+    }
+    Canvas.ClearStroke = ClearStroke;
     function SetStroke(color, width) {
         ctx.strokeStyle = color.toString();
         ctx.lineWidth = width;
+        strokeStyle = [color.toString(), width];
     }
     Canvas.SetStroke = SetStroke;
+    function SetFillRadialGradient(rect, start, end) {
+        const grd = ctx.createRadialGradient(rect.X + rect.Width / 2, ctx.canvas.height - rect.Height * 0.5 - rect.Y, 0, rect.X + rect.Width / 2, ctx.canvas.height - rect.Height * 0.5 - rect.Y, Math.max(rect.Width, rect.Height) * 2);
+        grd.addColorStop(0, start.toString());
+        grd.addColorStop(1, end.toString());
+        ctx.fillStyle = grd;
+    }
+    Canvas.SetFillRadialGradient = SetFillRadialGradient;
     function ResetTransform() {
         ctx.resetTransform();
     }
@@ -40,15 +59,21 @@ export var Canvas;
         ctx.translate(x, y);
     }
     Canvas.Translate = Translate;
+    function ClearRectangle(x, y, width, height) {
+        ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+    }
+    Canvas.ClearRectangle = ClearRectangle;
     function DrawRectangle(x, y, width, height) {
         ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
     }
     Canvas.DrawRectangle = DrawRectangle;
     function DrawRectangleEx(rect) {
         ctx.beginPath();
-        ctx.rect(rect.X, ctx.canvas.height - rect.Y - rect.Height, rect.Width, rect.Height);
-        ctx.fill();
-        ctx.stroke();
+        ctx.rect(rect.X, ctx.canvas.height - rect.Y, rect.Width, -rect.Height);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
     }
     Canvas.DrawRectangleEx = DrawRectangleEx;
     function DrawRectangleRounded(rect, round) {
@@ -168,19 +193,61 @@ export var Canvas;
         return ctx.canvas.getBoundingClientRect();
     }
     Canvas.GetClientRectangle = GetClientRectangle;
-    function SetFont(size, family = "arial") {
-        ctx.font = `${size}px ${family}`;
+})(Canvas || (Canvas = {}));
+export var GUI;
+(function (GUI) {
+    GUI.Width = ctxOverlay.canvas.width;
+    GUI.Height = ctxOverlay.canvas.height;
+    function SetFillColor(color) {
+        ctx.fillStyle = color.toString();
+        fillStyle = color.toString();
     }
-    Canvas.SetFont = SetFont;
+    GUI.SetFillColor = SetFillColor;
+    function SetStroke(color, width) {
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = width;
+        strokeStyle = [color.toString(), width];
+    }
+    GUI.SetStroke = SetStroke;
+    function ClearFillColor() {
+        fillStyle = null;
+    }
+    GUI.ClearFillColor = ClearFillColor;
+    function ClearStroke() {
+        strokeStyle = null;
+    }
+    GUI.ClearStroke = ClearStroke;
+    function SetFont(size) {
+        ctx.font = `${size}px arial`;
+    }
+    GUI.SetFont = SetFont;
+    function DrawRectangle(x, y, width, height) {
+        ctx.beginPath();
+        ctx.rect(x, y, width, height);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    GUI.DrawRectangle = DrawRectangle;
     function DrawText(x, y, text) {
         ctx.fillText(text, x, y);
     }
-    Canvas.DrawText = DrawText;
-    function DrawTextInRectangle(text, rect) {
+    GUI.DrawText = DrawText;
+    function DrawTextCenter(text, x, y, width) {
+        const textWidth = ctx.measureText(text).width;
+        ctx.fillText(text, x + (width - textWidth) / 2, y);
+    }
+    GUI.DrawTextCenter = DrawTextCenter;
+    function DrawTextInRectangle(x, y, text, maxWidth) {
         const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
         const lines = text.split("\n");
         for (let i = 0; i < lines.length; i++)
-            ctx.fillText(lines[i], rect.X, rect.Y + i * height);
+            ctx.fillText(lines[i], x, y + i * height);
     }
-    Canvas.DrawTextInRectangle = DrawTextInRectangle;
-})(Canvas || (Canvas = {}));
+    GUI.DrawTextInRectangle = DrawTextInRectangle;
+    function DrawImage(image, x, y, width, height) {
+        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
+    }
+    GUI.DrawImage = DrawImage;
+})(GUI || (GUI = {}));

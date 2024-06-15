@@ -21,7 +21,7 @@ export class Morshu extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
+		Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 	}
 
 	public static override IsTalked() {
@@ -42,7 +42,7 @@ export class Morshu extends Character {
 			const quest = Scene.Current.Player.Quests.findIndex((x) => x.Giver === Morshu && x.IsCompleted());
 			Morshu._completedQuests++;
 
-			if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof PickupBackpackTask)) Scene.Current.Player.HasBackpack = false;
+			// if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof PickupBackpackTask)) Scene.Current.Player.HasBackpack = false;
 			if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof HasItemTask)) {
 				const task = Scene.Current.Player.Quests[quest].Tasks.find((x) => x instanceof HasItemTask) as HasItemTask;
 
@@ -63,7 +63,7 @@ export class Morshu extends Character {
 						Messages: ["Отлично, тот самый рюкзак. Давай его сюда", "Хорошо. Заходи позже за новым заданием.\nПрощай.", "Пока."],
 					};
 				case 3: {
-					Scene.Current.Player.HasBackpack = true;
+					// Scene.Current.Player.HasBackpack() = true;
 
 					return {
 						State: 0,
@@ -89,7 +89,7 @@ export class Morshu extends Character {
 			case 1:
 				if (Scene.Current.Player.HasBackpack) {
 					Morshu._completedQuests++;
-					Scene.Current.Player.HasBackpack = false;
+					// Scene.Current.Player.HasBackpack = false;
 
 					return {
 						State: 0,

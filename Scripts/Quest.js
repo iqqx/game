@@ -62,7 +62,7 @@ export class HasItemTask extends Task {
 }
 export class PickupBackpackTask extends Task {
     IsCompleted() {
-        return Scene.Current.Player.HasBackpack;
+        return Scene.Current.Player.HasBackpack();
     }
     toString() {
         return this.IsCompleted() ? "Отдай рюкзак Моршу" : "Подбери рюкзак";

@@ -1,4 +1,4 @@
-import { Canvas } from "./Context.js";
+import { Canvas, GUI } from "./Context.js";
 import { Vector2, Color, Rectangle } from "./Utilites.js";
 import { Platform } from "./GameObjects/Platform.js";
 import { Wall } from "./GameObjects/Wall.js";
@@ -186,8 +186,8 @@ export class SceneEditor {
         Canvas.SetFillColor(new Color(0, 0, 0));
         Canvas.DrawRectangle(0, Canvas.GetSize().Y, 500, -50);
         Canvas.SetFillColor(new Color(255, 255, 255));
-        Canvas.SetFont(24);
-        Canvas.DrawText(5, 25, (() => {
+        GUI.SetFont(24);
+        GUI.DrawText(5, 25, (() => {
             switch (this._selectedType) {
                 case 0:
                     return "Select";
@@ -198,16 +198,16 @@ export class SceneEditor {
             }
         })());
         if (this._selectedRectangle !== null) {
-            Canvas.SetFont(16);
-            Canvas.DrawText(100, 20, "z: Изменить тип.");
-            Canvas.DrawText(100, 35, "x: Удалить.");
+            GUI.SetFont(16);
+            GUI.DrawText(100, 20, "z: Изменить тип.");
+            GUI.DrawText(100, 35, "x: Удалить.");
             if (this._shiftPressed)
-                Canvas.DrawText(250, 20, "Стрелочки: Изменить размер.");
+                GUI.DrawText(250, 20, "Стрелочки: Изменить размер.");
             else
-                Canvas.DrawText(250, 20, "Стрелочки: Изменить положение.");
+                GUI.DrawText(250, 20, "Стрелочки: Изменить положение.");
         }
         else
-            Canvas.DrawText(100, 20, "c: Преобразовать.");
+            GUI.DrawText(100, 20, "c: Преобразовать.");
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);
         Canvas.SwitchLayer();

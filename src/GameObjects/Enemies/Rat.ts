@@ -32,9 +32,9 @@ export class Rat extends Enemy {
 			if (
 				Math.abs(
 					this._x +
-						(this.Direction === 1 ? this._width : 0) -
+						(this.Direction === 1 ? this.Width : 0) -
 						(plrPos.X + (this.Direction === 1 ? plrSize.Width : 0))
-				) <= this._width &&
+				) <= this.Width &&
 				this._y == plrPos.Y
 			) {
 				this._attackCooldown = Rat.AttackCooldown;
@@ -55,8 +55,8 @@ export class Rat extends Enemy {
 				new Rectangle(
 					this._x - Scene.Current.GetLevelPosition(),
 					this._y,
-					this._width,
-					this._height
+					this.Width,
+					this.Height
 				)
 			);
 		} else {
@@ -65,8 +65,8 @@ export class Rat extends Enemy {
 				new Rectangle(
 					this._x - Scene.Current.GetLevelPosition(),
 					this._y,
-					this._width,
-					this._height
+					this.Width,
+					this.Height
 				)
 			);
 		}

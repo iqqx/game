@@ -16,7 +16,7 @@ export class Morshu extends Character {
         this._y = y;
     }
     Render() {
-        Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
+        Canvas.DrawImage(Morshu._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
     static IsTalked() {
         return Morshu._isTalked;
@@ -32,8 +32,7 @@ export class Morshu extends Character {
         if (Scene.Current.Player.Quests.some((x) => x.Giver === Morshu && x.IsCompleted())) {
             const quest = Scene.Current.Player.Quests.findIndex((x) => x.Giver === Morshu && x.IsCompleted());
             Morshu._completedQuests++;
-            if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof PickupBackpackTask))
-                Scene.Current.Player.HasBackpack = false;
+            // if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof PickupBackpackTask)) Scene.Current.Player.HasBackpack = false;
             if (Scene.Current.Player.Quests[quest].Tasks.some((x) => x instanceof HasItemTask)) {
                 const task = Scene.Current.Player.Quests[quest].Tasks.find((x) => x instanceof HasItemTask);
                 for (const item of task.NeededItems)
@@ -52,7 +51,7 @@ export class Morshu extends Character {
                         Messages: ["Отлично, тот самый рюкзак. Давай его сюда", "Хорошо. Заходи позже за новым заданием.\nПрощай.", "Пока."],
                     };
                 case 3: {
-                    Scene.Current.Player.HasBackpack = true;
+                    // Scene.Current.Player.HasBackpack() = true;
                     return {
                         State: 0,
                         Messages: ["СЮДА", "Отдай рюкзак", "Держи"],
@@ -76,7 +75,7 @@ export class Morshu extends Character {
             case 1:
                 if (Scene.Current.Player.HasBackpack) {
                     Morshu._completedQuests++;
-                    Scene.Current.Player.HasBackpack = false;
+                    // Scene.Current.Player.HasBackpack = false;
                     return {
                         State: 0,
                         Messages: ["Привет.", "Здарова, там был рюкзак?", "Сэр, да, сэр.", "Отлично. Ты его забрал?", "Сэр, да, сэр.", "Отлично, давай сюда. Прощай", "Пока."],

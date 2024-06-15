@@ -1,19 +1,18 @@
 import { Player } from "./GameObjects/Player.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Line, GetIntersectPoint, Lerp } from "./Utilites.js";
+import { GameObject, Line, GetIntersectPoint, Lerp, Interactable } from "./Utilites.js";
 export class Scene {
     static Current;
-    _gameObjects;
-    Length;
+    _gameObjects = [];
+    _interactableGameObjects = [];
     _background;
+    static Player;
     Player;
     _levelPosition = 0;
     Time = 0;
     constructor(background) {
-        this.Length = background.Image.naturalWidth * (Canvas.GetSize().Y / background.Image.naturalHeight);
         this._background = background;
         Scene.Current = this;
-        this._gameObjects = [];
     }
     GetLevelPosition() {
         return this._levelPosition;
@@ -64,10 +63,23 @@ export class Scene {
         }
         return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
     }
+    GetInteractiveAt(x, y) {
+        for (const object of this._interactableGameObjects) {
+            const playerCenter = this.Player.GetCenter();
+            const position = object.GetRectangle();
+            if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 * 100)
+                continue;
+            if (x > position.X && x < position.X + position.Width && y > position.Y && y < position.Y + position.Height)
+                return object;
+        }
+        return null;
+    }
     Update(time) {
-        const plrPos = this.Player.GetPosition();
-        const plrTargetRaw = this.Player.GetTarget();
-        this._levelPosition = Math.round(Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
+        if (this.Player.CanTarget()) {
+            const plrPos = this.Player.GetPosition();
+            const plrTargetRaw = this.Player.GetTarget();
+            this._levelPosition = Math.round(Lerp(this._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
+        }
         for (const object of this._gameObjects)
             object.Update(time - this.Time);
         this.Time = time;
@@ -91,8 +103,18 @@ export class Scene {
     }
     Instantiate(object) {
         this._gameObjects.push(object);
-        if (object instanceof Player)
+        if (object instanceof Player) {
             this.Player = object;
-        object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
+            Scene.Player = object;
+        }
+        if (object instanceof Interactable) {
+            this._interactableGameObjects.push(object);
+            object.OnDestroy = () => {
+                this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
+                this._interactableGameObjects.splice(this._interactableGameObjects.indexOf(object), 1);
+            };
+        }
+        else
+            object.OnDestroy = () => this._gameObjects.splice(this._gameObjects.indexOf(object), 1);
     }
 }

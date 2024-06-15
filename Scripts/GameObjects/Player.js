@@ -1,12 +1,9 @@
+import { Weapon } from "../Assets/Weapons/Weapon.js";
+import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
-import { Canvas } from "../Context.js";
-import { Rectangle, Color, Vector2, LoadImage, LoadSound } from "../Utilites.js";
+import { LoadImage, Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
 import { Entity } from "./Entity.js";
-import { Glock } from "../Assets/Weapons/Glock.js";
-import { Backpack } from "../Assets/Items/Backpack.js";
-import { Weapon } from "../Assets/Weapons/Weapon.js";
-import { Box } from "./Box.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
     _frameIndex = 0;
@@ -15,18 +12,20 @@ export class Player extends Entity {
     _angle = 1;
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
-    _selectedSlot = null;
-    _inventory = [new Glock(), null, null, null, null, null];
+    _selectedHand = 0;
+    _inventory = [null, null];
+    _backpack = null; // new Backpack(1, 1);
     _weapon = null;
     _hasInteraction = null;
     _interacting = null;
     Quests = [];
-    HasBackpack = false;
     _armHeight = 0.65;
     _dialog = null;
     _timeFromDeath = 0;
-    _openedBox = null;
+    _openedContainer = null;
     _draggedItem = null;
+    _hoveredObject = null;
+    _selectedInteraction = 0;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -59,11 +58,10 @@ export class Player extends Entity {
         super(40, 100, Player._speed, 100);
         this._x = x;
         this._y = y;
-        // this._sit = true;
         this._xTarget = 800;
         this._yTarget = y;
         this.Tag = Tag.Player;
-        this._collider = new Rectangle(0, 0, this._width, this._height);
+        this._collider = new Rectangle(0, 0, this.Width, this.Height);
         Player._walkSound.Speed = 1.6;
         Player._walkSound.Apply();
         addEventListener("keydown", (e) => {
@@ -75,13 +73,13 @@ export class Player extends Entity {
                         this._armHeight = 0.5;
                         Player._walkSound.Speed = 1;
                         Player._walkSound.Apply();
-                        this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
+                        this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
                         this._speed = Player._speed * Player._sitSpeedModifier;
                     }
                     else {
-                        this._collider = new Rectangle(0, 0, this._width, this._height);
+                        this._collider = new Rectangle(0, 0, this.Width, this.Height);
                         if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
-                            this._collider = new Rectangle(0, 0, this._width, this._height * Player._sitHeightModifier);
+                            this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
                         }
                         else {
                             this._sit = false;
@@ -96,22 +94,10 @@ export class Player extends Entity {
                     this.Jump();
                     break;
                 case "Digit1":
-                    this.SelectSlot(0);
+                    this.ChangeActiveHand(0);
                     break;
                 case "Digit2":
-                    this.SelectSlot(1);
-                    break;
-                case "Digit3":
-                    this.SelectSlot(2);
-                    break;
-                case "Digit4":
-                    this.SelectSlot(3);
-                    break;
-                case "Digit5":
-                    this.SelectSlot(4);
-                    break;
-                case "Digit6":
-                    this.SelectSlot(5);
+                    this.ChangeActiveHand(1);
                     break;
                 case "KeyA":
                     this._movingLeft = true;
@@ -126,10 +112,12 @@ export class Player extends Entity {
                     this._weapon?.Reload();
                     break;
                 case "KeyE":
-                    if (this._openedBox !== null) {
-                        if (this._draggedItem !== null)
-                            this._openedBox.TryPushItem(this._draggedItem);
-                        this._openedBox = null;
+                    if (this._openedContainer !== null) {
+                        if (this._draggedItem !== null) {
+                            this._openedContainer.TryPushItem(this._draggedItem);
+                            this._draggedItem = null;
+                        }
+                        this._openedContainer = null;
                         return;
                     }
                     if (this._interacting !== null && this._dialog !== null) {
@@ -146,28 +134,8 @@ export class Player extends Entity {
                         this._interacting = this._hasInteraction;
                         this._dialog = this._interacting.GetDialog();
                     }
-                    else {
-                        Scene.Current.GetByTag(Tag.Pickable).forEach((pickup) => {
-                            const distance = (this._x + this._width / 2 - (pickup.GetPosition().X + pickup.GetSize().X / 2)) ** 2 +
-                                (this._y + this._height / 2 - (pickup.GetPosition().Y + pickup.GetSize().Y / 2)) ** 2;
-                            if (distance < 20000) {
-                                if (pickup instanceof Backpack) {
-                                    this.HasBackpack = true;
-                                    const content = pickup.Pickup();
-                                    for (let i = 0; i < 5; i++)
-                                        this._inventory[i + 1] = content[i];
-                                }
-                            }
-                        });
-                        for (const box of Scene.Current.GetByType(Box)) {
-                            const distance = (this._x + this._width / 2 - (box.GetPosition().X + box.GetSize().X / 2)) ** 2 +
-                                (this._y + this._height / 2 - (box.GetPosition().Y + box.GetSize().Y / 2)) ** 2;
-                            if (distance < 100 ** 2) {
-                                this._openedBox = box;
-                                break;
-                            }
-                        }
-                    }
+                    else if (this._hoveredObject !== null)
+                        this._hoveredObject.OnInteractSelected(this._selectedInteraction);
                     break;
                 default:
                     break;
@@ -190,60 +158,69 @@ export class Player extends Entity {
                 return;
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
-            this.Direction = e.x > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+            this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (e.button === 0) {
-                const xCell = this.HasBackpack
-                    ? this._xTarget < 690
-                        ? Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2 - 5)) / 55)
-                        : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2)) / 55)
-                    : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 50 / 2)) / 55);
-                const yCell = this._openedBox === null ? Math.floor((this._yTarget - (Canvas.GetSize().Y - 10 - 50)) / 55) : Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
-                if (this._openedBox !== null) {
-                    if (this._yTarget > 460) {
-                        if (yCell === 0 && xCell >= 0 && xCell <= 5) {
-                            if (this._draggedItem === null) {
-                                this._draggedItem = this._inventory[xCell];
-                                this._inventory[xCell] = null;
-                                if (this._weapon === this._draggedItem)
-                                    this._weapon = null;
+                if (this._openedContainer !== null) {
+                    const hotbarY = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
+                    if (this._yTarget < GUI.Height - hotbarY + 10) {
+                        // Тык В инвентарь
+                        if (this._backpack !== null) {
+                            const firstXOffset = GUI.Width / 2 - 55 * 3;
+                            const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                            const yCell = Math.floor((750 - this._yTarget - hotbarY) / 55);
+                            if (yCell === 0 && xCell >= 0) {
+                                if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                    if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                        this._draggedItem = this.GetItemAt(xCell);
+                                    else
+                                        this.TakeItemFrom(xCell);
+                                }
+                                else if (xCell < 2)
+                                    this.SwapItemAt(xCell);
+                                else if (xCell <= 5)
+                                    this._draggedItem = this._backpack.SwapItem(xCell - 2, yCell, this._draggedItem);
                             }
-                            else {
-                                const existItem = this._inventory[xCell];
-                                if (existItem === this._weapon)
-                                    this._weapon = null;
-                                this._inventory[xCell] = this._draggedItem;
-                                this._draggedItem = existItem;
-                                if (this._selectedSlot === xCell && xCell < 2 && this._inventory[xCell] instanceof Weapon)
-                                    this._weapon = this._inventory[xCell];
+                        }
+                        else {
+                            const firstXOffset = GUI.Width / 2 - 52.5;
+                            const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+                            const yCell = Math.floor((750 - this._yTarget - hotbarY) / 55);
+                            if (yCell === 0 && xCell >= 0 && xCell < 2) {
+                                if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                    if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                        this._draggedItem = this.GetItemAt(xCell);
+                                    else
+                                        this.TakeItemFrom(xCell);
+                                }
+                                else
+                                    this.SwapItemAt(xCell);
                             }
                         }
                     }
                     else {
-                        const xCell = Math.floor((this._xTarget - (1500 / 2 - 170 / 2 + 5)) / 55);
-                        const yCell = Math.floor((this._yTarget - (750 / 2 - 170 / 2 + 5)) / 55);
-                        if (xCell < 0 || xCell > 2 || yCell < 0 || yCell > 2)
-                            return;
-                        if (this._draggedItem === null)
-                            this._draggedItem = this._openedBox.TakeItemFrom(xCell, yCell);
-                        else if (this._openedBox.TryPushItemTo(xCell, yCell, this._draggedItem))
-                            this._draggedItem = null;
+                        // Тык В коробку
+                        const firstXOffset = GUI.Width / 2 -
+                            (this._openedContainer.SlotsSize.X % 2 === 1
+                                ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25
+                                : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
+                        const firstYOffset = GUI.Height / 2 - Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 - 25;
+                        const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+                        const yCell = Math.floor((750 - this._yTarget - firstYOffset) / 55);
+                        if (this._openedContainer.CellInContainer(xCell, yCell))
+                            if (e.shiftKey && this.TryPushItem(this._openedContainer.GetItemAt(xCell, yCell)))
+                                this._openedContainer.TakeItemFrom(xCell, yCell);
+                            else
+                                this._draggedItem = this._openedContainer.SwapItem(xCell, yCell, this._draggedItem);
                     }
                 }
-                else if (this.HasBackpack && yCell === 0 && xCell >= 0 && xCell <= 5) {
-                    if (this._draggedItem === null) {
-                        this._draggedItem = this._inventory[xCell];
-                        this._inventory[xCell] = null;
-                        if (this._weapon === this._draggedItem)
-                            this._weapon = null;
-                    }
-                    else if (this._inventory[xCell] === null && (xCell >= 2 || this._draggedItem instanceof Weapon)) {
-                        this._inventory[xCell] = this._draggedItem;
-                        this._draggedItem = null;
-                        if (this._selectedSlot === xCell && xCell < 2 && this._inventory[xCell] instanceof Weapon)
-                            this._weapon = this._inventory[xCell];
-                    }
+                const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
+                const firstYOffset = 5;
+                const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                const yCell = Math.floor((this._yTarget - firstYOffset) / 50);
+                if (yCell === 0 && xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5))) {
+                    this.SwapItemAt(xCell);
                 }
-                else if (this._openedBox === null) {
+                else if (this.CanTarget()) {
                     this._LMBPressed = true;
                     this.Shoot();
                 }
@@ -261,14 +238,28 @@ export class Player extends Entity {
                 return;
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
-            this.Direction = e.x > this._x + this._width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+            this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+        });
+        addEventListener("wheel", (e) => {
+            if (this._hoveredObject !== null) {
+                this._selectedInteraction = Math.clamp(this._selectedInteraction + Math.sign(e.deltaY), 0, this._hoveredObject.GetInteractives().length - 1);
+            }
+            else {
+                this.ChangeActiveHand(((this._selectedHand + 1) % 2));
+            }
         });
     }
     Update(dt) {
         const prevX = this._x;
         if (this._timeFromDeath > 0)
             this._timeFromDeath -= dt;
-        super.Update(dt);
+        this.ApplyVForce();
+        if (this._movingLeft)
+            this.MoveLeft();
+        else if (this._movingRight)
+            this.MoveRight();
+        if (this.CanTarget())
+            this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
         if (prevX != this._x) {
             this._timeToNextFrame -= dt;
             if (this._timeToNextFrame <= 0) {
@@ -280,175 +271,275 @@ export class Player extends Entity {
         else {
             this._frameIndex = 0;
         }
-        this._angle = (() => {
-            const angle = -Math.atan2(this._yTarget - (this._y + this._height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this._width / 2));
-            if (this.Direction == 1)
-                return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
-            else
-                return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
-        })();
-        this._weapon?.Update(dt, new Vector2(this._x + this._width / 2, this._y + this._height * this._armHeight), this._angle);
+        if (this.CanTarget())
+            this._angle = (() => {
+                const angle = -Math.atan2(this._yTarget - (this._y + this.Height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this.Width / 2));
+                if (this.Direction == 1)
+                    return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+                else
+                    return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+            })();
+        this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
         if (this._interacting === null) {
             this._hasInteraction = null;
             Scene.Current.GetByTag(Tag.NPC).forEach((npc) => {
-                const distance = (this._x + this._width / 2 - (npc.GetPosition().X + npc.GetSize().X / 2)) ** 2 + (this._y + this._height / 2 - (npc.GetPosition().Y + npc.GetSize().Y / 2)) ** 2;
+                const distance = (this._x + this.Width / 2 - (npc.GetPosition().X + npc.GetSize().X / 2)) ** 2 + (this._y + this.Height / 2 - (npc.GetPosition().Y + npc.GetSize().Y / 2)) ** 2;
                 if (distance < 20000)
                     this._hasInteraction = npc;
             });
         }
-        if (this._openedBox !== null) {
-            const distance = (this._x + this._width / 2 - (this._openedBox.GetPosition().X + this._openedBox.GetSize().X / 2)) ** 2 +
-                (this._y + this._height / 2 - (this._openedBox.GetPosition().Y + this._openedBox.GetSize().Y / 2)) ** 2;
+        if (this._openedContainer !== null) {
+            const distance = (this._x + this.Width / 2 - (this._openedContainer.GetPosition().X + this._openedContainer.GetSize().X / 2)) ** 2 +
+                (this._y + this.Height / 2 - (this._openedContainer.GetPosition().Y + this._openedContainer.GetSize().Y / 2)) ** 2;
             if (distance > 100 ** 2) {
                 if (this._draggedItem !== null)
-                    this._openedBox.TryPushItem(this._draggedItem);
-                this._openedBox = null;
+                    this._openedContainer.TryPushItem(this._draggedItem);
+                this._openedContainer = null;
             }
         }
+        const lastHover = this._hoveredObject;
+        this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
+        if (lastHover === null && this._hoveredObject !== null)
+            this._selectedInteraction = 0;
         if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic)
             this.Shoot();
     }
     Render() {
-        const ratio = (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.Y / this._height;
+        const ratio = (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.Y / this.Height;
+        // if (this._hoveredObject !== null) {
+        // 	const pos = this._hoveredObject.GetPosition();
+        // 	Canvas.SetFillRadialGradient(
+        // 		new Rectangle(pos.X - Scene.Current.GetLevelPosition() - 10, pos.Y - 10, this._hoveredObject.Width + 20, this._hoveredObject.Height + 20),
+        // 		new Color(255, 255, 255, 20),
+        // 		Color.Transparent
+        // 	);
+        // 	Canvas.DrawCircle(pos.X - Scene.Current.GetLevelPosition() + this._hoveredObject.Width / 2, pos.Y, this._hoveredObject.Width);
+        // 	Canvas.ClearRectangle(pos.X - Scene.Current.GetLevelPosition(), pos.Y, this._hoveredObject.Width, this._hoveredObject.Height);
+        // }
         if (this.Direction == 1) {
             if (this._weapon === null)
-                Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition(), this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle - Math.PI / 4, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle - Math.PI / 4, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             else if (this._weapon.Heavy)
-                Canvas.DrawImageWithAngle(Player._frames.Hands.Left, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition(), this._y + this._height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle + 0.05, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngle(Player._frames.Hands.Left, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle + 0.05, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             if (this._movingLeft || this._movingRight)
-                Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this._height));
+                Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this.Height));
             else
-                Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[0], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.X / ratio, this._height));
-            if (this.HasBackpack)
+                Canvas.DrawImage((this._sit ? Player._frames.Sit : Player._frames.Walk)[0], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.X / ratio, this.Height));
+            if (this._backpack !== null)
                 Canvas.DrawImage(Player._frames.Backpack, new Rectangle(this._x - Scene.Current.GetLevelPosition() - 15, this._y + (this._sit ? 24 : 36), Player._frames.Backpack.ScaledSize.X, Player._frames.Backpack.ScaledSize.Y));
             if (this._weapon === null)
-                Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition(), this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             else {
                 this._weapon.Render();
                 if (this._weapon.Heavy)
-                    Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition(), this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+                    Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
                         (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
                 else
-                    Canvas.DrawImageWithAngle(Player._frames.Hands.Left, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition(), this._y + this._height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                    Canvas.DrawImageWithAngle(Player._frames.Hands.Left, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             }
         }
         else {
             if (this._weapon === null)
-                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition() - 10, this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle + Math.PI / 4, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 10, this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle + Math.PI / 4, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             else {
                 if (this._weapon.Heavy)
-                    Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition() - 10, this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+                    Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 10, this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
                         (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             }
             if (this._movingLeft || this._movingRight)
-                Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 7, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this._height));
+                Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 7, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this.Height));
             else
-                Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[0], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 7, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this._height));
-            if (this.HasBackpack)
+                Canvas.DrawImageFlipped((this._sit ? Player._frames.Sit : Player._frames.Walk)[0], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 7, this._y, (this._sit ? Player._frames.Sit : Player._frames.Walk)[this._frameIndex].ScaledSize.X / ratio, this.Height));
+            if (this._backpack !== null)
                 Canvas.DrawImageFlipped(Player._frames.Backpack, new Rectangle(this._x - Scene.Current.GetLevelPosition() + 7, this._y + (this._sit ? 24 : 36), Player._frames.Backpack.BoundingBox.Width * Player._frames.Backpack.Scale, Player._frames.Backpack.BoundingBox.Height * Player._frames.Backpack.Scale));
             if (this._weapon === null)
-                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition() - 3, this._y + this._height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3, this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             else {
                 this._weapon.Render();
-                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Left, new Rectangle(this._x + this._width / 2 - Scene.Current.GetLevelPosition() - 3, this._y + this._height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle - 0.05, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
+                Canvas.DrawImageWithAngleVFlipped(Player._frames.Hands.Left, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3, this._y + this.Height * this._armHeight, Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale, Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale), this._angle - 0.05, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             }
         }
     }
     RenderOverlay() {
+        if (this._hoveredObject !== null && this._openedContainer === null) {
+            const items = this._hoveredObject.GetInteractives();
+            GUI.SetFillColor(new Color(70, 70, 70));
+            GUI.SetStroke(new Color(100, 100, 100), 2);
+            GUI.DrawRectangle(this._xTarget - 75, 750 - this._yTarget + 50, 150, 25 * items.length);
+            GUI.ClearStroke();
+            GUI.SetFillColor(Color.White);
+            GUI.SetFont(20);
+            for (let i = 0; i < items.length; i++) {
+                if (i == this._selectedInteraction) {
+                    GUI.SetFillColor(new Color(100, 100, 100));
+                    GUI.DrawRectangle(this._xTarget - 75 + 3, 750 - this._yTarget + 50 + 3 + 25 * i, 150 - 6, 25 - 6);
+                    GUI.SetFillColor(Color.White);
+                }
+                GUI.DrawTextCenter(items[i], this._xTarget - 75, 750 - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
+            }
+        }
         if (this._interacting === null && this._dialog === null) {
-            const y = this._openedBox === null ? Canvas.GetSize().Y - 10 - 50 : Canvas.GetSize().Y / 2 + 170 / 2 + 10;
-            Canvas.SetFillColor(new Color(70, 70, 70, 200));
-            if (this.HasBackpack) {
-                Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 330 / 2 - 10, y - 5, 340, 60);
-                Canvas.SetFillColor(new Color(30, 30, 30));
+            const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
+            if (this._backpack !== null) {
+                const firstXOffset = GUI.Width / 2 - 55 * 3;
+                GUI.SetFillColor(new Color(70, 70, 70, 200));
+                GUI.SetStroke(new Color(155, 155, 155), 1);
+                GUI.DrawRectangle(firstXOffset - 5, y - 5, 6 * 55 + 10, 55 + 5);
+                // Canvas.SetFillColor(Color.Red);
+                // Canvas.DrawRectangle(750, 0, 1, 1000);
+                // Canvas.DrawRectangle(750 - 90, 0, 1, 1000);
+                // Canvas.DrawRectangle(750 + 90, 0, 1, 1000);
+                // Canvas.DrawRectangle(750 - 180, 0, 1, 1000);
+                // Canvas.DrawRectangle(750 + 180, 0, 1, 1000);
+                // Canvas.DrawRectangle(0, 750 / 2, 10000, 1);
+                // Canvas.DrawRectangle(0, 750 / 2 + 90, 10000, 1);
+                // Canvas.DrawRectangle(0, 750 / 2 - 90, 10000, 1);
+                GUI.ClearStroke();
+                GUI.SetFillColor(new Color(155, 155, 155, 100));
+                GUI.DrawRectangle(firstXOffset + 2 * 55 - 1, y - 4, 2, 58);
+                const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                const yCell = Math.floor((750 - this._yTarget - y) / 55);
                 for (let i = 0; i < 6; i++) {
-                    if (this._openedBox !== null) {
-                        const xCell = this._xTarget < 690
-                            ? Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2 - 5)) / 55)
-                            : Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 330 / 2)) / 55);
-                        const yCell = Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
-                        if (yCell === 0 && xCell == i)
-                            Canvas.SetStroke(new Color(200, 200, 200), 2);
-                        else
-                            Canvas.SetStroke(new Color(155, 155, 155), 1);
-                    }
-                    else if (i == this._selectedSlot)
-                        Canvas.SetStroke(new Color(200, 200, 200), 2);
+                    if (i == this._selectedHand)
+                        GUI.SetFillColor(new Color(50, 50, 50));
                     else
-                        Canvas.SetStroke(new Color(155, 155, 155), 1);
-                    Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0), y, 50, 50));
-                    if (this._inventory[i] !== null)
-                        Canvas.DrawImage(this._inventory[i].Icon, new Rectangle(Canvas.GetSize().X / 2 - 330 / 2 - 5 + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4));
+                        GUI.SetFillColor(new Color(30, 30, 30));
+                    if (yCell === 0 && xCell == i)
+                        GUI.SetStroke(new Color(200, 200, 200), 2);
+                    else
+                        GUI.SetStroke(new Color(155, 155, 155), 1);
+                    GUI.DrawRectangle(firstXOffset + i * 55 + (i > 1 ? 5 : 0), y, 50, 50);
+                    if (i < 2 && this._inventory[i] !== null) {
+                        GUI.DrawImage(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
+                        if (this._inventory[i] instanceof Weapon) {
+                            const loaded = this._inventory[i].GetLoadedAmmo();
+                            const loadedRatio = this._inventory[i].GetFillClipRatio();
+                            // const reload = ;
+                            const displayAmmo = (() => {
+                                if (this._inventory[i].IsReloading())
+                                    return "~";
+                                else if (loadedRatio > 1)
+                                    return loaded.toString();
+                                else if (loaded === 0)
+                                    return "0";
+                                else if (loadedRatio > 0.6)
+                                    return ">3/4";
+                                else if (loadedRatio > 0.4)
+                                    return "~1/2";
+                                else if (loadedRatio > 0.2)
+                                    return ">1/4";
+                                else if (loadedRatio <= 0.2)
+                                    return "<1/4";
+                            })();
+                            GUI.SetFillColor(Color.White);
+                            GUI.SetFont(12);
+                            GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 5, y + 46 + 2, displayAmmo);
+                        }
+                    }
+                    else if (i >= 2 && this._backpack.GetItemAt(i - 2, 0) !== null)
+                        GUI.DrawImage(this._backpack.GetItemAt(i - 2, 0).Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
                 }
             }
             else {
-                Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 60 / 2, y - 5, 60, 60);
-                if (this._openedBox !== null) {
-                    const xCell = Math.floor((this._xTarget - (Canvas.GetSize().X / 2 - 50 / 2)) / 55);
-                    const yCell = Math.floor((this._yTarget - (Canvas.GetSize().Y / 2 + 170 / 2 + 10)) / 55);
-                    if (yCell === 0 && xCell == 0)
-                        Canvas.SetStroke(new Color(200, 200, 200), 2);
+                const firstXOffset = GUI.Width / 2 - 52.5;
+                GUI.SetFillColor(new Color(70, 70, 70, 200));
+                GUI.SetStroke(new Color(155, 155, 155), 1);
+                GUI.DrawRectangle(firstXOffset - 5, y - 5, 2 * 55 + 5, 55 + 5);
+                GUI.SetFillColor(new Color(30, 30, 30));
+                for (let i = 0; i < 2; i++) {
+                    const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+                    const yCell = Math.floor((750 - this._yTarget - y) / 55);
+                    if (yCell === 0 && xCell == i)
+                        GUI.SetStroke(new Color(200, 200, 200), 2);
                     else
-                        Canvas.SetStroke(new Color(155, 155, 155), 1);
+                        GUI.SetStroke(new Color(155, 155, 155), 1);
+                    if (i == this._selectedHand)
+                        GUI.SetFillColor(new Color(50, 50, 50));
+                    else
+                        GUI.SetFillColor(new Color(30, 30, 30));
+                    GUI.DrawRectangle(firstXOffset + i * 55, y, 50, 50);
+                    if (this._inventory[i] !== null) {
+                        GUI.DrawImage(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
+                        if (this._inventory[i] instanceof Weapon) {
+                            const loaded = this._inventory[i].GetLoadedAmmo();
+                            const loadedRatio = this._inventory[i].GetFillClipRatio();
+                            // const reload = ;
+                            const displayAmmo = (() => {
+                                if (this._inventory[i].IsReloading())
+                                    return "~";
+                                else if (loadedRatio > 1)
+                                    return loaded.toString();
+                                else if (loaded === 0)
+                                    return "0";
+                                else if (loadedRatio > 0.6)
+                                    return ">3/4";
+                                else if (loadedRatio > 0.4)
+                                    return "~1/2";
+                                else if (loadedRatio > 0.2)
+                                    return ">1/4";
+                                else if (loadedRatio <= 0.2)
+                                    return "<1/4";
+                            })();
+                            GUI.SetFillColor(Color.White);
+                            GUI.SetFont(12);
+                            GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 5, y + 46 + 2, displayAmmo);
+                        }
+                    }
                 }
-                else if (0 == this._selectedSlot)
-                    Canvas.SetStroke(new Color(200, 200, 200), 2);
-                else
-                    Canvas.SetStroke(new Color(155, 155, 155), 1);
-                Canvas.SetFillColor(new Color(30, 30, 30));
-                Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2, y, 50, 50));
-                if (this._inventory[0] !== null)
-                    Canvas.DrawImage(this._inventory[0].Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 2, y + 2, 50 - 4, 50 - 4));
             }
-            if (this._openedBox !== null) {
-                Canvas.SetFillColor(new Color(70, 70, 70, 200));
-                Canvas.DrawRectangle(Canvas.GetSize().X / 2 - 170 / 2, Canvas.GetSize().Y / 2 - 170 / 2, 170, 170);
-                const xCell = Math.floor((this._xTarget - (1500 / 2 - 170 / 2 + 5)) / 55);
-                const yCell = Math.floor((this._yTarget - (750 / 2 - 170 / 2 + 5)) / 55);
-                for (let y = -1; y <= 1; y++)
-                    for (let x = -1; x <= 1; x++) {
-                        if (xCell == x + 1 && yCell == y + 1)
-                            Canvas.SetStroke(new Color(200, 200, 200), 2);
+            if (this._openedContainer !== null) {
+                const firstXOffset = GUI.Width / 2 -
+                    (this._openedContainer.SlotsSize.X % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
+                const firstYOffset = GUI.Height / 2 -
+                    (this._openedContainer.SlotsSize.Y % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.Y / 2) * 52.5);
+                GUI.SetStroke(new Color(155, 155, 155), 1);
+                GUI.SetFillColor(new Color(70, 70, 70, 200));
+                GUI.DrawRectangle(firstXOffset - 5, firstYOffset - 5, this._openedContainer.SlotsSize.X * 55 + 5, this._openedContainer.SlotsSize.Y * 55 + 5);
+                const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+                const yCell = Math.floor((750 - this._yTarget - firstYOffset) / 55);
+                for (let y = 0; y < this._openedContainer.SlotsSize.Y; y++)
+                    for (let x = 0; x < this._openedContainer.SlotsSize.X; x++) {
+                        if (xCell == x && yCell == y)
+                            GUI.SetStroke(new Color(200, 200, 200), 2);
                         else
-                            Canvas.SetStroke(new Color(155, 155, 155), 1);
-                        Canvas.DrawRectangleEx(new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 55 * x, Canvas.GetSize().Y / 2 - 50 / 2 + 55 * y, 50, 50));
-                        const item = this._openedBox.GetItemAt((x + 1), (y + 1));
+                            GUI.SetStroke(new Color(100, 100, 100), 1);
+                        GUI.SetFillColor(new Color(30, 30, 30, 200));
+                        GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
+                        const item = this._openedContainer.GetItemAt(x, y);
                         if (item !== null)
-                            Canvas.DrawImage(item.Icon, new Rectangle(Canvas.GetSize().X / 2 - 50 / 2 + 55 * x + 2, Canvas.GetSize().Y / 2 - 50 / 2 + 55 * y + 2, 50 - 4, 50 - 4));
+                            GUI.DrawImage(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
                     }
             }
         }
         if (this._draggedItem !== null)
-            Canvas.DrawImage(this._draggedItem.Icon, new Rectangle(this._xTarget - 25, this._yTarget - 25, 50, 50));
+            GUI.DrawImage(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
         if (this._interacting !== null && this._dialog !== null) {
             Canvas.SetFillColor(new Color(70, 70, 70));
             Canvas.DrawRectangle(1500 / 2 - 500 / 2, 50, 500, 150);
             Canvas.SetFillColor(Color.White);
-            Canvas.SetFont(24);
-            Canvas.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._dialog.State % 2 === 0 ? Player._name : "Моршу");
-            Canvas.SetFont(16);
-            Canvas.DrawTextInRectangle(this._dialog.Messages[this._dialog.State], new Rectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, 0, 0));
-            Canvas.DrawText(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]");
+            GUI.SetFont(24);
+            GUI.DrawText(1500 / 2 - 500 / 2 + 30, 750 - 150 - 20, this._dialog.State % 2 === 0 ? Player._name : "Моршу");
+            GUI.SetFont(16);
+            GUI.DrawTextInRectangle(1500 / 2 - 500 / 2 + 5, 750 - 150 + 10, this._dialog.Messages[this._dialog.State]);
+            GUI.DrawText(1500 / 2 - 500 / 2 + 5, 750 - 60, "Продолжить   [E]");
         }
         else if (this._hasInteraction) {
-            Canvas.SetFillColor(new Color(70, 70, 70));
-            Canvas.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
-            Canvas.SetFillColor(Color.White);
-            Canvas.SetFont(16);
-            Canvas.DrawText(1500 / 2 - 200 / 2 + 5, 750 - 70, "Поговорить с Моршу   [E]");
+            GUI.SetFillColor(new Color(70, 70, 70));
+            GUI.DrawRectangle(1500 / 2 - 200 / 2, 50, 200, 50);
+            GUI.SetFillColor(Color.White);
+            GUI.SetFont(16);
+            GUI.DrawText(1500 / 2 - 200 / 2, 50, "Поговорить с Моршу   [E]");
         }
         this.Quests.forEach((quest, i) => {
             Canvas.SetStroke(Color.Yellow, 2);
             Canvas.SetFillColor(quest.IsCompleted() ? Color.Yellow : Color.Transparent);
             Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 330 - i * 60, 10, 10, Math.PI / 4, -10, 0);
             Canvas.SetFillColor(Color.White);
-            Canvas.SetFont(24);
-            Canvas.DrawText(10, 300 + i * 60, quest.Title);
-            Canvas.SetFont(16);
-            Canvas.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
+            GUI.SetFont(24);
+            GUI.DrawText(10, 300 + i * 60, quest.Title);
+            GUI.SetFont(16);
+            GUI.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
         });
-        // if (this._openedBox !== null) {
-        // }
         // POSTPROCCES
         if (this._needDrawRedVegnitte > 0) {
             this._needDrawRedVegnitte--;
@@ -479,12 +570,72 @@ export class Player extends Entity {
     OnKilled(type) {
         this.Quests.forEach((x) => x.OnKilled(type));
     }
+    TryPushItem(item) {
+        for (let x = 0; x < this._inventory.length; x++)
+            if (this._inventory[x] === null) {
+                this._inventory[x] = item;
+                if (x === this._selectedHand)
+                    if (this._inventory[x] instanceof Weapon)
+                        this._weapon = this._inventory[x];
+                    else
+                        this._weapon = null;
+                return true;
+            }
+        if (this._backpack !== null)
+            return this._backpack.TryPushItem(item);
+        else
+            return false;
+    }
+    SwapItemAt(x) {
+        if (this._backpack !== null && x >= 2)
+            this._draggedItem = this._backpack.SwapItem(x - 2, 0, this._draggedItem);
+        else {
+            [this._draggedItem, this._inventory[x]] = [this._inventory[x], this._draggedItem];
+            if (x === this._selectedHand)
+                if (this._inventory[x] instanceof Weapon)
+                    this._weapon = this._inventory[x];
+                else
+                    this._weapon = null;
+        }
+    }
+    GetItemAt(x) {
+        if (x < 2)
+            return this._inventory[x];
+        else if (this._backpack !== null)
+            return this._backpack.GetItemAt(x - 2, 0);
+        else
+            return null;
+    }
+    TakeItemFrom(x) {
+        if (x < 2) {
+            this._inventory[x] = null;
+            if (x === this._selectedHand)
+                this._weapon = null;
+        }
+        else if (this._backpack !== null)
+            return this._backpack.TakeItemFrom(x - 2, 0);
+    }
+    CanTarget() {
+        return this._openedContainer === null;
+    }
+    PutBackpack(backpack) {
+        this._backpack = backpack;
+    }
+    HasBackpack() {
+        return this._backpack !== null;
+    }
     GetItems() {
         const copy = [];
         for (const item of this._inventory)
             if (item !== null)
                 copy.push(item);
         return copy;
+    }
+    OpenContainer(container) {
+        this._openedContainer = container;
+    }
+    GetCenter() {
+        return new Vector2(this._x + this._collider.X + this._collider.Width / 2, this._y + this._collider.Y + this._collider.Height / 2);
     }
     GetPosition() {
         return new Vector2(this._x, this._y);
@@ -494,19 +645,16 @@ export class Player extends Entity {
             if (this._inventory[i] instanceof item)
                 this._inventory[i] = null;
     }
-    SelectSlot(slot) {
-        if (slot > 0 && !this.HasBackpack)
-            return;
-        if (slot === this._selectedSlot) {
-            this._selectedSlot = null;
+    ChangeActiveHand(hand) {
+        this._selectedHand = hand;
+        if (this._inventory[this._selectedHand] === null) {
             this._weapon = null;
             return;
         }
-        if (this._inventory[slot] instanceof Weapon)
-            this._weapon = this._inventory[slot];
+        if (this._inventory[this._selectedHand] instanceof Weapon)
+            this._weapon = this._inventory[this._selectedHand];
         else
             this._weapon = null;
-        this._selectedSlot = slot;
     }
     IsMoving() {
         if (this._movingLeft || this._movingRight)

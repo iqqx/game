@@ -23,8 +23,8 @@ export class Rat extends Enemy {
         const plrSize = Scene.Current.Player.GetCollider();
         if (this._attackCooldown <= 0) {
             if (Math.abs(this._x +
-                (this.Direction === 1 ? this._width : 0) -
-                (plrPos.X + (this.Direction === 1 ? plrSize.Width : 0))) <= this._width &&
+                (this.Direction === 1 ? this.Width : 0) -
+                (plrPos.X + (this.Direction === 1 ? plrSize.Width : 0))) <= this.Width &&
                 this._y == plrPos.Y) {
                 this._attackCooldown = Rat.AttackCooldown;
                 Scene.Current.Player.TakeDamage(Rat.Damage);
@@ -38,10 +38,10 @@ export class Rat extends Enemy {
     }
     Render() {
         if (this.Direction === 1) {
-            Canvas.DrawImage(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
+            Canvas.DrawImage(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
         }
         else {
-            Canvas.DrawImageFlipped(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height));
+            Canvas.DrawImageFlipped(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
         }
     }
     TakeDamage(damage) {

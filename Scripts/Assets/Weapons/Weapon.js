@@ -55,7 +55,7 @@ export class Weapon extends Item {
         if (this._secondsToReload > 0) {
             this._secondsToReload -= dt;
             if (this._secondsToReload <= 0) {
-                this._loadedAmmo = this._maxAmmoClip + 1;
+                this._loadedAmmo = this._maxAmmoClip + (this._loadedAmmo > 0 ? 1 : 0);
                 this.Automatic = this._automatic;
             }
         }
@@ -80,6 +80,15 @@ export class Weapon extends Item {
             return;
         this._secondsToReload = this._reloadTime;
         this._sounds.Reload.Play(0.5);
+    }
+    GetLoadedAmmo() {
+        return this._loadedAmmo;
+    }
+    IsReloading() {
+        return this._secondsToReload > 0;
+    }
+    GetFillClipRatio() {
+        return this._loadedAmmo / (this._maxAmmoClip - 1);
     }
     TryShoot(tag = Tag.Enemy) {
         if (this._secondsToCooldown > 0 || this._secondsToReload > 0) {

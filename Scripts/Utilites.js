@@ -81,24 +81,30 @@ export function SquareMagnitude(x0, y0, x1, y1) {
 export class GameObject {
     _x = 0;
     _y = 0;
-    _width;
-    _height;
+    Width;
+    Height;
     _collider;
     OnDestroy;
     Tag;
     constructor(width, height) {
-        this._width = width;
-        this._height = height;
+        this.Width = width;
+        this.Height = height;
     }
     Destroy() {
         if (this.OnDestroy !== undefined)
             this.OnDestroy();
     }
+    GetRectangle() {
+        return new Rectangle(this._x, this._y, this.Width, this.Height);
+    }
     GetPosition() {
         return new Vector2(this._x, this._y);
     }
     GetSize() {
-        return new Vector2(this._width, this._height);
+        return new Vector2(this.Width, this.Height);
+    }
+    GetCenter() {
+        return new Vector2(this._x + this.Width / 2, this._y + this.Height / 2);
     }
     Update(dt) { }
     Render() { }
@@ -118,19 +124,19 @@ export class GameObject {
     static GetCollide(who, other) {
         if (this.IsCollide(who, other) === false)
             return false;
-        const xstart = who._x + who._width - other._x;
-        const xend = other._x + other._width - who._x;
-        const ystart = other._y + other._height - who._y;
-        const yend = who._y + who._height - other._y;
+        const xstart = who._x + who.Width - other._x;
+        const xend = other._x + other.Width - who._x;
+        const ystart = other._y + other.Height - who._y;
+        const yend = who._y + who.Height - other._y;
         let xOffset = 0;
         let yOffset = 0;
-        if (xstart > 0 && xend > 0 && xend < other._width && xstart < other._width)
+        if (xstart > 0 && xend > 0 && xend < other.Width && xstart < other.Width)
             xOffset = 0;
         else if (xstart > 0 && (xend < 0 || xstart < xend))
             xOffset = xstart;
         else if (xend > 0)
             xOffset = -xend;
-        if (ystart > 0 && yend > 0 && yend < other._height && ystart < other._height)
+        if (ystart > 0 && yend > 0 && yend < other.Height && ystart < other.Height)
             yOffset = 0;
         else if (ystart > 0 && (yend < 0 || ystart < yend))
             yOffset = ystart;
@@ -158,17 +164,26 @@ export class Vector2 {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
 }
+let imagesLoaded = 0;
+export function IsImagesLoaded() {
+    return imagesLoaded >= 36;
+}
 export function LoadImage(source, boundingBox, scale) {
     const img = new Image();
-    img.src = source;
-    boundingBox ??= new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
-    scale ??= 1;
-    return {
+    const cte = {
         Image: img,
         BoundingBox: boundingBox,
         Scale: scale,
-        ScaledSize: new Vector2(boundingBox.Width * scale, boundingBox.Height * scale),
+        ScaledSize: new Vector2(0, 0),
     };
+    img.onload = () => {
+        cte.Scale = scale ?? 1;
+        cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
+        cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
+        imagesLoaded++;
+    };
+    img.src = source;
+    return cte;
 }
 export function LoadSound(source) {
     const s = new Audio(source);
@@ -193,4 +208,6 @@ export function LoadSound(source) {
             s.play();
         },
     };
+}
+export class Interactable extends GameObject {
 }

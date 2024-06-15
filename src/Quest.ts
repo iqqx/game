@@ -85,7 +85,7 @@ export class HasItemTask extends Task {
 
 export class PickupBackpackTask extends Task {
 	IsCompleted(): boolean {
-		return Scene.Current.Player.HasBackpack;
+		return Scene.Current.Player.HasBackpack();
 	}
 
 	public override toString() {
