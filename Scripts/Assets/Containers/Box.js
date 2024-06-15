@@ -5,7 +5,7 @@ import { Container } from "./Containers.js";
 export class Box extends Container {
     static _sprite = LoadImage("Images/Container.png");
     constructor(x, y, ...items) {
-        super(3, 3);
+        super(50, 50, 3, 3);
         this._x = x;
         this._y = y;
         let added = 0;

@@ -11,7 +11,7 @@ export class Backpack extends Container implements IPickapable {
 	public readonly OnPickup?: () => void;
 
 	constructor(x: number, y: number, ...content: Item[]) {
-		super(4, 1);
+		super(Backpack._image.ScaledSize.X, Backpack._image.ScaledSize.Y, 4, 1);
 
 		for (let i = 0; i < content.length; i++) this._items[0][i] = content[i];
 

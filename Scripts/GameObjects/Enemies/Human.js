@@ -5,6 +5,8 @@ import { LoadImage, Rectangle, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { AK } from "../../Assets/Weapons/AK.js";
+import { Corpse } from "../Corpse.js";
+import { AidKit } from "../../Assets/Items/Item.js";
 export class Human extends Enemy {
     static _deathSound = new Audio("Sounds/human_death.mp3");
     static _frames = {
@@ -101,6 +103,7 @@ export class Human extends Enemy {
         if (this._health <= 0) {
             this.Destroy();
             Scene.Current.Player.OnKilled(this._type);
+            Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, new AidKit()));
             const s = Human._deathSound.cloneNode();
             s.volume = 0.25;
             s.play();

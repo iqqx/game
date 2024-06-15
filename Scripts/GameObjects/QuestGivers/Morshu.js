@@ -1,7 +1,7 @@
 import { Vodka } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
-import { EnemyType, Tag } from "../../Enums.js";
-import { PickupBackpackTask, HasItemTask, KillTask, Quest } from "../../Quest.js";
+import { Tag } from "../../Enums.js";
+import { PickupBackpackTask, HasItemTask, Quest, MoveTask } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { LoadImage, Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
@@ -67,7 +67,7 @@ export class Morshu extends Character {
                         "Cлышал, что на соседней станции Люди\nпостроили себе убежище, а про другие знать\nне знаю. Слушай давай ты поможешь мне, а я\nтебе если вдруг найдешь выход, то свяжись со\nмной и расскажи, где он, а я тебе если вдруг\nнайду тоже тебе сообщу. Вот возим рацию\nчастота 102.75",
                         "Хорошо договорились",
                     ],
-                    Quest: new Quest("Первая кровь", Morshu, new KillTask(EnemyType.Green, 1)),
+                    Quest: new Quest("Поиск людей", Morshu, new MoveTask("Лагерь", 18400)),
                 };
             case 1:
                 if (Scene.Current.Player.HasBackpack) {

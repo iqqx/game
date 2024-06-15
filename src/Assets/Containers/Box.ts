@@ -8,7 +8,7 @@ export class Box extends Container {
 	private static readonly _sprite = LoadImage("Images/Container.png");
 
 	constructor(x: number, y: number, ...items: { item: Item; Chance: number }[]) {
-		super(3, 3);
+		super(50, 50, 3, 3);
 
 		this._x = x;
 		this._y = y;

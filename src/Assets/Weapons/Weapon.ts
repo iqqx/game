@@ -1,5 +1,6 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { Blood } from "../../GameObjects/Blood.js";
 import { Bullet } from "../../GameObjects/Bullet.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
@@ -167,6 +168,9 @@ export abstract class Weapon extends Item {
 		if (hit !== undefined && hit.instance instanceof Entity) {
 			hit.instance.TakeDamage(this._damage);
 			this._sounds.Hit.Play(0.15);
+
+			const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
+			Scene.Current.Instantiate(new Blood(new Vector2(hit.position.X + bloodDir.X * 100, hit.position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 50, bloodDir.Y * 30)));
 		} else if (hit !== undefined) {
 			this._sounds.Impact.Play(
 				(1 - Math.sqrt((muzzlePosition.X + Math.cos(this._angle) * 100 - hit.position.X) ** 2 + (muzzlePosition.Y - Math.sin(this._angle) * 100 - hit.position.Y) ** 2) / 1500) * 0.25

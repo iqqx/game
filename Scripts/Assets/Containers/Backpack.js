@@ -8,7 +8,7 @@ export class Backpack extends Container {
     static _sound = LoadSound("Sounds/backpack_pickup.mp3");
     OnPickup;
     constructor(x, y, ...content) {
-        super(4, 1);
+        super(Backpack._image.ScaledSize.X, Backpack._image.ScaledSize.Y, 4, 1);
         for (let i = 0; i < content.length; i++)
             this._items[0][i] = content[i];
         this.Tag = Tag.Pickable;

@@ -3,8 +3,8 @@ import { Interactable, Vector2 } from "../../Utilites.js";
 export class Container extends Interactable {
     _items;
     SlotsSize;
-    constructor(slotsWidth, slotsHeight) {
-        super(50, 50);
+    constructor(width, height, slotsWidth, slotsHeight) {
+        super(width, height);
         this._items = new Array(slotsHeight);
         for (let y = 0; y < slotsHeight; y++) {
             this._items[y] = new Array(slotsWidth);

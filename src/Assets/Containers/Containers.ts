@@ -6,8 +6,8 @@ export class Container extends Interactable {
 	protected readonly _items: (Item | null)[][];
 	public readonly SlotsSize: Vector2;
 
-	constructor(slotsWidth: number, slotsHeight: number) {
-		super(50, 50);
+	constructor(width: number, height: number, slotsWidth: number, slotsHeight: number) {
+		super(width, height);
 
 		this._items = new Array(slotsHeight);
 		for (let y = 0; y < slotsHeight; y++) {

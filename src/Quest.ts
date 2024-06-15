@@ -66,7 +66,7 @@ export class HasItemTask extends Task {
 	IsCompleted(): boolean {
 		const playerItems = Scene.Current.Player.GetItems();
 
-		var has = true;
+		let has = true;
 
 		for (const item of this.NeededItems) {
 			if (playerItems.some((x) => x instanceof item) === false) {
@@ -108,5 +108,32 @@ export class TalkTask extends Task {
 
 	public override toString() {
 		return this.IsCompleted() ? "Меня не должно быть видно" : "Поговори с Моршу";
+	}
+}
+
+export class MoveTask extends Task {
+	private readonly _name: string;
+	private readonly _to: number;
+
+	constructor(locationName: string, to: number) {
+		super();
+
+		this._name = locationName;
+		this._to = to;
+	}
+
+	IsCompleted(): boolean {
+		const player = Scene.Player.GetCenter().X;
+
+		return Math.abs(player - this._to) < 500;
+	}
+
+	public override toString() {
+		const player = Scene.Player.GetCenter().X;
+		const distance = Math.abs(Math.round((player - this._to) * 0.1));
+
+		return this.IsCompleted()
+			? "Вы прибыли"
+			: `${this._name}: ${distance > 1000 ? (distance / 1000).toFixed(1) : distance} ${distance > 1000 ? "кило" : ""}метров в${player - this._to > 0 ? "лево" : "право"}`;
 	}
 }

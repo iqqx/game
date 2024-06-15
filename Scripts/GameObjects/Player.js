@@ -3,6 +3,7 @@ import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { LoadImage, Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
+import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
@@ -779,8 +780,10 @@ export class Player extends Entity {
                 this._mainHand = !this._mainHand;
                 const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
                 if (enemy.length > 0) {
-                    Player._hitSound.Play();
+                    Player._hitSound.Play(.15);
                     enemy[0].instance.TakeDamage(10);
+                    const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
+                    Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].position.X + bloodDir.X * 100, enemy[0].position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
                 }
             }
         }

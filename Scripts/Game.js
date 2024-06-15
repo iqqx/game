@@ -83,6 +83,7 @@ scene.Instantiate(new Wall(12001, 338, 72, 44));
 scene.Instantiate(new Ladder(500, 260, 300));
 scene.Instantiate(new Spikes(13504, 5, 368, 14));
 scene.Instantiate(new Human(2200, 300, EnemyType.Green));
+scene.Instantiate(new Human(500, 300, EnemyType.Green));
 scene.Instantiate(new Morshu(700, 260));
 scene.Instantiate(new Backpack(600, 260, new Glock()));
 scene.Instantiate(new Box(400, 260, { item: new Bread(), Chance: 0.9 }, { item: new Bread(), Chance: 0.5 }, { item: new Vodka(), Chance: 1 }, { item: new AidKit(), Chance: 0.2 }, { item: new AK(), Chance: 0.3 }, { item: new Sausage(), Chance: 0.6 }, { item: new Radio(), Chance: 1 }));

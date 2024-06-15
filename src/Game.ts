@@ -10,10 +10,11 @@ import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
 import { Spikes } from "./GameObjects/Spikes.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Scene } from "./Scene.js";
-import { IsImagesLoaded, LoadImage, LoadSound } from "./Utilites.js";
+import { IsImagesLoaded, LoadImage, LoadSound, Vector2 } from "./Utilites.js";
 import { Glock } from "./Assets/Weapons/Glock.js";
 import { Ladder } from "./GameObjects/Ladder.js";
 import { AudioSource as BoomBox } from "./GameObjects/BoomBox.js";
+import { Blood } from "./GameObjects/Blood.js";
 
 const scene = new Scene(LoadImage("Images/Level_1.png"));
 
@@ -85,6 +86,7 @@ scene.Instantiate(new Wall(12001, 338, 72, 44));
 scene.Instantiate(new Ladder(500, 260, 300));
 scene.Instantiate(new Spikes(13504, 5, 368, 14));
 scene.Instantiate(new Human(2200, 300, EnemyType.Green));
+scene.Instantiate(new Human(500, 300, EnemyType.Green));
 scene.Instantiate(new Morshu(700, 260));
 scene.Instantiate(new Backpack(600, 260, new Glock()));
 scene.Instantiate(
@@ -109,7 +111,7 @@ scene.Instantiate(
 		LoadSound("Sounds/music-2.mp3"),
 		LoadSound("Sounds/music-3.mp3"),
 		LoadSound("https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3"),
-		LoadSound("https://pool.anison.fm/AniSonFM(320)"),
+		LoadSound("https://pool.anison.fm/AniSonFM(320)")
 	)
 );
 scene.Instantiate(new Player(310, 500));
