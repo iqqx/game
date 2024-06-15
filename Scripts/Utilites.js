@@ -187,6 +187,7 @@ export function LoadImage(source, boundingBox, scale) {
 }
 export function LoadSound(source) {
     const s = new Audio(source);
+    s.volume = 1;
     return {
         Speed: 1,
         Volume: 1,

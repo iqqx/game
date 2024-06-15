@@ -247,6 +247,7 @@ export function LoadImage(source: string, boundingBox?: Rectangle, scale?: numbe
 
 export function LoadSound(source: string): Sound {
 	const s = new Audio(source);
+	s.volume = 1;
 
 	return {
 		Speed: 1,

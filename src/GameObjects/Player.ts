@@ -1,7 +1,6 @@
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item } from "../Assets/Items/Item.js";
-import { AK } from "../Assets/Weapons/AK.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -21,7 +20,7 @@ export class Player extends Entity {
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
 	private _inventory: [Item | null, Item | null] = [null, null];
-	private _backpack: Backpack | null = null; // new Backpack(1, 1);
+	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	public readonly Quests: Quest[] = [];
 	private _armHeight: 0.5 | 0.65 = 0.65;
@@ -35,6 +34,7 @@ export class Player extends Entity {
 	private _draggedItem: Item | null = null;
 	private _hoveredObject: Interactable | null = null;
 	private _selectedInteraction: number = 0;
+	private _timeToWalkSound = 0;
 
 	private static readonly _name = "Володя";
 	private static readonly _speed = 5;
@@ -63,7 +63,7 @@ export class Player extends Entity {
 		Backpack: LoadImage(`Images/Player/Backpack.png`, new Rectangle(2, 9, 13, 10), 4),
 	};
 	private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
-	private static readonly _walkSound = LoadSound("Sounds/walk.mp3");
+	private static readonly _walkSound = LoadSound("Sounds/walk-2.wav");
 	private static readonly _dialogSound = LoadSound("Sounds/dialog.mp3");
 
 	constructor(x: number, y: number) {
@@ -84,9 +84,8 @@ export class Player extends Entity {
 					if (this._sit === false) {
 						this._frameIndex = 0;
 						this._sit = true;
+						this._timeToWalkSound -= 200;
 						this._armHeight = 0.5;
-						Player._walkSound.Speed = 1;
-						Player._walkSound.Apply();
 
 						this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
 
@@ -98,8 +97,6 @@ export class Player extends Entity {
 							this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
 						} else {
 							this._sit = false;
-							Player._walkSound.Speed = 1.6;
-							Player._walkSound.Apply();
 							this._armHeight = 0.65;
 							this._speed = Player._speed;
 						}
@@ -298,12 +295,16 @@ export class Player extends Entity {
 
 			if (prevX != this._x) {
 				this._timeToNextFrame -= dt;
+				this._timeToWalkSound -= dt;
 
-				if (this._timeToNextFrame <= 0) {
+				if (this._timeToNextFrame < 0) {
 					this._frameIndex = (this._frameIndex + 1) % (this._sit ? Player._frames.Sit.length : Player._frames.Walk.length);
 					this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
+				}
 
-					Player._walkSound.PlayOriginal();
+				if (this._timeToWalkSound <= 0) {
+					Player._walkSound.Play(0.5);
+					this._timeToWalkSound = this._sit ? 500 : 300;
 				}
 			} else {
 				this._frameIndex = 0;

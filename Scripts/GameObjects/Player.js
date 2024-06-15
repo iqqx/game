@@ -14,7 +14,7 @@ export class Player extends Entity {
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
     _inventory = [null, null];
-    _backpack = null; // new Backpack(1, 1);
+    _backpack = null;
     _weapon = null;
     Quests = [];
     _armHeight = 0.65;
@@ -28,6 +28,7 @@ export class Player extends Entity {
     _draggedItem = null;
     _hoveredObject = null;
     _selectedInteraction = 0;
+    _timeToWalkSound = 0;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -55,7 +56,7 @@ export class Player extends Entity {
         Backpack: LoadImage(`Images/Player/Backpack.png`, new Rectangle(2, 9, 13, 10), 4),
     };
     static _deathSound = LoadSound("Sounds/human_death.mp3");
-    static _walkSound = LoadSound("Sounds/walk.mp3");
+    static _walkSound = LoadSound("Sounds/walk-2.wav");
     static _dialogSound = LoadSound("Sounds/dialog.mp3");
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
@@ -73,9 +74,8 @@ export class Player extends Entity {
                     if (this._sit === false) {
                         this._frameIndex = 0;
                         this._sit = true;
+                        this._timeToWalkSound -= 200;
                         this._armHeight = 0.5;
-                        Player._walkSound.Speed = 1;
-                        Player._walkSound.Apply();
                         this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
                         this._speed = Player._speed * Player._sitSpeedModifier;
                     }
@@ -86,8 +86,6 @@ export class Player extends Entity {
                         }
                         else {
                             this._sit = false;
-                            Player._walkSound.Speed = 1.6;
-                            Player._walkSound.Apply();
                             this._armHeight = 0.65;
                             this._speed = Player._speed;
                         }
@@ -274,10 +272,14 @@ export class Player extends Entity {
             this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (prevX != this._x) {
                 this._timeToNextFrame -= dt;
-                if (this._timeToNextFrame <= 0) {
+                this._timeToWalkSound -= dt;
+                if (this._timeToNextFrame < 0) {
                     this._frameIndex = (this._frameIndex + 1) % (this._sit ? Player._frames.Sit.length : Player._frames.Walk.length);
                     this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
-                    Player._walkSound.PlayOriginal();
+                }
+                if (this._timeToWalkSound <= 0) {
+                    Player._walkSound.Play(0.5);
+                    this._timeToWalkSound = this._sit ? 500 : 300;
                 }
             }
             else {
