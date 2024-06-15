@@ -7,6 +7,7 @@ import { Tag, EnemyType } from "../Enums.js";
 import { Quest } from "../Quest.js";
 import { Scene } from "../Scene.js";
 import { Interactable, LoadImage, Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
+import { Enemy } from "./Enemies/Enemy.js";
 import { Entity } from "./Entity.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
 
@@ -35,6 +36,9 @@ export class Player extends Entity {
 	private _hoveredObject: Interactable | null = null;
 	private _selectedInteraction: number = 0;
 	private _timeToWalkSound = 0;
+	private _timeToNextPunch = 0;
+	private _framesToPunch = 0;
+	private _mainHand = true;
 
 	private static readonly _name = "Володя";
 	private static readonly _speed = 5;
@@ -66,6 +70,7 @@ export class Player extends Entity {
 	private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
 	private static readonly _walkSound = LoadSound("Sounds/walk-2.wav");
 	private static readonly _dialogSound = LoadSound("Sounds/dialog.mp3");
+	private static readonly _punchSound = LoadSound("Sounds/punch.wav");
 
 	constructor(x: number, y: number) {
 		super(40, 100, Player._speed, 100);
@@ -120,9 +125,9 @@ export class Player extends Entity {
 						const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
 
 						if (offsets !== false) {
+							this._verticalAcceleration = 0;
 							this._onLadder = offsets.instance;
 							this._frameIndex = 0;
-							this._xTarget = 750;
 						}
 					}
 					break;
@@ -136,6 +141,7 @@ export class Player extends Entity {
 						const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
 
 						if (offsets !== false) {
+							this._verticalAcceleration = 0;
 							this._onLadder = offsets.instance;
 							this._frameIndex = 0;
 						}
@@ -291,6 +297,7 @@ export class Player extends Entity {
 
 		addEventListener("mousemove", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			if ((e as any).sourceCapabilities.firesTouchEvents === true) return;
 
 			this._xTarget = e.offsetX;
@@ -364,6 +371,11 @@ export class Player extends Entity {
 		this.ApplyVForce();
 
 		if (this.CanTarget()) {
+			if (this._timeToNextPunch > 0) {
+				this._timeToNextPunch -= dt;
+			}
+			this._framesToPunch--;
+
 			const prevX = this._x;
 
 			if (this._movingLeft) this.MoveLeft();
@@ -408,38 +420,43 @@ export class Player extends Entity {
 	public override Render() {
 		const ratio = (this._sit ? Player._frames.Sit : Player._frames.Walk)[0].ScaledSize.Y / this.Height;
 
-		// if (this._hoveredObject !== null) {
-		// 	const pos = this._hoveredObject.GetPosition();
-
-		// 	Canvas.SetFillRadialGradient(
-		// 		new Rectangle(pos.X - Scene.Current.GetLevelPosition() - 10, pos.Y - 10, this._hoveredObject.Width + 20, this._hoveredObject.Height + 20),
-		// 		new Color(255, 255, 255, 20),
-		// 		Color.Transparent
-		// 	);
-		// 	Canvas.DrawCircle(pos.X - Scene.Current.GetLevelPosition() + this._hoveredObject.Width / 2, pos.Y, this._hoveredObject.Width);
-		// 	Canvas.ClearRectangle(pos.X - Scene.Current.GetLevelPosition(), pos.Y, this._hoveredObject.Width, this._hoveredObject.Height);
-		// }
-
 		if (this._onLadder !== null) {
 			Canvas.DrawImage(
 				Player._frames.Ladder[this._frameIndex],
 				new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, Player._frames.Ladder[this._frameIndex].ScaledSize.X / ratio, this.Height)
 			);
 		} else if (this.Direction == 1) {
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngle(
-					Player._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * this._armHeight,
-						Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
-						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
-					),
-					this._angle - Math.PI / 4,
-					-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
-					Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
-				);
-			else if (this._weapon.Heavy)
+			if (this._weapon === null) {
+				if (this._framesToPunch > 0 && !this._mainHand) {
+					this._framesToPunch--;
+
+					Canvas.DrawImageWithAngle(
+						Player._frames.Hands.Left,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale,
+							Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale
+						),
+						this._angle + 0.05,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+				} else
+					Canvas.DrawImageWithAngle(
+						Player._frames.Hands.Right,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
+							Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
+						),
+						this._angle - Math.PI / 4,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+							(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+			} else if (this._weapon.Heavy)
 				Canvas.DrawImageWithAngle(
 					Player._frames.Hands.Left,
 					new Rectangle(
@@ -480,20 +497,35 @@ export class Player extends Entity {
 					)
 				);
 
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngle(
-					Player._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * this._armHeight,
-						Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
-						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
-					),
-					this._angle,
-					-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
-					Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
-				);
-			else {
+			if (this._weapon === null) {
+				if (this._framesToPunch > 0 && this._mainHand) {
+					Canvas.DrawImageWithAngle(
+						Player._frames.Hands.Left,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale,
+							Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale
+						),
+						this._angle,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+				} else
+					Canvas.DrawImageWithAngle(
+						Player._frames.Hands.Right,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
+							Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
+						),
+						this._angle,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+							(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+			} else {
 				this._weapon.Render();
 
 				if (this._weapon.Heavy)
@@ -525,20 +557,35 @@ export class Player extends Entity {
 					);
 			}
 		} else {
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngleVFlipped(
-					Player._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 10,
-						this._y + this.Height * this._armHeight,
-						Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
-						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
-					),
-					this._angle + Math.PI / 4,
-					-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
-					Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
-				);
-			else {
+			if (this._weapon === null) {
+				if (this._framesToPunch > 0 && this._mainHand)
+					Canvas.DrawImageWithAngleVFlipped(
+						Player._frames.Hands.Left,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3,
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale,
+							Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale
+						),
+						this._angle,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+				else
+					Canvas.DrawImageWithAngleVFlipped(
+						Player._frames.Hands.Right,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 10,
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
+							Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
+						),
+						this._angle + Math.PI / 4,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+							(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+			} else {
 				if (this._weapon.Heavy)
 					Canvas.DrawImageWithAngleVFlipped(
 						Player._frames.Hands.Right,
@@ -587,20 +634,35 @@ export class Player extends Entity {
 					)
 				);
 
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngleVFlipped(
-					Player._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3,
-						this._y + this.Height * this._armHeight,
-						Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
-						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
-					),
-					this._angle,
-					-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
-					Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
-				);
-			else {
+			if (this._weapon === null) {
+				if (this._framesToPunch > 0 && !this._mainHand)
+					Canvas.DrawImageWithAngleVFlipped(
+						Player._frames.Hands.Left,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3,
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Left.BoundingBox.Width * Player._frames.Hands.Left.Scale,
+							Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale
+						),
+						this._angle,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+				else
+					Canvas.DrawImageWithAngleVFlipped(
+						Player._frames.Hands.Right,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition() - 3,
+							this._y + this.Height * this._armHeight,
+							Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale,
+							Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale
+						),
+						this._angle,
+						-(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2,
+						Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale -
+							(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2
+					);
+			} else {
 				this._weapon.Render();
 
 				Canvas.DrawImageWithAngleVFlipped(
@@ -955,8 +1017,24 @@ export class Player extends Entity {
 		this._verticalAcceleration = this._jumpForce;
 	}
 
+	private static readonly _hitSound = LoadSound("Sounds/hitmarker.mp3");
 	private Shoot() {
-		if (this._weapon !== null && this._weapon.TryShoot()) this._needDrawAntiVegnitte = 2;
+		if (this._weapon === null) {
+			if (this._timeToNextPunch <= 0) {
+				Player._punchSound.Play();
+
+				this._framesToPunch = 5;
+				this._timeToNextPunch = 250;
+				this._mainHand = !this._mainHand;
+
+				const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
+
+				if (enemy.length > 0) {
+					Player._hitSound.Play();
+					(enemy[0].instance as Enemy).TakeDamage(10);
+				}
+			}
+		} else if (this._weapon.TryShoot()) this._needDrawAntiVegnitte = 2;
 	}
 
 	override TakeDamage(damage: number): void {

@@ -166,7 +166,7 @@ export class Vector2 {
 }
 let imagesLoaded = 0;
 export function IsImagesLoaded() {
-    return imagesLoaded >= 30;
+    return imagesLoaded >= 36;
 }
 export function LoadImage(source, boundingBox, scale) {
     const img = new Image();

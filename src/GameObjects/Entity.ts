@@ -93,7 +93,7 @@ export class Entity extends GameObject {
 
 		if (this._verticalAcceleration <= 0) {
 			// падаем
-			const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform | Tag.Ladder);
+			const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
 
 			if (offsets !== false && offsets.position.Y !== 0) {
 				{

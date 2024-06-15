@@ -78,7 +78,7 @@ export class Entity extends GameObject {
         this._y += this._verticalAcceleration;
         if (this._verticalAcceleration <= 0) {
             // падаем
-            const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform | Tag.Ladder);
+            const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
             if (offsets !== false && offsets.position.Y !== 0) {
                 {
                     if (offsets.instance instanceof Spikes)
