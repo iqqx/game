@@ -220,7 +220,7 @@ export type Sprite = {
 
 let imagesLoaded = 0;
 export function IsImagesLoaded() {
-	return imagesLoaded >= 36;
+	return imagesLoaded >= 30;
 }
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {

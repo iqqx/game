@@ -7,6 +7,8 @@ export class Entity extends GameObject {
     _maxHealth;
     _speed;
     _health;
+    _movingUp = false;
+    _movingDown = false;
     _movingLeft = false;
     _movingRight = false;
     _verticalAcceleration = 0;
@@ -14,6 +16,7 @@ export class Entity extends GameObject {
     _jumpForce = 20;
     _xTarget = 0;
     _yTarget = 0;
+    _onLadder = null;
     Direction = 1;
     constructor(width, height, speed, maxHealth) {
         super(width, height);
@@ -23,6 +26,13 @@ export class Entity extends GameObject {
         this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
     }
     Update(dt) {
+        if (this._onLadder !== null) {
+            if (this._movingUp)
+                this._y += 5;
+            else if (this._movingDown)
+                this._y -= 5;
+            return;
+        }
         this.ApplyVForce();
         if (this._movingLeft)
             this.MoveLeft();
@@ -68,7 +78,7 @@ export class Entity extends GameObject {
         this._y += this._verticalAcceleration;
         if (this._verticalAcceleration <= 0) {
             // падаем
-            const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
+            const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform | Tag.Ladder);
             if (offsets !== false && offsets.position.Y !== 0) {
                 {
                     if (offsets.instance instanceof Spikes)

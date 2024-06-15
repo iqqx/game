@@ -49,6 +49,7 @@ export class Player extends Entity {
             LoadImage(`Images/Player/Crouch/2.png`, new Rectangle(2, 2, 18, 30), 3),
             LoadImage(`Images/Player/Crouch/3.png`, new Rectangle(2, 2, 18, 30), 3),
         ],
+        Ladder: [LoadImage(`Images/Player/Ladder/0.png`, new Rectangle(0, 2, 20, 30), 3), LoadImage(`Images/Player/Ladder/1.png`, new Rectangle(0, 2, 20, 30), 3)],
         Hands: {
             Left: LoadImage("Images/Player/Arm_left.png", new Rectangle(4, 14, 20, 4), 3),
             Right: LoadImage("Images/Player/Arm_right.png", new Rectangle(4, 14, 11, 8), 3),
@@ -92,6 +93,7 @@ export class Player extends Entity {
                     }
                     break;
                 case "Space":
+                    this._onLadder = null;
                     this.Jump();
                     break;
                 case "Digit1":
@@ -100,17 +102,36 @@ export class Player extends Entity {
                 case "Digit2":
                     this.ChangeActiveHand(1);
                     break;
+                case "KeyW":
+                    {
+                        this._movingUp = true;
+                        const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                        if (offsets !== false) {
+                            this._onLadder = offsets.instance;
+                            this._frameIndex = 0;
+                            this._xTarget = 750;
+                        }
+                    }
+                    break;
                 case "KeyA":
                     this._movingLeft = true;
+                    break;
+                case "KeyS":
+                    {
+                        this._movingDown = true;
+                        const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                        if (offsets !== false) {
+                            this._onLadder = offsets.instance;
+                            this._frameIndex = 0;
+                        }
+                    }
                     break;
                 case "KeyD":
                     this._movingRight = true;
                     break;
-                case "KeyS":
-                    this.TryDown();
-                    break;
                 case "KeyR":
-                    this._weapon?.Reload();
+                    if (this.CanTarget())
+                        this._weapon?.Reload();
                     break;
                 case "KeyE":
                     if (this._openedContainer !== null) {
@@ -132,8 +153,14 @@ export class Player extends Entity {
         });
         addEventListener("keyup", (e) => {
             switch (e.code) {
+                case "KeyW":
+                    this._movingUp = false;
+                    break;
                 case "KeyA":
                     this._movingLeft = false;
+                    break;
+                case "KeyS":
+                    this._movingDown = false;
                     break;
                 case "KeyD":
                     this._movingRight = false;
@@ -262,6 +289,34 @@ export class Player extends Entity {
                     this._timeToNextChar = 75;
             }
         }
+        if (this._onLadder !== null) {
+            const pos = this._onLadder.GetPosition();
+            const size = this._onLadder.GetCollider();
+            const prevY = this._y;
+            const prevX = this._x;
+            if (this._movingUp) {
+                if (this._y + this._collider.Height < pos.Y + size.Height)
+                    this._y += 5;
+            }
+            else if (this._movingDown) {
+                if (pos.Y < this._y)
+                    this._y -= 5;
+            }
+            if (this._movingLeft)
+                this.MoveLeft();
+            else if (this._movingRight)
+                this.MoveRight();
+            if (!Scene.Current.IsCollide(this, Tag.Ladder))
+                this._onLadder = null;
+            if (prevY !== this._y || prevX !== this._x) {
+                this._timeToNextFrame -= dt;
+                if (this._timeToNextFrame <= 0) {
+                    this._timeToNextFrame = 100;
+                    this._frameIndex = (this._frameIndex + 1) % Player._frames.Ladder.length;
+                }
+            }
+            return;
+        }
         this.ApplyVForce();
         if (this.CanTarget()) {
             const prevX = this._x;
@@ -313,7 +368,10 @@ export class Player extends Entity {
         // 	Canvas.DrawCircle(pos.X - Scene.Current.GetLevelPosition() + this._hoveredObject.Width / 2, pos.Y, this._hoveredObject.Width);
         // 	Canvas.ClearRectangle(pos.X - Scene.Current.GetLevelPosition(), pos.Y, this._hoveredObject.Width, this._hoveredObject.Height);
         // }
-        if (this.Direction == 1) {
+        if (this._onLadder !== null) {
+            Canvas.DrawImage(Player._frames.Ladder[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - 17, this._y, Player._frames.Ladder[this._frameIndex].ScaledSize.X / ratio, this.Height));
+        }
+        else if (this.Direction == 1) {
             if (this._weapon === null)
                 Canvas.DrawImageWithAngle(Player._frames.Hands.Right, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, Player._frames.Hands.Right.BoundingBox.Width * Player._frames.Hands.Right.Scale, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale), this._angle - Math.PI / 4, -(Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2, Player._frames.Hands.Right.BoundingBox.Height * Player._frames.Hands.Right.Scale - (Player._frames.Hands.Left.BoundingBox.Height * Player._frames.Hands.Left.Scale) / 2);
             else if (this._weapon.Heavy)
@@ -671,9 +729,6 @@ export class Player extends Entity {
         if (!this._grounded || this._sit)
             return;
         this._verticalAcceleration = this._jumpForce;
-    }
-    TryDown() {
-        this._y--;
     }
     Shoot() {
         if (this._weapon !== null && this._weapon.TryShoot())

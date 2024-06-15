@@ -1,6 +1,7 @@
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { GameObject, Rectangle, Vector2 } from "../Utilites.js";
+import { Ladder } from "./Ladder.js";
 import { Platform } from "./Platform.js";
 import { Spikes } from "./Spikes.js";
 
@@ -8,6 +9,8 @@ export class Entity extends GameObject {
 	protected readonly _maxHealth: number;
 	protected _speed: number;
 	protected _health: number;
+	protected _movingUp = false;
+	protected _movingDown = false;
 	protected _movingLeft = false;
 	protected _movingRight = false;
 	protected _verticalAcceleration = 0;
@@ -15,6 +18,7 @@ export class Entity extends GameObject {
 	protected _jumpForce = 20;
 	protected _xTarget = 0;
 	protected _yTarget = 0;
+	protected _onLadder: Ladder | null = null;
 
 	public Direction: -1 | 1 = 1;
 
@@ -29,6 +33,13 @@ export class Entity extends GameObject {
 	}
 
 	public override Update(dt: number) {
+		if (this._onLadder !== null) {
+			if (this._movingUp) this._y += 5;
+			else if (this._movingDown) this._y -= 5;
+
+			return;
+		}
+
 		this.ApplyVForce();
 
 		if (this._movingLeft) this.MoveLeft();
@@ -82,7 +93,7 @@ export class Entity extends GameObject {
 
 		if (this._verticalAcceleration <= 0) {
 			// падаем
-			const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform);
+			const offsets = Scene.Current.GetCollide(this, Tag.Wall | Tag.Platform | Tag.Ladder);
 
 			if (offsets !== false && offsets.position.Y !== 0) {
 				{
