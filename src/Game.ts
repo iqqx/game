@@ -10,9 +10,10 @@ import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
 import { Spikes } from "./GameObjects/Spikes.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Scene } from "./Scene.js";
-import { IsImagesLoaded, LoadImage } from "./Utilites.js";
+import { IsImagesLoaded, LoadImage, LoadSound } from "./Utilites.js";
 import { Glock } from "./Assets/Weapons/Glock.js";
 import { Ladder } from "./GameObjects/Ladder.js";
+import { AudioSource as BoomBox } from "./GameObjects/BoomBox.js";
 
 const scene = new Scene(LoadImage("Images/Level_1.png"));
 
@@ -99,6 +100,7 @@ scene.Instantiate(
 		{ item: new Radio(), Chance: 1 }
 	)
 );
+scene.Instantiate(new BoomBox(375, 310, 1000, LoadSound("Sounds/music.mp3"), LoadSound("Sounds/music-2.mp3")));
 scene.Instantiate(new Player(300, 500));
 
 function gameLoop(timeStamp: number) {

@@ -268,6 +268,12 @@ export function LoadSound(source: string): Sound {
 		PlayOriginal: function () {
 			s.play();
 		},
+		IsPlayingOriginal: function () {
+			return !s.paused;
+		},
+		StopOriginal: function () {
+			s.pause();
+		},
 	};
 }
 
@@ -275,6 +281,8 @@ export type Sound = {
 	PlayOriginal: () => void;
 	Play: (volume?: number, speed?: number) => void;
 	Apply: () => void;
+	IsPlayingOriginal: () => boolean;
+	StopOriginal: () => void;
 	Speed: number;
 	Volume: number;
 };

@@ -208,6 +208,12 @@ export function LoadSound(source) {
         PlayOriginal: function () {
             s.play();
         },
+        IsPlayingOriginal: function () {
+            return !s.paused;
+        },
+        StopOriginal: function () {
+            s.pause();
+        },
     };
 }
 export class Interactable extends GameObject {
