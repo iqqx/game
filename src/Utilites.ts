@@ -138,13 +138,22 @@ export type Sprite = {
 	readonly Scale: number;
 };
 
-let imagesToLoad = 100000000;
-let imagesLoaded = 0;
-export function IsImagesLoaded() {
-	return imagesLoaded >= imagesToLoad;
+declare global {
+	interface MouseEvent {
+		sourceCapabilities: { firesTouchEvents: boolean };
+	}
 }
-export function SetImageCount(count: number) {
-	imagesToLoad = count;
+
+// let imagesToLoad = 100000000;
+let imagesLoaded = 0;
+// export function IsImagesLoaded() {
+// 	return imagesLoaded >= imagesToLoad;
+// }
+// export function SetImageCount(count: number) {
+// 	imagesToLoad = count;
+// }
+export function GetLoadedImagesCount() {
+	return imagesLoaded;
 }
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {

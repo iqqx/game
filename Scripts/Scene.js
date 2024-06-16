@@ -1,25 +1,12 @@
-import { EnemyType } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas, GUI } from "./Context.js";
-import { Line, GetIntersectPoint, Lerp, LoadImage, Color, Rectangle, LoadSound, SetImageCount } from "./Utilites.js";
+import { Line, GetIntersectPoint, Lerp, Color, Rectangle } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
-import { Wall } from "./GameObjects/Wall.js";
-import { Platform } from "./GameObjects/Platform.js";
 import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
 import { BlinkingLabel } from "./GameObjects/GUI/BlinkingLabel.js";
-import { AudioSource } from "./GameObjects/BoomBox.js";
-import { Box } from "./Assets/Containers/Box.js";
-import { Item } from "./Assets/Items/Item.js";
-import { Spikes } from "./GameObjects/Spikes.js";
-import { Ladder } from "./GameObjects/Ladder.js";
-import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
-import { Backpack } from "./Assets/Containers/Backpack.js";
-import { Human } from "./GameObjects/Enemies/Human.js";
 export class Scene {
     static Current;
-    static _sprites = new Map();
-    static _sounds = new Map();
     _gameObjects = [];
     _interactableGameObjects = [];
     _background;
@@ -33,85 +20,12 @@ export class Scene {
         for (const object of objects)
             this.Instantiate(object);
     }
-    static async Load() {
-        const routers = await fetch("Assets/Routers.json").catch(() => false);
-        if (routers === false || !routers.ok)
-            return Scene.LoadErrorScene("Не найдено: Assets/Routers.json");
-        const parsedRouters = await routers.json();
-        if (parsedRouters.Scenes === undefined || parsedRouters.Scenes.length === 0)
-            return Scene.LoadErrorScene("Сцены не найдены в Assets/Routers.json");
-        if (parsedRouters.Images === undefined)
-            return Scene.LoadErrorScene("Изображения не найдены в Assets/Routers.json");
-        if (parsedRouters.Sounds === undefined)
-            return Scene.LoadErrorScene("Звуки не найдены в Assets/Routers.json");
-        let imagesToLoad = 0;
-        for (const imageKey in parsedRouters.Images) {
-            imagesToLoad++;
-            const object = parsedRouters.Images[imageKey];
-            if (typeof object === "string")
-                this._sprites.set(imageKey, LoadImage(object));
-            else if (object instanceof Array)
-                this._sprites.set(imageKey, object.map((x) => LoadImage(x)));
-            else
-                return Scene.LoadErrorScene(`Недопустимый тип изображения: ${imageKey}`);
-        }
-        SetImageCount(imagesToLoad);
-        for (const soundKey in parsedRouters.Sounds) {
-            const object = parsedRouters.Sounds[soundKey];
-            if (typeof object === "string")
-                this._sounds.set(soundKey, LoadSound(object));
-            else
-                return Scene.LoadErrorScene(`Недопустимый тип звука: ${soundKey}`);
-        }
-        const sceneFile = await fetch(parsedRouters.Scenes[0]);
-        if (!sceneFile.ok)
-            return Scene.LoadErrorScene(`Сцена не найдена: ${parsedRouters.Scenes[0]}`);
-        const sceneData = await sceneFile.json();
-        return new Scene(this._sprites.get(sceneData.Background), sceneData.GameObjects.map((x) => {
-            switch (x.Type) {
-                case "Wall":
-                    return new Wall(...x.Arguments);
-                case "Platform":
-                    return new Platform(...x.Arguments);
-                case "Player":
-                    return new Player(...x.Arguments);
-                case "Boombox":
-                    return new AudioSource(...x.Arguments);
-                case "Box":
-                    x.Arguments.slice(2).map((x) => {
-                        const value = x;
-                        return { Item: Item.Parse(value.Item), Chance: value.Chance };
-                    });
-                    return new Box(...x.Arguments);
-                case "Spikes":
-                    return new Spikes(...x.Arguments);
-                case "Ladder":
-                    return new Ladder(...x.Arguments);
-                case "Morshu":
-                    return new Morshu(...x.Arguments);
-                case "Backpack":
-                    x.Arguments.slice(2).map((x) => Item.Parse(x));
-                    return new Backpack(...x.Arguments);
-                case "Human":
-                    x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Rat;
-                    return new Human(...x.Arguments);
-                default:
-                    throw new Error("Не удалось распарсить: " + x.Type);
-            }
-        }));
-    }
-    static LoadErrorScene(error) {
+    static GetErrorScene(error) {
         return new Scene(null, [
             new GUIRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height), Color.Black),
             new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width / 2, GUI.Height / 2), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
             new BlinkingLabel(error, GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
         ]);
-    }
-    static GetSprite(key) {
-        return Scene._sprites.get(key);
-    }
-    static GetSound(key) {
-        return Scene._sounds.get(key);
     }
     GetLevelPosition() {
         return this._levelPosition;

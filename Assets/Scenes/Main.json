@@ -97,6 +97,10 @@
 			"Arguments": [2200, 300, "Green"]
 		},
 		{
+			"Type": "Human",
+			"Arguments": [600, 300, "Green"]
+		},
+		{
 			"Type": "Morshu",
 			"Arguments": [700, 260]
 		},

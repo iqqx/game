@@ -1,3 +1,4 @@
+import { GetSprite } from "../../Game.js";
 import { LoadImage, Sprite } from "../../Utilites.js";
 import { Weapon } from "../Weapons/Weapon.js";
 
@@ -34,7 +35,7 @@ export class Vodka extends Item {
 }
 
 export class Radio extends Item {
-	public readonly Icon = LoadImage("Images/Items/Radio.png");
+	public readonly Icon = GetSprite("Radio") as Sprite;
 
 	static toString(): string {
 		return "Радио";

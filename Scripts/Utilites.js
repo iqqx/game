@@ -95,13 +95,16 @@ export class Vector2 {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
 }
-let imagesToLoad = 100000000;
+// let imagesToLoad = 100000000;
 let imagesLoaded = 0;
-export function IsImagesLoaded() {
-    return imagesLoaded >= imagesToLoad;
-}
-export function SetImageCount(count) {
-    imagesToLoad = count;
+// export function IsImagesLoaded() {
+// 	return imagesLoaded >= imagesToLoad;
+// }
+// export function SetImageCount(count: number) {
+// 	imagesToLoad = count;
+// }
+export function GetLoadedImagesCount() {
+    return imagesLoaded;
 }
 export function LoadImage(source, boundingBox, scale) {
     const img = new Image();

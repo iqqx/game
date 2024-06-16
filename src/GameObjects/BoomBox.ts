@@ -2,6 +2,7 @@ import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Sound, LoadImage, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
+import { GetSound } from "../Game.js";
 
 export class AudioSource extends Interactable {
 	private readonly _volume: number;
@@ -21,7 +22,7 @@ export class AudioSource extends Interactable {
 
 		this._x = x;
 		this._y = y;
-		this._soundPack = sounds.map((i) => Scene.GetSound(i));
+		this._soundPack = sounds.map((i) => GetSound(i));
 		this._currentSound = 0;
 		this._volume = volume;
 	}

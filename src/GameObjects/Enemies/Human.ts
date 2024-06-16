@@ -1,32 +1,29 @@
 import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { LoadImage, Rectangle, Vector2 } from "../../Utilites.js";
+import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
 import { AK } from "../../Assets/Weapons/Weapon.js";
+import { GetSprite } from "../../Game.js";
 
 export class Human extends Enemy {
 	private static readonly _deathSound = new Audio("Sounds/human_death-2.mp3");
-	private static readonly _frames = {
-		Walk: [
-			LoadImage(`Images/Player/Walk/0.png`, new Rectangle(0, 2, 20, 30), 3),
-			LoadImage(`Images/Player/Walk/1.png`, new Rectangle(1, 2, 19, 30), 3),
-			LoadImage(`Images/Player/Walk/2.png`, new Rectangle(7, 2, 11, 30), 3),
-			LoadImage(`Images/Player/Walk/3.png`, new Rectangle(7, 2, 11, 30), 3),
-			LoadImage(`Images/Player/Walk/4.png`, new Rectangle(7, 2, 11, 30), 3),
-			LoadImage(`Images/Player/Walk/5.png`, new Rectangle(1, 2, 18, 30), 3),
-		],
-		Sit: [LoadImage(`Images/Player/Crouch/3.png`, new Rectangle(0, 6, 22, 26), 3)],
+	private readonly _frames = {
+		Walk: GetSprite("Player_Walk") as Sprite[],
+		Sit: GetSprite("Player_Crouch") as Sprite[],
 		Hands: {
-			Left: LoadImage("Images/Player/Arm_left.png", new Rectangle(4, 14, 20, 4), 3),
-			Right: LoadImage("Images/Player/Arm_right.png", new Rectangle(4, 14, 11, 8), 3),
+			Straight: GetSprite("Player_Arm_Straight") as Sprite,
+			Bend: GetSprite("Player_Arm_Bend") as Sprite,
 		},
 	};
 	private readonly _weapon = new AK();
 	private static readonly _visibleDistance = 500;
+	private readonly _armHeight = 0.65;
+	private _timeToNextFrame = 0;
+	private _frameIndex = 0;
 
 	private _angle = 0;
 
@@ -40,7 +37,20 @@ export class Human extends Enemy {
 	}
 
 	override Update(dt: number): void {
+		const prevX = this._x;
+
 		super.Update(dt);
+
+		if (prevX != this._x) {
+			this._timeToNextFrame -= dt;
+
+			if (this._timeToNextFrame < 0) {
+				this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
+				this._timeToNextFrame = 70;
+			}
+		} else {
+			this._frameIndex = 0;
+		}
 
 		this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
 
@@ -67,142 +77,71 @@ export class Human extends Enemy {
 	}
 
 	override Render(): void {
+		const framesPack = this._frames.Walk;
+		const scale = this.Height / framesPack[0].BoundingBox.Height;
+		const scaledWidth = framesPack[0].BoundingBox.Width * scale;
+		const widthOffset = (scaledWidth - this.Width) / 2;
+
 		if (this.Direction == 1) {
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngle(
-					Human._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-					),
-					this._angle - Math.PI / 4,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
-			else if (this._weapon.Heavy)
-				Canvas.DrawImageWithAngle(
-					Human._frames.Hands.Left,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Left.BoundingBox.Width * Human._frames.Hands.Left.Scale,
-						Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale
-					),
-					this._angle,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
+			Canvas.DrawImageWithAngle(
+				this._frames.Hands.Straight,
+				new Rectangle(
+					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+					this._y + this.Height * this._armHeight,
+					this._frames.Hands.Straight.BoundingBox.Width * scale,
+					this._frames.Hands.Straight.BoundingBox.Height * scale
+				),
+				this._angle + 0.05,
+				-2 * scale,
+				(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+			);
 
-			if (this._movingLeft || this._movingRight)
-				Canvas.DrawImage(Human._frames.Walk[0], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() + 15, this._y, this.Width + 50, this.Height));
-			else Canvas.DrawImage(Human._frames.Walk[0], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() + 15, this._y, this.Width + 50, this.Height));
+			Canvas.DrawImage(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngle(
-					Human._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-					),
-					this._angle,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
-			else {
-				this._weapon.Render();
+			this._weapon.Render();
 
-				if (this._weapon.Heavy)
-					Canvas.DrawImageWithAngle(
-						Human._frames.Hands.Right,
-						new Rectangle(
-							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-							this._y + this.Height * 0.6,
-							Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-							Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-						),
-						this._angle,
-						-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-					);
-				else
-					Canvas.DrawImageWithAngle(
-						Human._frames.Hands.Left,
-						new Rectangle(
-							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-							this._y + this.Height * 0.6,
-							Human._frames.Hands.Left.BoundingBox.Width * Human._frames.Hands.Left.Scale,
-							Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale
-						),
-						this._angle,
-						-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-						(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-					);
-			}
+			Canvas.DrawImageWithAngle(
+				this._frames.Hands.Bend,
+				new Rectangle(
+					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+					this._y + this.Height * this._armHeight,
+					this._frames.Hands.Bend.BoundingBox.Width * scale,
+					this._frames.Hands.Bend.BoundingBox.Height * scale
+				),
+				this._angle,
+				-2 * scale,
+				(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+			);
 		} else {
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngleVFlipped(
-					Human._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-					),
-					this._angle + Math.PI / 4,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
-			else if (this._weapon.Heavy)
-				Canvas.DrawImageWithAngleVFlipped(
-					Human._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-					),
-					this._angle,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
+			Canvas.DrawImageWithAngleVFlipped(
+				this._frames.Hands.Bend,
+				new Rectangle(
+					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+					this._y + this.Height * this._armHeight,
+					this._frames.Hands.Bend.BoundingBox.Width * scale,
+					this._frames.Hands.Bend.BoundingBox.Height * scale
+				),
+				this._angle,
+				-2 * scale,
+				(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+			);
 
-			if (this._movingLeft || this._movingRight)
-				Canvas.DrawImageFlipped(Human._frames.Walk[0], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() - 15, this._y, this.Width + 50, this.Height));
-			else Canvas.DrawImageFlipped(Human._frames.Walk[0], new Rectangle(this._x - 25 - Scene.Current.GetLevelPosition() - 15, this._y, this.Width + 50, this.Height));
+			Canvas.DrawImageFlipped(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 
-			if (this._weapon === null)
-				Canvas.DrawImageWithAngleVFlipped(
-					Human._frames.Hands.Right,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Right.BoundingBox.Width * Human._frames.Hands.Right.Scale,
-						Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale
-					),
-					this._angle,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					Human._frames.Hands.Right.BoundingBox.Height * Human._frames.Hands.Right.Scale - (Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
-			else {
-				this._weapon.Render();
+			this._weapon.Render();
 
-				Canvas.DrawImageWithAngleVFlipped(
-					Human._frames.Hands.Left,
-					new Rectangle(
-						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-						this._y + this.Height * 0.6,
-						Human._frames.Hands.Left.BoundingBox.Width * Human._frames.Hands.Left.Scale,
-						Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale
-					),
-					this._angle,
-					-(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2,
-					(Human._frames.Hands.Left.BoundingBox.Height * Human._frames.Hands.Left.Scale) / 2
-				);
-			}
+			Canvas.DrawImageWithAngleVFlipped(
+				this._frames.Hands.Straight,
+				new Rectangle(
+					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+					this._y + this.Height * this._armHeight,
+					this._frames.Hands.Straight.BoundingBox.Width * scale,
+					this._frames.Hands.Straight.BoundingBox.Height * scale
+				),
+				this._angle - 0.05,
+				-2 * scale,
+				(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+			);
 		}
 	}
 

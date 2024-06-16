@@ -2,6 +2,7 @@ import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, LoadImage, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
+import { GetSound } from "../Game.js";
 export class AudioSource extends Interactable {
     _volume;
     _life = 0;
@@ -18,7 +19,7 @@ export class AudioSource extends Interactable {
             throw new Error("Бумбокс без музыки.");
         this._x = x;
         this._y = y;
-        this._soundPack = sounds.map((i) => Scene.GetSound(i));
+        this._soundPack = sounds.map((i) => GetSound(i));
         this._currentSound = 0;
         this._volume = volume;
     }
