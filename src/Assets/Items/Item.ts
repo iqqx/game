@@ -1,7 +1,28 @@
 import { LoadImage, Sprite } from "../../Utilites.js";
+import { Weapon } from "../Weapons/Weapon.js";
 
 export abstract class Item {
 	abstract readonly Icon: Sprite;
+
+	public static Parse(raw: string) {
+		switch (raw) {
+			case "Bread":
+				return new Bread();
+			case "Vodka":
+				return new Vodka();
+			case "Sausage":
+				return new Sausage();
+			case "AidKit":
+				return new AidKit();
+			case "AK":
+			case "Glock":
+				return Weapon.Parse(raw);
+			case "Radio":
+				return new Radio();
+			default:
+				throw new Error("Предмет не удалось распарсить: " + raw);
+		}
+	}
 }
 
 export class Vodka extends Item {

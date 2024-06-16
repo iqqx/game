@@ -18,7 +18,7 @@ export class AudioSource extends Interactable {
             throw new Error("Бумбокс без музыки.");
         this._x = x;
         this._y = y;
-        this._soundPack = sounds;
+        this._soundPack = sounds.map((i) => Scene.GetSound(i));
         this._currentSound = 0;
         this._volume = volume;
     }

@@ -4,7 +4,7 @@ import { Scene } from "../../Scene.js";
 import { LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 export class Backpack extends Container {
-    static _image = LoadImage(`Images/Player/Drop_backpack.png`, new Rectangle(11, 13, 10, 6), 5);
+    static _image = LoadImage(`Images/Drop_backpack.png`, new Rectangle(11, 13, 10, 6), 5);
     static _sound = LoadSound("Sounds/backpack_pickup.mp3");
     OnPickup;
     constructor(x, y, ...content) {

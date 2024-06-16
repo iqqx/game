@@ -14,14 +14,14 @@ export class AudioSource extends Interactable {
 	private _currentSound: number;
 	private static readonly _frames = [LoadImage("Images/Boombox/0.png"), LoadImage("Images/Boombox/1.png")];
 
-	constructor(x: number, y: number, volume: number, ...sounds: Sound[]) {
+	constructor(x: number, y: number, volume: number, ...sounds: string[]) {
 		super(100, 50);
 
 		if (sounds.length === 0) throw new Error("Бумбокс без музыки.");
 
 		this._x = x;
 		this._y = y;
-		this._soundPack = sounds;
+		this._soundPack = sounds.map((i) => Scene.GetSound(i));
 		this._currentSound = 0;
 		this._volume = volume;
 	}

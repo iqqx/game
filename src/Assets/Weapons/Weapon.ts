@@ -5,7 +5,7 @@ import { Bullet } from "../../GameObjects/Bullet.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Sprite, Sound, Vector2, Rectangle, LoadSound } from "../../Utilites.js";
+import { Sprite, Sound, Vector2, Rectangle, LoadSound, LoadImage } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 
 export abstract class Weapon extends Item {
@@ -125,6 +125,17 @@ export abstract class Weapon extends Item {
 		}
 	}
 
+	public static Parse(raw: string) {
+		switch (raw) {
+			case "Glock":
+				return new Glock();
+			case "AK":
+				return new AK();
+			default:
+				throw new Error("Оружие не удалось распарсить: " + raw);
+		}
+	}
+
 	public Reload() {
 		if (this._secondsToReload > 0) return;
 
@@ -197,5 +208,46 @@ export abstract class Weapon extends Item {
 			this._sounds.Shell?.Play(0.1);
 		}, 300);
 		return true;
+	}
+}
+
+export class Glock extends Weapon {
+	private static readonly _sprites = {
+		Icon: LoadImage("Images/Glock-icon.png"),
+		Image: LoadImage("Images/Pistol.png", new Rectangle(0, 3, 32, 28), 0.75),
+	};
+	private static readonly _sounds = {
+		Fire: LoadSound("Sounds/shoot-3.mp3"),
+		Shell: LoadSound("Sounds/shell.mp3"),
+	};
+
+	constructor() {
+		super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+	}
+
+	static toString(): string {
+		return "Пистолет";
+	}
+}
+
+export class AK extends Weapon {
+	private static readonly _sprites = {
+		Icon: LoadImage("Images/AK-icon.png"),
+		Image: LoadImage("Images/Rifle.png", new Rectangle(16, 6, 43, 15)),
+	};
+	private static readonly _sounds = {
+		Fire: LoadSound("Sounds/shoot-1.wav"),
+	};
+
+	private static readonly _fireCooldown = 150;
+	private static readonly _damage = 40;
+	private static readonly _spread = 0.01;
+
+	constructor() {
+		super(AK._sprites, AK._sounds, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
+	}
+
+	static toString(): string {
+		return "Калак 12";
 	}
 }

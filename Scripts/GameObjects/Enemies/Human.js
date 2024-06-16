@@ -4,9 +4,9 @@ import { Canvas } from "../../Context.js";
 import { LoadImage, Rectangle, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
-import { AK } from "../../Assets/Weapons/AK.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
+import { AK } from "../../Assets/Weapons/Weapon.js";
 export class Human extends Enemy {
     static _deathSound = new Audio("Sounds/human_death-2.mp3");
     static _frames = {

@@ -4,9 +4,9 @@ import { Rectangle, LoadImage, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
     static _frames = [
-        LoadImage("Images/Player/Fireball/2.png", new Rectangle(8, 8, 6, 10)),
-        LoadImage("Images/Player/Fireball/1.png", new Rectangle(8, 9, 15, 10)),
-        LoadImage("Images/Player/Fireball/0.png", new Rectangle(8, 10, 7, 8)),
+        LoadImage("Images/Fireball/2.png", new Rectangle(8, 8, 6, 10)),
+        LoadImage("Images/Fireball/1.png", new Rectangle(8, 9, 15, 10)),
+        LoadImage("Images/Fireball/0.png", new Rectangle(8, 10, 7, 8)),
     ];
     _angle;
     _offset;

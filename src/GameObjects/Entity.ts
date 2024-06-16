@@ -62,7 +62,8 @@ export class Entity extends GameObject {
 		if (collideOffsets !== false) {
 			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
 
-			this._x -= collideOffsets.position.X;
+			if (collideOffsets.position.Y > 0 && collideOffsets.position.Y < 10) this._y += collideOffsets.position.Y;
+			else this._x -= collideOffsets.position.X;
 		}
 	}
 
@@ -75,7 +76,8 @@ export class Entity extends GameObject {
 		if (collideOffsets !== false) {
 			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
 
-			this._x -= collideOffsets.position.X;
+			if (collideOffsets.position.Y > 0 && collideOffsets.position.Y < 10) this._y += collideOffsets.position.Y;
+			else this._x -= collideOffsets.position.X;
 		}
 	}
 

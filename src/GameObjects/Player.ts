@@ -742,7 +742,7 @@ export class Player extends Entity {
 								if ((this._inventory[i] as Weapon).IsReloading()) return "~";
 								else if (loadedRatio > 1) return loaded.toString();
 								else if (loaded === 0) return "0";
-								else if (loadedRatio > 0.6) return ">3/4";
+								else if (loadedRatio > 0.75) return ">3/4";
 								else if (loadedRatio > 0.4) return "~1/2";
 								else if (loadedRatio > 0.2) return ">1/4";
 								else if (loadedRatio <= 0.2) return "<1/4";
@@ -786,7 +786,7 @@ export class Player extends Entity {
 								if ((this._inventory[i] as Weapon).IsReloading()) return "~";
 								else if (loadedRatio > 1) return loaded.toString();
 								else if (loaded === 0) return "0";
-								else if (loadedRatio > 0.6) return ">3/4";
+								else if (loadedRatio > 0.75) return ">3/4";
 								else if (loadedRatio > 0.4) return "~1/2";
 								else if (loadedRatio > 0.2) return ">1/4";
 								else if (loadedRatio <= 0.2) return "<1/4";

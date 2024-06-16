@@ -5,7 +5,7 @@ import { Bullet } from "../../GameObjects/Bullet.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Vector2, Rectangle, LoadSound } from "../../Utilites.js";
+import { Vector2, Rectangle, LoadSound, LoadImage } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 export class Weapon extends Item {
     Icon;
@@ -76,6 +76,16 @@ export class Weapon extends Item {
                 Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
         }
     }
+    static Parse(raw) {
+        switch (raw) {
+            case "Glock":
+                return new Glock();
+            case "AK":
+                return new AK();
+            default:
+                throw new Error("Оружие не удалось распарсить: " + raw);
+        }
+    }
     Reload() {
         if (this._secondsToReload > 0)
             return;
@@ -124,5 +134,39 @@ export class Weapon extends Item {
             this._sounds.Shell?.Play(0.1);
         }, 300);
         return true;
+    }
+}
+export class Glock extends Weapon {
+    static _sprites = {
+        Icon: LoadImage("Images/Glock-icon.png"),
+        Image: LoadImage("Images/Pistol.png", new Rectangle(0, 3, 32, 28), 0.75),
+    };
+    static _sounds = {
+        Fire: LoadSound("Sounds/shoot-3.mp3"),
+        Shell: LoadSound("Sounds/shell.mp3"),
+    };
+    constructor() {
+        super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+    }
+    static toString() {
+        return "Пистолет";
+    }
+}
+export class AK extends Weapon {
+    static _sprites = {
+        Icon: LoadImage("Images/AK-icon.png"),
+        Image: LoadImage("Images/Rifle.png", new Rectangle(16, 6, 43, 15)),
+    };
+    static _sounds = {
+        Fire: LoadSound("Sounds/shoot-1.wav"),
+    };
+    static _fireCooldown = 150;
+    static _damage = 40;
+    static _spread = 0.01;
+    constructor() {
+        super(AK._sprites, AK._sounds, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
+    }
+    static toString() {
+        return "Калак 12";
     }
 }

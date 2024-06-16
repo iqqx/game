@@ -1,26 +1,135 @@
-import { Tag } from "./Enums.js";
+import { EnemyType, Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
-import { Canvas } from "./Context.js";
-import { Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite } from "./Utilites.js";
+import { Canvas, GUI } from "./Context.js";
+import { Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, LoadImage, Color, Rectangle, Sound, LoadSound, SetImageCount } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
+import { Wall } from "./GameObjects/Wall.js";
+import { Platform } from "./GameObjects/Platform.js";
+import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
+import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
+import { BlinkingLabel } from "./GameObjects/GUI/BlinkingLabel.js";
+import { AudioSource } from "./GameObjects/BoomBox.js";
+import { Box } from "./Assets/Containers/Box.js";
+import { Item } from "./Assets/Items/Item.js";
+import { Spikes } from "./GameObjects/Spikes.js";
+import { Ladder } from "./GameObjects/Ladder.js";
+import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
+import { Backpack } from "./Assets/Containers/Backpack.js";
+import { Human } from "./GameObjects/Enemies/Human.js";
 
 export class Scene {
 	public static Current: Scene;
+	private static readonly _sprites = new Map<string, Sprite | Sprite[]>();
+	private static readonly _sounds = new Map<string, Sound>();
 
 	private readonly _gameObjects: GameObject[] = [];
 	private readonly _interactableGameObjects: Interactable[] = [];
 
-	private readonly _background: Sprite;
+	private readonly _background: Sprite | null;
 
-	public static readonly Player: Player;
-	public Player: Player;
+	public static Player: Player | null = null;
+	public Player: Player | null = null;
 	private _levelPosition = 0;
 	public Time = 0;
 
-	constructor(background: Sprite) {
+	constructor(background: Sprite | null, objects: GameObject[]) {
 		this._background = background;
 
 		Scene.Current = this;
+
+		for (const object of objects) this.Instantiate(object);
+	}
+
+	public static async Load() {
+		const routers = await fetch("Assets/Routers.json").catch(() => false as const);
+		if (routers === false || !routers.ok) return Scene.LoadErrorScene("Не найдено: Assets/Routers.json");
+
+		const parsedRouters = await routers.json();
+		if (parsedRouters.Scenes === undefined || parsedRouters.Scenes.length === 0) return Scene.LoadErrorScene("Сцены не найдены в Assets/Routers.json");
+		if (parsedRouters.Images === undefined) return Scene.LoadErrorScene("Изображения не найдены в Assets/Routers.json");
+		if (parsedRouters.Sounds === undefined) return Scene.LoadErrorScene("Звуки не найдены в Assets/Routers.json");
+
+		let imagesToLoad = 0;
+		for (const imageKey in parsedRouters.Images) {
+			imagesToLoad++;
+			const object = parsedRouters.Images[imageKey];
+
+			if (typeof object === "string") this._sprites.set(imageKey, LoadImage(object as string));
+			else if (object instanceof Array)
+				this._sprites.set(
+					imageKey,
+					object.map((x) => LoadImage(x))
+				);
+			else return Scene.LoadErrorScene(`Недопустимый тип изображения: ${imageKey}`);
+		}
+		SetImageCount(imagesToLoad);
+
+		for (const soundKey in parsedRouters.Sounds) {
+			const object = parsedRouters.Sounds[soundKey];
+
+			if (typeof object === "string") this._sounds.set(soundKey, LoadSound(object as string));
+			else return Scene.LoadErrorScene(`Недопустимый тип звука: ${soundKey}`);
+		}
+
+		const sceneFile = await fetch(parsedRouters.Scenes[0]);
+		if (!sceneFile.ok) return Scene.LoadErrorScene(`Сцена не найдена: ${parsedRouters.Scenes[0]}`);
+
+		const sceneData = await sceneFile.json();
+		return new Scene(
+			this._sprites.get(sceneData.Background) as Sprite,
+			(sceneData.GameObjects as { Type: string; Arguments: unknown[] }[]).map((x) => {
+				switch (x.Type) {
+					case "Wall":
+						return new Wall(...(x.Arguments as [number, number, number, number]));
+					case "Platform":
+						return new Platform(...(x.Arguments as [number, number, number, number]));
+					case "Player":
+						return new Player(...(x.Arguments as [number, number]));
+					case "Boombox":
+						return new AudioSource(...(x.Arguments as [number, number, number]));
+					case "Box":
+						x.Arguments.slice(2).map((x) => {
+							const value = x as { Item: string; Chance: number };
+
+							return { Item: Item.Parse(value.Item), Chance: value.Chance };
+						});
+
+						return new Box(...(x.Arguments as [number, number]));
+					case "Spikes":
+						return new Spikes(...(x.Arguments as [number, number, number, number]));
+					case "Ladder":
+						return new Ladder(...(x.Arguments as [number, number, number]));
+					case "Morshu":
+						return new Morshu(...(x.Arguments as [number, number]));
+					case "Backpack":
+						x.Arguments.slice(2).map((x) => Item.Parse(x as string));
+
+						return new Backpack(...(x.Arguments as [number, number]));
+					case "Human":
+						x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Rat;
+
+						return new Human(...(x.Arguments as [number, number, EnemyType]));
+					default:
+						throw new Error("Не удалось распарсить: " + x.Type);
+				}
+			})
+		);
+	}
+
+	private static LoadErrorScene(error: string) {
+		return new Scene(null, [
+			new GUIRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height), Color.Black),
+			new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width / 2, GUI.Height / 2), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingLabel(error, GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
+		]);
+	}
+
+	public static GetSprite(key: string): Sprite | Sprite[] {
+		return Scene._sprites.get(key);
+	}
+
+	public static GetSound(key: string): Sound {
+		return Scene._sounds.get(key);
 	}
 
 	public GetLevelPosition() {
@@ -113,7 +222,7 @@ export class Scene {
 	}
 
 	public Update(time: number) {
-		if (this.Player.CanTarget()) {
+		if (this.Player !== null && this.Player.CanTarget()) {
 			const plrPos = this.Player.GetPosition();
 			const plrTargetRaw = this.Player.GetTarget();
 
@@ -126,17 +235,19 @@ export class Scene {
 	}
 
 	public Render() {
-		Canvas.DrawBackground(this._background, this._levelPosition);
+		if (this._background !== null) Canvas.DrawBackground(this._background, this._levelPosition);
 
 		for (const object of this._gameObjects) object.Render();
 	}
 
 	public RenderOverlay() {
-		Canvas.SwitchLayer(false);
+		if (this.Player !== null) {
+			Canvas.SwitchLayer(false);
 
-		Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
-		this.Player.RenderOverlay();
-		Canvas.SwitchLayer(true);
+			Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
+			this.Player.RenderOverlay();
+			Canvas.SwitchLayer(true);
+		}
 	}
 
 	public GetByTag(tag: Tag) {
@@ -152,7 +263,7 @@ export class Scene {
 
 		if (object instanceof Player) {
 			this.Player = object;
-			(Scene.Player as unknown) = object;
+			Scene.Player = object;
 		}
 
 		if (object instanceof Interactable) {

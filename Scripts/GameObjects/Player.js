@@ -507,7 +507,7 @@ export class Player extends Entity {
                                     return loaded.toString();
                                 else if (loaded === 0)
                                     return "0";
-                                else if (loadedRatio > 0.6)
+                                else if (loadedRatio > 0.75)
                                     return ">3/4";
                                 else if (loadedRatio > 0.4)
                                     return "~1/2";
@@ -555,7 +555,7 @@ export class Player extends Entity {
                                     return loaded.toString();
                                 else if (loaded === 0)
                                     return "0";
-                                else if (loadedRatio > 0.6)
+                                else if (loadedRatio > 0.75)
                                     return ">3/4";
                                 else if (loadedRatio > 0.4)
                                     return "~1/2";

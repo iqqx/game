@@ -7,7 +7,7 @@ import { Container } from "./Containers.js";
 export class Box extends Container {
 	private static readonly _sprite = LoadImage("Images/Container.png");
 
-	constructor(x: number, y: number, ...items: { item: Item; Chance: number }[]) {
+	constructor(x: number, y: number, ...items: { Item: Item; Chance: number }[]) {
 		super(50, 50, 3, 3);
 
 		this._x = x;
@@ -26,7 +26,7 @@ export class Box extends Container {
 			}
 
 			if (Math.random() <= item.Chance) {
-				this._items[nextCellY][nextCellX] = item.item;
+				this._items[nextCellY][nextCellX] = item.Item;
 				added++;
 			}
 		}

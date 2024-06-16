@@ -243,9 +243,14 @@ export var GUI;
             ctx.fillText(lines[i], x, y + i * height);
     }
     GUI.DrawTextWithBreakes = DrawTextWithBreakes;
-    function DrawTextCenter(text, x, y, width) {
+    function DrawTextCenter(text, x, y, width, height) {
         const textWidth = ctx.measureText(text).width;
-        ctx.fillText(text, x + (width - textWidth) / 2, y);
+        if (height !== undefined) {
+            const textHeight = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
+            ctx.fillText(text, x + (width - textWidth) / 2, y + (height + textHeight) / 2);
+        }
+        else
+            ctx.fillText(text, x + (width - textWidth) / 2, y);
     }
     GUI.DrawTextCenter = DrawTextCenter;
     function DrawTextClamped(x, y, text, maxWidth) {

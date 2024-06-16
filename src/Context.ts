@@ -301,10 +301,14 @@ export namespace GUI {
 		for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, y + i * height);
 	}
 
-	export function DrawTextCenter(text: string, x: number, y: number, width: number) {
+	export function DrawTextCenter(text: string, x: number, y: number, width: number, height?: number) {
 		const textWidth = ctx.measureText(text).width;
 
-		ctx.fillText(text, x + (width - textWidth) / 2, y);
+		if (height !== undefined) {
+			const textHeight = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
+
+			ctx.fillText(text, x + (width - textWidth) / 2, y + (height + textHeight) / 2);
+		} else ctx.fillText(text, x + (width - textWidth) / 2, y);
 	}
 
 	export function DrawTextClamped(x: number, y: number, text: string, maxWidth: number) {

@@ -138,9 +138,13 @@ export type Sprite = {
 	readonly Scale: number;
 };
 
+let imagesToLoad = 100000000;
 let imagesLoaded = 0;
 export function IsImagesLoaded() {
-	return imagesLoaded >= 44;
+	return imagesLoaded >= imagesToLoad;
+}
+export function SetImageCount(count: number) {
+	imagesToLoad = count;
 }
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {

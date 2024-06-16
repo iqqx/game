@@ -19,7 +19,7 @@ export class Box extends Container {
                 nextCellY = Math.round(Math.random() * 2);
             }
             if (Math.random() <= item.Chance) {
-                this._items[nextCellY][nextCellX] = item.item;
+                this._items[nextCellY][nextCellX] = item.Item;
                 added++;
             }
         }
