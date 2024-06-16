@@ -39,6 +39,27 @@ export class Scene {
 		return false;
 	}
 
+	public GetCollides(who: GameObject, tag?: Tag): RaycastHit[] {
+		const result: RaycastHit[] = [];
+
+		if (tag === undefined)
+			for (const object of this._gameObjects) {
+				const collide = GameObject.GetCollide(who, object);
+
+				if (collide !== false) result.push(collide);
+			}
+		else
+			for (const object of this._gameObjects) {
+				if (object.Tag & tag) {
+					const collide = GameObject.GetCollide(who, object);
+
+					if (collide !== false) result.push(collide);
+				}
+			}
+
+		return result;
+	}
+
 	public IsCollide(who: GameObject, tag?: Tag) {
 		for (const object of this._gameObjects) {
 			if (tag !== undefined && (object.Tag & tag) === 0) continue;

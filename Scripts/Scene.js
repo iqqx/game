@@ -28,6 +28,24 @@ export class Scene {
         }
         return false;
     }
+    GetCollides(who, tag) {
+        const result = [];
+        if (tag === undefined)
+            for (const object of this._gameObjects) {
+                const collide = GameObject.GetCollide(who, object);
+                if (collide !== false)
+                    result.push(collide);
+            }
+        else
+            for (const object of this._gameObjects) {
+                if (object.Tag & tag) {
+                    const collide = GameObject.GetCollide(who, object);
+                    if (collide !== false)
+                        result.push(collide);
+                }
+            }
+        return result;
+    }
     IsCollide(who, tag) {
         for (const object of this._gameObjects) {
             if (tag !== undefined && (object.Tag & tag) === 0)
