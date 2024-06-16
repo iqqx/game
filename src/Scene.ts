@@ -1,7 +1,8 @@
 import { Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, Interactable } from "./Utilites.js";
+import { Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite } from "./Utilites.js";
+import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 
 export class Scene {
 	public static Current: Scene;

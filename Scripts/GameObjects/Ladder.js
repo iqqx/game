@@ -1,7 +1,8 @@
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Color, GameObject, Rectangle } from "../Utilites.js";
+import { Color, Rectangle } from "../Utilites.js";
 import { Tag } from "../Enums.js";
+import { GameObject } from "./GameObject.js";
 export class Ladder extends GameObject {
     constructor(x, y, height) {
         super(50, height);

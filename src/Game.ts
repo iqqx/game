@@ -10,11 +10,10 @@ import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
 import { Spikes } from "./GameObjects/Spikes.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Scene } from "./Scene.js";
-import { IsImagesLoaded, LoadImage, LoadSound, Vector2 } from "./Utilites.js";
+import { IsImagesLoaded, LoadImage, LoadSound } from "./Utilites.js";
 import { Glock } from "./Assets/Weapons/Glock.js";
 import { Ladder } from "./GameObjects/Ladder.js";
 import { AudioSource as BoomBox } from "./GameObjects/BoomBox.js";
-import { Blood } from "./GameObjects/Blood.js";
 
 const scene = new Scene(LoadImage("Images/Level_1.png"));
 

@@ -1,13 +1,14 @@
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Color, LoadImage, Rectangle, Interactable } from "../Utilites.js";
+import { Color, LoadImage, Rectangle } from "../Utilites.js";
+import { Interactable } from "./GameObject.js";
 export class AudioSource extends Interactable {
     _volume;
     _life = 0;
     _timeToNextFrame = 0;
     _frameIndex = 0;
     _enabled = false;
-    _silent = false;
+    _volumeModifier = 0.5;
     _soundPack;
     _currentSound;
     static _frames = [LoadImage("Images/Boombox/0.png"), LoadImage("Images/Boombox/1.png")];
@@ -31,10 +32,9 @@ export class AudioSource extends Interactable {
             this._timeToNextFrame = 100;
         }
         const c = Scene.Current.Player.GetCenter();
-        const trueVolume = this._volume * (this._silent ? 0.75 : 1);
+        const trueVolume = this._volume;
         this._soundPack[this._currentSound].Volume = (trueVolume - Math.clamp(Math.sqrt((this._x - c.X) ** 2 + (this._y - c.Y) ** 2), 0, trueVolume)) / trueVolume;
-        if (this._silent)
-            this._soundPack[this._currentSound].Volume /= 4;
+        this._soundPack[this._currentSound].Volume *= this._volumeModifier;
         this._soundPack[this._currentSound].Apply();
         if (!this._soundPack[this._currentSound].IsPlayingOriginal())
             this._soundPack[this._currentSound].PlayOriginal();
@@ -44,7 +44,7 @@ export class AudioSource extends Interactable {
         Canvas.DrawImageWithAngle(AudioSource._frames[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height), this._enabled ? Math.cos(this._life / 50) / 10 : 0, -this.Width / 2, this.Height / 2);
     }
     GetInteractives() {
-        return [this._enabled ? "выключить" : "включить", this._silent ? "прибавить" : "убавить", "переключить"];
+        return [this._enabled ? "выключить" : "включить", "прибавить", "убавить", "переключить"];
     }
     OnInteractSelected(id) {
         switch (id) {
@@ -57,9 +57,12 @@ export class AudioSource extends Interactable {
                 }
                 break;
             case 1:
-                this._silent = !this._silent;
+                this._volumeModifier = Math.min(this._volumeModifier + 0.1, 1);
                 break;
             case 2:
+                this._volumeModifier = Math.max(this._volumeModifier - 0.1, 0);
+                break;
+            case 3:
                 this._soundPack[this._currentSound].StopOriginal();
                 this._currentSound = (this._currentSound + 1) % this._soundPack.length;
                 break;

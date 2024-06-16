@@ -36,7 +36,6 @@ export class SceneEditor {
 					this._selectedType = 2;
 					break;
 				case "KeyA":
-				case "KeyA":
 					this._movingLeft = true;
 					break;
 				case "KeyD":

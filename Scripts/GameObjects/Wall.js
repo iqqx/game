@@ -1,5 +1,6 @@
-import { Rectangle, GameObject } from "../Utilites.js";
+import { Rectangle } from "../Utilites.js";
 import { Tag } from "../Enums.js";
+import { GameObject } from "./GameObject.js";
 export class Wall extends GameObject {
     constructor(x, y, width, height) {
         super(width, height);

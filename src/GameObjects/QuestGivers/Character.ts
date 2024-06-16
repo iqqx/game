@@ -1,6 +1,6 @@
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Interactable } from "../../Utilites.js";
+import { Interactable } from "../GameObject.js";
 
 export class Character extends Interactable {
 	public GetDialog(): Dialog {

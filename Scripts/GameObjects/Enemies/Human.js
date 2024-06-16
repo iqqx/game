@@ -8,7 +8,7 @@ import { AK } from "../../Assets/Weapons/AK.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
 export class Human extends Enemy {
-    static _deathSound = new Audio("Sounds/human_death.mp3");
+    static _deathSound = new Audio("Sounds/human_death-2.mp3");
     static _frames = {
         Walk: [
             LoadImage(`Images/Player/Walk/0.png`, new Rectangle(0, 2, 20, 30), 3),
@@ -105,7 +105,8 @@ export class Human extends Enemy {
             Scene.Current.Player.OnKilled(this._type);
             Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, new AidKit()));
             const s = Human._deathSound.cloneNode();
-            s.volume = 0.25;
+            s.playbackRate = 0.5;
+            s.volume = 1;
             s.play();
         }
     }

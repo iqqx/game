@@ -1,6 +1,7 @@
 import { Canvas } from "../Context.js";
 import { Scene } from "../Scene.js";
-import { GameObject, Rectangle, LoadImage, Vector2 } from "../Utilites.js";
+import { Rectangle, LoadImage, Vector2 } from "../Utilites.js";
+import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
     static _frames = [
         LoadImage("Images/Player/Fireball/2.png", new Rectangle(8, 8, 6, 10)),

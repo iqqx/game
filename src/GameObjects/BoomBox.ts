@@ -1,6 +1,7 @@
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Color, Sound, LoadImage, Rectangle, Interactable } from "../Utilites.js";
+import { Color, Sound, LoadImage, Rectangle } from "../Utilites.js";
+import { Interactable } from "./GameObject.js";
 
 export class AudioSource extends Interactable {
 	private readonly _volume: number;
@@ -8,7 +9,7 @@ export class AudioSource extends Interactable {
 	private _timeToNextFrame = 0;
 	private _frameIndex = 0;
 	private _enabled = false;
-	private _silent = false;
+	private _volumeModifier = 0.5;
 	private readonly _soundPack: Sound[];
 	private _currentSound: number;
 	private static readonly _frames = [LoadImage("Images/Boombox/0.png"), LoadImage("Images/Boombox/1.png")];
@@ -38,10 +39,10 @@ export class AudioSource extends Interactable {
 
 		const c = Scene.Current.Player.GetCenter();
 
-		const trueVolume = this._volume * (this._silent ? 0.75 : 1);
+		const trueVolume = this._volume;
 
 		this._soundPack[this._currentSound].Volume = (trueVolume - Math.clamp(Math.sqrt((this._x - c.X) ** 2 + (this._y - c.Y) ** 2), 0, trueVolume)) / trueVolume;
-		if (this._silent) this._soundPack[this._currentSound].Volume /= 4;
+		this._soundPack[this._currentSound].Volume *= this._volumeModifier;
 		this._soundPack[this._currentSound].Apply();
 
 		if (!this._soundPack[this._currentSound].IsPlayingOriginal()) this._soundPack[this._currentSound].PlayOriginal();
@@ -59,7 +60,7 @@ export class AudioSource extends Interactable {
 	}
 
 	GetInteractives(): string[] {
-		return [this._enabled ? "выключить" : "включить", this._silent ? "прибавить" : "убавить", "переключить"];
+		return [this._enabled ? "выключить" : "включить", "прибавить", "убавить", "переключить"];
 	}
 	OnInteractSelected(id: number): void {
 		switch (id) {
@@ -73,9 +74,12 @@ export class AudioSource extends Interactable {
 				}
 				break;
 			case 1:
-				this._silent = !this._silent;
+				this._volumeModifier = Math.min(this._volumeModifier + 0.1, 1);
 				break;
 			case 2:
+				this._volumeModifier = Math.max(this._volumeModifier - 0.1, 0);
+				break;
+			case 3:
 				this._soundPack[this._currentSound].StopOriginal();
 				this._currentSound = (this._currentSound + 1) % this._soundPack.length;
 

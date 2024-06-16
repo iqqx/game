@@ -1,5 +1,5 @@
 import { Scene } from "../../Scene.js";
-import { Interactable } from "../../Utilites.js";
+import { Interactable } from "../GameObject.js";
 export class Character extends Interactable {
     GetDialog() {
         return;

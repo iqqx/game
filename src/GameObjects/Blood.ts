@@ -1,7 +1,8 @@
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
-import { Color, GameObject, Rectangle, Vector2 } from "../Utilites.js";
+import { Color, Rectangle, Vector2 } from "../Utilites.js";
+import { GameObject } from "./GameObject.js";
 
 export class Blood extends GameObject {
 	private _accelerationX: number;

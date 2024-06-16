@@ -1,7 +1,6 @@
-import { Rectangle, Color, GameObject } from "../Utilites.js";
+import { Rectangle } from "../Utilites.js";
 import { Tag } from "../Enums.js";
-import { Canvas } from "../Context.js";
-import { Scene } from "../Scene.js";
+import { GameObject } from "./GameObject.js";
 
 export class Wall extends GameObject {
 	constructor(x: number, y: number, width: number, height: number) {

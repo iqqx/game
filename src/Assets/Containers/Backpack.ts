@@ -1,7 +1,8 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { IPickapable } from "../../GameObjects/GameObject.js";
 import { Scene } from "../../Scene.js";
-import { IPickapable, LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
+import { LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 import { Container } from "./Containers.js";
 
@@ -11,7 +12,7 @@ export class Backpack extends Container implements IPickapable {
 	public readonly OnPickup?: () => void;
 
 	constructor(x: number, y: number, ...content: Item[]) {
-		super(Backpack._image.ScaledSize.X, Backpack._image.ScaledSize.Y, 4, 1);
+		super(50, 25, 4, 1);
 
 		for (let i = 0; i < content.length; i++) this._items[0][i] = content[i];
 
@@ -21,7 +22,7 @@ export class Backpack extends Container implements IPickapable {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(Backpack._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, Backpack._image.ScaledSize.X, Backpack._image.ScaledSize.Y));
+		Canvas.DrawImage(Backpack._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 	}
 
 	public Pickup() {

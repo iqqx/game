@@ -1,7 +1,7 @@
 import { Vodka } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
-import { EnemyType, Tag } from "../../Enums.js";
-import { PickupBackpackTask, HasItemTask, KillTask, Quest, MoveTask } from "../../Quest.js";
+import { Tag } from "../../Enums.js";
+import { PickupBackpackTask, HasItemTask, Quest, MoveTask } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { LoadImage, Rectangle } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";

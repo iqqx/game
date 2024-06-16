@@ -1,6 +1,7 @@
 import { Player } from "./GameObjects/Player.js";
 import { Canvas } from "./Context.js";
-import { GameObject, Line, GetIntersectPoint, Lerp, Interactable } from "./Utilites.js";
+import { Line, GetIntersectPoint, Lerp } from "./Utilites.js";
+import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 export class Scene {
     static Current;
     _gameObjects = [];

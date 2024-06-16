@@ -780,7 +780,7 @@ export class Player extends Entity {
                 this._mainHand = !this._mainHand;
                 const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
                 if (enemy.length > 0) {
-                    Player._hitSound.Play(.15);
+                    Player._hitSound.Play(0.15);
                     enemy[0].instance.TakeDamage(10);
                     const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
                     Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].position.X + bloodDir.X * 100, enemy[0].position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));

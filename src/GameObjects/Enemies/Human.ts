@@ -9,7 +9,7 @@ import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
 
 export class Human extends Enemy {
-	private static readonly _deathSound = new Audio("Sounds/human_death.mp3");
+	private static readonly _deathSound = new Audio("Sounds/human_death-2.mp3");
 	private static readonly _frames = {
 		Walk: [
 			LoadImage(`Images/Player/Walk/0.png`, new Rectangle(0, 2, 20, 30), 3),
@@ -232,7 +232,8 @@ export class Human extends Enemy {
 			Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, new AidKit()));
 
 			const s = Human._deathSound.cloneNode() as HTMLAudioElement;
-			s.volume = 0.25;
+			s.playbackRate = 0.5
+			s.volume = 1;
 			s.play();
 		}
 	}
