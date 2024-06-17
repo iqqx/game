@@ -47,6 +47,7 @@ export class Scene {
 	constructor(background: Sprite | null, objects: (GameObject | GUIBase)[]) {
 		this._background = background;
 
+		if (Scene.Current !== undefined) Scene.Current.Unload();
 		Scene.Current = this;
 
 		for (const object of objects)
@@ -74,6 +75,14 @@ export class Scene {
 		addEventListener("keydown", (e) => {
 			for (const event of this._keyDownEvents) if (event[0] === "any" || event[0] === e.code) event[1]();
 		});
+	}
+
+	public Unload() {
+		this._gameObjects.clear();
+		this._interactableGameObjects.clear();
+		this._GUIElements.clear();
+		this._keyDownEvents.clear();
+		this.Player = undefined;
 	}
 
 	public static async LoadFromFile(src: string) {

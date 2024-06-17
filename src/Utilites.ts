@@ -3,6 +3,7 @@ import { GameObject } from "./GameObjects/GameObject.js";
 declare global {
 	interface Array<T> {
 		minBy(by: (element: T) => number): T;
+		clear(): void;
 	}
 
 	interface Math {
@@ -16,6 +17,10 @@ Array.prototype.minBy = function <T>(this: T[], by: (element: T) => number): T {
 	for (const element of this) if (by(element) < by(min)) min = element;
 
 	return min;
+};
+
+Array.prototype.clear = function <T>(this: T[]): void {
+	this.length = 0;
 };
 
 Math.clamp = function (n: number, min: number, max: number) {

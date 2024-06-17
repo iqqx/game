@@ -40,6 +40,8 @@ export class Scene {
     static Time = 0;
     constructor(background, objects) {
         this._background = background;
+        if (Scene.Current !== undefined)
+            Scene.Current.Unload();
         Scene.Current = this;
         for (const object of objects)
             if (object instanceof GameObject)
@@ -71,6 +73,13 @@ export class Scene {
                 if (event[0] === "any" || event[0] === e.code)
                     event[1]();
         });
+    }
+    Unload() {
+        this._gameObjects.clear();
+        this._interactableGameObjects.clear();
+        this._GUIElements.clear();
+        this._keyDownEvents.clear();
+        this.Player = undefined;
     }
     static async LoadFromFile(src) {
         const scene = await fetch(src);

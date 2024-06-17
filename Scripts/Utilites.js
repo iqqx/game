@@ -5,6 +5,9 @@ Array.prototype.minBy = function (by) {
             min = element;
     return min;
 };
+Array.prototype.clear = function () {
+    this.length = 0;
+};
 Math.clamp = function (n, min, max) {
     return Math.min(Math.max(n, min), max);
 };
