@@ -34,7 +34,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
-    _timeFromIntro = 0;
+    _timeFromSpawn = 0;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -44,6 +44,8 @@ export class Player extends Entity {
         Walk: GetSprite("Player_Walk"),
         Sit: GetSprite("Player_Crouch"),
         Ladder: GetSprite("Player_Ladder"),
+        Death: GetSprite("Player_Death"),
+        Spawn: GetSprite("Player_Spawn"),
         Hands: {
             Straight: GetSprite("Player_Arm_Straight"),
             Bend: GetSprite("Player_Arm_Bend"),
@@ -54,21 +56,21 @@ export class Player extends Entity {
     static _walkSound = LoadSound("Sounds/walk-2.wav");
     static _dialogSound = LoadSound("Sounds/dialog.mp3");
     static _punchSound = LoadSound("Sounds/punch.wav");
-    _introSound = GetSound("Intro");
+    _hitSound = GetSound("Hit");
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
         this._x = x;
         this._y = y;
-        this._xTarget = 800;
+        this._xTarget = 750;
         this._yTarget = y;
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
         Player._walkSound.Speed = 1.6;
         Player._walkSound.Apply();
-        this._introSound.Volume = 0.35;
-        this._introSound.Apply();
-        this._introSound.PlayOriginal();
+        // this._health = 0;
         addEventListener("keydown", (e) => {
+            if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
+                return;
             switch (e.code) {
                 case "KeyC":
                     if (this._sit === false) {
@@ -172,6 +174,8 @@ export class Player extends Entity {
         addEventListener("mousedown", (e) => {
             if (e.target.tagName !== "CANVAS")
                 return;
+            if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
+                return;
             if (this._hoveredObject !== null) {
                 if (e.offsetX > this._xTarget - 75 && e.offsetX < this._xTarget - 75 + 150)
                     if (e.offsetY > 750 - this._yTarget + 50 && e.offsetY < 750 - this._yTarget + 50 + 25 * this._hoveredObject.GetInteractives().length) {
@@ -185,7 +189,7 @@ export class Player extends Entity {
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
-            if (e.button === 0 && this._timeFromIntro >= 23000) {
+            if (e.button === 0) {
                 const lastHover = this._hoveredObject;
                 this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
                 if (lastHover === null && this._hoveredObject !== null)
@@ -273,6 +277,8 @@ export class Player extends Entity {
                 return;
             if (e.sourceCapabilities.firesTouchEvents === true)
                 return;
+            if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
+                return;
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
@@ -294,12 +300,11 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
-        if (this._timeFromIntro < 23000) {
-            this._timeFromIntro += dt;
-            return;
+        if (this._health <= 0) {
+            this._timeFromDeath += dt;
+            if (this._timeFromDeath > 5000)
+                Scene.LoadFromFile("Assets/Scenes/Main.json");
         }
-        if (this._timeFromDeath > 0)
-            this._timeFromDeath -= dt;
         if (this._dialog !== null && this._timeToNextChar > 0) {
             this._timeToNextChar -= dt;
             if (this._timeToNextChar <= 0) {
@@ -338,10 +343,13 @@ export class Player extends Entity {
             return;
         }
         this.ApplyVForce();
+        if (this._timeFromSpawn < 5000) {
+            this._timeFromSpawn += dt;
+            return;
+        }
         if (this.CanTarget()) {
-            if (this._timeToNextPunch > 0) {
+            if (this._timeToNextPunch > 0)
                 this._timeToNextPunch -= dt;
-            }
             this._framesToPunch--;
             const prevX = this._x;
             if (this._movingLeft)
@@ -381,6 +389,22 @@ export class Player extends Entity {
         }
     }
     Render() {
+        if (this._timeFromSpawn < 5000) {
+            const framesPack = this._frames.Spawn;
+            const scale = this.Height / framesPack[0].BoundingBox.Height;
+            const scaledWidth = framesPack[0].BoundingBox.Width * scale;
+            const widthOffset = (scaledWidth - this.Width) / 2;
+            Canvas.DrawImage(framesPack[Math.clamp(Math.floor((this._timeFromSpawn - 4000) / 900), 0, 1)], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
+            return;
+        }
+        else if (this._timeFromDeath > 0) {
+            const framesPack = this._frames.Death;
+            const scale = this.Height / framesPack[0].BoundingBox.Height;
+            const scaledWidth = framesPack[0].BoundingBox.Width * scale;
+            const widthOffset = (scaledWidth - this.Width) / 2;
+            Canvas.DrawImage(framesPack[Math.clamp(Math.floor(this._timeFromDeath / 500), 0, 1)], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
+            return;
+        }
         const framesPack = this._sit ? this._frames.Sit : this._frames.Walk;
         const scale = this.Height / framesPack[0].BoundingBox.Height;
         const scaledWidth = framesPack[0].BoundingBox.Width * scale;
@@ -444,43 +468,21 @@ export class Player extends Entity {
         }
     }
     RenderOverlay() {
-        if (this._timeFromIntro < 23000) {
-            if (this._timeFromIntro < 19000) {
-                GUI.SetFillColor(Color.Black);
-                GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
-                const cn = "ПЕНТАГОН";
-                const nt = "ПРЕДСТАВЛЯЕТ";
-                const gn = "SUBWAY INFERNO";
-                GUI.SetFillColor(Color.White);
-                if (this._timeFromIntro < 7000 && this._timeFromIntro > 1000) {
-                    GUI.SetFont(72);
-                    if (this._timeFromIntro < 6000) {
-                        GUI.DrawTextCenter(cn.slice(0, Math.round(cn.length * ((this._timeFromIntro - 1000) / 2500))), 0, 0, GUI.Width, GUI.Height);
-                        if (this._timeFromIntro > 4000) {
-                            GUI.SetFont(24);
-                            GUI.DrawTextCenter(nt.slice(0, Math.round(nt.length * ((this._timeFromIntro - 4000) / 1000))), 0, GUI.Height / 2 + 100, GUI.Width);
-                        }
-                    }
-                    else {
-                        GUI.DrawTextCenter(cn.slice(0, Math.max(0, cn.length - Math.round(cn.length * ((this._timeFromIntro - 6000) / 800)))), 0, 0, GUI.Width, GUI.Height);
-                        GUI.SetFont(24);
-                        GUI.DrawTextCenter(nt.slice(0, Math.max(0, nt.length - Math.round(nt.length * ((this._timeFromIntro - 6000) / 800)))), 0, GUI.Height / 2 + 100, GUI.Width);
-                    }
-                }
-                else if (this._timeFromIntro > 8000) {
-                    GUI.SetFont(92);
-                    if (this._timeFromIntro < 16000)
-                        GUI.DrawTextCenter(gn.slice(0, Math.ceil(nt.length * ((this._timeFromIntro - 8000) / 3000))), 0, 0, GUI.Width, GUI.Height);
-                    else
-                        GUI.DrawTextCenter(gn.slice(0, -Math.ceil(nt.length * ((this._timeFromIntro - 16000) / 2500))), 0, 0, GUI.Width, GUI.Height);
-                }
-            }
-            else if (this._timeFromIntro < 23000) {
-                Canvas.DrawVignette(Color.Black, 0, 1);
-                GUI.SetFillColor(new Color(0, 0, 0, 255 - 255 * ((this._timeFromIntro - 19000) / 4000)));
-                GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
-            }
+        if (this._timeFromSpawn < 5000) {
+            GUI.DrawVignette(Color.Black, this._timeFromSpawn / 11111, 1 - this._timeFromSpawn / 5000, 1 - this._timeFromSpawn / 10000);
             return;
+        }
+        if (this._health > 0)
+            GUI.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.45, 0, 0.5);
+        else
+            GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
+        if (this._needDrawRedVegnitte > 0) {
+            this._needDrawRedVegnitte--;
+            Canvas.DrawVignette(Color.Red);
+        }
+        if (this._needDrawAntiVegnitte > 0) {
+            this._needDrawAntiVegnitte--;
+            Canvas.DrawVignette(new Color(100, 100, 100));
         }
         if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
             const items = this._hoveredObject.GetInteractives();
@@ -653,28 +655,6 @@ export class Player extends Entity {
             GUI.SetFont(16);
             GUI.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
         });
-        // POSTPROCCES
-        if (this._needDrawRedVegnitte > 0) {
-            this._needDrawRedVegnitte--;
-            Canvas.DrawVignette(Color.Red);
-        }
-        if (this._needDrawAntiVegnitte > 0) {
-            this._needDrawAntiVegnitte--;
-            Canvas.DrawVignette(new Color(100, 100, 100));
-            // Canvas.SetFillColor(Color.Red);
-        }
-        if (this._health > 0)
-            Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0, 1);
-        else
-            Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 1 - this._timeFromDeath / 150, 1 - this._timeFromDeath / 150 + 0.5);
-        // Canvas.SetFillColor(new Color(50, 50, 50));
-        // Canvas.DrawRectangle(0, 0, 1500, 750);
-        // Canvas.SetFillColor(Color.Black);
-        // Canvas.DrawTextEx(500,200,"STALKER 2",162)
-        // Canvas.SetFillColor(new Color(25,25,25));
-        // Canvas.DrawRectangle(300,200,300,150);
-        // Canvas.SetFillColor(Color.White);
-        // Canvas.DrawTextEx(400,500,"PLAY",32);
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
@@ -794,7 +774,6 @@ export class Player extends Entity {
             return;
         this._verticalAcceleration = this._jumpForce;
     }
-    static _hitSound = LoadSound("Sounds/hitmarker.mp3");
     Shoot() {
         if (!this.CanTarget() || this._onLadder !== null)
             return;
@@ -806,7 +785,7 @@ export class Player extends Entity {
                 this._mainHand = !this._mainHand;
                 const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
                 if (enemy.length > 0) {
-                    Player._hitSound.Play(0.15);
+                    this._hitSound.Play(0.15);
                     enemy[0].instance.TakeDamage(10);
                     const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
                     Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].position.X + bloodDir.X * 100, enemy[0].position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
@@ -822,7 +801,7 @@ export class Player extends Entity {
         this._health -= damage;
         this._needDrawRedVegnitte = 5;
         if (this._health <= 0) {
-            this._timeFromDeath = 150;
+            this._timeFromDeath = 1;
             Player._deathSound.Play();
         }
     }

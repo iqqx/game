@@ -20,7 +20,7 @@
 					"On": "AnyKeyDown",
 					"Action": {
 						"Type": "LoadScene",
-						"Source": "Assets/Scenes/Main.json"
+						"Source": "Assets/Scenes/Intro.json"
 					}
 				}
 			]

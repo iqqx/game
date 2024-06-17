@@ -1,0 +1,12 @@
+{
+	"GameObjects": [
+		{
+			"Type": "IntroCutscene",
+			"Arguments": ["Assets/Scenes/Main.json"]
+		},
+		{
+			"Type": "HintLabel",
+			"Arguments": ["Удерживайте ПРОБЕЛ чтобы пропустить", 1300, 700]
+		}
+	]
+}

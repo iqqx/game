@@ -5,7 +5,7 @@ export const sprites = new Map<string, Sprite | Sprite[]>();
 export const sounds = new Map<string, Sound>();
 let imagesToLoad = 99997;
 
-const scene = await (async () => {
+await (async () => {
 	const routers = await fetch("Assets/Routers.json");
 	if (!routers.ok) return Scene.GetErrorScene("Не найдено: Assets/Routers.json");
 
@@ -34,7 +34,7 @@ const scene = await (async () => {
 		else return Scene.GetErrorScene(`Недопустимый тип звука: ${soundKey}`);
 	}
 
-	return Scene.LoadFromFile(parsedRouters.Scenes[0]);
+	Scene.LoadFromFile(parsedRouters.Scenes[0]);
 })();
 
 export function GetSprite(key: string): Sprite | Sprite[] {
@@ -48,9 +48,11 @@ export function GetSound(key: string): Sound {
 function gameLoop(timeStamp: number) {
 	window.requestAnimationFrame(gameLoop);
 
-	scene.Update(timeStamp);
-	scene.Render();
-	scene.RenderOverlay();
+	if (Scene.Current === undefined) return;
+
+	Scene.Current.Update(timeStamp);
+	Scene.Current.Render();
+	Scene.Current.RenderOverlay();
 }
 
 function loadLoop() {

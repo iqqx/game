@@ -304,4 +304,13 @@ export var GUI;
         ctx.restore();
     }
     GUI.DrawImageWithAngle = DrawImageWithAngle;
+    function DrawVignette(color, startRadius, startAlpha, endAlpha) {
+        const grd = ctx.createRadialGradient(GUI.Width / 2, GUI.Height / 2, GUI.Width * startRadius, GUI.Width / 2, GUI.Height / 2, GUI.Width);
+        grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha})`);
+        grd.addColorStop(.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+        grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, GUI.Width, GUI.Height);
+    }
+    GUI.DrawVignette = DrawVignette;
 })(GUI || (GUI = {}));

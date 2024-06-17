@@ -370,4 +370,14 @@ export namespace GUI {
 
 		ctx.restore();
 	}
+
+	export function DrawVignette(color: Color, startRadius: number, startAlpha: number, endAlpha?: number) {
+		const grd = ctx.createRadialGradient(Width / 2, Height / 2, Width * startRadius, Width / 2, Height / 2, Width);
+		grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha})`);
+		grd.addColorStop(.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+		grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+
+		ctx.fillStyle = grd;
+		ctx.fillRect(0, 0, Width, Height);
+	}
 }

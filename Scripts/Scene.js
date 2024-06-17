@@ -23,6 +23,8 @@ import { Wall } from "./GameObjects/Wall.js";
 import { Image } from "./GameObjects/GUI/Image.js";
 import { LoadingIcon } from "./GameObjects/GUI/LoadingIcon.js";
 import { Label } from "./GameObjects/GUI/Label.js";
+import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
+import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -86,18 +88,15 @@ export class Scene {
         if (!scene.ok)
             return Scene.GetErrorScene("Сцена не найдена: " + src);
         const sceneData = await scene.json();
-        return new Scene(sceneData.Background === undefined ? null : sprites.get(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)));
+        new Scene(sceneData.Background === undefined ? null : sprites.get(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)));
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static ParseObject(x) {
         switch (x.Type) {
-            case "Action": {
-                switch (x.On) {
-                    case "AnyKeyDown":
-                        Scene.Current.RegisterKeyDown(this.ParseAction(x.Action));
-                }
-                break;
-            }
+            case "HintLabel":
+                return new HintLabel(...x.Arguments);
+            case "IntroCutscene":
+                return new IntroCutscene(x.Arguments[0]);
             case "Label":
                 return new Label(...x.Arguments);
             case "Image":
@@ -156,7 +155,7 @@ export class Scene {
     static ParseAction(x) {
         switch (x.Type) {
             case "LoadScene":
-                return async () => (Scene.Current = await Scene.LoadFromFile(x.Source));
+                return () => Scene.LoadFromFile(x.Source);
             case "Replace":
                 return function () {
                     Scene.Current.Destroy(this);
