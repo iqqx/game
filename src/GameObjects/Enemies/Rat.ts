@@ -16,7 +16,7 @@ export class Rat extends Enemy {
 	private _attackCooldown = 0;
 
 	constructor(x: number, y: number) {
-		super(50, 25, 2, 5, EnemyType.Rat);
+		super(100, 50, 5, 5, EnemyType.Rat);
 
 		this._x = x;
 		this._y = y;
@@ -26,17 +26,17 @@ export class Rat extends Enemy {
 		super.Update(dt);
 
 		const plrPos = Scene.Current.Player.GetPosition();
-		const plrSize = Scene.Current.Player.GetCollider();
+
+		const distance = this.GetDistanceToPlayer();
 
 		if (this._attackCooldown <= 0) {
-			if (
-				Math.abs(
-					this._x +
-						(this.Direction === 1 ? this.Width : 0) -
-						(plrPos.X + (this.Direction === 1 ? plrSize.Width : 0))
-				) <= this.Width &&
-				this._y == plrPos.Y
-			) {
+			if (Math.abs(distance) > 50 && Math.abs(distance) < 150) {
+				this._verticalAcceleration = 25;
+
+				this._attackCooldown = Rat.AttackCooldown;
+			}
+
+			if (Math.abs(this.GetDistanceToPlayer()) <= 50 && this._y == plrPos.Y) {
 				this._attackCooldown = Rat.AttackCooldown;
 
 				Scene.Current.Player.TakeDamage(Rat.Damage);
@@ -50,25 +50,9 @@ export class Rat extends Enemy {
 
 	override Render(): void {
 		if (this.Direction === 1) {
-			Canvas.DrawImage(
-				Rat._frames.Idle,
-				new Rectangle(
-					this._x - Scene.Current.GetLevelPosition(),
-					this._y,
-					this.Width,
-					this.Height
-				)
-			);
+			Canvas.DrawImage(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 		} else {
-			Canvas.DrawImageFlipped(
-				Rat._frames.Idle,
-				new Rectangle(
-					this._x - Scene.Current.GetLevelPosition(),
-					this._y,
-					this.Width,
-					this.Height
-				)
-			);
+			Canvas.DrawImageFlipped(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 		}
 	}
 

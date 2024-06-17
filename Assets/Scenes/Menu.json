@@ -1,0 +1,16 @@
+{
+	"GameObjects": [
+		{
+			"Type": "TextButton",
+			"Arguments": [750, 375, 200, 50, "НАЧАТЬ", 32],
+			"Action": {
+				"Type": "LoadScene",
+				"Source": "Assets/Scenes/Loading.json"
+			}
+		},
+		{
+			"Type": "Cursor",
+			"Arguments": []
+		}
+	]
+}

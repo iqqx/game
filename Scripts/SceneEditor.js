@@ -180,8 +180,8 @@ export class SceneEditor {
         }
     }
     RenderOverlay() {
-        Canvas.SwitchLayer(false);
-        Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
+        GUI.SwitchOn();
+        GUI.Clear();
         Canvas.SetFillColor(new Color(0, 0, 0));
         Canvas.DrawRectangle(0, Canvas.GetSize().Y, 500, -50);
         Canvas.SetFillColor(new Color(255, 255, 255));
@@ -209,6 +209,6 @@ export class SceneEditor {
             GUI.DrawText(100, 20, "c: Преобразовать.");
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);
-        Canvas.SwitchLayer();
+        Canvas.SwitchOn();
     }
 }

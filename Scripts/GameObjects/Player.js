@@ -1,7 +1,7 @@
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { GetSprite } from "../Game.js";
+import { GetSound, GetSprite } from "../Game.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
@@ -34,6 +34,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
+    _timeFromIntro = 0;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -53,6 +54,7 @@ export class Player extends Entity {
     static _walkSound = LoadSound("Sounds/walk-2.wav");
     static _dialogSound = LoadSound("Sounds/dialog.mp3");
     static _punchSound = LoadSound("Sounds/punch.wav");
+    _introSound = GetSound("Intro");
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
         this._x = x;
@@ -63,6 +65,9 @@ export class Player extends Entity {
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
         Player._walkSound.Speed = 1.6;
         Player._walkSound.Apply();
+        this._introSound.Volume = 0.35;
+        this._introSound.Apply();
+        this._introSound.PlayOriginal();
         addEventListener("keydown", (e) => {
             switch (e.code) {
                 case "KeyC":
@@ -180,7 +185,7 @@ export class Player extends Entity {
             this._xTarget = e.offsetX;
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
-            if (e.button === 0) {
+            if (e.button === 0 && this._timeFromIntro >= 23000) {
                 const lastHover = this._hoveredObject;
                 this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
                 if (lastHover === null && this._hoveredObject !== null)
@@ -289,6 +294,10 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
+        if (this._timeFromIntro < 23000) {
+            this._timeFromIntro += dt;
+            return;
+        }
         if (this._timeFromDeath > 0)
             this._timeFromDeath -= dt;
         if (this._dialog !== null && this._timeToNextChar > 0) {
@@ -435,6 +444,44 @@ export class Player extends Entity {
         }
     }
     RenderOverlay() {
+        if (this._timeFromIntro < 23000) {
+            if (this._timeFromIntro < 19000) {
+                GUI.SetFillColor(Color.Black);
+                GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
+                const cn = "ПЕНТАГОН";
+                const nt = "ПРЕДСТАВЛЯЕТ";
+                const gn = "SUBWAY INFERNO";
+                GUI.SetFillColor(Color.White);
+                if (this._timeFromIntro < 7000 && this._timeFromIntro > 1000) {
+                    GUI.SetFont(72);
+                    if (this._timeFromIntro < 6000) {
+                        GUI.DrawTextCenter(cn.slice(0, Math.round(cn.length * ((this._timeFromIntro - 1000) / 2500))), 0, 0, GUI.Width, GUI.Height);
+                        if (this._timeFromIntro > 4000) {
+                            GUI.SetFont(24);
+                            GUI.DrawTextCenter(nt.slice(0, Math.round(nt.length * ((this._timeFromIntro - 4000) / 1000))), 0, GUI.Height / 2 + 100, GUI.Width);
+                        }
+                    }
+                    else {
+                        GUI.DrawTextCenter(cn.slice(0, Math.max(0, cn.length - Math.round(cn.length * ((this._timeFromIntro - 6000) / 800)))), 0, 0, GUI.Width, GUI.Height);
+                        GUI.SetFont(24);
+                        GUI.DrawTextCenter(nt.slice(0, Math.max(0, nt.length - Math.round(nt.length * ((this._timeFromIntro - 6000) / 800)))), 0, GUI.Height / 2 + 100, GUI.Width);
+                    }
+                }
+                else if (this._timeFromIntro > 8000) {
+                    GUI.SetFont(92);
+                    if (this._timeFromIntro < 16000)
+                        GUI.DrawTextCenter(gn.slice(0, Math.ceil(nt.length * ((this._timeFromIntro - 8000) / 3000))), 0, 0, GUI.Width, GUI.Height);
+                    else
+                        GUI.DrawTextCenter(gn.slice(0, -Math.ceil(nt.length * ((this._timeFromIntro - 16000) / 2500))), 0, 0, GUI.Width, GUI.Height);
+                }
+            }
+            else if (this._timeFromIntro < 23000) {
+                Canvas.DrawVignette(Color.Black, 0, 1);
+                GUI.SetFillColor(new Color(0, 0, 0, 255 - 255 * ((this._timeFromIntro - 19000) / 4000)));
+                GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
+            }
+            return;
+        }
         if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
             const items = this._hoveredObject.GetInteractives();
             GUI.SetFillColor(new Color(70, 70, 70));
@@ -617,11 +664,9 @@ export class Player extends Entity {
             // Canvas.SetFillColor(Color.Red);
         }
         if (this._health > 0)
-            Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.15, 0.7);
+            Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0, 1);
         else
             Canvas.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 1 - this._timeFromDeath / 150, 1 - this._timeFromDeath / 150 + 0.5);
-        // Canvas.SetFillColor(Color.Red);
-        // if (this._health <= 0) Canvas.DrawRectangle(0, 0, 1500, 750);
         // Canvas.SetFillColor(new Color(50, 50, 50));
         // Canvas.DrawRectangle(0, 0, 1500, 750);
         // Canvas.SetFillColor(Color.Black);

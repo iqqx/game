@@ -15,9 +15,9 @@ export abstract class Enemy extends Entity {
 	}
 
 	protected IsSpotPlayer(): boolean {
-		const plrPos = Scene.Current.Player.GetPosition();
+		const plrPos = Scene.Current.Player.GetCenter();
 
-		const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + 1), new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1), 1000, Tag.Player | Tag.Wall)[0];
+		const hit = Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 1000, Tag.Player | Tag.Wall)[0];
 
 		return hit !== undefined && hit.instance instanceof Player && hit.instance.IsAlive();
 	}
@@ -36,5 +36,11 @@ export abstract class Enemy extends Entity {
 
 		if (this.Direction == 1) this.MoveRight();
 		else this.MoveLeft();
+	}
+
+	public GetDistanceToPlayer() {
+		const plr = Scene.Player.GetCenter();
+
+		return plr.X - (this._x + this.Width / 2);
 	}
 }

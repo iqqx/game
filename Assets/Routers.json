@@ -28,12 +28,15 @@
 		"Player_Backpack": "Images/Player/Backpack.png",
 		"Drop_Backpack": "Images/Drop_backpack.png",
 		"Glock": "Images/Pistol.png",
-		"AK": "Images/Rifle.png"
+		"AK": "Images/Rifle.png",
+		"Controls": "Images/Controls.png",
+		"Loading_Icon": "Images/Loading.png"
 	},
 	"Sounds": {
 		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",
 		"Dialog": "Sounds/dialog.mp3",
 		"Hit": "Sounds/hitmarker.mp3",
+		"Intro": "Sounds/intro.mp3",
 		"Human_Death_1": "Sounds/human_death.mp3",
 		"Human_Death_2": "Sounds/human_death-2.mp3",
 		"Projectile_Impact": "Sounds/impact.mp3",
@@ -55,5 +58,5 @@
 		"Walk_1": "Sounds/walk.mp3",
 		"Walk_2": "Sounds/walk-2.wav"
 	},
-	"Scenes": ["Assets/Scenes/Main.json"]
+	"Scenes": ["Assets/Scenes/Menu.json"]
 }

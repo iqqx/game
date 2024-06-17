@@ -1,0 +1,29 @@
+{
+	"GameObjects": [
+		{
+			"Type": "Image",
+			"Arguments": [750, 375, 500, 232, "Controls"]
+		},
+		{
+			"Type": "LoadingIcon",
+			"Arguments": [750, 700, 5000],
+			"Actions": [
+				{
+					"Type": "Replace",
+					"With": {
+						"Type": "Label",
+						"Arguments": ["Нажмите любую клавишу для продолжения", 750, 700, 200, 50, 32]
+					}
+				},
+				{
+					"Type": "RegisterEvent",
+					"On": "AnyKeyDown",
+					"Action": {
+						"Type": "LoadScene",
+						"Source": "Assets/Scenes/Main.json"
+					}
+				}
+			]
+		}
+	]
+}

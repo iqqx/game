@@ -257,8 +257,8 @@ export class SceneEditor {
 	}
 
 	public RenderOverlay() {
-		Canvas.SwitchLayer(false);
-		Canvas.EraseRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
+		GUI.SwitchOn();
+		GUI.Clear();
 
 		Canvas.SetFillColor(new Color(0, 0, 0));
 		Canvas.DrawRectangle(0, Canvas.GetSize().Y, 500, -50);
@@ -291,6 +291,6 @@ export class SceneEditor {
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);
 
-		Canvas.SwitchLayer();
+		Canvas.SwitchOn();
 	}
 }

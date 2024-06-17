@@ -11,8 +11,8 @@ export class Enemy extends Entity {
         this.Tag = Tag.Enemy;
     }
     IsSpotPlayer() {
-        const plrPos = Scene.Current.Player.GetPosition();
-        const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + 1), new Vector2(plrPos.X - this._x, plrPos.Y - this._y + 1), 1000, Tag.Player | Tag.Wall)[0];
+        const plrPos = Scene.Current.Player.GetCenter();
+        const hit = Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 1000, Tag.Player | Tag.Wall)[0];
         return hit !== undefined && hit.instance instanceof Player && hit.instance.IsAlive();
     }
     Update(dt) {
@@ -28,5 +28,9 @@ export class Enemy extends Entity {
             this.MoveRight();
         else
             this.MoveLeft();
+    }
+    GetDistanceToPlayer() {
+        const plr = Scene.Player.GetCenter();
+        return plr.X - (this._x + this.Width / 2);
     }
 }

@@ -3,6 +3,7 @@ import { Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
 ctxMain.imageSmoothingEnabled = false;
 const ctxOverlay = document.createElement("canvas").getContext("2d");
+ctxOverlay.canvas.className = "123";
 // ctxOverlay.canvas.width = ctxMain.canvas.clientWidth;
 // ctxOverlay.canvas.height = ctxMain.canvas.clientHeight;
 ctxOverlay.canvas.width = ctxMain.canvas.width;
@@ -13,15 +14,11 @@ let fillStyle;
 let strokeStyle;
 export var Canvas;
 (function (Canvas) {
-    function SwitchLayer(onMain = true) {
-        if (onMain) {
-            ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
-            ctx = ctxMain;
-        }
-        else
-            ctx = ctxOverlay;
+    function SwitchOn() {
+        ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
+        ctx = ctxMain;
     }
-    Canvas.SwitchLayer = SwitchLayer;
+    Canvas.SwitchOn = SwitchOn;
     function EraseRectangle(x, y, width, height) {
         ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
     }
@@ -137,8 +134,6 @@ export var Canvas;
         ctx.setTransform(prev);
     }
     Canvas.DrawRectangleWithAngleAndStroke = DrawRectangleWithAngleAndStroke;
-    function DrawImageEx() { }
-    Canvas.DrawImageEx = DrawImageEx;
     function DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
         ctx.save();
         ctx.resetTransform();
@@ -161,8 +156,8 @@ export var Canvas;
     }
     Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;
     function DrawVignette(color, startAlpha, endAlpha) {
-        const outerRadius = ctx.canvas.width * 0.6;
-        const innerRadius = ctx.canvas.width * 0.5;
+        const outerRadius = ctx.canvas.width * 1;
+        const innerRadius = ctx.canvas.width * 0.1;
         const grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
@@ -199,6 +194,10 @@ export var GUI;
 (function (GUI) {
     GUI.Width = ctxOverlay.canvas.width;
     GUI.Height = ctxOverlay.canvas.height;
+    function SwitchOn() {
+        ctx = ctxOverlay;
+    }
+    GUI.SwitchOn = SwitchOn;
     function SetFillColor(color) {
         ctx.fillStyle = color.toString();
         fillStyle = color.toString();
@@ -218,6 +217,10 @@ export var GUI;
         strokeStyle = null;
     }
     GUI.ClearStroke = ClearStroke;
+    function Clear() {
+        ctx.clearRect(0, 0, GUI.Width, GUI.Height);
+    }
+    GUI.Clear = Clear;
     function SetFont(size) {
         ctx.font = `${size}px Consolas`; // Monospace
         ctx.letterSpacing = "2px";
@@ -232,6 +235,15 @@ export var GUI;
             ctx.stroke();
     }
     GUI.DrawRectangle = DrawRectangle;
+    function DrawCircle(x, y, radius) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    GUI.DrawCircle = DrawCircle;
     function DrawText(x, y, text) {
         ctx.fillText(text, x, y);
     }
@@ -262,7 +274,6 @@ export var GUI;
     GUI.DrawTextClamped = DrawTextClamped;
     function DrawTextWrapped(x, y, text, maxWidth) {
         const height = ctx.measureText("0").actualBoundingBoxAscent + ctx.measureText("0").actualBoundingBoxDescent;
-        // const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
         const words = text.split(" ");
         const lines = [];
         let added = 0;
@@ -278,11 +289,19 @@ export var GUI;
             }
             ctx.fillText(lines[l], x, y + l * height * 2);
         }
-        // for (let i = 0; i < Math.ceil(text.length / lineCount); i++) ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
     }
     GUI.DrawTextWrapped = DrawTextWrapped;
     function DrawImage(image, x, y, width, height) {
         ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
     }
     GUI.DrawImage = DrawImage;
+    function DrawImageWithAngle(image, x, y, width, height, angle) {
+        ctx.save();
+        ctx.resetTransform();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.drawImage(image.Image, -width / 2, -height / 2, width, height);
+        ctx.restore();
+    }
+    GUI.DrawImageWithAngle = DrawImageWithAngle;
 })(GUI || (GUI = {}));

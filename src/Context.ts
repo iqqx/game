@@ -5,6 +5,7 @@ const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).ge
 ctxMain.imageSmoothingEnabled = false;
 
 const ctxOverlay = document.createElement("canvas").getContext("2d");
+ctxOverlay.canvas.className = "123";
 // ctxOverlay.canvas.width = ctxMain.canvas.clientWidth;
 // ctxOverlay.canvas.height = ctxMain.canvas.clientHeight;
 ctxOverlay.canvas.width = ctxMain.canvas.width;
@@ -17,11 +18,9 @@ let fillStyle: string | CanvasGradient | CanvasPattern | null;
 let strokeStyle: [string | CanvasGradient | CanvasPattern, number] | null;
 
 export namespace Canvas {
-	export function SwitchLayer(onMain = true) {
-		if (onMain) {
-			ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
-			ctx = ctxMain;
-		} else ctx = ctxOverlay;
+	export function SwitchOn() {
+		ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
+		ctx = ctxMain;
 	}
 
 	export function EraseRectangle(x: number, y: number, width: number, height: number) {
@@ -178,8 +177,6 @@ export namespace Canvas {
 		ctx.setTransform(prev);
 	}
 
-	export function DrawImageEx() {}
-
 	export function DrawImageWithAngle(image: Sprite, rect: Rectangle, angle: number, xPivot: number, yPivot: number) {
 		ctx.save();
 
@@ -208,8 +205,8 @@ export namespace Canvas {
 	}
 
 	export function DrawVignette(color: Color, startAlpha?: number, endAlpha?: number) {
-		const outerRadius = ctx.canvas.width * 0.6;
-		const innerRadius = ctx.canvas.width * 0.5;
+		const outerRadius = ctx.canvas.width * 1;
+		const innerRadius = ctx.canvas.width * 0.1;
 		const grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
 		grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
 		grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
@@ -255,6 +252,10 @@ export namespace GUI {
 	export const Width = ctxOverlay.canvas.width;
 	export const Height = ctxOverlay.canvas.height;
 
+	export function SwitchOn() {
+		ctx = ctxOverlay;
+	}
+
 	export function SetFillColor(color: Color) {
 		ctx.fillStyle = color.toString();
 
@@ -276,6 +277,10 @@ export namespace GUI {
 		strokeStyle = null;
 	}
 
+	export function Clear() {
+		ctx.clearRect(0, 0, Width, Height);
+	}
+
 	export function SetFont(size: number) {
 		ctx.font = `${size}px Consolas`; // Monospace
 		ctx.letterSpacing = "2px";
@@ -285,6 +290,15 @@ export namespace GUI {
 		ctx.beginPath();
 
 		ctx.rect(x, y, width, height);
+
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
+	}
+
+	export function DrawCircle(x: number, y: number, radius: number) {
+		ctx.beginPath();
+
+		ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
 
 		if (fillStyle !== null) ctx.fill();
 		if (strokeStyle !== null) ctx.stroke();
@@ -320,7 +334,6 @@ export namespace GUI {
 
 	export function DrawTextWrapped(x: number, y: number, text: string, maxWidth: number) {
 		const height = ctx.measureText("0").actualBoundingBoxAscent + ctx.measureText("0").actualBoundingBoxDescent;
-		// const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
 		const words = text.split(" ");
 		const lines: string[] = [];
 		let added = 0;
@@ -340,11 +353,21 @@ export namespace GUI {
 
 			ctx.fillText(lines[l], x, y + l * height * 2);
 		}
-
-		// for (let i = 0; i < Math.ceil(text.length / lineCount); i++) ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
 	}
 
 	export function DrawImage(image: Sprite, x: number, y: number, width: number, height: number) {
 		ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
+	}
+
+	export function DrawImageWithAngle(image: Sprite, x: number, y: number, width: number, height: number, angle: number) {
+		ctx.save();
+
+		ctx.resetTransform();
+		ctx.translate(x, y);
+		ctx.rotate(angle);
+
+		ctx.drawImage(image.Image, -width / 2, -height / 2, width, height);
+
+		ctx.restore();
 	}
 }
