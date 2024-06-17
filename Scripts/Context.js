@@ -304,10 +304,22 @@ export var GUI;
         ctx.restore();
     }
     GUI.DrawImageWithAngle = DrawImageWithAngle;
+    function DrawCircleWithGradient(x, y, radius, startColor, endColor) {
+        const grd = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grd.addColorStop(0, startColor.toString());
+        grd.addColorStop(1, endColor.toString());
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
+        ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    GUI.DrawCircleWithGradient = DrawCircleWithGradient;
     function DrawVignette(color, startRadius, startAlpha, endAlpha) {
         const grd = ctx.createRadialGradient(GUI.Width / 2, GUI.Height / 2, GUI.Width * startRadius, GUI.Width / 2, GUI.Height / 2, GUI.Width);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha})`);
-        grd.addColorStop(.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+        grd.addColorStop(0.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, GUI.Width, GUI.Height);

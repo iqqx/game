@@ -1,4 +1,5 @@
 import { GUI } from "../../Context.js";
+import { GetSound } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Color } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
@@ -7,6 +8,7 @@ export class Button extends GUIBase {
 	protected _hovered = false;
 	protected _pressed = false;
 	protected _onClicked: () => void;
+	private readonly _hoverSound = GetSound("GUI_Hover");
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(width, height);
@@ -19,6 +21,7 @@ export class Button extends GUIBase {
 		const mouse = Scene.Current.GetMousePosition();
 		const buttons = Scene.Current.GetMouseButtons();
 
+		const lastHovered = this._hovered;
 		this._hovered =
 			mouse.X > this._x - this.Width / 2 &&
 			mouse.X <= this._x + this.Width / 2 &&
@@ -26,6 +29,8 @@ export class Button extends GUIBase {
 			GUI.Height - mouse.Y <= this._y + this.Height / 2;
 
 		if (this._hovered) {
+			if (lastHovered === false) this._hoverSound.Play(0.1);
+
 			if (!this._pressed) {
 				if (buttons.Left) {
 					if (this._onClicked !== undefined) this._onClicked();

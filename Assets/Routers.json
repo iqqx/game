@@ -58,7 +58,8 @@
 		"Shoot_3": "Sounds/shoot-3.mp3",
 		"Shoot_4": "Sounds/shoot-4.mp3",
 		"Walk_1": "Sounds/walk.mp3",
-		"Walk_2": "Sounds/walk-2.wav"
+		"Walk_2": "Sounds/walk-2.wav",
+		"GUI_Hover": "Sounds/hover.mp3"
 	},
 	"Scenes": ["Assets/Scenes/Menu.json"]
 }

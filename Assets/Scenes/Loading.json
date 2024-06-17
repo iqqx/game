@@ -11,7 +11,7 @@
 				{
 					"Type": "Replace",
 					"With": {
-						"Type": "Label",
+						"Type": "HintLabel",
 						"Arguments": ["Нажмите любую клавишу для продолжения", 750, 700, 200, 50, 32]
 					}
 				},

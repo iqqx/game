@@ -1,12 +1,20 @@
 {
 	"GameObjects": [
 		{
+			"Type": "SpotLightSpawner",
+			"Arguments": []
+		},
+		{
 			"Type": "TextButton",
 			"Arguments": [750, 375, 200, 50, "НАЧАТЬ", 32],
 			"Action": {
 				"Type": "LoadScene",
 				"Source": "Assets/Scenes/Loading.json"
 			}
+		},
+		{
+			"Type": "HintLabel",
+			"Arguments": ["0.21 pre-alpha", 750, 730]
 		},
 		{
 			"Type": "Cursor",

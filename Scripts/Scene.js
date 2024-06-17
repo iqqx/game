@@ -25,6 +25,7 @@ import { LoadingIcon } from "./GameObjects/GUI/LoadingIcon.js";
 import { Label } from "./GameObjects/GUI/Label.js";
 import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
+import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -93,6 +94,8 @@ export class Scene {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static ParseObject(x) {
         switch (x.Type) {
+            case "SpotLightSpawner":
+                return new GUISpotLight();
             case "HintLabel":
                 return new HintLabel(...x.Arguments);
             case "IntroCutscene":

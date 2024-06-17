@@ -371,10 +371,22 @@ export namespace GUI {
 		ctx.restore();
 	}
 
+	export function DrawCircleWithGradient(x: number, y: number, radius: number, startColor: Color, endColor: Color) {
+		const grd = ctx.createRadialGradient(x, y, 0, x, y, radius);
+		grd.addColorStop(0, startColor.toString());
+		grd.addColorStop(1, endColor.toString());
+
+		ctx.fillStyle = grd;
+		ctx.beginPath();
+		ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
+		ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
+	}
+
 	export function DrawVignette(color: Color, startRadius: number, startAlpha: number, endAlpha?: number) {
 		const grd = ctx.createRadialGradient(Width / 2, Height / 2, Width * startRadius, Width / 2, Height / 2, Width);
 		grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha})`);
-		grd.addColorStop(.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
+		grd.addColorStop(0.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
 		grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
 
 		ctx.fillStyle = grd;

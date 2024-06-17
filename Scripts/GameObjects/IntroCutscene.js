@@ -41,6 +41,7 @@ export class IntroCutscene extends GameObject {
         const cn = "ПЕНТАГОН";
         const nt = "ПРЕДСТАВЛЯЕТ";
         const gn = "SUBWAY INFERNO";
+        GUI.DrawCircleWithGradient(-1000 + (this._timeFromIntro % ((GUI.Width + 2000) / 2)) * 4, GUI.Height / 2, 1000, new Color(255, 255, 255, 20), Color.Transparent);
         GUI.SetFillColor(Color.White);
         if (this._timeFromIntro < 7000 && this._timeFromIntro > 1000) {
             GUI.SetFont(72);

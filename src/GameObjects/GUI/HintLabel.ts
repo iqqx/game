@@ -15,7 +15,7 @@ export class HintLabel extends GameObject {
 	}
 
 	public override Render(): void {
-		GUI.SetFillColor(new Color(255, 255, 255, (Math.sin(Scene.Time / 1000) + 3) * 50));
+		GUI.SetFillColor(new Color(255, 255, 255, 100 + (Math.sin(Scene.Time / 500) + 1) * 20));
 		GUI.SetFont(12);
 		GUI.DrawTextCenter(this._text, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
 	}
