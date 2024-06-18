@@ -1,19 +1,18 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { LoadImage, Rectangle } from "../../Utilites.js";
+import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
+import { GetSound, GetSprite } from "../../Game.js";
 export class Rat extends Enemy {
     static Damage = 10;
     static AttackCooldown = 500;
-    static _attackSound = new Audio("Sounds/rat_attack.mp3");
     static _deathSound = new Audio("Sounds/rat_death.mp3");
-    static _frames = {
-        Idle: LoadImage(`Images/Rat.png`),
-    };
+    _image = GetSprite("Rat");
+    _attackSound = GetSound("Rat_Attack");
     _attackCooldown = 0;
     constructor(x, y) {
-        super(100, 50, 5, 5, EnemyType.Rat);
+        super(100, 50, 4, 5, EnemyType.Rat);
         this._x = x;
         this._y = y;
     }
@@ -29,21 +28,17 @@ export class Rat extends Enemy {
             if (Math.abs(this.GetDistanceToPlayer()) <= 50 && this._y == plrPos.Y) {
                 this._attackCooldown = Rat.AttackCooldown;
                 Scene.Current.Player.TakeDamage(Rat.Damage);
-                const s = Rat._attackSound.cloneNode();
-                s.volume = 0.5;
-                s.play();
+                this._attackSound.Play(0.5);
             }
         }
         else
             this._attackCooldown -= dt;
     }
     Render() {
-        if (this.Direction === 1) {
-            Canvas.DrawImage(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
-        }
-        else {
-            Canvas.DrawImageFlipped(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
-        }
+        if (this.Direction === 1)
+            Canvas.DrawImage(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        else
+            Canvas.DrawImageFlipped(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);

@@ -31,7 +31,7 @@
 		"Drop_Backpack": "Images/Drop_backpack.png",
 		"Glock": "Images/Pistol.png",
 		"AK": "Images/Rifle.png",
-		"Controls": "Images/Controls.png",
+		"Controls": "Images/Controls-2.png",
 		"Loading_Icon": "Images/Loading.png"
 	},
 	"Sounds": {
@@ -61,5 +61,5 @@
 		"Walk_2": "Sounds/walk-2.wav",
 		"GUI_Hover": "Sounds/hover.mp3"
 	},
-	"Scenes": ["Assets/Scenes/Menu.json"]
+	"Scenes": ["Assets/Scenes/Main.json"]
 }

@@ -34,7 +34,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
+    _timeFromSpawn = 10000;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;

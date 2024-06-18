@@ -93,13 +93,6 @@ export var Canvas;
         return new Vector2(ctx.canvas.width, ctx.canvas.height);
     }
     Canvas.GetSize = GetSize;
-    function DrawImageProportional(image, rect) {
-        const ratio = Math.min(rect.Height, rect.Width) / Math.max(image.naturalWidth, image.naturalHeight);
-        const newHeight = image.naturalHeight * ratio;
-        const offsetY = (rect.Height - newHeight) / 2;
-        ctx.drawImage(image, rect.X, ctx.canvas.height - rect.Height - rect.Y + offsetY, rect.Width * ratio, newHeight);
-    }
-    Canvas.DrawImageProportional = DrawImageProportional;
     function DrawImageFlipped(image, rect) {
         ctx.save();
         ctx.scale(-1, 1);
@@ -113,6 +106,15 @@ export var Canvas;
         ctx.fill();
     }
     Canvas.DrawCircle = DrawCircle;
+    function DrawEllipse(x, y, radiusX, radiusY) {
+        ctx.beginPath();
+        ctx.ellipse(x, ctx.canvas.height - radiusY / 2 - y, radiusX, radiusY, 0, 0, Math.PI * 2);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    Canvas.DrawEllipse = DrawEllipse;
     function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
         const prev = ctx.getTransform();
         ctx.resetTransform();

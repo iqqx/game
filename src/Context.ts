@@ -117,16 +117,6 @@ export namespace Canvas {
 		return new Vector2(ctx.canvas.width, ctx.canvas.height);
 	}
 
-	export function DrawImageProportional(image: HTMLImageElement, rect: Rectangle) {
-		const ratio = Math.min(rect.Height, rect.Width) / Math.max(image.naturalWidth, image.naturalHeight);
-
-		const newHeight = image.naturalHeight * ratio;
-
-		const offsetY = (rect.Height - newHeight) / 2;
-
-		ctx.drawImage(image, rect.X, ctx.canvas.height - rect.Height - rect.Y + offsetY, rect.Width * ratio, newHeight);
-	}
-
 	export function DrawImageFlipped(image: Sprite, rect: Rectangle) {
 		ctx.save();
 		ctx.scale(-1, 1);
@@ -148,6 +138,15 @@ export namespace Canvas {
 		ctx.beginPath();
 		ctx.ellipse(x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
 		ctx.fill();
+	}
+
+	export function DrawEllipse(x: number, y: number, radiusX: number, radiusY: number) {
+		ctx.beginPath();
+
+		ctx.ellipse(x, ctx.canvas.height - radiusY / 2 - y, radiusX, radiusY, 0, 0, Math.PI * 2);
+
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
 	}
 
 	export function DrawRectangleWithAngle(x: number, y: number, width: number, height: number, angle: number, xPivot: number, yPivot: number) {

@@ -7,7 +7,7 @@ import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
 import { BlinkingLabel } from "./GameObjects/GUI/BlinkingLabel.js";
 import { GUIBase } from "./GameObjects/GUI/GUIBase.js";
-import { GetSprite, sprites } from "./Game.js";
+import { GetSprite } from "./Game.js";
 import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
@@ -95,7 +95,7 @@ export class Scene {
 		const sceneData = await scene.json();
 
 		new Scene(
-			sceneData.Background === undefined ? null : (sprites.get(sceneData.Background) as Sprite),
+			sceneData.Background === undefined ? null : (GetSprite(sceneData.Background) as Sprite),
 			sceneData.GameObjects.map((x: unknown) => this.ParseObject(x))
 		);
 	}
@@ -285,10 +285,10 @@ export class Scene {
 			const bottom = GetIntersectPoint(line, new Line(pos.X, pos.Y, pos.X + collider.Width, pos.Y));
 			const left = GetIntersectPoint(line, new Line(pos.X, pos.Y, pos.X, pos.Y + collider.Height));
 
-			if (top !== undefined) result.push({ position: top, instance: object });
-			if (right !== undefined) result.push({ position: right, instance: object });
-			if (bottom !== undefined) result.push({ position: bottom, instance: object });
-			if (left !== undefined) result.push({ position: left, instance: object });
+			if (top !== undefined) result.push({ position: top, instance: object, Normal: new Vector2(0, 1) });
+			if (right !== undefined) result.push({ position: right, instance: object, Normal: new Vector2(1, 0) });
+			if (bottom !== undefined) result.push({ position: bottom, instance: object, Normal: new Vector2(0, -1) });
+			if (left !== undefined) result.push({ position: left, instance: object, Normal: new Vector2(-1, 0) });
 		}
 
 		return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));

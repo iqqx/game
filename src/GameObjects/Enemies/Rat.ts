@@ -1,22 +1,21 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { LoadImage, Rectangle } from "../../Utilites.js";
+import { Color, Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
+import { GetSound, GetSprite } from "../../Game.js";
 
 export class Rat extends Enemy {
 	public static readonly Damage = 10;
 	public static readonly AttackCooldown = 500;
-	private static readonly _attackSound = new Audio("Sounds/rat_attack.mp3");
 	private static readonly _deathSound = new Audio("Sounds/rat_death.mp3");
-	private static readonly _frames = {
-		Idle: LoadImage(`Images/Rat.png`),
-	};
+	private readonly _image = GetSprite("Rat") as Sprite;
+	private readonly _attackSound = GetSound("Rat_Attack");
 
 	private _attackCooldown = 0;
 
 	constructor(x: number, y: number) {
-		super(100, 50, 5, 5, EnemyType.Rat);
+		super(100, 50, 4, 5, EnemyType.Rat);
 
 		this._x = x;
 		this._y = y;
@@ -26,7 +25,6 @@ export class Rat extends Enemy {
 		super.Update(dt);
 
 		const plrPos = Scene.Current.Player.GetPosition();
-
 		const distance = this.GetDistanceToPlayer();
 
 		if (this._attackCooldown <= 0) {
@@ -41,19 +39,14 @@ export class Rat extends Enemy {
 
 				Scene.Current.Player.TakeDamage(Rat.Damage);
 
-				const s = Rat._attackSound.cloneNode() as HTMLAudioElement;
-				s.volume = 0.5;
-				s.play();
+				this._attackSound.Play(0.5);
 			}
 		} else this._attackCooldown -= dt;
 	}
 
 	override Render(): void {
-		if (this.Direction === 1) {
-			Canvas.DrawImage(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
-		} else {
-			Canvas.DrawImageFlipped(Rat._frames.Idle, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
-		}
+		if (this.Direction === 1) Canvas.DrawImage(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		else Canvas.DrawImageFlipped(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 	}
 
 	override TakeDamage(damage: number): void {

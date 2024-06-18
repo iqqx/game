@@ -42,7 +42,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _framesToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
+	private _timeFromSpawn = 10000;
 
 	private static readonly _name = "Володя";
 	private static readonly _speed = 5;

@@ -16,7 +16,7 @@ export class IntroCutscene extends GameObject {
 
 		this._mainSceneSource = mainScene;
 
-		this._introSound.Volume = 0.35;
+		this._introSound.Volume = 0.2;
 		this._introSound.Apply();
 		this._introSound.PlayOriginal();
 

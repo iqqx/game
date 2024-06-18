@@ -2,7 +2,7 @@
 	"GameObjects": [
 		{
 			"Type": "Image",
-			"Arguments": [750, 375, 500, 232, "Controls"]
+			"Arguments": [750, 375, 600, 232, "Controls"]
 		},
 		{
 			"Type": "LoadingIcon",

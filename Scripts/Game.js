@@ -1,7 +1,7 @@
 import { Scene } from "./Scene.js";
 import { GetLoadedImagesCount, LoadImage, LoadSound } from "./Utilites.js";
-export const sprites = new Map();
-export const sounds = new Map();
+const sprites = new Map();
+const sounds = new Map();
 let imagesToLoad = 99997;
 await (async () => {
     const routers = await fetch("Assets/Routers.json");

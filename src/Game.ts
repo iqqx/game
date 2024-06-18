@@ -1,8 +1,8 @@
 import { Scene } from "./Scene.js";
 import { GetLoadedImagesCount, LoadImage, LoadSound, Sound, Sprite } from "./Utilites.js";
 
-export const sprites = new Map<string, Sprite | Sprite[]>();
-export const sounds = new Map<string, Sound>();
+const sprites = new Map<string, Sprite | Sprite[]>();
+const sounds = new Map<string, Sound>();
 let imagesToLoad = 99997;
 
 await (async () => {

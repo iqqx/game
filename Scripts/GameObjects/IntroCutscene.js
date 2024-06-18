@@ -12,7 +12,7 @@ export class IntroCutscene extends GameObject {
     constructor(mainScene) {
         super(0, 0);
         this._mainSceneSource = mainScene;
-        this._introSound.Volume = 0.35;
+        this._introSound.Volume = 0.2;
         this._introSound.Apply();
         this._introSound.PlayOriginal();
         addEventListener("keydown", (e) => {

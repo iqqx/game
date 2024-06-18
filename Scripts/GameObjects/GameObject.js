@@ -65,7 +65,7 @@ export class GameObject {
             yOffset = -yend;
         if (xOffset == 0 && yOffset == 0)
             return false;
-        return { instance: other, position: new Vector2(xOffset, yOffset) };
+        return { instance: other, position: new Vector2(xOffset, yOffset), Normal: new Vector2(Math.sign(xOffset), Math.sign(yOffset)) };
     }
 }
 export class Interactable extends GameObject {

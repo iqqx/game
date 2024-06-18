@@ -17,7 +17,7 @@ export abstract class Enemy extends Entity {
 	protected IsSpotPlayer(): boolean {
 		const plrPos = Scene.Current.Player.GetCenter();
 
-		const hit = Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 1000, Tag.Player | Tag.Wall)[0];
+		const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + this.Height), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 1000, Tag.Player | Tag.Wall)[0];
 
 		return hit !== undefined && hit.instance instanceof Player && hit.instance.IsAlive();
 	}
@@ -27,12 +27,14 @@ export abstract class Enemy extends Entity {
 
 		if (!this.IsSpotPlayer()) return;
 
-		const plrPos = Scene.Current.Player.GetPosition();
-		const plrSize = Scene.Current.Player.GetCollider();
+		const plrPos = Scene.Current.Player.GetCenter();
+		this.Direction = Math.sign(plrPos.X - (this._x + this.Width / 2)) as -1 | 1;
 
-		this.Direction = Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2)) as -1 | 1;
+		if (this.GetDistanceToPlayer() < 50) {
+			if (Scene.Player.GetPosition().Y > this._y) this.Jump();
 
-		if (Math.abs(this._x - (plrPos.X + plrSize.Width / 2)) < 5) return;
+			return;
+		}
 
 		if (this.Direction == 1) this.MoveRight();
 		else this.MoveLeft();
@@ -41,6 +43,10 @@ export abstract class Enemy extends Entity {
 	public GetDistanceToPlayer() {
 		const plr = Scene.Player.GetCenter();
 
-		return plr.X - (this._x + this.Width / 2);
+		return Math.abs(plr.X - (this._x + this.Width / 2));
+	}
+
+	public GetDirectionToPlayer() {
+		return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2));
 	}
 }
