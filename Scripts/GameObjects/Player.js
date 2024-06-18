@@ -36,11 +36,13 @@ export class Player extends Entity {
     _framesToPunch = 0;
     _mainHand = true;
     _timeFromSpawn = 10000;
+    _running = false;
     static _name = "Володя";
     static _speed = 5;
     static _animationFrameDuration = 50;
     static _sitHeightModifier = 0.85;
     static _sitSpeedModifier = 0.75;
+    static _runningSpeedModifier = 1.5;
     _frames = {
         Walk: GetSprite("Player_Walk"),
         Sit: GetSprite("Player_Crouch"),
@@ -89,7 +91,7 @@ export class Player extends Entity {
                         else {
                             this._sit = false;
                             this._armHeight = 0.65;
-                            this._speed = Player._speed;
+                            this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
                         }
                     }
                     break;
@@ -149,6 +151,11 @@ export class Player extends Entity {
                     else if (this._hoveredObject !== null)
                         this._hoveredObject.OnInteractSelected(this._selectedInteraction);
                     break;
+                case "ShiftLeft":
+                    this._running = true;
+                    this._weapon = null;
+                    this._speed = Player._speed * Player._runningSpeedModifier;
+                    break;
                 default:
                     break;
             }
@@ -166,6 +173,12 @@ export class Player extends Entity {
                     break;
                 case "KeyD":
                     this._movingRight = false;
+                    break;
+                case "ShiftLeft":
+                    this._running = false;
+                    if (this._inventory[this._selectedHand] instanceof Weapon)
+                        this._weapon = this._inventory[this._selectedHand];
+                    this._speed = Player._speed;
                     break;
                 default:
                     break;
@@ -362,11 +375,11 @@ export class Player extends Entity {
                 this._timeToWalkSound -= dt;
                 if (this._timeToNextFrame < 0) {
                     this._frameIndex = (this._frameIndex + 1) % (this._sit ? this._frames.Sit.length : this._frames.Walk.length);
-                    this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : 1);
+                    this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : this._running ? 0.5 : 1);
                 }
                 if (this._timeToWalkSound <= 0) {
                     Player._walkSound.Play(0.5);
-                    this._timeToWalkSound = this._sit ? 500 : 300;
+                    this._timeToWalkSound = this._sit ? 500 : this._running ? 150 : 300;
                 }
             }
             else {
@@ -762,7 +775,7 @@ export class Player extends Entity {
             this._weapon = null;
             return;
         }
-        if (this._inventory[this._selectedHand] instanceof Weapon)
+        if (this._inventory[this._selectedHand] instanceof Weapon && !this._running)
             this._weapon = this._inventory[this._selectedHand];
         else
             this._weapon = null;
