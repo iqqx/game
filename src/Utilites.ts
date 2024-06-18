@@ -134,7 +134,7 @@ export class Vector2 {
 export type RaycastHit = {
 	instance: GameObject;
 	position: Vector2;
-	Normal: Vector2
+	Normal: Vector2;
 };
 
 export type Sprite = {

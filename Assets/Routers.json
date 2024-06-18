@@ -61,7 +61,11 @@
 		"Walk_1": "Sounds/walk.mp3",
 		"Walk_2": "Sounds/walk-2.wav",
 		"GUI_Hover": "Sounds/hover.mp3",
-		"Play": "Sounds/play.mp3"
+		"Play": "Sounds/play.mp3",
+		"Eat": "Sounds/eat.wav",
+		"AidKit": "Sounds/aid_kit.mp3",
+		"Drink": "Sounds/drink.mp3",
+		"Syringe": "Sounds/syringe.mp3"
 	},
-	"Scenes": ["Assets/Scenes/Main.json"]
+	"Scenes": ["Assets/Scenes/Menu.json"]
 }

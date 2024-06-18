@@ -307,6 +307,17 @@ export var GUI;
         ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
     }
     GUI.DrawImage = DrawImage;
+    function DrawImageScaled(image, x, y, width, height) {
+        if (image.BoundingBox.Width > image.BoundingBox.Height) {
+            const scaledHeight = image.BoundingBox.Height * (width / image.BoundingBox.Width);
+            ctx.drawImage(image.Image, x, y + (height - scaledHeight) / 2, width, scaledHeight);
+        }
+        else {
+            const scaledWidth = image.BoundingBox.Width * (height / image.BoundingBox.Height);
+            ctx.drawImage(image.Image, x + (width - scaledWidth) / 2, y, scaledWidth, height);
+        }
+    }
+    GUI.DrawImageScaled = DrawImageScaled;
     function DrawImageWithAngle(image, x, y, width, height, angle) {
         ctx.save();
         ctx.resetTransform();

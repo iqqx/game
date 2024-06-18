@@ -11,7 +11,7 @@ import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { Item } from "./Assets/Items/Item.js";
+import { AidKit, Bread, Radio, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -27,6 +27,7 @@ import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
+import { AK, Glock } from "./Assets/Weapons/Weapon.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -134,7 +135,7 @@ export class Scene {
             case "Box":
                 x.Arguments.splice(2, x.Arguments.length - 2, ...x.Arguments.slice(2).map((x) => {
                     const value = x;
-                    return { Item: Item.Parse(value.Item), Chance: value.Chance };
+                    return { Item: Scene.ParseItem(value.Item), Chance: value.Chance };
                 }));
                 return new Box(...x.Arguments);
             case "Spikes":
@@ -145,7 +146,7 @@ export class Scene {
                 return new Morshu(...x.Arguments);
             case "Backpack":
                 x.Arguments.splice(2, x.Arguments.length - 2, ...x.Arguments.slice(2).map((x) => {
-                    return Item.Parse(x);
+                    return Scene.ParseItem(x);
                 }));
                 return new Backpack(...x.Arguments);
             case "Human":
@@ -327,5 +328,30 @@ export class Scene {
     }
     Destroy(element) {
         Scene.Current._GUIElements.splice(Scene.Current._GUIElements.indexOf(element), 1);
+    }
+    DestroyGameObject(element) {
+        Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(element), 1);
+        if (element instanceof Interactable)
+            Scene.Current._interactableGameObjects.splice(Scene.Current._interactableGameObjects.indexOf(element), 1);
+    }
+    static ParseItem(raw) {
+        switch (raw) {
+            case "Bread":
+                return new Bread();
+            case "Vodka":
+                return new Vodka();
+            case "Sausage":
+                return new Sausage();
+            case "AidKit":
+                return new AidKit();
+            case "AK":
+                return new AK();
+            case "Glock":
+                return new Glock();
+            case "Radio":
+                return new Radio();
+            default:
+                throw new Error("Предмет не удалось распарсить: " + raw);
+        }
     }
 }

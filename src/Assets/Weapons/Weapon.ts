@@ -9,7 +9,7 @@ import { Sprite, Sound, Vector2, Rectangle, LoadSound, LoadImage } from "../../U
 import { Item } from "../Items/Item.js";
 
 export abstract class Weapon extends Item {
-	public readonly Icon: Sprite;
+	public declare readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite };
 	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
 
@@ -23,7 +23,7 @@ export abstract class Weapon extends Item {
 	private readonly _maxAmmoClip: number = 30;
 	private readonly _automatic;
 
-	public readonly Heavy: boolean;
+	public declare readonly Heavy: boolean;
 	public Automatic: boolean;
 
 	private _loadedAmmo: number = 5;
@@ -122,17 +122,6 @@ export abstract class Weapon extends Item {
 					this._handOffset.X,
 					this._handOffset.Y
 				);
-		}
-	}
-
-	public static Parse(raw: string) {
-		switch (raw) {
-			case "Glock":
-				return new Glock();
-			case "AK":
-				return new AK();
-			default:
-				throw new Error("Оружие не удалось распарсить: " + raw);
 		}
 	}
 

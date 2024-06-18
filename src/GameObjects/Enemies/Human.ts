@@ -84,7 +84,10 @@ export class Human extends Enemy {
 					} else this._frameIndex = 0;
 				}
 
-				this._weapon.TryShoot(Tag.Player);
+				if (!this._weapon.IsReloading()) {
+					if (this._weapon.GetLoadedAmmo() === 0) this._weapon.Reload();
+					else this._weapon.TryShoot(Tag.Player);
+				}
 			}
 		} else this._frameIndex = 0;
 	}

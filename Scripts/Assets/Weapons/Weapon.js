@@ -8,7 +8,6 @@ import { Scene } from "../../Scene.js";
 import { Vector2, Rectangle, LoadSound, LoadImage } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 export class Weapon extends Item {
-    Icon;
     Sprites;
     _sounds;
     _fireCooldown;
@@ -20,7 +19,6 @@ export class Weapon extends Item {
     _muzzleOffset;
     _maxAmmoClip = 30;
     _automatic;
-    Heavy;
     Automatic;
     _loadedAmmo = 5;
     _position = Vector2.Zero;
@@ -74,16 +72,6 @@ export class Weapon extends Item {
                 Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
             else
                 Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
-        }
-    }
-    static Parse(raw) {
-        switch (raw) {
-            case "Glock":
-                return new Glock();
-            case "AK":
-                return new AK();
-            default:
-                throw new Error("Оружие не удалось распарсить: " + raw);
         }
     }
     Reload() {

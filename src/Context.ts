@@ -368,6 +368,16 @@ export namespace GUI {
 		ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
 	}
 
+	export function DrawImageScaled(image: Sprite, x: number, y: number, width: number, height: number) {
+		if (image.BoundingBox.Width > image.BoundingBox.Height) {
+			const scaledHeight = image.BoundingBox.Height * (width / image.BoundingBox.Width);
+			ctx.drawImage(image.Image, x, y + (height - scaledHeight) / 2, width, scaledHeight);
+		} else {
+			const scaledWidth = image.BoundingBox.Width * (height / image.BoundingBox.Height);
+			ctx.drawImage(image.Image, x + (width - scaledWidth) / 2, y, scaledWidth, height);
+		}
+	}
+
 	export function DrawImageWithAngle(image: Sprite, x: number, y: number, width: number, height: number, angle: number) {
 		ctx.save();
 

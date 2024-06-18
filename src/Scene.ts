@@ -12,7 +12,7 @@ import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { Item } from "./Assets/Items/Item.js";
+import { AidKit, Bread, Radio, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -28,6 +28,7 @@ import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
+import { AK, Glock } from "./Assets/Weapons/Weapon.js";
 
 export class Scene {
 	public static Current: Scene;
@@ -147,7 +148,7 @@ export class Scene {
 					...x.Arguments.slice(2).map((x) => {
 						const value = x as { Item: string; Chance: number };
 
-						return { Item: Item.Parse(value.Item), Chance: value.Chance };
+						return { Item: Scene.ParseItem(value.Item), Chance: value.Chance };
 					})
 				);
 
@@ -163,7 +164,7 @@ export class Scene {
 					2,
 					x.Arguments.length - 2,
 					...x.Arguments.slice(2).map((x) => {
-						return Item.Parse(x as string);
+						return Scene.ParseItem(x as string);
 					})
 				);
 
@@ -371,5 +372,32 @@ export class Scene {
 
 	public Destroy(element: GUIBase) {
 		Scene.Current._GUIElements.splice(Scene.Current._GUIElements.indexOf(element), 1);
+	}
+
+	public DestroyGameObject(element: GameObject) {
+		Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(element), 1);
+
+		if (element instanceof Interactable) Scene.Current._interactableGameObjects.splice(Scene.Current._interactableGameObjects.indexOf(element), 1);
+	}
+
+	private static ParseItem(raw: string) {
+		switch (raw) {
+			case "Bread":
+				return new Bread();
+			case "Vodka":
+				return new Vodka();
+			case "Sausage":
+				return new Sausage();
+			case "AidKit":
+				return new AidKit();
+			case "AK":
+				return new AK();
+			case "Glock":
+				return new Glock();
+			case "Radio":
+				return new Radio();
+			default:
+				throw new Error("Предмет не удалось распарсить: " + raw);
+		}
 	}
 }

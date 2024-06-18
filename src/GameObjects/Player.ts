@@ -1,6 +1,6 @@
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
-import { Item } from "../Assets/Items/Item.js";
+import { Adrenalin, AidKit, Bread, Item, Radio, Sausage, Vodka } from "../Assets/Items/Item.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -12,6 +12,7 @@ import { Blood } from "./Blood.js";
 import { Enemy } from "./Enemies/Enemy.js";
 import { Entity } from "./Entity.js";
 import { Interactable } from "./GameObject.js";
+import { ItemDrop } from "./ItemDrop.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
 
 export class Player extends Entity {
@@ -23,8 +24,8 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
-	private _backpack: Backpack | null = new Backpack(1, 1);
+	private _inventory: [Item | null, Item | null] = [new Bread(), null];
+	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	public readonly Quests: Quest[] = [];
 	private _armHeight: 0.5 | 0.65 = 0.65;
@@ -42,7 +43,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _framesToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 10000;
+	private _timeFromSpawn = 0;
 	private _running = false;
 
 	private static readonly _name = "Володя";
@@ -74,8 +75,8 @@ export class Player extends Entity {
 
 		this._x = x;
 		this._y = y;
-		this._xTarget = 750;
-		this._yTarget = y;
+		this._xTarget = 900;
+		this._yTarget = 750 / 2;
 		this.Tag = Tag.Player;
 		this._collider = new Rectangle(0, 0, this.Width, this.Height);
 		Player._walkSound.Speed = 1.6;
@@ -166,7 +167,19 @@ export class Player extends Entity {
 					} else if (this._hoveredObject !== null) this._hoveredObject.OnInteractSelected(this._selectedInteraction);
 
 					break;
+				case "KeyQ":
+					if (this._inventory[this._selectedHand] !== null && this._grounded) {
+						Scene.Current.Instantiate(new ItemDrop(this._x, this._y, this._inventory[this._selectedHand]));
+
+						if (this._inventory[this._selectedHand] === this._weapon) this._weapon = null;
+
+						this._inventory[this._selectedHand] = null;
+					}
+
+					break;
 				case "ShiftLeft":
+					if (this._sit) return;
+
 					this._running = true;
 					this._weapon = null;
 					this._speed = Player._speed * Player._runningSpeedModifier;
@@ -290,7 +303,7 @@ export class Player extends Entity {
 				const yCell = Math.floor((this._yTarget - firstYOffset) / 50);
 
 				if (yCell === 0 && xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5))) {
-					this.SwapItemAt(xCell);
+					if (!(this._inventory[this._selectedHand] instanceof Item) || !this._inventory[this._selectedHand].IsUsing()) this.SwapItemAt(xCell);
 				} else if (this.CanTarget()) {
 					this._LMBPressed = true;
 
@@ -394,6 +407,9 @@ export class Player extends Entity {
 			return;
 		}
 
+		if (this._inventory[this._selectedHand] instanceof Item)
+			this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
+
 		if (this.CanTarget()) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
 			this._framesToPunch--;
@@ -428,8 +444,6 @@ export class Player extends Entity {
 				if (this.Direction == 1) return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
 				else return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 			})();
-
-			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
 
 			const lastHover = this._hoveredObject;
 			this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
@@ -525,7 +539,37 @@ export class Player extends Entity {
 				Canvas.DrawImage(this._frames.Backpack, new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y - (this._sit ? 14 : 0), scaledWidth, this.Height));
 
 			if (this._weapon === null) {
-				if (this._framesToPunch > 0 && this._mainHand) {
+				if (this._inventory[this._selectedHand] !== null && !(this._inventory[this._selectedHand] instanceof Weapon)) {
+					if (this._inventory[this._selectedHand].Big)
+						this._inventory[this._selectedHand].Render(
+							new Vector2(
+								this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(Math.PI / 2),
+								this._y + this.Height * this._armHeight - 23 * Math.sin(Math.PI / 2 + 0.2)
+							),
+							0
+						);
+					else
+						this._inventory[this._selectedHand].Render(
+							new Vector2(
+								this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle),
+								this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)
+							),
+							this._angle
+						);
+
+					Canvas.DrawImageWithAngle(
+						this._frames.Hands.Bend,
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							this._frames.Hands.Bend.BoundingBox.Width * scale,
+							this._frames.Hands.Bend.BoundingBox.Height * scale
+						),
+						this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle,
+						-2 * scale,
+						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+					);
+				} else if (this._framesToPunch > 0 && this._mainHand) {
 					Canvas.DrawImageWithAngle(
 						this._frames.Hands.Straight,
 						new Rectangle(
@@ -746,7 +790,7 @@ export class Player extends Entity {
 					GUI.DrawRectangle(firstXOffset + i * 55 + (i > 1 ? 5 : 0), y, 50, 50);
 
 					if (i < 2 && this._inventory[i] !== null) {
-						GUI.DrawImage(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
+						GUI.DrawImageScaled(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
 
 						if (this._inventory[i] instanceof Weapon) {
 							const loaded = (this._inventory[i] as Weapon).GetLoadedAmmo();
@@ -767,7 +811,7 @@ export class Player extends Entity {
 							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
 						}
 					} else if (i >= 2 && this._backpack.GetItemAt(i - 2, 0) !== null)
-						GUI.DrawImage(this._backpack.GetItemAt(i - 2, 0).Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
+						GUI.DrawImageScaled(this._backpack.GetItemAt(i - 2, 0).Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
 				}
 			} else {
 				const firstXOffset = GUI.Width / 2 - 52.5;
@@ -790,7 +834,7 @@ export class Player extends Entity {
 					GUI.DrawRectangle(firstXOffset + i * 55, y, 50, 50);
 
 					if (this._inventory[i] !== null) {
-						GUI.DrawImage(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
+						GUI.DrawImageScaled(this._inventory[i].Icon, firstXOffset + i * 55 + 2, y + 2, 50 - 4, 50 - 4);
 
 						if (this._inventory[i] instanceof Weapon) {
 							const loaded = (this._inventory[i] as Weapon).GetLoadedAmmo();
@@ -838,7 +882,7 @@ export class Player extends Entity {
 						GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
 
 						const item = this._openedContainer.GetItemAt(x as 0 | 1 | 2, y as 0 | 1 | 2);
-						if (item !== null) GUI.DrawImage(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
+						if (item !== null) GUI.DrawImageScaled(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
 					}
 			}
 		} else {
@@ -863,7 +907,7 @@ export class Player extends Entity {
 			if (this._dialog.Messages[this._dialogState].length === this._chars) GUI.DrawTextCenter("ПРОДОЛЖИТЬ", GUI.Width / 2 + 500 / 2 - 140, GUI.Height - 200 - 72, 120);
 		}
 
-		if (this._draggedItem !== null) GUI.DrawImage(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
+		if (this._draggedItem !== null) GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
 
 		this.Quests.forEach((quest, i) => {
 			Canvas.SetStroke(Color.Yellow, 2);
@@ -914,6 +958,12 @@ export class Player extends Entity {
 				if (this._inventory[x] instanceof Weapon) this._weapon = this._inventory[x] as Weapon;
 				else this._weapon = null;
 		}
+	}
+
+	public Heal(by: number) {
+		if (by <= 0) return;
+
+		this._health = Math.clamp(this._health + by, 0, this._maxHealth);
 	}
 
 	private GetItemAt(x: number): Item | null {
@@ -986,6 +1036,8 @@ export class Player extends Entity {
 	}
 
 	private ChangeActiveHand(hand: 0 | 1) {
+		if (this._inventory[this._selectedHand] instanceof Item && this._inventory[this._selectedHand].IsUsing()) return;
+
 		this._selectedHand = hand;
 
 		if (this._inventory[this._selectedHand] === null) {
@@ -1014,7 +1066,11 @@ export class Player extends Entity {
 		if (!this.CanTarget() || this._onLadder !== null) return;
 
 		if (this._weapon === null) {
-			if (this._timeToNextPunch <= 0) {
+			if (this._inventory[this._selectedHand] instanceof Item) {
+				this._inventory[this._selectedHand].Use(() => {
+					this._inventory[this._selectedHand] = null;
+				});
+			} else if (this._timeToNextPunch <= 0) {
 				Player._punchSound.Play();
 
 				this._framesToPunch = 5;
