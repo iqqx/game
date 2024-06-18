@@ -1,12 +1,12 @@
 import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
+import { Color, Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
-import { AK } from "../../Assets/Weapons/Weapon.js";
+import { AK, Glock } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
 
 export class Human extends Enemy {
@@ -19,13 +19,16 @@ export class Human extends Enemy {
 			Bend: GetSprite("Player_Arm_Bend") as Sprite,
 		},
 	};
-	private readonly _weapon = new AK();
+	private readonly _weapon = new Glock();
 	private static readonly _visibleDistance = 500;
 	private readonly _armHeight = 0.65;
 	private _timeToNextFrame = 0;
 	private _frameIndex = 0;
-
 	private _angle = 0;
+	private _timeFromNotice = -1;
+	private _timeFromSaw = -1;
+	private readonly _timeToShoot = 500;
+	private readonly _timeToTurn = 1500;
 
 	constructor(x: number, y: number, type: EnemyType) {
 		super(50, 100, 1, 100, type);
@@ -37,32 +40,22 @@ export class Human extends Enemy {
 	}
 
 	override Update(dt: number): void {
-		const prevX = this._x;
+		if (this._timeFromNotice >= 0) this._timeFromNotice += dt;
+		if (this._timeFromSaw >= 0) this._timeFromSaw += dt;
 
-		super.Update(dt);
-
-		if (prevX != this._x) {
-			this._timeToNextFrame -= dt;
-
-			if (this._timeToNextFrame < 0) {
-				this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
-				this._timeToNextFrame = 70;
-			}
-		} else {
-			this._frameIndex = 0;
-		}
-
-		this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
+		this.ApplyVForce();
+		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 
-		if (
-			Scene.Current.Player.IsMoving() === 2 &&
-			Math.sign(plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2)) != this.Direction &&
-			(plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2)) ** 2 + (plrPos.Y + plrSize.Height / 2 - (this._y + this.Height / 2)) < Human._visibleDistance ** 2
-		)
-			this.Direction *= -1;
+		if (Scene.Current.Player.IsMoving() === 2 && this.GetDirectionToPlayer() != this.Direction && this.GetDistanceToPlayer() < Human._visibleDistance && this._timeFromNotice === -1)
+			this._timeFromNotice = 0;
+		else if (this._timeFromNotice > this._timeToTurn) {
+			this.Direction = this.GetDirectionToPlayer();
+
+			if (this._timeFromSaw === -1) this._timeFromSaw = 0;
+		}
 
 		if (this.IsSpotPlayer()) {
 			this._angle = (() => {
@@ -72,8 +65,28 @@ export class Human extends Enemy {
 				else return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
 			})();
 
-			this._weapon.TryShoot(Tag.Player);
-		}
+			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
+
+			if (this._timeFromSaw > this._timeToShoot) {
+				const prevX = this._x;
+
+				if (this.GetDistanceToPlayer() < Human._visibleDistance && this.GetDistanceToPlayer() > 50) {
+					if (this.Direction == -1) this.MoveRight();
+					else this.MoveLeft();
+
+					if (prevX != this._x) {
+						this._timeToNextFrame -= dt;
+
+						if (this._timeToNextFrame < 0) {
+							this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
+							this._timeToNextFrame = 70;
+						}
+					} else this._frameIndex = 0;
+				}
+
+				this._weapon.TryShoot(Tag.Player);
+			}
+		} else this._frameIndex = 0;
 	}
 
 	override Render(): void {
@@ -81,6 +94,9 @@ export class Human extends Enemy {
 		const scale = this.Height / framesPack[0].BoundingBox.Height;
 		const scaledWidth = framesPack[0].BoundingBox.Width * scale;
 		const widthOffset = (scaledWidth - this.Width) / 2;
+
+		if (this._timeFromNotice >= 0 && this._timeFromSaw < this._timeToShoot)
+			Canvas.DrawImage(GetSprite("Notice") as Sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition() + widthOffset, this._y + this.Height + 15, 20, 20));
 
 		if (this.Direction == 1) {
 			Canvas.DrawImageWithAngle(
@@ -146,6 +162,8 @@ export class Human extends Enemy {
 	}
 
 	override IsSpotPlayer(): boolean {
+		if (!Scene.Player.IsAlive()) return false;
+
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
 
@@ -163,6 +181,9 @@ export class Human extends Enemy {
 
 	override TakeDamage(damage: number): void {
 		super.TakeDamage(damage);
+
+		this.Direction = this.GetDirectionToPlayer();
+		if (this._timeFromNotice === -1) this._timeFromNotice = 0;
 
 		if (this._health <= 0) {
 			this.Destroy();

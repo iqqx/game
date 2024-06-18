@@ -1,3 +1,4 @@
+import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -16,7 +17,7 @@ export class Player extends Entity {
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
     _inventory = [null, null];
-    _backpack = null;
+    _backpack = new Backpack(1, 1);
     _weapon = null;
     Quests = [];
     _armHeight = 0.65;
@@ -67,7 +68,6 @@ export class Player extends Entity {
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
         Player._walkSound.Speed = 1.6;
         Player._walkSound.Apply();
-        // this._health = 0;
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
@@ -509,7 +509,7 @@ export class Player extends Entity {
                 GUI.SetStroke(new Color(155, 155, 155), 1);
                 GUI.DrawRectangle(firstXOffset - 5, y - 5, 6 * 55 + 10, 55 + 5);
                 GUI.ClearStroke();
-                GUI.SetFillColor(new Color(155, 155, 155));
+                GUI.SetFillColor(new Color(100, 100, 100));
                 GUI.DrawRectangle(firstXOffset + 2 * 55 - 1, y - 4, 2, 58);
                 const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
                 const yCell = Math.floor((750 - this._yTarget - y) / 55);
@@ -657,6 +657,9 @@ export class Player extends Entity {
         });
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+    }
+    IsAlive() {
+        return this._health > 0;
     }
     OnKilled(type) {
         this.Quests.forEach((x) => x.OnKilled(type));

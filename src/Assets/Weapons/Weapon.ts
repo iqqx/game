@@ -180,7 +180,7 @@ export abstract class Weapon extends Item {
 			hit.instance.TakeDamage(this._damage);
 			this._sounds.Hit.Play(0.15);
 
-			const bloodCount = Math.round(Math.random() * 5);
+			const bloodCount = Math.round((Math.random() + 1) * 2);
 			for (let i = 0; i < bloodCount; i++) {
 				const offset = (Math.random() - 0.5) / 2;
 				const bloodDir = new Vector2(Math.cos(this._angle + offset), -Math.sin(this._angle + offset));

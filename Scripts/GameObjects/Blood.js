@@ -37,7 +37,6 @@ export class Blood extends GameObject {
         const prevX = this._accelerationX;
         this._accelerationY -= 2;
         this._accelerationX -= Math.sign(this._accelerationX);
-        console.log(prevX / this._accelerationX);
         if (this._accelerationX === 0 || prevX / this._accelerationX === -1)
             this._accelerationX = 0;
         const dir = new Vector2(this._accelerationX, this._accelerationY);

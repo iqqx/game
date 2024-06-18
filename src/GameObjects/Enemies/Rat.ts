@@ -1,6 +1,6 @@
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Color, Rectangle, Sprite } from "../../Utilites.js";
+import { Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
 import { GetSound, GetSprite } from "../../Game.js";

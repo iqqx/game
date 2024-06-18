@@ -32,7 +32,8 @@
 		"Glock": "Images/Pistol.png",
 		"AK": "Images/Rifle.png",
 		"Controls": "Images/Controls-2.png",
-		"Loading_Icon": "Images/Loading.png"
+		"Loading_Icon": "Images/Loading.png",
+		"Notice": "Images/Notice.png"
 	},
 	"Sounds": {
 		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",
@@ -59,7 +60,8 @@
 		"Shoot_4": "Sounds/shoot-4.mp3",
 		"Walk_1": "Sounds/walk.mp3",
 		"Walk_2": "Sounds/walk-2.wav",
-		"GUI_Hover": "Sounds/hover.mp3"
+		"GUI_Hover": "Sounds/hover.mp3",
+		"Play": "Sounds/play.mp3"
 	},
 	"Scenes": ["Assets/Scenes/Main.json"]
 }

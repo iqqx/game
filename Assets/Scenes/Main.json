@@ -96,7 +96,6 @@
 			"Type": "Rat",
 			"Arguments": [2200, 300]
 		},
-		{ "Type": "Wall", "Arguments": [1300, 0, 100, 10000] },
 		{
 			"Type": "Human",
 			"Arguments": [1000, 300, "Green"]

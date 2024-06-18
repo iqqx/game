@@ -246,6 +246,16 @@ export var GUI;
             ctx.stroke();
     }
     GUI.DrawCircle = DrawCircle;
+    function DrawSector(x, y, radius, angle) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, radius, 0, angle);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    GUI.DrawSector = DrawSector;
     function DrawText(x, y, text) {
         ctx.fillText(text, x, y);
     }

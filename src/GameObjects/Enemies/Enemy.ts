@@ -46,7 +46,7 @@ export abstract class Enemy extends Entity {
 		return Math.abs(plr.X - (this._x + this.Width / 2));
 	}
 
-	public GetDirectionToPlayer() {
-		return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2));
+	public GetDirectionToPlayer(): -1 | 1 {
+		return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2)) as -1 | 1;
 	}
 }

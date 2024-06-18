@@ -9,6 +9,7 @@ export class Button extends GUIBase {
 	protected _pressed = false;
 	protected _onClicked: () => void;
 	private readonly _hoverSound = GetSound("GUI_Hover");
+	private readonly _clickSound = GetSound("Play");
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(width, height);
@@ -33,7 +34,10 @@ export class Button extends GUIBase {
 
 			if (!this._pressed) {
 				if (buttons.Left) {
-					if (this._onClicked !== undefined) this._onClicked();
+					if (this._onClicked !== undefined) {
+						this._onClicked();
+						this._clickSound.PlayOriginal();
+					}
 					this._pressed = true;
 				}
 			} else if (!buttons.Left) this._pressed = false;

@@ -26,6 +26,7 @@ import { Label } from "./GameObjects/GUI/Label.js";
 import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
+import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -94,6 +95,8 @@ export class Scene {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static ParseObject(x) {
         switch (x.Type) {
+            case "PressedIndicator":
+                return new PressedIndicator(...x.Arguments);
             case "SpotLightSpawner":
                 return new GUISpotLight();
             case "HintLabel":

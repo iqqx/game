@@ -7,6 +7,10 @@
 		{
 			"Type": "HintLabel",
 			"Arguments": ["Удерживайте ПРОБЕЛ чтобы пропустить", 1300, 700]
+		},
+		{
+			"Type": "PressedIndicator",
+			"Arguments": [1120, 700, "Space", 1000]
 		}
 	]
 }

@@ -303,6 +303,16 @@ export namespace GUI {
 		if (strokeStyle !== null) ctx.stroke();
 	}
 
+	export function DrawSector(x: number, y: number, radius: number, angle: number) {
+		ctx.beginPath();
+
+		ctx.moveTo(x, y);
+		ctx.arc(x, y, radius, 0, angle);
+
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
+	}
+
 	export function DrawText(x: number, y: number, text: string) {
 		ctx.fillText(text, x, y);
 	}

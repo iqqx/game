@@ -24,7 +24,7 @@ export class Player extends Entity {
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
 	private _inventory: [Item | null, Item | null] = [null, null];
-	private _backpack: Backpack | null = null;
+	private _backpack: Backpack | null = new Backpack(1, 1);
 	private _weapon: Weapon | null = null;
 	public readonly Quests: Quest[] = [];
 	private _armHeight: 0.5 | 0.65 = 0.65;
@@ -78,7 +78,6 @@ export class Player extends Entity {
 		this._collider = new Rectangle(0, 0, this.Width, this.Height);
 		Player._walkSound.Speed = 1.6;
 		Player._walkSound.Apply();
-		// this._health = 0;
 
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
@@ -719,7 +718,7 @@ export class Player extends Entity {
 				GUI.DrawRectangle(firstXOffset - 5, y - 5, 6 * 55 + 10, 55 + 5);
 
 				GUI.ClearStroke();
-				GUI.SetFillColor(new Color(155, 155, 155));
+				GUI.SetFillColor(new Color(100, 100, 100));
 				GUI.DrawRectangle(firstXOffset + 2 * 55 - 1, y - 4, 2, 58);
 
 				const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
@@ -868,6 +867,10 @@ export class Player extends Entity {
 
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+	}
+
+	public IsAlive(): boolean {
+		return this._health > 0;
 	}
 
 	public OnKilled(type: EnemyType) {
