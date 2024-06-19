@@ -55,7 +55,6 @@ export class Scene {
 
 		if (Scene.Current !== undefined) Scene.Current.Unload();
 		Scene.Current = this;
-		Scene.Time = 0;
 
 		for (const object of objects)
 			if (object instanceof GameObject) this.Instantiate(object);
