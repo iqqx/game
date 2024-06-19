@@ -74,7 +74,7 @@ export class Human extends Enemy {
 				if (this._timeFromSaw > this._timeToShoot) {
 					const prevX = this._x;
 
-					if (this.GetDistanceToPlayer() < Human._visibleDistance && this.GetDistanceToPlayer() > 50) {
+					if (this.GetDistanceToPlayer() < Human._visibleDistance) {
 						if (this.Direction == -1) this.MoveRight();
 						else this.MoveLeft();
 

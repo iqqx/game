@@ -57,7 +57,7 @@
 		{ "Type": "Wall", "Arguments": [11580, 301, 80, 122] },
 		{ "Type": "Wall", "Arguments": [12259, 413, 40, 38] },
 		{ "Type": "Platform", "Arguments": [1498, 248, 114, 14] },
-		{ "Type": "Platform", "Arguments": [1129, 326, 108, 10] },
+		{ "Type": "Platform", "Arguments": [1129, 326, 138, 10] },
 		{ "Type": "Platform", "Arguments": [1240, 362, 31, 10] },
 		{ "Type": "Platform", "Arguments": [1338, 287, 27, 5] },
 		{ "Type": "Platform", "Arguments": [1409, 292, 34, 6] },
@@ -108,14 +108,6 @@
 		{
 			"Type": "HumanCorpse",
 			"Arguments": [3300, 150, "DogTag", "Glock"]
-		},
-		{
-			"Type": "Rat",
-			"Arguments": [3700, 150]
-		},
-		{
-			"Type": "Rat",
-			"Arguments": [3600, 150]
 		},
 		{
 			"Type": "Trader",

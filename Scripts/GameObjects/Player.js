@@ -37,8 +37,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
-    // private _timeFromSpawn = 0;
-    _timeFromSpawn = 10000;
+    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 10000;
     _running = false;
     static _name = "Макс";
     static _speed = 5;
@@ -492,7 +492,14 @@ export class Player extends Entity {
             if (this._backpack !== null)
                 Canvas.DrawImageFlipped(this._frames.Backpack, new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y - (this._sit ? 14 : 0), scaledWidth, this.Height));
             if (this._weapon === null) {
-                if (this._framesToPunch > 0 && !this._mainHand)
+                if (this._inventory[this._selectedHand] !== null && !(this._inventory[this._selectedHand] instanceof Weapon)) {
+                    if (this._inventory[this._selectedHand].Big)
+                        this._inventory[this._selectedHand].Render(new Vector2(this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(Math.PI / 2), this._y + this.Height * this._armHeight - 23 * Math.sin(Math.PI / 2 + 0.2)), 0);
+                    else
+                        this._inventory[this._selectedHand].Render(new Vector2(this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle), this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)), this._angle);
+                    Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle, -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
+                }
+                else if (this._framesToPunch > 0 && !this._mainHand)
                     Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle, -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
                 else
                     Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle, -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
@@ -510,8 +517,10 @@ export class Player extends Entity {
         }
         if (this._health > 0)
             GUI.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.45, 0, 0.5);
-        else
+        else {
             GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
+            return;
+        }
         if (this._needDrawRedVegnitte > 0) {
             this._needDrawRedVegnitte--;
             Canvas.DrawVignette(Color.Red);

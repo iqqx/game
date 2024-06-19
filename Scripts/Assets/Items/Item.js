@@ -43,7 +43,10 @@ export class Vodka extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 35 * ratio, 35), angle, -(35 * ratio) / 2, 35);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 35 * ratio, 35), angle, -(35 * ratio) / 2, 35);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 35 * ratio, 35), angle, -(35 * ratio) / 2, 35);
     }
 }
 export class Radio extends Item {
@@ -54,7 +57,10 @@ export class Radio extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
     OnUsed() {
         Scene.Player.Heal(10);
@@ -67,7 +73,10 @@ export class DogTag extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
     Use(callback) { }
 }
@@ -78,7 +87,10 @@ export class RatTail extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 10);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 10);
     }
     Use(callback) { }
 }
@@ -108,7 +120,10 @@ export class Sausage extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle + Math.PI / 2, -15, 7);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 14);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle + Math.PI / 2, -15, 7);
     }
     OnUsed() {
         Scene.Player.Heal(10);
@@ -123,7 +138,10 @@ export class Adrenalin extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -3, 3);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 6);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -3, 3);
     }
     OnUsed() {
         Scene.Player.Heal(10);
@@ -138,7 +156,11 @@ export class Bread extends Item {
     }
     Render(at, angle) {
         const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+        console.log(angle);
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
     OnUsed() {
         Scene.Player.Heal(15);

@@ -136,6 +136,8 @@ export type RaycastHit = {
 	instance: GameObject;
 	position: Vector2;
 	Normal: Vector2;
+	start?: Vector2;
+	end?: Vector2;
 };
 
 export type Sprite = {

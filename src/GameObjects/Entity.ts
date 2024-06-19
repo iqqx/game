@@ -100,15 +100,14 @@ export class Entity extends GameObject {
 
 			offsets.sort((a, b) => a.instance.GetPosition().Y - b.instance.GetPosition().Y);
 
-			if (offsets.length > 0 && offsets[0].position.Y !== 0) {
+			if (offsets.length > 0 && offsets[0].start.Y >= 0) {
 				if (offsets[0].instance instanceof Spikes) this.TakeDamage(100);
-				else if (offsets[0].instance instanceof Platform && (offsets[0].position.Y < 0 || prevY < offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height))
-					return;
+				else if (offsets[0].instance instanceof Platform && (prevY < offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height || this._movingDown)) return;
 
 				this._verticalAcceleration = 0;
 
 				this._grounded = true;
-				this._y += offsets[0].position.Y;
+				this._y += offsets[0].start.Y;
 			}
 		} else if (this._verticalAcceleration > 0) {
 			// взлетаем
@@ -118,7 +117,7 @@ export class Entity extends GameObject {
 			if (offsets.length > 0) {
 				this._verticalAcceleration = 0;
 
-				this._y += offsets.minBy((x) => x.instance.GetPosition().Y).position.Y;
+				this._y += offsets.minBy((x) => x.instance.GetPosition().Y).end.Y;
 
 				return;
 			}

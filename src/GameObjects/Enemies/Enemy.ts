@@ -31,7 +31,11 @@ export abstract class Enemy extends Entity {
 		this.Direction = Math.sign(plrPos.X - (this._x + this.Width / 2)) as -1 | 1;
 
 		if (this.GetDistanceToPlayer() < 50) {
-			if (Scene.Player.GetPosition().Y > this._y) this.Jump();
+			if (Scene.Player.GetPosition().Y > this._y) {
+				if (Scene.Player.GetPosition().Y === this._y) this._movingDown = false;
+
+				this.Jump();
+			} else this._movingDown = true;
 
 			return;
 		}
