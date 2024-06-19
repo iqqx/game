@@ -32,22 +32,34 @@ export class Titles extends GameObject {
 		"",
 		"МЛАДШИЕ ВЕРСТАЛЬЩИКИ",
 		"Иван",
+		"Даниил Е.",
 		"",
 		"СТАРШИЕ ДИЗАЙНЕРЫ",
 		"Вова",
 		"",
 		"МЛАДШИЕ ДИЗАЙНЕРЫ",
 		"Вова",
-		"Иван",
 		"Кирилл",
 		"Михаил",
 		"Владислав",
 		"",
 		"ПРОЕКТИРОВЩИКИ УРОВНЕЙ",
-		"Даниил",
+		"Даниил Л.",
 		"",
 		"РАЗРАБОТЧИКИ АНИМАЦИЙ",
 		"Михаил",
+		"",
+		"",
+		"",
+		"ИСПОЛЬЗУЕМЫЕ ТЕХНОЛОГИИ",
+		"TypeScript",
+		"MicEngine",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
 		"",
 		"",
 		"",
@@ -62,19 +74,19 @@ export class Titles extends GameObject {
 	}
 
 	public Update(dt: number): void {
-		this._y -= 1;
+		this._y--;
 
-		if (this._y < -3000) Scene.LoadFromFile("Assets/Scenes/Menu.json");
+		if (this._y < -3300) Scene.LoadFromFile("Assets/Scenes/Menu.json");
 	}
 
 	public Render(): void {
 		GUI.SetFillColor(Color.White);
 		GUI.ClearStroke();
 
-		GUI.SetFont(72);
-		GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, this._y, this.Width, this.Height);
 		GUI.SetFont(32);
+		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, this._y + i * 32 * 1.5, this.Width, this.Height);
 
-		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, this._y + 300 + i * 32 * 1.5, this.Width, this.Height);
+		GUI.SetFont(72);
+		GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(this._y, -3000) + 3000, this.Width, this.Height);
 	}
 }
