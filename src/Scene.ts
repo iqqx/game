@@ -40,6 +40,7 @@ export class Scene {
 	private readonly _background: Sprite | null;
 	private readonly _keyDownEvents: [string, () => void][] = [];
 
+	private _touch: Vector2 | null = null;
 	private _levelPosition = 0;
 	private _mouseX = 0;
 	private _mouseY = 0;
@@ -74,8 +75,11 @@ export class Scene {
 			Scene.Current._mouseX = e.offsetX;
 			Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
 
-			if (e.button === 0) this._lmb = true;
-			if (e.button === 2) this._rmb = true;
+			if (e.sourceCapabilities.firesTouchEvents === true) this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
+			else {
+				if (e.button === 0) this._lmb = true;
+				if (e.button === 2) this._rmb = true;
+			}
 		});
 
 		addEventListener("mouseup", (e) => {
@@ -332,6 +336,7 @@ export class Scene {
 		for (const element of Scene.Current._GUIElements) element.Update(time - Scene.Time, time);
 
 		Scene.Time = time;
+		this._touch = null;
 	}
 
 	public Render() {
@@ -348,6 +353,10 @@ export class Scene {
 		if (Scene.Current.Player !== null) Scene.Current.Player.RenderOverlay();
 
 		for (const element of Scene.Current._GUIElements) element.Render();
+	}
+
+	public GetTouch() {
+		return this._touch;
 	}
 
 	public GetByTag(tag: Tag) {

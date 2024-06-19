@@ -38,7 +38,7 @@ export class Player extends Entity {
     _mainHand = true;
     _timeFromSpawn = 0;
     _running = false;
-    static _name = "Володя";
+    static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
     static _sitHeightModifier = 0.85;

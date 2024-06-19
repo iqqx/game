@@ -32,15 +32,28 @@ export class Button extends GUIBase {
 		if (this._hovered) {
 			if (lastHovered === false) this._hoverSound.Play(0.1);
 
-			if (!this._pressed) {
-				if (buttons.Left) {
-					if (this._onClicked !== undefined) {
-						this._onClicked();
-						this._clickSound.PlayOriginal();
-					}
-					this._pressed = true;
+			const touch = Scene.Current.GetTouch();
+			if (touch !== null) {
+				if (
+					touch.X > this._x - this.Width / 2 &&
+					touch.X <= this._x + this.Width / 2 &&
+					GUI.Height - touch.Y > this._y - this.Height / 2 &&
+					GUI.Height - touch.Y <= this._y + this.Height / 2
+				) {
+					this._onClicked();
+					this._clickSound.PlayOriginal();
 				}
-			} else if (!buttons.Left) this._pressed = false;
+			} else {
+				if (!this._pressed) {
+					if (buttons.Left) {
+						if (this._onClicked !== undefined) {
+							this._onClicked();
+							this._clickSound.PlayOriginal();
+						}
+						this._pressed = true;
+					}
+				} else if (!buttons.Left) this._pressed = false;
+			}
 		}
 	}
 

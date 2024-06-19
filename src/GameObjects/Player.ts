@@ -46,7 +46,7 @@ export class Player extends Entity {
 	private _timeFromSpawn = 0;
 	private _running = false;
 
-	private static readonly _name = "Володя";
+	private static readonly _name = "Макс";
 	private static readonly _speed = 5;
 	private static readonly _animationFrameDuration = 50;
 	private static readonly _sitHeightModifier = 0.85;
