@@ -1,13 +1,14 @@
 import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Color, Rectangle, Sprite, Vector2 } from "../../Utilites.js";
+import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
-import { AK, Glock } from "../../Assets/Weapons/Weapon.js";
+import { Glock } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
+import { GuardFake } from "../QuestGivers/GuardFake.js";
 
 export class Human extends Enemy {
 	private static readonly _deathSound = new Audio("Sounds/human_death-2.mp3");
@@ -27,8 +28,10 @@ export class Human extends Enemy {
 	private _angle = 0;
 	private _timeFromNotice = -1;
 	private _timeFromSaw = -1;
+	private _aggresive = false;
 	private readonly _timeToShoot = 500;
 	private readonly _timeToTurn = 1500;
+	private readonly _fakeCharacter = new GuardFake(0, 0);
 
 	constructor(x: number, y: number, type: EnemyType) {
 		super(50, 100, 1, 100, type);
@@ -67,27 +70,31 @@ export class Human extends Enemy {
 
 			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
 
-			if (this._timeFromSaw > this._timeToShoot) {
-				const prevX = this._x;
+			if (this._aggresive) {
+				if (this._timeFromSaw > this._timeToShoot) {
+					const prevX = this._x;
 
-				if (this.GetDistanceToPlayer() < Human._visibleDistance && this.GetDistanceToPlayer() > 50) {
-					if (this.Direction == -1) this.MoveRight();
-					else this.MoveLeft();
+					if (this.GetDistanceToPlayer() < Human._visibleDistance && this.GetDistanceToPlayer() > 50) {
+						if (this.Direction == -1) this.MoveRight();
+						else this.MoveLeft();
 
-					if (prevX != this._x) {
-						this._timeToNextFrame -= dt;
+						if (prevX != this._x) {
+							this._timeToNextFrame -= dt;
 
-						if (this._timeToNextFrame < 0) {
-							this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
-							this._timeToNextFrame = 70;
-						}
-					} else this._frameIndex = 0;
+							if (this._timeToNextFrame < 0) {
+								this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
+								this._timeToNextFrame = 70;
+							}
+						} else this._frameIndex = 0;
+					}
+
+					if (!this._weapon.IsReloading()) {
+						if (this._weapon.GetLoadedAmmo() === 0) this._weapon.Reload();
+						else this._weapon.TryShoot(Tag.Player);
+					}
 				}
-
-				if (!this._weapon.IsReloading()) {
-					if (this._weapon.GetLoadedAmmo() === 0) this._weapon.Reload();
-					else this._weapon.TryShoot(Tag.Player);
-				}
+			} else if (this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+				Scene.Player.SpeakWith(this._fakeCharacter);
 			}
 		} else this._frameIndex = 0;
 	}
@@ -185,6 +192,7 @@ export class Human extends Enemy {
 	override TakeDamage(damage: number): void {
 		super.TakeDamage(damage);
 
+		this._aggresive = true;
 		this.Direction = this.GetDirectionToPlayer();
 		if (this._timeFromNotice === -1) this._timeFromNotice = 0;
 

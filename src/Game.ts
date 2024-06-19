@@ -3,7 +3,7 @@ import { GetLoadedImagesCount, LoadImage, LoadSound, Sound, Sprite } from "./Uti
 
 const sprites = new Map<string, Sprite | Sprite[]>();
 const sounds = new Map<string, Sound>();
-let imagesToLoad = 99997;
+let imagesToLoad = 0;
 
 await (async () => {
 	const routers = await fetch("Assets/Routers.json");
@@ -15,16 +15,19 @@ await (async () => {
 	if (parsedRouters.Sounds === undefined) return Scene.GetErrorScene("Звуки не найдены в Assets/Routers.json");
 
 	for (const imageKey in parsedRouters.Images) {
-		imagesToLoad++;
 		const object = parsedRouters.Images[imageKey];
 
-		if (typeof object === "string") sprites.set(imageKey, LoadImage(object as string));
-		else if (object instanceof Array)
+		if (typeof object === "string") {
+			imagesToLoad++;
+			sprites.set(imageKey, LoadImage(object as string));
+		} else if (object instanceof Array) {
+			imagesToLoad += object.length;
+
 			sprites.set(
 				imageKey,
 				object.map((x) => LoadImage(x))
 			);
-		else return Scene.GetErrorScene(`Недопустимый тип изображения: ${imageKey}`);
+		} else return Scene.GetErrorScene(`Недопустимый тип изображения: ${imageKey}`);
 	}
 
 	for (const soundKey in parsedRouters.Sounds) {
@@ -37,8 +40,8 @@ await (async () => {
 	Scene.LoadFromFile(parsedRouters.Scenes[0]);
 })();
 
-export function GetSprite(key: string): Sprite | Sprite[] {
-	return sprites.get(key);
+export function GetSprite<T extends Sprite | Sprite[]>(key: string): T {
+	return sprites.get(key) as T;
 }
 
 export function GetSound(key: string): Sound {
@@ -58,7 +61,7 @@ function gameLoop(timeStamp: number) {
 function loadLoop() {
 	const n = window.requestAnimationFrame(loadLoop);
 
-	if (GetLoadedImagesCount() >= imagesToLoad) return;
+	if (GetLoadedImagesCount() < imagesToLoad) return;
 
 	window.cancelAnimationFrame(n);
 	gameLoop(0);

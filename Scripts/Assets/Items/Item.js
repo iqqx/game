@@ -60,6 +60,28 @@ export class Radio extends Item {
         Scene.Player.Heal(10);
     }
 }
+export class DogTag extends Item {
+    Icon = GetSprite("DogTag");
+    static toString() {
+        return "Жетон";
+    }
+    Render(at, angle) {
+        const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+    }
+    Use(callback) { }
+}
+export class RatTail extends Item {
+    Icon = GetSprite("RatTail");
+    static toString() {
+        return "Крысинный хвост";
+    }
+    Render(at, angle) {
+        const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+        Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 10);
+    }
+    Use(callback) { }
+}
 export class AidKit extends Item {
     UseTime = 5500;
     Icon = LoadImage("Images/Items/FirstAid.png");

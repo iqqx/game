@@ -92,13 +92,34 @@
 			"Type": "Ladder",
 			"Arguments": [500, 260, 300]
 		},
+
 		{
-			"Type": "Rat",
-			"Arguments": [2200, 300]
+			"Type": "Artem",
+			"Arguments": [700, 260]
 		},
 		{
-			"Type": "Morshu",
-			"Arguments": [700, 260]
+			"Type": "Elder",
+			"Arguments": [1300, 260]
+		},
+		{
+			"Type": "HumanCorpse",
+			"Arguments": [3062, 150, "RatTail", "DogTag"]
+		},
+		{
+			"Type": "HumanCorpse",
+			"Arguments": [3300, 150, "DogTag", "Glock"]
+		},
+		{
+			"Type": "Rat",
+			"Arguments": [3700, 150]
+		},
+		{
+			"Type": "Rat",
+			"Arguments": [3600, 150]
+		},
+		{
+			"Type": "Trader",
+			"Arguments": [1600, 100]
 		},
 		{
 			"Type": "Backpack",

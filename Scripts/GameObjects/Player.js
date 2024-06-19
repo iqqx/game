@@ -3,6 +3,7 @@ import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
+import { Quest } from "../Quest.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
@@ -20,7 +21,7 @@ export class Player extends Entity {
     _inventory = [new Bread(), null];
     _backpack = null;
     _weapon = null;
-    Quests = [];
+    _quests = [new Quest("Свет в конце туннеля", this).AddPlaceholderTask("Найти выход из метро")];
     _armHeight = 0.65;
     _dialog = null;
     _dialogState = 0;
@@ -36,7 +37,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 10000;
     _running = false;
     static _name = "Макс";
     static _speed = 5;
@@ -238,10 +240,8 @@ export class Player extends Entity {
                                     else
                                         this.TakeItemFrom(xCell);
                                 }
-                                else if (xCell < 2)
-                                    this.SwapItemAt(xCell);
                                 else if (xCell <= 5)
-                                    this._draggedItem = this._backpack.SwapItem(xCell - 2, yCell, this._draggedItem);
+                                    this.SwapItemAt(xCell);
                             }
                         }
                         else {
@@ -336,9 +336,12 @@ export class Player extends Entity {
                 this._chars++;
                 Player._dialogSound.Play(0.05);
                 if (this._chars < this._dialog.Messages[this._dialogState].length)
-                    this._timeToNextChar = 75;
+                    this._timeToNextChar = 50;
             }
         }
+        this._quests.forEach((quest) => {
+            quest.Update();
+        });
         if (this._onLadder !== null) {
             const pos = this._onLadder.GetPosition();
             const size = this._onLadder.GetCollider();
@@ -669,7 +672,7 @@ export class Player extends Entity {
                 GUI.DrawRectangle(GUI.Width / 2 + 500 / 2 - 155, GUI.Height - 200 - 95, 150, 35);
             GUI.SetFillColor(Color.White);
             GUI.SetFont(24);
-            GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 70, this._dialogState % 2 === 0 ? Player._name : "Моршу");
+            GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 70, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
             GUI.SetFont(16);
             // GUI.DrawTextWrapped(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235, this._dialog.Messages[this._dialogState].slice(0, this._chars), 490);
             GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235);
@@ -678,16 +681,36 @@ export class Player extends Entity {
         }
         if (this._draggedItem !== null)
             GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
-        this.Quests.forEach((quest, i) => {
-            Canvas.SetStroke(Color.Yellow, 2);
-            Canvas.SetFillColor(quest.IsCompleted() ? Color.Yellow : Color.Transparent);
-            Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 330 - i * 60, 10, 10, Math.PI / 4, -10, 0);
-            Canvas.SetFillColor(Color.White);
+        GUI.ClearStroke();
+        GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
+        let offset = 0;
+        for (const quest of this._quests) {
+            GUI.SetFillColor(Color.White);
             GUI.SetFont(24);
-            GUI.DrawText(10, 300 + i * 60, quest.Title);
+            GUI.DrawText(10, 30 + offset, quest.Title);
+            offset += 30;
+            GUI.SetStroke(Color.Yellow, 2);
             GUI.SetFont(16);
-            GUI.DrawText(40, 330 + i * 60, quest.IsCompleted() ? "Возвращайтесь к Моршу" : quest.Tasks[0].toString());
-        });
+            const tasks = quest.GetTasks();
+            if (tasks.length === 1) {
+                GUI.DrawText(35, 30 + offset, tasks[tasks.length - 1].toString());
+                GUI.SetFillColor(Color.Transparent);
+                Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 30 + 10 / 2 - offset, 10, 10, Math.PI / 4, -5, 5);
+            }
+            else {
+                tasks.slice(0, -1).forEach((x) => {
+                    GUI.SetFillColor(Color.Yellow);
+                    Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 30 + 10 / 2 - offset, 10, 10, Math.PI / 4, -5, 5);
+                    GUI.SetFillColor(Color.White);
+                    GUI.DrawText(35, 30 + offset, x.toString());
+                    offset += 30;
+                });
+                GUI.DrawText(35, 30 + offset, tasks[tasks.length - 1].toString());
+                GUI.SetFillColor(Color.Transparent);
+                Canvas.DrawRectangleWithAngleAndStroke(20, 750 - 30 + 10 / 2 - offset, 10, 10, Math.PI / 4, -5, 5);
+            }
+            offset += 30;
+        }
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
@@ -695,7 +718,7 @@ export class Player extends Entity {
         return this._health > 0;
     }
     OnKilled(type) {
-        this.Quests.forEach((x) => x.OnKilled(type));
+        this._quests.forEach((x) => x.OnKilled(type));
     }
     TryPushItem(item) {
         for (let x = 0; x < this._inventory.length; x++)
@@ -706,12 +729,35 @@ export class Player extends Entity {
                         this._weapon = this._inventory[x];
                     else
                         this._weapon = null;
+                this._quests.forEach((quest) => {
+                    quest.InventoryChanged();
+                });
                 return true;
             }
-        if (this._backpack !== null)
-            return this._backpack.TryPushItem(item);
+        if (this._backpack !== null) {
+            if (this._backpack.TryPushItem(item)) {
+                this._quests.forEach((quest) => {
+                    quest.InventoryChanged();
+                });
+                return true;
+            }
+        }
         else
             return false;
+    }
+    GiveQuestItem(item) {
+        if (!this.TryPushItem(item))
+            Scene.Current.Instantiate(new ItemDrop(this._x, this._y, item));
+        else
+            this._quests.forEach((quest) => {
+                quest.InventoryChanged();
+            });
+    }
+    GetQuestsBy(by) {
+        return this._quests.filter((x) => x.Giver === by);
+    }
+    RemoveQuest(quest) {
+        return this._quests.splice(this._quests.indexOf(quest), 1);
     }
     SwapItemAt(x) {
         if (this._backpack !== null && x >= 2)
@@ -724,6 +770,9 @@ export class Player extends Entity {
                 else
                     this._weapon = null;
         }
+        this._quests.forEach((quest) => {
+            quest.InventoryChanged();
+        });
     }
     Heal(by) {
         if (by <= 0)
@@ -748,15 +797,21 @@ export class Player extends Entity {
             return this._backpack.TakeItemFrom(x - 2, 0);
     }
     SpeakWith(character) {
+        if (this._dialog !== null)
+            return;
         this._dialogState = 0;
+        this._chars = 0;
         this._timeToNextChar = 75;
         this._dialog = character.GetDialog();
+    }
+    PushQuest(quest) {
+        this._quests.push(quest);
     }
     ContinueDialog() {
         this._dialogState++;
         if (this._dialog.Messages.length == this._dialogState) {
-            if (this._dialog.Quest !== undefined)
-                this.Quests.push(this._dialog.Quest);
+            if (this._dialog.AfterAction !== undefined)
+                this._dialog.AfterAction();
             this._dialog = null;
         }
         else {
@@ -778,6 +833,10 @@ export class Player extends Entity {
         for (const item of this._inventory)
             if (item !== null)
                 copy.push(item);
+        if (this._backpack !== null)
+            for (let i = 0; i < this._backpack.SlotsSize.X; i++)
+                if (this._backpack.GetItemAt(i, 0) !== null)
+                    copy.push(this._backpack.GetItemAt(i, 0));
         return copy;
     }
     OpenContainer(container) {
@@ -793,6 +852,13 @@ export class Player extends Entity {
         for (let i = 0; i < this._inventory.length; i++)
             if (this._inventory[i] instanceof item)
                 this._inventory[i] = null;
+        if (this._backpack !== null)
+            for (let i = 0; i < this._backpack.SlotsSize.X; i++)
+                if (this._backpack.GetItemAt(i, 0) instanceof item)
+                    this._backpack.TakeItemFrom(i, 0);
+        this._quests.forEach((quest) => {
+            quest.InventoryChanged();
+        });
     }
     ChangeActiveHand(hand) {
         if (this._inventory[this._selectedHand] instanceof Item && this._inventory[this._selectedHand].IsUsing())

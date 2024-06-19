@@ -23,6 +23,7 @@ export class Item {
 			}
 		}
 	}
+
 	public Use(callback: () => void) {
 		if (this._isUsing) return;
 		this._isUsing = true;
@@ -31,10 +32,13 @@ export class Item {
 		this._usingCallback = callback;
 		this._usingTime = 0;
 	}
+
 	public Render(at: Vector2, angle: number) {}
+
 	public IsUsing() {
 		return this._isUsing;
 	}
+
 	protected OnUsed() {}
 }
 
@@ -70,6 +74,38 @@ export class Radio extends Item {
 	protected OnUsed() {
 		Scene.Player.Heal(10);
 	}
+}
+
+export class DogTag extends Item {
+	public readonly Icon = GetSprite("DogTag") as Sprite;
+
+	static toString(): string {
+		return "Жетон";
+	}
+
+	public Render(at: Vector2, angle: number): void {
+		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+
+		Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+	}
+
+	public Use(callback: () => void) {}
+}
+
+export class RatTail extends Item {
+	public readonly Icon = GetSprite("RatTail") as Sprite;
+
+	static toString(): string {
+		return "Крысинный хвост";
+	}
+
+	public Render(at: Vector2, angle: number): void {
+		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+
+		Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 10);
+	}
+
+	public Use(callback: () => void) {}
 }
 
 export class AidKit extends Item {

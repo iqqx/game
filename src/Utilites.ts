@@ -1,3 +1,4 @@
+import { EnemyType } from "./Enums.js";
 import { GameObject } from "./GameObjects/GameObject.js";
 
 declare global {
@@ -150,16 +151,9 @@ declare global {
 	}
 }
 
-// let imagesToLoad = 100000000;
-let imagesLoaded = 0;
-// export function IsImagesLoaded() {
-// 	return imagesLoaded >= imagesToLoad;
-// }
-// export function SetImageCount(count: number) {
-// 	imagesToLoad = count;
-// }
+const imagesLoaded: string[] = [];
 export function GetLoadedImagesCount() {
-	return imagesLoaded;
+	return imagesLoaded.length;
 }
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {
@@ -177,7 +171,7 @@ export function LoadImage(source: string, boundingBox?: Rectangle, scale?: numbe
 		cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
 		cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
 
-		imagesLoaded++;
+		imagesLoaded.push(source);
 	};
 	img.src = source;
 
@@ -225,3 +219,16 @@ export type Sound = {
 	Speed: number;
 	Volume: number;
 };
+
+export function GetEnemyTypeName(enemyType: EnemyType) {
+	switch (enemyType) {
+		case EnemyType.Rat:
+			return "Крыса";
+		case EnemyType.Yellow:
+			return "Боец ВДНХ";
+		case EnemyType.Red:
+			return "Боец Ганза";
+		case EnemyType.Green:
+			return "Боец Ордена";
+	}
+}

@@ -2,7 +2,7 @@ import { Scene } from "./Scene.js";
 import { GetLoadedImagesCount, LoadImage, LoadSound } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
-let imagesToLoad = 99997;
+let imagesToLoad = 0;
 await (async () => {
     const routers = await fetch("Assets/Routers.json");
     if (!routers.ok)
@@ -15,12 +15,15 @@ await (async () => {
     if (parsedRouters.Sounds === undefined)
         return Scene.GetErrorScene("Звуки не найдены в Assets/Routers.json");
     for (const imageKey in parsedRouters.Images) {
-        imagesToLoad++;
         const object = parsedRouters.Images[imageKey];
-        if (typeof object === "string")
+        if (typeof object === "string") {
+            imagesToLoad++;
             sprites.set(imageKey, LoadImage(object));
-        else if (object instanceof Array)
+        }
+        else if (object instanceof Array) {
+            imagesToLoad += object.length;
             sprites.set(imageKey, object.map((x) => LoadImage(x)));
+        }
         else
             return Scene.GetErrorScene(`Недопустимый тип изображения: ${imageKey}`);
     }
@@ -49,7 +52,7 @@ function gameLoop(timeStamp) {
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
-    if (GetLoadedImagesCount() >= imagesToLoad)
+    if (GetLoadedImagesCount() < imagesToLoad)
         return;
     window.cancelAnimationFrame(n);
     gameLoop(0);

@@ -4,6 +4,8 @@ import { Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
 import { GetSound, GetSprite } from "../../Game.js";
+import { RatCorpse } from "../RatCorpse.js";
+import { RatTail } from "../../Assets/Items/Item.js";
 
 export class Rat extends Enemy {
 	public static readonly Damage = 10;
@@ -54,6 +56,8 @@ export class Rat extends Enemy {
 
 		if (this._health <= 0) {
 			this.Destroy();
+
+			Scene.Current.Instantiate(new RatCorpse(this._x, this._y, new RatTail()));
 
 			const s = Rat._deathSound.cloneNode() as HTMLAudioElement;
 			s.volume = 0.25;

@@ -11,13 +11,12 @@ import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { AidKit, Bread, Radio, Sausage, Vodka } from "./Assets/Items/Item.js";
+import { AidKit, Bread, DogTag, Radio, RatTail, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
 import { Ladder } from "./GameObjects/Ladder.js";
 import { Platform } from "./GameObjects/Platform.js";
-import { Morshu } from "./GameObjects/QuestGivers/Morshu.js";
 import { Spikes } from "./GameObjects/Spikes.js";
 import { Wall } from "./GameObjects/Wall.js";
 import { Image } from "./GameObjects/GUI/Image.js";
@@ -29,6 +28,10 @@ import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
 import { AK, Glock } from "./Assets/Weapons/Weapon.js";
 import { Titles } from "./GameObjects/GUI/Titles.js";
+import { Artem } from "./GameObjects/QuestGivers/Artem.js";
+import { Elder } from "./GameObjects/QuestGivers/Elder.js";
+import { Trader } from "./GameObjects/QuestGivers/Trader.js";
+import { Corpse } from "./GameObjects/Corpse.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -156,13 +159,22 @@ export class Scene {
                 return new Spikes(...x.Arguments);
             case "Ladder":
                 return new Ladder(...x.Arguments);
-            case "Morshu":
-                return new Morshu(...x.Arguments);
+            case "Artem":
+                return new Artem(...x.Arguments);
+            case "Elder":
+                return new Elder(...x.Arguments);
+            case "Trader":
+                return new Trader(...x.Arguments);
             case "Backpack":
                 x.Arguments.splice(2, x.Arguments.length - 2, ...x.Arguments.slice(2).map((x) => {
                     return Scene.ParseItem(x);
                 }));
                 return new Backpack(...x.Arguments);
+            case "HumanCorpse":
+                x.Arguments.splice(2, x.Arguments.length - 2, ...x.Arguments.slice(2).map((x) => {
+                    return Scene.ParseItem(x);
+                }));
+                return new Corpse(...x.Arguments);
             case "Human":
                 x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Rat;
                 return new Human(...x.Arguments);
@@ -368,6 +380,10 @@ export class Scene {
                 return new Glock();
             case "Radio":
                 return new Radio();
+            case "DogTag":
+                return new DogTag();
+            case "RatTail":
+                return new RatTail();
             default:
                 throw new Error("Предмет не удалось распарсить: " + raw);
         }

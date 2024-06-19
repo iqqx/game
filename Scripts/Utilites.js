@@ -1,3 +1,4 @@
+import { EnemyType } from "./Enums.js";
 Array.prototype.minBy = function (by) {
     let min = this[0];
     for (const element of this)
@@ -98,16 +99,9 @@ export class Vector2 {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
 }
-// let imagesToLoad = 100000000;
-let imagesLoaded = 0;
-// export function IsImagesLoaded() {
-// 	return imagesLoaded >= imagesToLoad;
-// }
-// export function SetImageCount(count: number) {
-// 	imagesToLoad = count;
-// }
+const imagesLoaded = [];
 export function GetLoadedImagesCount() {
-    return imagesLoaded;
+    return imagesLoaded.length;
 }
 export function LoadImage(source, boundingBox, scale) {
     const img = new Image();
@@ -121,7 +115,7 @@ export function LoadImage(source, boundingBox, scale) {
         cte.Scale = scale ?? 1;
         cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
         cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
-        imagesLoaded++;
+        imagesLoaded.push(source);
     };
     img.src = source;
     return cte;
@@ -156,4 +150,16 @@ export function LoadSound(source) {
             s.pause();
         },
     };
+}
+export function GetEnemyTypeName(enemyType) {
+    switch (enemyType) {
+        case EnemyType.Rat:
+            return "Крыса";
+        case EnemyType.Yellow:
+            return "Боец ВДНХ";
+        case EnemyType.Red:
+            return "Боец Ганза";
+        case EnemyType.Green:
+            return "Боец Ордена";
+    }
 }

@@ -1,14 +1,18 @@
-import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Interactable } from "../GameObject.js";
 
 export class Character extends Interactable {
+	protected _completedQuests = 0;
+	private _isTalked = false;
+
 	public GetDialog(): Dialog {
+		this._isTalked = true;
+
 		return;
 	}
 
-	public static IsTalked() {
-		return false;
+	public IsTalked() {
+		return this._isTalked;
 	}
 
 	GetInteractives(): string[] {
@@ -22,9 +26,19 @@ export class Character extends Interactable {
 				break;
 		}
 	}
+
+	public GetCompletedQuestsCount() {
+		return this._completedQuests;
+	}
+
+	public GetName() {
+		return "НЕКТО";
+	}
 }
 
 export type Dialog = {
 	Messages: string[];
-	Quest?: Quest;
+	AfterAction?: () => void;
+	Owner: Character;
+	OwnerFirst: boolean;
 };
