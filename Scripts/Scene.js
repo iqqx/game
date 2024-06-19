@@ -28,6 +28,7 @@ import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
 import { AK, Glock } from "./Assets/Weapons/Weapon.js";
+import { Titles } from "./GameObjects/GUI/Titles.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -48,6 +49,7 @@ export class Scene {
         if (Scene.Current !== undefined)
             Scene.Current.Unload();
         Scene.Current = this;
+        Scene.Time = 0;
         for (const object of objects)
             if (object instanceof GameObject)
                 this.Instantiate(object);
@@ -62,12 +64,18 @@ export class Scene {
             Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
         });
         addEventListener("mousedown", (e) => {
+            if (e.target.tagName !== "CANVAS")
+                return;
+            Scene.Current._mouseX = e.offsetX;
+            Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
             if (e.button === 0)
                 this._lmb = true;
             if (e.button === 2)
                 this._rmb = true;
         });
         addEventListener("mouseup", (e) => {
+            if (e.target.tagName !== "CANVAS")
+                return;
             if (e.button === 0)
                 this._lmb = false;
             if (e.button === 2)
@@ -98,6 +106,8 @@ export class Scene {
         switch (x.Type) {
             case "PressedIndicator":
                 return new PressedIndicator(...x.Arguments);
+            case "Titles":
+                return new Titles();
             case "SpotLightSpawner":
                 return new GUISpotLight();
             case "HintLabel":

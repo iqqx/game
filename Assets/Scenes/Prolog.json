@@ -1,0 +1,11 @@
+{
+	"GameObjects": [
+		{
+			"Type": "SpotLightSpawner",
+			"Arguments": []
+		},
+		{
+			"Type": "Titles"
+		}
+	]
+}

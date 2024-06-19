@@ -33,7 +33,9 @@
 		"AK": "Images/Rifle.png",
 		"Controls": "Images/Controls-2.png",
 		"Loading_Icon": "Images/Loading.png",
-		"Notice": "Images/Notice.png"
+		"Notice": "Images/Notice.png",
+		"TSLogo": "Images/TypeScriptLogo.png",
+		"EngineLogo": "Images/MicEngineLogo.png"
 	},
 	"Sounds": {
 		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",
