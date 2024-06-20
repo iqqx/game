@@ -28,7 +28,6 @@ export class SceneEditor {
 	private _movingRight = false;
 	private _movingLeft = false;
 	private _shiftPressed = false;
-	private _controlPressed = false;
 	private _movingSpeed: number;
 	private _levelPosition = 0;
 	private _mousePosition = new Vector2(0, 0);
@@ -37,6 +36,8 @@ export class SceneEditor {
 	private _selectedType: ObjectType | -1 = -1;
 	private _selectedRectangle: number | null = null;
 	private _startRectangle: Vector2 | null = null;
+
+	public static Time = 0;
 
 	constructor(background: Sprite, init: [ObjectType, Rectangle][], backName?: string) {
 		this._background = background;
@@ -57,9 +58,6 @@ export class SceneEditor {
 					break;
 				case "ShiftLeft":
 					this._shiftPressed = true;
-					break;
-				case "ControlLeft":
-					this._controlPressed = true;
 					break;
 				case "ArrowUp":
 					if (this._selectedRectangle !== null) {
@@ -156,9 +154,6 @@ export class SceneEditor {
 				case "ShiftLeft":
 					this._shiftPressed = false;
 					break;
-				case "ControlLeft":
-					this._controlPressed = false;
-					break;
 			}
 		});
 
@@ -180,11 +175,15 @@ export class SceneEditor {
 		});
 
 		addEventListener("mouseup", (e) => {
-			this._mousePosition = new Vector2(e.x - Canvas.GetClientRectangle().left, Canvas.GetClientRectangle().height - e.y + Canvas.GetClientRectangle().top);
+			this._mousePosition = new Vector2(e.offsetX, Canvas.GetClientRectangle().height - e.offsetY);
 
 			if (this._selectedType !== -1 && this._drawingRectangle !== null) {
-				if (this._startRectangle !== null)
-					this._drawingRectangle = new Rectangle(this._startRectangle.X, this._startRectangle.Y, this._drawingRectangle.Width, this._drawingRectangle.Height);
+				if (this._startRectangle !== null) {
+					this._startRectangle.X,
+						this._startRectangle.Y,
+						this.GetObjectSize(this._selectedType)[0] ?? this._mousePosition.X - this._startRectangle.X + this._levelPosition,
+						this.GetObjectSize(this._selectedType)[1] ?? this._mousePosition.Y - this._startRectangle.Y;
+				}
 
 				if (this._drawingRectangle.Width < 0)
 					this._drawingRectangle = new Rectangle(
@@ -201,7 +200,7 @@ export class SceneEditor {
 						-this._drawingRectangle.Height
 					);
 
-				this._selectedRectangle = this._gameObjects.push([this._selectedType, this._drawingRectangle]) - 1;
+				if (this._drawingRectangle.Width > 3 && this._drawingRectangle.Height > 3) this._selectedRectangle = this._gameObjects.push([this._selectedType, this._drawingRectangle]) - 1;
 
 				this._startRectangle = null;
 				this._drawingRectangle = null;
@@ -301,10 +300,13 @@ export class SceneEditor {
 
 	public Update(time: number) {
 		if (this._shiftPressed) this._movingSpeed = 50;
-		else if (this._controlPressed) this._movingSpeed = 1;
 		else this._movingSpeed = 10;
 
-		if (this._movingLeft || this._movingRight) this._levelPosition += this._movingLeft ? -this._movingSpeed : this._movingSpeed;
+		const move = Math.max(0.5, Math.round(((time - SceneEditor.Time) * 0.1) / 0.5) * 0.5);
+
+		if (this._movingLeft || this._movingRight) this._levelPosition += (this._movingLeft ? -this._movingSpeed : this._movingSpeed) * move;
+
+		SceneEditor.Time = time;
 	}
 
 	public Render() {
@@ -406,16 +408,19 @@ export class SceneEditor {
 
 		Canvas.SetFillColor(Color.White);
 		GUI.SetFont(16);
-		GUI.DrawText(5, 20, this._selectedType === -1 ? "Select" : ObjectType[this._selectedType]);
+		GUI.DrawText(5, 20, this._selectedType === -1 ? "Режим выбора" : ObjectType[this._selectedType]);
 
 		if (this._selectedRectangle !== null) {
 			GUI.DrawText(5, 35, `Выбран: ${ObjectType[this._gameObjects[this._selectedRectangle][0]]}`);
-			GUI.DrawText(250, 20, "z: изменить тип");
 			GUI.DrawText(250, 35, "x: удалить");
 
-			if (this._shiftPressed) GUI.DrawText(450, 20, "Стрелочки: изменить размер");
-			else GUI.DrawText(450, 20, "Стрелочки: изменить положение");
-		} else GUI.DrawText(250, 20, "c: сохранить");
+			if (this._shiftPressed) GUI.DrawText(250, 20, "Стрелочки: изменить размер");
+			else GUI.DrawText(250, 20, "Стрелочки: изменить положение");
+		}
+
+		GUI.DrawText(750, 20, "AD: движение");
+		GUI.DrawText(750, 35, "C: сохранить");
+		GUI.DrawText(950, 20, "Shift: альтернативный режим");
 
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);

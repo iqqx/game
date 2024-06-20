@@ -33,6 +33,7 @@ import { Artem } from "./GameObjects/QuestGivers/Artem.js";
 import { Elder } from "./GameObjects/QuestGivers/Elder.js";
 import { Trader } from "./GameObjects/QuestGivers/Trader.js";
 import { Corpse } from "./GameObjects/Corpse.js";
+import { SceneEditor } from "./SceneEditor.js";
 
 export class Scene {
 	public static Current: Scene;
@@ -216,6 +217,8 @@ export class Scene {
 		switch (x.Type) {
 			case "LoadScene":
 				return () => Scene.LoadFromFile(x.Source);
+			case "LoadSceneEditor":
+				return () => SceneEditor.LoadFromFile(x.Source);
 			case "Replace":
 				return function () {
 					Scene.Current.Destroy(this);

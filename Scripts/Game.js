@@ -1,4 +1,5 @@
 import { Scene } from "./Scene.js";
+import { SceneEditor } from "./SceneEditor.js";
 import { Rectangle, Vector2 } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
@@ -102,7 +103,7 @@ function loadLoop() {
     if (imagesLoaded.length < imagesToLoad)
         return;
     window.cancelAnimationFrame(n);
-    Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
+    SceneEditor.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
         scene = x;
         gameLoop(0);
     });
