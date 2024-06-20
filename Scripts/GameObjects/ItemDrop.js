@@ -21,3 +21,4 @@ export class ItemDrop extends Interactable {
             Scene.Current.DestroyGameObject(this);
     }
 }
+//# sourceMappingURL=ItemDrop.js.map

@@ -67,3 +67,4 @@ export class Blood extends GameObject {
             Canvas.DrawCircle(this._x - Scene.Current.GetLevelPosition(), this._y, 2);
     }
 }
+//# sourceMappingURL=Blood.js.map

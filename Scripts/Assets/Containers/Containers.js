@@ -51,3 +51,4 @@ export class Container extends Interactable {
         return x >= 0 && y >= 0 && x < this.SlotsSize.X && y < this.SlotsSize.Y;
     }
 }
+//# sourceMappingURL=Containers.js.map

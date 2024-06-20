@@ -16,3 +16,4 @@ export class Ladder extends GameObject {
         Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=Ladder.js.map

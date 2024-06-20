@@ -15,3 +15,4 @@ export class Corpse extends Container {
         Canvas.DrawImage(GetSprite("Corpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
 }
+//# sourceMappingURL=Corpse.js.map

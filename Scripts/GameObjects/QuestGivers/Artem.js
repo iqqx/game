@@ -55,3 +55,4 @@ export class Artem extends Character {
         return "Артём";
     }
 }
+//# sourceMappingURL=Artem.js.map

@@ -14,3 +14,4 @@ export class Wall extends GameObject {
         // Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
     }
 }
+//# sourceMappingURL=Wall.js.map

@@ -40,3 +40,4 @@ export class Backpack extends Container {
         }
     }
 }
+//# sourceMappingURL=Backpack.js.map

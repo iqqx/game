@@ -58,3 +58,4 @@ function loadLoop() {
     gameLoop(0);
 }
 loadLoop();
+//# sourceMappingURL=Game.js.map

@@ -142,3 +142,4 @@ export class Human extends Enemy {
         }
     }
 }
+//# sourceMappingURL=Human.js.map

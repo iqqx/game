@@ -114,3 +114,4 @@ export class Entity extends GameObject {
         return new Vector2(this._xTarget, this._yTarget);
     }
 }
+//# sourceMappingURL=Entity.js.map

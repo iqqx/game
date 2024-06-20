@@ -12,3 +12,4 @@ export class GUIBase {
     Update(dt, time) { }
     Render() { }
 }
+//# sourceMappingURL=GUIBase.js.map

@@ -25,3 +25,4 @@ export class GuardFake extends Character {
         return "Охранник";
     }
 }
+//# sourceMappingURL=GuardFake.js.map

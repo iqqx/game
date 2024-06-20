@@ -71,3 +71,4 @@ export class Trader extends Character {
         return "Торгаш";
     }
 }
+//# sourceMappingURL=Trader.js.map

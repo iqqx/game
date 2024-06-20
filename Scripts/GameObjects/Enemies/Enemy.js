@@ -44,3 +44,4 @@ export class Enemy extends Entity {
         return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2));
     }
 }
+//# sourceMappingURL=Enemy.js.map

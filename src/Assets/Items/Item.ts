@@ -194,7 +194,6 @@ export class Bread extends Item {
 
 	public Render(at: Vector2, angle: number): void {
 		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-		console.log(angle);
 
 		if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
 			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);

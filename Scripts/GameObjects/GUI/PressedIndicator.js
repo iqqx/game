@@ -32,3 +32,4 @@ export class PressedIndicator extends GUIBase {
         GUI.DrawSector(this._x + this.Width / 2, this._y + 3, 10, Math.PI * 2 * (this._spaceDownedTime / this._delay));
     }
 }
+//# sourceMappingURL=PressedIndicator.js.map

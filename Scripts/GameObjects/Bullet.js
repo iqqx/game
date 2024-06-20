@@ -25,3 +25,4 @@ export class Bullet extends GameObject {
         Canvas.DrawRectangleWithGradientAndAngle(new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._length, 2), [this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0], [1, Bullet._bulletColor1], this._angle, 0, 1);
     }
 }
+//# sourceMappingURL=Bullet.js.map

@@ -26,3 +26,4 @@ export class GUISpotLight extends GUIBase {
             GUI.DrawCircleWithGradient(dot.Position.X, dot.Position.Y, 1000, new Color(255, 255, 255, 25 * Math.sin(Math.PI * (dot.lifeTime / 3000))), Color.Transparent);
     }
 }
+//# sourceMappingURL=GUISpotLight.js.map

@@ -27,3 +27,4 @@ export class Fireball extends GameObject {
         Canvas.DrawImageWithAngle(Fireball._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 50, 25), this._angle, 0, 25 / 2 - this._offset.Y);
     }
 }
+//# sourceMappingURL=Fireball.js.map

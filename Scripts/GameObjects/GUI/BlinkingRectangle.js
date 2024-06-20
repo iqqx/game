@@ -27,3 +27,4 @@ export class BlinkingRectangle extends GameObject {
         GUI.DrawRectangle(this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=BlinkingRectangle.js.map

@@ -27,3 +27,4 @@ export class Character extends Interactable {
         return "НЕКТО";
     }
 }
+//# sourceMappingURL=Character.js.map

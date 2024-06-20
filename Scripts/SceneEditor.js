@@ -212,3 +212,4 @@ export class SceneEditor {
         Canvas.SwitchOn();
     }
 }
+//# sourceMappingURL=SceneEditor.js.map

@@ -188,3 +188,4 @@ class HasItemTask extends Task {
         return this._mask;
     }
 }
+//# sourceMappingURL=Quest.js.map

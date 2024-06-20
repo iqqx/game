@@ -929,3 +929,4 @@ export class Player extends Entity {
         }
     }
 }
+//# sourceMappingURL=Player.js.map

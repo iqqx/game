@@ -60,3 +60,4 @@ export class GameObject {
 }
 export class Interactable extends GameObject {
 }
+//# sourceMappingURL=GameObject.js.map

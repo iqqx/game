@@ -53,3 +53,4 @@ export class Rat extends Enemy {
         }
     }
 }
+//# sourceMappingURL=Rat.js.map

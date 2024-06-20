@@ -162,3 +162,4 @@ export class AK extends Weapon {
         return "Калак 12";
     }
 }
+//# sourceMappingURL=Weapon.js.map

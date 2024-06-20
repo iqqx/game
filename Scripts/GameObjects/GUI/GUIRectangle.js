@@ -14,3 +14,4 @@ export class GUIRectangle extends GameObject {
         GUI.DrawRectangle(this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=GUIRectangle.js.map

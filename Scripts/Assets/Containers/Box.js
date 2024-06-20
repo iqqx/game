@@ -29,3 +29,4 @@ export class Box extends Container {
         Canvas.DrawImage(Box._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
 }
+//# sourceMappingURL=Box.js.map

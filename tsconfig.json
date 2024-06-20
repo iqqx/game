@@ -1,11 +1,12 @@
 {
-    "compilerOptions": {
-        "moduleResolution": "Bundler",
-        "target": "ESNext",
-        "module": "ESNext",
-        "types": ["node"],
-        "incremental": true,
-        "outDir": "Scripts",
-        "rootDir": "src"
-    }
+	"compilerOptions": {
+		"moduleResolution": "Bundler",
+		"target": "ESNext",
+		"module": "ESNext",
+		"types": ["node"],
+		"incremental": true,
+		"outDir": "Scripts",
+		"sourceMap": true,
+		"rootDir": "src"
+	}
 }

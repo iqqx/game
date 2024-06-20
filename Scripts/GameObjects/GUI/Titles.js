@@ -103,3 +103,4 @@ export class Titles extends GameObject {
         GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(this._y, Titles._texts.length * -50) + Titles._texts.length * 50, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=Titles.js.map

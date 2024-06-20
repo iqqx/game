@@ -15,3 +15,4 @@ export var Tag;
     Tag[Tag["Pickable"] = 32] = "Pickable";
     Tag[Tag["Ladder"] = 64] = "Ladder";
 })(Tag || (Tag = {}));
+//# sourceMappingURL=Enums.js.map

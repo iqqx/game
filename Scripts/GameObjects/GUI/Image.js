@@ -12,3 +12,4 @@ export class Image extends GUIBase {
         GUI.DrawImage(this._image, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=Image.js.map

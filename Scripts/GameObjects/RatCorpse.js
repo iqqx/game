@@ -15,3 +15,4 @@ export class RatCorpse extends Container {
         Canvas.DrawImage(GetSprite("RatCorpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
 }
+//# sourceMappingURL=RatCorpse.js.map

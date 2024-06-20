@@ -10,3 +10,4 @@ export class Spikes extends GameObject {
         this._collider = new Rectangle(0, 0, width, height);
     }
 }
+//# sourceMappingURL=Spikes.js.map

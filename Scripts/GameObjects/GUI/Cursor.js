@@ -19,3 +19,4 @@ export class Cursor extends GUIBase {
         GUI.DrawCircle(this._x, this._y, this._radius);
     }
 }
+//# sourceMappingURL=Cursor.js.map

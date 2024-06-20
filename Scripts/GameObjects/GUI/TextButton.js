@@ -16,3 +16,4 @@ export class TextButton extends Button {
         GUI.DrawTextCenter(this._text, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
     }
 }
+//# sourceMappingURL=TextButton.js.map

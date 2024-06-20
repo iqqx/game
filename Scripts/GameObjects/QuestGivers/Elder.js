@@ -74,3 +74,4 @@ export class Elder extends Character {
         return "Староста";
     }
 }
+//# sourceMappingURL=Elder.js.map
