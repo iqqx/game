@@ -100,8 +100,7 @@ export class Entity extends GameObject {
 			// падаем
 			const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);
 
-			offsets.sort((a, b) => b.start.Y - a.start.Y);
-			offsets.sort((a, b) => b.instance.Tag - a.instance.Tag);
+			offsets.sort((a, b) => (a.instance.Tag === b.instance.Tag ? (a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y) : a.instance.Tag));
 
 			if (offsets.length > 0 && offsets[0].start.Y >= 0) {
 				if (offsets[0].instance instanceof Spikes) this.TakeDamage(100);
