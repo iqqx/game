@@ -153,65 +153,6 @@ declare global {
 	}
 }
 
-const imagesLoaded: string[] = [];
-export function GetLoadedImagesCount() {
-	return imagesLoaded.length;
-}
-
-export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {
-	const img = new Image();
-
-	const cte = {
-		Image: img,
-		BoundingBox: boundingBox,
-		Scale: scale,
-		ScaledSize: new Vector2(0, 0),
-	};
-
-	img.onload = () => {
-		cte.Scale = scale ?? 1;
-		cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
-		cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
-
-		imagesLoaded.push(source);
-	};
-	img.src = source;
-
-	return cte;
-}
-
-export function LoadSound(source: string): Sound {
-	const s = new Audio(source);
-	s.volume = 1;
-
-	return {
-		Speed: 1,
-		Volume: 1,
-		Play: function (volume?: number, speed?: number) {
-			if (volume === undefined && speed === undefined) (s.cloneNode() as HTMLAudioElement).play();
-			else {
-				const c = s.cloneNode() as HTMLAudioElement;
-				c.volume = volume ?? this.Volume;
-				c.playbackRate = speed ?? this.Speed;
-				c.play();
-			}
-		},
-		Apply: function () {
-			s.volume = this.Volume;
-			s.playbackRate = this.Speed;
-		},
-		PlayOriginal: function () {
-			s.play();
-		},
-		IsPlayingOriginal: function () {
-			return !s.paused;
-		},
-		StopOriginal: function () {
-			s.pause();
-		},
-	};
-}
-
 export type Sound = {
 	PlayOriginal: () => void;
 	Play: (volume?: number, speed?: number) => void;

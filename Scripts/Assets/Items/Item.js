@@ -1,7 +1,7 @@
 import { Canvas } from "../../Context.js";
 import { GetSound, GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
-import { LoadImage, Rectangle, Vector2 } from "../../Utilites.js";
+import { Rectangle, Vector2 } from "../../Utilites.js";
 export class Item {
     _usingSound;
     Icon;
@@ -36,7 +36,7 @@ export class Item {
 }
 export class Vodka extends Item {
     UseTime = 2500;
-    Icon = LoadImage("Images/Items/Vodka.png");
+    Icon = GetSprite("Vodka");
     _usingSound = GetSound("Drink");
     static toString() {
         return "Водка";
@@ -96,7 +96,7 @@ export class RatTail extends Item {
 }
 export class AidKit extends Item {
     UseTime = 5500;
-    Icon = LoadImage("Images/Items/FirstAid.png");
+    Icon = GetSprite("AidKit");
     Big = true;
     _usingSound = GetSound("AidKit");
     static toString() {
@@ -113,7 +113,7 @@ export class AidKit extends Item {
 }
 export class Sausage extends Item {
     UseTime = 1500;
-    Icon = LoadImage("Images/Items/MeatStick.png");
+    Icon = GetSprite("Sausage");
     _usingSound = GetSound("Eat");
     static toString() {
         return "Колбаса";
@@ -131,7 +131,7 @@ export class Sausage extends Item {
 }
 export class Adrenalin extends Item {
     UseTime = 1000;
-    Icon = LoadImage("Images/Items/Syringe.png");
+    Icon = GetSprite("Syringe");
     _usingSound = GetSound("Syringe");
     static toString() {
         return "Адреналин";
@@ -149,7 +149,7 @@ export class Adrenalin extends Item {
 }
 export class Bread extends Item {
     UseTime = 1500;
-    Icon = LoadImage("Images/Items/Bread.png");
+    Icon = GetSprite("Bread");
     _usingSound = GetSound("Eat");
     static toString() {
         return "Хлеб";

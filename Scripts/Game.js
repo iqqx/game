@@ -1,5 +1,5 @@
 import { Scene } from "./Scene.js";
-import { GetLoadedImagesCount, LoadImage, LoadSound } from "./Utilites.js";
+import { Rectangle, Vector2 } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
 let imagesToLoad = 0;
@@ -8,8 +8,6 @@ await (async () => {
     if (!routers.ok)
         return Scene.GetErrorScene("Не найдено: Assets/Routers.json");
     const parsedRouters = await routers.json();
-    if (parsedRouters.Scenes === undefined || parsedRouters.Scenes.length === 0)
-        return Scene.GetErrorScene("Сцены не найдены в Assets/Routers.json");
     if (parsedRouters.Images === undefined)
         return Scene.GetErrorScene("Изображения не найдены в Assets/Routers.json");
     if (parsedRouters.Sounds === undefined)
@@ -34,13 +32,64 @@ await (async () => {
         else
             return Scene.GetErrorScene(`Недопустимый тип звука: ${soundKey}`);
     }
-    Scene.LoadFromFile(parsedRouters.Scenes[0]);
 })();
 export function GetSprite(key) {
+    if (!sprites.has(key))
+        console.error("Sprite key dont found: " + key);
     return sprites.get(key);
 }
 export function GetSound(key) {
     return sounds.get(key);
+}
+const imagesLoaded = [];
+function LoadImage(source, boundingBox, scale) {
+    const img = new Image();
+    const cte = {
+        Image: img,
+        BoundingBox: boundingBox,
+        Scale: scale,
+        ScaledSize: new Vector2(0, 0),
+    };
+    img.onload = () => {
+        cte.Scale = scale ?? 1;
+        cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
+        cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
+        console.log("Loaded: " + source);
+        imagesLoaded.push(source);
+    };
+    img.src = source;
+    return cte;
+}
+function LoadSound(source) {
+    const s = new Audio(source);
+    s.volume = 1;
+    return {
+        Speed: 1,
+        Volume: 1,
+        Play: function (volume, speed) {
+            if (volume === undefined && speed === undefined)
+                s.cloneNode().play();
+            else {
+                const c = s.cloneNode();
+                c.volume = volume ?? this.Volume;
+                c.playbackRate = speed ?? this.Speed;
+                c.play();
+            }
+        },
+        Apply: function () {
+            s.volume = this.Volume;
+            s.playbackRate = this.Speed;
+        },
+        PlayOriginal: function () {
+            s.play();
+        },
+        IsPlayingOriginal: function () {
+            return !s.paused;
+        },
+        StopOriginal: function () {
+            s.pause();
+        },
+    };
 }
 function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
@@ -52,8 +101,9 @@ function gameLoop(timeStamp) {
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
-    if (GetLoadedImagesCount() < imagesToLoad)
+    if (imagesLoaded.length < imagesToLoad)
         return;
+    Scene.LoadFromFile("Assets/Scenes/Main.json");
     window.cancelAnimationFrame(n);
     gameLoop(0);
 }

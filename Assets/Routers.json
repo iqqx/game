@@ -1,11 +1,13 @@
 {
 	"Images": {
 		"Boombox": ["Images/Boombox/0.png", "Images/Boombox/1.png"],
+		"Fireball": ["Images/Fireball/0.png", "Images/Fireball/1.png", "Images/Fireball/2.png"],
 		"Bread": "Images/Items/Bread.png",
 		"AidKit": "Images/Items/FirstAid.png",
 		"Sausage": "Images/Items/MeatStick.png",
 		"Radio": "Images/Items/Radio.png",
-		"Syringe": "Images/Items/Vodka.png",
+		"Vodka": "Images/Items/Vodka.png",
+		"Syringe": "Images/Items/Syringe.png",
 		"AK_Icon": "Images/AK-icon.png",
 		"Container": "Images/Container.png",
 		"Corpse": "Images/HumanCorpse.png",
@@ -55,7 +57,8 @@
 		"Music_3": "Sounds/music-3.mp3",
 		"Music_4": "https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3",
 		"Music_5": "https://pool.anison.fm/AniSonFM(320)",
-		"Punch": "Sounds/punch.wav",
+		"PunchHit": "Sounds/punch.wav",
+		"Punch": "Sounds/punch.mp3",
 		"Rat_Attack": "Sounds/rat_attack.mp3",
 		"Rat_Death": "Sounds/rat_death.mp3",
 		"Reload": "Sounds/reload.wav",
@@ -73,6 +76,5 @@
 		"AidKit": "Sounds/aid_kit.mp3",
 		"Drink": "Sounds/drink.mp3",
 		"Syringe": "Sounds/syringe.mp3"
-	},
-	"Scenes": ["Assets/Scenes/Main.json"]
+	}
 }

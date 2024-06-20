@@ -1,9 +1,9 @@
 import { Canvas } from "../../Context.js";
 import { Scene } from "../../Scene.js";
-import { Color, LoadImage, Rectangle } from "../../Utilites.js";
+import { Color, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
+import { GetSprite } from "../../Game.js";
 export class Box extends Container {
-    static _sprite = LoadImage("Images/Container.png");
     constructor(x, y, ...items) {
         super(50, 50, 3, 3);
         this._x = x;
@@ -26,7 +26,7 @@ export class Box extends Container {
     }
     Render() {
         Canvas.SetFillColor(new Color(0, 255, 0));
-        Canvas.DrawImage(Box._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("Container"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
 }
 //# sourceMappingURL=Box.js.map

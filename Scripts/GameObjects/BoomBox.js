@@ -1,8 +1,8 @@
 import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
-import { Color, LoadImage, Rectangle } from "../Utilites.js";
+import { Color, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
-import { GetSound } from "../Game.js";
+import { GetSound, GetSprite } from "../Game.js";
 export class AudioSource extends Interactable {
     _volume;
     _life = 0;
@@ -12,7 +12,7 @@ export class AudioSource extends Interactable {
     _volumeModifier = 0.5;
     _soundPack;
     _currentSound;
-    static _frames = [LoadImage("Images/Boombox/0.png"), LoadImage("Images/Boombox/1.png")];
+    _frames = GetSprite("Boombox");
     constructor(x, y, volume, ...sounds) {
         super(100, 50);
         if (sounds.length === 0)
@@ -42,7 +42,7 @@ export class AudioSource extends Interactable {
     }
     Render() {
         Canvas.SetFillColor(Color.White);
-        Canvas.DrawImageWithAngle(AudioSource._frames[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height), this._enabled ? Math.cos(this._life / 50) / 10 : 0, -this.Width / 2, this.Height / 2);
+        Canvas.DrawImageWithAngle(this._frames[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height), this._enabled ? Math.cos(this._life / 50) / 10 : 0, -this.Width / 2, this.Height / 2);
     }
     GetInteractives() {
         return [this._enabled ? "выключить" : "включить", "прибавить", "убавить", "переключить"];

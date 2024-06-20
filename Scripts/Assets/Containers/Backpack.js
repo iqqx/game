@@ -1,11 +1,10 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { GetSound, GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
-import { LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
+import { Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 export class Backpack extends Container {
-    static _image = LoadImage(`Images/Drop_backpack.png`, new Rectangle(11, 13, 10, 6), 5);
-    static _sound = LoadSound("Sounds/backpack_pickup.mp3");
     OnPickup;
     constructor(x, y, ...content) {
         super(50, 25, 4, 1);
@@ -16,13 +15,13 @@ export class Backpack extends Container {
         this._y = y;
     }
     Render() {
-        Canvas.DrawImage(Backpack._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("Drop_Backpack"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
     Pickup() {
         if (this.OnPickup !== undefined)
             this.OnPickup();
         Scene.Player.PutBackpack(this);
-        Backpack._sound.Play(0.5);
+        GetSound("Backpack_Pickup").Play(0.5);
         this.Destroy();
         return this._items;
     }

@@ -1,11 +1,12 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { GetSound, GetSprite } from "../../Game.js";
 import { Blood } from "../../GameObjects/Blood.js";
 import { Bullet } from "../../GameObjects/Bullet.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Vector2, Rectangle, LoadSound, LoadImage } from "../../Utilites.js";
+import { Vector2, Rectangle } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 export class Weapon extends Item {
     Sprites;
@@ -31,10 +32,10 @@ export class Weapon extends Item {
         this.Sprites = images;
         this._sounds = {
             ...sounds,
-            EmptyFire: LoadSound("Sounds/shoot_without.mp3"),
-            Reload: LoadSound("Sounds/reload.wav"),
-            Impact: LoadSound("Sounds/impact.mp3"),
-            Hit: LoadSound("Sounds/hitmarker.mp3"),
+            EmptyFire: GetSound("Shoot_Empty"),
+            Reload: GetSound("Reload"),
+            Impact: GetSound("Projectile_Impact"),
+            Hit: GetSound("Hit"),
         };
         this._fireCooldown = fireCooldown;
         this._damage = damage;
@@ -129,34 +130,31 @@ export class Weapon extends Item {
     }
 }
 export class Glock extends Weapon {
-    static _sprites = {
-        Icon: LoadImage("Images/Glock-icon.png"),
-        Image: LoadImage("Images/Pistol.png", new Rectangle(0, 3, 32, 28), 0.75),
-    };
-    static _sounds = {
-        Fire: LoadSound("Sounds/shoot-3.mp3"),
-        Shell: LoadSound("Sounds/shell.mp3"),
-    };
     constructor() {
-        super(Glock._sprites, Glock._sounds, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+        super({
+            Icon: GetSprite("Glock_Icon"),
+            Image: GetSprite("Glock"),
+        }, {
+            Fire: GetSound("Shoot_3"),
+            Shell: GetSound("Shell"),
+        }, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
     }
     static toString() {
         return "Пистолет";
     }
 }
 export class AK extends Weapon {
-    static _sprites = {
-        Icon: LoadImage("Images/AK-icon.png"),
-        Image: LoadImage("Images/Rifle.png", new Rectangle(16, 6, 43, 15)),
-    };
-    static _sounds = {
-        Fire: LoadSound("Sounds/shoot-1.wav"),
-    };
     static _fireCooldown = 150;
     static _damage = 40;
     static _spread = 0.01;
     constructor() {
-        super(AK._sprites, AK._sounds, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
+        super({
+            Icon: GetSprite("AK_Icon"),
+            Image: GetSprite("AK"),
+        }, {
+            Fire: GetSound("Shoot-1"),
+            Shell: GetSound("Shell"),
+        }, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
     }
     static toString() {
         return "Калак 12";

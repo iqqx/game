@@ -1,14 +1,13 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { GetSound, GetSprite } from "../../Game.js";
 import { IPickapable } from "../../GameObjects/GameObject.js";
 import { Scene } from "../../Scene.js";
-import { LoadImage, LoadSound, Rectangle } from "../../Utilites.js";
+import { Rectangle } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 import { Container } from "./Containers.js";
 
 export class Backpack extends Container implements IPickapable {
-	private static readonly _image = LoadImage(`Images/Drop_backpack.png`, new Rectangle(11, 13, 10, 6), 5);
-	private static readonly _sound = LoadSound("Sounds/backpack_pickup.mp3");
 	public readonly OnPickup?: () => void;
 
 	constructor(x: number, y: number, ...content: Item[]) {
@@ -22,15 +21,16 @@ export class Backpack extends Container implements IPickapable {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(Backpack._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("Drop_Backpack"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
 	}
 
 	public Pickup() {
 		if (this.OnPickup !== undefined) this.OnPickup();
 
 		Scene.Player.PutBackpack(this);
-		Backpack._sound.Play(0.5);
+		GetSound("Backpack_Pickup").Play(0.5);
 		this.Destroy();
+
 		return this._items;
 	}
 

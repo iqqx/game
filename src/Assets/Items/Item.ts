@@ -1,7 +1,7 @@
 import { Canvas } from "../../Context.js";
 import { GetSound, GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
-import { LoadImage, Rectangle, Sound, Sprite, Vector2 } from "../../Utilites.js";
+import { Rectangle, Sound, Sprite, Vector2 } from "../../Utilites.js";
 
 export class Item {
 	protected readonly _usingSound: Sound;
@@ -44,7 +44,7 @@ export class Item {
 
 export class Vodka extends Item {
 	public readonly UseTime = 2500;
-	public readonly Icon = LoadImage("Images/Items/Vodka.png");
+	public readonly Icon: Sprite = GetSprite("Vodka");
 	protected readonly _usingSound = GetSound("Drink");
 
 	static toString(): string {
@@ -119,7 +119,7 @@ export class RatTail extends Item {
 
 export class AidKit extends Item {
 	public readonly UseTime = 5500;
-	public readonly Icon = LoadImage("Images/Items/FirstAid.png");
+	public readonly Icon: Sprite = GetSprite("AidKit");
 	public readonly Big = true;
 	protected readonly _usingSound = GetSound("AidKit");
 
@@ -141,7 +141,7 @@ export class AidKit extends Item {
 
 export class Sausage extends Item {
 	public readonly UseTime = 1500;
-	public readonly Icon = LoadImage("Images/Items/MeatStick.png");
+	public readonly Icon: Sprite = GetSprite("Sausage");
 	protected readonly _usingSound = GetSound("Eat");
 
 	static toString(): string {
@@ -163,7 +163,7 @@ export class Sausage extends Item {
 
 export class Adrenalin extends Item {
 	public readonly UseTime = 1000;
-	public readonly Icon = LoadImage("Images/Items/Syringe.png");
+	public readonly Icon: Sprite = GetSprite("Syringe");
 	protected readonly _usingSound = GetSound("Syringe");
 
 	static toString(): string {
@@ -185,7 +185,7 @@ export class Adrenalin extends Item {
 
 export class Bread extends Item {
 	public readonly UseTime = 1500;
-	public readonly Icon = LoadImage("Images/Items/Bread.png");
+	public readonly Icon: Sprite = GetSprite("Bread");
 	protected readonly _usingSound = GetSound("Eat");
 
 	static toString(): string {

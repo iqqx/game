@@ -5,7 +5,7 @@ import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
 import { Quest } from "../Quest.js";
 import { Scene } from "../Scene.js";
-import { Rectangle, LoadSound, Vector2, Color } from "../Utilites.js";
+import { Rectangle, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
@@ -58,10 +58,11 @@ export class Player extends Entity {
         },
         Backpack: GetSprite("Player_Backpack"),
     };
-    static _deathSound = LoadSound("Sounds/human_death.mp3");
-    static _walkSound = LoadSound("Sounds/walk-2.wav");
-    static _dialogSound = LoadSound("Sounds/dialog.mp3");
-    static _punchSound = LoadSound("Sounds/punch.wav");
+    // private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
+    // private static readonly _walkSound = LoadSound("Sounds/walk-2.wav");
+    // private static readonly _dialogSound = LoadSound("Sounds/dialog.mp3");
+    // private static readonly _punchSound = LoadSound("Sounds/punch.wav");
+    // private static readonly _punchSound = LoadSound("Sounds/punch.wav");
     _hitSound = GetSound("Hit");
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
@@ -71,8 +72,8 @@ export class Player extends Entity {
         this._yTarget = 750 / 2;
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
-        Player._walkSound.Speed = 1.6;
-        Player._walkSound.Apply();
+        GetSound("Walk_2").Speed = 1.6;
+        GetSound("Walk_2").Apply();
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
@@ -334,7 +335,7 @@ export class Player extends Entity {
             this._timeToNextChar -= dt;
             if (this._timeToNextChar <= 0) {
                 this._chars++;
-                Player._dialogSound.Play(0.05);
+                GetSound("Dialog").Play(0.05);
                 if (this._chars < this._dialog.Messages[this._dialogState].length)
                     this._timeToNextChar = 50;
             }
@@ -395,7 +396,7 @@ export class Player extends Entity {
                     this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : this._running ? 0.5 : 1);
                 }
                 if (this._timeToWalkSound <= 0) {
-                    Player._walkSound.Play(0.5);
+                    GetSound("Walk_2").Play(0.5);
                     this._timeToWalkSound = this._sit ? 500 : this._running ? 150 : 300;
                 }
             }
@@ -902,17 +903,18 @@ export class Player extends Entity {
                 });
             }
             else if (this._timeToNextPunch <= 0) {
-                Player._punchSound.Play();
                 this._framesToPunch = 5;
                 this._timeToNextPunch = 250;
                 this._mainHand = !this._mainHand;
                 const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
                 if (enemy.length > 0) {
-                    this._hitSound.Play(0.15);
+                    GetSound("PunchHit").Play(0.15);
                     enemy[0].instance.TakeDamage(10);
                     const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
                     Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].position.X + bloodDir.X * 100, enemy[0].position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
                 }
+                else
+                    GetSound("Punch").Play(0.15);
             }
         }
         else if (this._weapon.TryShoot())
@@ -925,7 +927,7 @@ export class Player extends Entity {
         this._needDrawRedVegnitte = 5;
         if (this._health <= 0) {
             this._timeFromDeath = 1;
-            Player._deathSound.Play();
+            GetSound("Human_Death_1").Play();
         }
     }
 }
