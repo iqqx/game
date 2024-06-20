@@ -89,7 +89,7 @@ export class Titles extends GameObject {
         this._y = 450;
     }
     Update(dt) {
-        this._y -= Math.round(dt / 20);
+        this._y -= Math.max(0.5, Math.ceil((dt * 0.05) / 0.5) * 0.5);
         if (this._y < Titles._texts.length * -50 - 300)
             Scene.LoadFromFile("Assets/Scenes/Menu.json");
     }

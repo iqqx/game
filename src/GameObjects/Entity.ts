@@ -62,8 +62,9 @@ export class Entity extends GameObject {
 		if (collideOffsets !== false) {
 			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
 
-			if (collideOffsets.position.Y > 0 && collideOffsets.position.Y < 10) this._y += collideOffsets.position.Y;
-			else this._x -= collideOffsets.position.X;
+			// if (collideOffsets.start.Y > 0 && collideOffsets.start.Y < 20) this._y += collideOffsets.start.Y;
+			// else
+			this._x += collideOffsets.start.X;
 		}
 	}
 
@@ -76,8 +77,9 @@ export class Entity extends GameObject {
 		if (collideOffsets !== false) {
 			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
 
-			if (collideOffsets.position.Y > 0 && collideOffsets.position.Y < 10) this._y += collideOffsets.position.Y;
-			else this._x -= collideOffsets.position.X;
+			// if (collideOffsets.start.Y > 0 && collideOffsets.start.Y < 20) this._y += collideOffsets.start.Y;
+			// else
+			this._x += collideOffsets.end.X;
 		}
 	}
 
@@ -98,7 +100,8 @@ export class Entity extends GameObject {
 			// падаем
 			const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);
 
-			offsets.sort((a, b) => a.instance.GetPosition().Y - b.instance.GetPosition().Y);
+			offsets.sort((a, b) => b.start.Y - a.start.Y);
+			offsets.sort((a, b) => b.instance.Tag - a.instance.Tag);
 
 			if (offsets.length > 0 && offsets[0].start.Y >= 0) {
 				if (offsets[0].instance instanceof Spikes) this.TakeDamage(100);

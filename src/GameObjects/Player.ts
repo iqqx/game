@@ -43,8 +43,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _framesToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 10000;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 10000;
 	private _running = false;
 
 	private static readonly _name = "Макс";

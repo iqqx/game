@@ -74,5 +74,5 @@
 		"Drink": "Sounds/drink.mp3",
 		"Syringe": "Sounds/syringe.mp3"
 	},
-	"Scenes": ["Assets/Scenes/Menu.json"]
+	"Scenes": ["Assets/Scenes/Main.json"]
 }
