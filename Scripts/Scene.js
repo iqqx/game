@@ -106,7 +106,7 @@ export class Scene {
         if (!scene.ok)
             return Scene.GetErrorScene("Сцена не найдена: " + src);
         const sceneData = await scene.json();
-        new Scene(sceneData.Background === undefined ? null : GetSprite(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)));
+        return new Scene(sceneData.Background === undefined ? null : GetSprite(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)));
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static ParseObject(x) {

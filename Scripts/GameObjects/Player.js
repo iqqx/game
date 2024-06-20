@@ -58,12 +58,6 @@ export class Player extends Entity {
         },
         Backpack: GetSprite("Player_Backpack"),
     };
-    // private static readonly _deathSound = LoadSound("Sounds/human_death.mp3");
-    // private static readonly _walkSound = LoadSound("Sounds/walk-2.wav");
-    // private static readonly _dialogSound = LoadSound("Sounds/dialog.mp3");
-    // private static readonly _punchSound = LoadSound("Sounds/punch.wav");
-    // private static readonly _punchSound = LoadSound("Sounds/punch.wav");
-    _hitSound = GetSound("Hit");
     constructor(x, y) {
         super(40, 100, Player._speed, 100);
         this._x = x;

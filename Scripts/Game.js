@@ -1,4 +1,5 @@
 import { Scene } from "./Scene.js";
+import { SceneEditor } from "./SceneEditor.js";
 import { Rectangle, Vector2 } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
@@ -91,21 +92,22 @@ function LoadSound(source) {
         },
     };
 }
+let scene = undefined;
 function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
-    if (Scene.Current === undefined)
-        return;
-    Scene.Current.Update(timeStamp);
-    Scene.Current.Render();
-    Scene.Current.RenderOverlay();
+    scene.Update(timeStamp);
+    scene.Render();
+    scene.RenderOverlay();
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
     if (imagesLoaded.length < imagesToLoad)
         return;
-    Scene.LoadFromFile("Assets/Scenes/Main.json");
     window.cancelAnimationFrame(n);
-    gameLoop(0);
+    SceneEditor.LoadFromFile("Assets/Scenes/Main-2.0.json").then((x) => {
+        scene = x;
+        gameLoop(0);
+    });
 }
 loadLoop();
 //# sourceMappingURL=Game.js.map

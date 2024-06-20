@@ -111,7 +111,7 @@ export class Scene {
 
 		const sceneData = await scene.json();
 
-		new Scene(
+		return new Scene(
 			sceneData.Background === undefined ? null : (GetSprite(sceneData.Background) as Sprite),
 			sceneData.GameObjects.map((x: unknown) => this.ParseObject(x))
 		);
@@ -153,7 +153,7 @@ export class Scene {
 			case "Wall":
 				return new Wall(...(x.Arguments as [number, number, number, number]));
 			case "Platform":
-				return new Platform(...(x.Arguments as [number, number, number, number]));
+				return new Platform(...(x.Arguments as [number, number, number]));
 			case "Player":
 				return new Player(...(x.Arguments as [number, number]));
 			case "Boombox":
