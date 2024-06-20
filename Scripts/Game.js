@@ -1,5 +1,4 @@
 import { Scene } from "./Scene.js";
-import { SceneEditor } from "./SceneEditor.js";
 import { Rectangle, Vector2 } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
@@ -55,7 +54,6 @@ function LoadImage(source, boundingBox, scale) {
         cte.Scale = scale ?? 1;
         cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
         cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
-        console.log("Loaded: " + source);
         imagesLoaded.push(source);
     };
     img.src = source;
@@ -104,7 +102,7 @@ function loadLoop() {
     if (imagesLoaded.length < imagesToLoad)
         return;
     window.cancelAnimationFrame(n);
-    SceneEditor.LoadFromFile("Assets/Scenes/Main-2.0.json").then((x) => {
+    Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
         scene = x;
         gameLoop(0);
     });

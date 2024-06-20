@@ -12,7 +12,7 @@
 		"Container": "Images/Container.png",
 		"Corpse": "Images/HumanCorpse.png",
 		"Glock_Icon": "Images/Glock-icon.png",
-		"Level_1": "Images/Level_1.1.png",
+		"Level_1": "Images/Level_1.png",
 		"Rat": "Images/Rat.png",
 		"Player_Crouch": ["Images/Player/Crouch/0.png", "Images/Player/Crouch/1.png", "Images/Player/Crouch/2.png", "Images/Player/Crouch/3.png"],
 		"Player_Ladder": ["Images/Player/Ladder/0.png", "Images/Player/Ladder/1.png"],

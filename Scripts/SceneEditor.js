@@ -318,7 +318,7 @@ export class SceneEditor {
                 GUI.DrawText(450, 20, "Стрелочки: изменить положение");
         }
         else
-            GUI.DrawText(250, 20, "c: преобразовать");
+            GUI.DrawText(250, 20, "c: сохранить");
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._mousePosition.X - 1, this._mousePosition.Y - 1, 2);
     }

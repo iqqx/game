@@ -64,7 +64,7 @@ export class Entity extends GameObject {
 
 			// if (collideOffsets.start.Y > 0 && collideOffsets.start.Y < 20) this._y += collideOffsets.start.Y;
 			// else
-			this._x += collideOffsets.start.X;
+			this._x -= collideOffsets.start.X;
 		}
 	}
 

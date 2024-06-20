@@ -64,7 +64,6 @@ function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Spr
 		cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
 		cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
 
-		console.log("Loaded: " + source);
 		imagesLoaded.push(source);
 	};
 	img.src = source;
@@ -120,7 +119,7 @@ function loadLoop() {
 	if (imagesLoaded.length < imagesToLoad) return;
 
 	window.cancelAnimationFrame(n);
-	SceneEditor.LoadFromFile("Assets/Scenes/Main-2.0.json").then((x) => {
+	Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
 		scene = x;
 
 		gameLoop(0);
