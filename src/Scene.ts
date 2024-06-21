@@ -68,7 +68,6 @@ export class Scene {
 
 		addEventListener("mousemove", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-			if (e.sourceCapabilities.firesTouchEvents === true) return;
 
 			Scene.Current._mouseX = e.offsetX;
 			Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
@@ -80,8 +79,9 @@ export class Scene {
 			Scene.Current._mouseX = e.offsetX;
 			Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
 
-			if (e.sourceCapabilities.firesTouchEvents === true) this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
-			else {
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent)) {
+				this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
+			} else {
 				if (e.button === 0) this._lmb = true;
 				if (e.button === 2) this._rmb = true;
 			}
