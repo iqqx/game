@@ -1,6 +1,6 @@
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
-import { Bread, Item, Radio } from "../Assets/Items/Item.js";
+import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -11,7 +11,7 @@ import { Rectangle, Vector2, Color, Sprite } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Enemy } from "./Enemies/Enemy.js";
 import { Entity } from "./Entity.js";
-import { GameObject, Interactable } from "./GameObject.js";
+import { Interactable } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
@@ -28,7 +28,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
+	private _inventory: [Item | null, Item | null] = [new PistolBullet(13), new RifleBullet(6)];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -47,8 +47,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 4000;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4000;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
@@ -917,6 +917,10 @@ export class Player extends Entity {
 							GUI.SetFillColor(Color.White);
 							GUI.SetFont(12);
 							GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
+						} else if (this._inventory[i].Stack > 0) {
+							GUI.SetFillColor(Color.White);
+							GUI.SetFont(12);
+							GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
 						}
 					}
 				}

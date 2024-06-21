@@ -11,6 +11,8 @@ export class Item {
 	protected _isUsing = false;
 	protected _usingTime = -1;
 	protected _usingCallback: () => void;
+	public readonly Stack: number = 0;
+	protected _count = 0;
 
 	public Update(dt: number, position: Vector2, angle: number) {
 		if (this._usingTime >= 0) {
@@ -38,6 +40,10 @@ export class Item {
 
 	public IsUsing() {
 		return this._isUsing;
+	}
+
+	public GetCount() {
+		return this._count;
 	}
 
 	protected OnUsed() {}
@@ -96,8 +102,6 @@ export class DogTag extends Item {
 			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
 		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
 	}
-
-	public Use(callback: () => void) {}
 }
 
 export class RatTail extends Item {
@@ -180,7 +184,7 @@ export class Adrenalin extends Item {
 	}
 
 	protected OnUsed() {
-		Scene.Player.Heal(10);
+		Scene.Player.Heal(30);
 	}
 }
 
@@ -203,5 +207,51 @@ export class Bread extends Item {
 
 	protected OnUsed() {
 		Scene.Player.Heal(15);
+	}
+}
+
+export class PistolBullet extends Item {
+	public readonly Icon: Sprite = GetSprite("Pistol_Bullet");
+	public readonly Stack: number = 60;
+
+	constructor(count: number) {
+		super();
+
+		this._count = count;
+	}
+
+	static toString(): string {
+		return "9x19";
+	}
+
+	public Render(at: Vector2, angle: number): void {
+		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+
+		if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+	}
+}
+
+export class RifleBullet extends Item {
+	public readonly Icon: Sprite = GetSprite("Rifle_Bullet");
+	public readonly Stack: number = 60;
+
+	constructor(count: number) {
+		super();
+
+		this._count = count;
+	}
+
+	static toString(): string {
+		return "7,62x39";
+	}
+
+	public Render(at: Vector2, angle: number): void {
+		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+
+		if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
 	}
 }

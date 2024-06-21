@@ -42,7 +42,9 @@
 		"DogTag": "Images/DogTag.png",
 		"RatCorpse": "Images/RatCorpse.png",
 		"RatTail": "Images/RatTail.png",
-		"Trader": "Images/Characters/Trader.png"
+		"Trader": "Images/Characters/Trader.png",
+		"Pistol_Bullet": "Images/Glock_Bullet.png",
+		"Rifle_Bullet": "Images/Rifle_Bullet.png"
 	},
 	"Sounds": {
 		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",

@@ -276,7 +276,7 @@ export class AK extends Weapon {
 			true,
 			2500,
 			30,
-			new Vector2(0, 18),
+			new Vector2(5, 18),
 			new Vector2(0, 0)
 		);
 	}

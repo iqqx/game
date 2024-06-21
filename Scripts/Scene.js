@@ -11,7 +11,7 @@ import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { Adrenalin, AidKit, Bread, DogTag, Radio, RatTail, Sausage, Vodka } from "./Assets/Items/Item.js";
+import { Adrenalin, AidKit, Bread, DogTag, PistolBullet, Radio, RatTail, RifleBullet, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -396,6 +396,10 @@ export class Scene {
                 return new RatTail();
             case "Adrenalin":
                 return new Adrenalin();
+            case "PistolBullet":
+                return new PistolBullet(0);
+            case "RifleBullet":
+                return new RifleBullet(0);
             default:
                 throw new Error("Предмет не удалось распарсить: " + raw);
         }

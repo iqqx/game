@@ -10,6 +10,8 @@ export class Item {
     _isUsing = false;
     _usingTime = -1;
     _usingCallback;
+    Stack = 0;
+    _count = 0;
     Update(dt, position, angle) {
         if (this._usingTime >= 0) {
             this._usingTime += dt;
@@ -33,6 +35,9 @@ export class Item {
     Render(at, angle) { }
     IsUsing() {
         return this._isUsing;
+    }
+    GetCount() {
+        return this._count;
     }
     OnUsed() { }
 }
@@ -80,7 +85,6 @@ export class DogTag extends Item {
         else
             Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
-    Use(callback) { }
 }
 export class RatTail extends Item {
     Icon = GetSprite("RatTail");
@@ -146,7 +150,7 @@ export class Adrenalin extends Item {
             Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -3, 3);
     }
     OnUsed() {
-        Scene.Player.Heal(10);
+        Scene.Player.Heal(30);
     }
 }
 export class Bread extends Item {
@@ -165,6 +169,42 @@ export class Bread extends Item {
     }
     OnUsed() {
         Scene.Player.Heal(15);
+    }
+}
+export class PistolBullet extends Item {
+    Icon = GetSprite("Pistol_Bullet");
+    Stack = 60;
+    constructor(count) {
+        super();
+        this._count = count;
+    }
+    static toString() {
+        return "9x19";
+    }
+    Render(at, angle) {
+        const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+    }
+}
+export class RifleBullet extends Item {
+    Icon = GetSprite("Rifle_Bullet");
+    Stack = 60;
+    constructor(count) {
+        super();
+        this._count = count;
+    }
+    static toString() {
+        return "7,62x39";
+    }
+    Render(at, angle) {
+        const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
+        if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
+        else
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
 }
 //# sourceMappingURL=Item.js.map

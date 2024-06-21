@@ -154,7 +154,7 @@ export class AK extends Weapon {
         }, {
             Fire: GetSound("Shoot_1"),
             Shell: GetSound("Shell"),
-        }, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
+        }, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(5, 18), new Vector2(0, 0));
     }
     static toString() {
         return "Калак 12";

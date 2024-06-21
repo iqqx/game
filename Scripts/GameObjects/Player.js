@@ -1,4 +1,4 @@
-import { Item, Radio } from "../Assets/Items/Item.js";
+import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -22,7 +22,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [null, null];
+    _inventory = [new PistolBullet(13), new RifleBullet(6)];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -41,8 +41,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
-    // private _timeFromSpawn = 4000;
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4000;
     _timeFromEnd = -1;
     _running = false;
     _endFake = new EndGameFake();
@@ -664,6 +664,11 @@ export class Player extends Entity {
                             GUI.SetFillColor(Color.White);
                             GUI.SetFont(12);
                             GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
+                        }
+                        else if (this._inventory[i].Stack > 0) {
+                            GUI.SetFillColor(Color.White);
+                            GUI.SetFont(12);
+                            GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
                         }
                     }
                 }
