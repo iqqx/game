@@ -33,6 +33,7 @@ import { Elder } from "./GameObjects/QuestGivers/Elder.js";
 import { Trader } from "./GameObjects/QuestGivers/Trader.js";
 import { Corpse } from "./GameObjects/Corpse.js";
 import { SceneEditor } from "./SceneEditor.js";
+import { FPSCounter } from "./GameObjects/GUI/FPSCounter.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -144,6 +145,8 @@ export class Scene {
             }
             case "Wall":
                 return new Wall(...x.Arguments);
+            case "FPSCounter":
+                return new FPSCounter();
             case "Platform":
                 return new Platform(...x.Arguments);
             case "Player":

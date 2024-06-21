@@ -165,6 +165,10 @@
 		{ "Type": "Rat", "Arguments": [27250, 147] },
 		{ "Type": "Rat", "Arguments": [26876, 152] },
 		{ "Type": "Rat", "Arguments": [28590, 154] },
-		{ "Type": "Player", "Arguments": [4000, 269] }
+		{ "Type": "Player", "Arguments": [4000, 269] },
+		{
+			"Type": "FPSCounter",
+			"Arguments": []
+		}
 	]
 }

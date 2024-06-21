@@ -41,6 +41,7 @@ export class Color {
 	public static readonly White = new Color(255, 255, 255, 255);
 	public static readonly Black = new Color(0, 0, 0, 255);
 	public static readonly Red = new Color(255, 0, 0, 255);
+	public static readonly Green = new Color(0, 255, 0);
 	public static readonly Yellow = new Color(255, 255, 0, 255);
 	public static readonly Transparent = new Color(0, 0, 0, 0);
 
