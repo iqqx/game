@@ -29,25 +29,25 @@ export class Entity extends GameObject {
     Update(dt) {
         if (this._onLadder !== null) {
             if (this._movingUp)
-                this._y += 5;
+                this.MoveUp(dt);
             else if (this._movingDown)
-                this._y -= 5;
+                this.MoveDown(dt);
             return;
         }
         this.ApplyVForce();
         if (this._movingLeft)
-            this.MoveLeft();
+            this.MoveLeft(dt);
         else if (this._movingRight)
-            this.MoveRight();
+            this.MoveRight(dt);
         this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
     }
     IsAlive() {
         return this._health > 0;
     }
-    MoveRight() {
+    MoveRight(dt) {
         if (!this.IsAlive())
             return;
-        this._x += this._speed;
+        this._x += this._speed; // * (dt / 15);
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
         if (collideOffsets !== false) {
             if (collideOffsets.instance instanceof Spikes)
@@ -57,10 +57,10 @@ export class Entity extends GameObject {
             this._x -= collideOffsets.start.X;
         }
     }
-    MoveLeft() {
+    MoveLeft(dt) {
         if (!this.IsAlive())
             return;
-        this._x -= this._speed;
+        this._x -= this._speed * (dt / 15);
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
         if (collideOffsets !== false) {
             if (collideOffsets.instance instanceof Spikes)
@@ -68,6 +68,28 @@ export class Entity extends GameObject {
             // if (collideOffsets.start.Y > 0 && collideOffsets.start.Y < 20) this._y += collideOffsets.start.Y;
             // else
             this._x += collideOffsets.end.X;
+        }
+    }
+    MoveDown(dt) {
+        if (!this.IsAlive())
+            return;
+        this._y -= this._speed * (dt / 15);
+        const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
+        if (collideOffsets !== false) {
+            if (collideOffsets.instance instanceof Spikes)
+                this.TakeDamage(100);
+            this._y += collideOffsets.start.Y;
+        }
+    }
+    MoveUp(dt) {
+        if (!this.IsAlive())
+            return;
+        this._y += this._speed * (dt / 15);
+        const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
+        if (collideOffsets !== false) {
+            if (collideOffsets.instance instanceof Spikes)
+                this.TakeDamage(100);
+            this._y -= collideOffsets.end.Y;
         }
     }
     Jump() {
@@ -84,7 +106,7 @@ export class Entity extends GameObject {
         if (this._verticalAcceleration <= 0) {
             // падаем
             const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);
-            offsets.sort((a, b) => (a.instance.Tag === b.instance.Tag ? (a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y) : a.instance.Tag));
+            offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
             if (offsets.length > 0 && offsets[0].start.Y >= 0) {
                 if (offsets[0].instance instanceof Spikes)
                     this.TakeDamage(100);

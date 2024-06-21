@@ -41,7 +41,7 @@ export class Scene {
     _background;
     _keyDownEvents = [];
     _touch = null;
-    _levelPosition = 0;
+    _levelPosition = 3899;
     _mouseX = 0;
     _mouseY = 0;
     _lmb = false;
@@ -177,7 +177,8 @@ export class Scene {
                 }));
                 return new Corpse(...x.Arguments);
             case "Human":
-                x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Rat;
+                x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Red;
+                x.Arguments[4] = x.Arguments[4] === undefined ? undefined : this.ParseItem(x.Arguments[4]);
                 return new Human(...x.Arguments);
             case "Rat":
                 return new Rat(...x.Arguments);
@@ -291,13 +292,13 @@ export class Scene {
         return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
     }
     GetInteractiveAt(x, y) {
-        for (const object of Scene.Current._interactableGameObjects) {
+        for (let i = Scene.Current._interactableGameObjects.length - 1; i >= 0; i--) {
             const playerCenter = Scene.Current.Player.GetCenter();
-            const position = object.GetRectangle();
+            const position = Scene.Current._interactableGameObjects[i].GetRectangle();
             if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 * 100)
                 continue;
             if (x > position.X && x < position.X + position.Width && y > position.Y && y < position.Y + position.Height)
-                return object;
+                return Scene.Current._interactableGameObjects[i];
         }
         return null;
     }

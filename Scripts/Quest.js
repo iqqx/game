@@ -4,14 +4,16 @@ export class Quest {
     Title;
     Giver;
     Tasks = [];
+    _afterComplete;
     _stage = 1;
-    constructor(Title, Giver) {
+    constructor(Title, Giver, afterComplete) {
         this.Title = Title;
         this.Giver = Giver;
+        this._afterComplete = afterComplete;
     }
     Update() {
         for (const task of this.Tasks.slice(0, this._stage)) {
-            if (task instanceof MoveTask || task instanceof FakeMoveTask)
+            if (task instanceof MoveTask || task instanceof FakeMoveTask || task instanceof CompletedQuestsTask)
                 task.Check();
         }
     }
@@ -21,13 +23,19 @@ export class Quest {
                 task.Check();
         }
     }
+    OnTalked(giver) {
+        for (const task of this.Tasks.slice(0, this._stage)) {
+            if (task instanceof TalkTask && task.Subject === giver)
+                task.Count();
+        }
+    }
     OnKilled(type) {
         for (const task of this.Tasks)
             if (task instanceof KillTask && task.EnemyType === type)
                 task.Count();
     }
     IsCompleted() {
-        return this.Tasks[this.Tasks.length - 1] instanceof PlaceholderTask ? this._stage > this.Tasks.length - 1 : this._stage > this.Tasks.length;
+        return this._stage > this.Tasks.length;
     }
     GetTasks() {
         return this.Tasks.slice(0, this._stage);
@@ -44,10 +52,12 @@ export class Quest {
         this.Tasks.push(new FakeMoveTask(this, () => this._stage++, location, to, fakeTo));
         return this;
     }
-    AddPlaceholderTask(text) {
-        if (this.Tasks.length === 0)
-            this._stage++;
-        this.Tasks.push(new PlaceholderTask(this, () => this._stage++, text));
+    AddTalkTask(text, subject) {
+        this.Tasks.push(new TalkTask(this, () => this._stage++, text, subject));
+        return this;
+    }
+    AddCompletedQuestsTask(text, giver, goal) {
+        this.Tasks.push(new CompletedQuestsTask(this, () => this._stage++, giver, goal, text));
         return this;
     }
     AddHasItemsTask(mask, ...items) {
@@ -89,14 +99,20 @@ class KillTask extends Task {
         return `Убей ${this._last} ${GetEnemyTypeName(this.EnemyType)}`;
     }
 }
-class PlaceholderTask extends Task {
+class TalkTask extends Task {
     _text;
-    constructor(quest, onComplete, placeholder) {
+    Subject;
+    constructor(quest, onComplete, placeholder, subject) {
         super(quest, onComplete);
         this._text = placeholder;
+        this.Subject = subject;
     }
     Check() {
-        return false;
+        return this._completed;
+    }
+    Count() {
+        this._completed = true;
+        this._onComplete();
     }
     toString() {
         return this._text;
@@ -183,6 +199,27 @@ class HasItemTask extends Task {
             this._onComplete();
         this._completed = true;
         return true;
+    }
+    toString() {
+        return this._mask;
+    }
+}
+class CompletedQuestsTask extends Task {
+    _goal;
+    _questGiver;
+    _mask;
+    constructor(quest, onComplete, giver, goal, mask) {
+        super(quest, onComplete);
+        this._mask = mask;
+        this._goal = goal;
+        this._questGiver = giver;
+    }
+    Check() {
+        if (!this._completed && this._questGiver.GetCompletedQuestsCount() >= this._goal) {
+            this._completed = true;
+            this._onComplete();
+        }
+        return this._completed;
     }
     toString() {
         return this._mask;

@@ -110,6 +110,8 @@ export class SceneEditor {
         });
         addEventListener("mousedown", (e) => {
             this._mousePosition = new Vector2(e.x - Canvas.GetClientRectangle().left, Canvas.GetClientRectangle().height - e.y + Canvas.GetClientRectangle().top);
+            if (e.button !== 0)
+                return;
             this._selectedRectangle = null;
             if (this._selectedType === -1) {
                 for (let i = 0; i < this._gameObjects.length; i++) {
@@ -125,6 +127,8 @@ export class SceneEditor {
         });
         addEventListener("mouseup", (e) => {
             this._mousePosition = new Vector2(e.offsetX, Canvas.GetClientRectangle().height - e.offsetY);
+            if (e.button !== 0)
+                return;
             if (this._selectedType !== -1 && this._drawingRectangle !== null) {
                 if (this._startRectangle !== null) {
                     this._startRectangle.X,
@@ -158,7 +162,7 @@ export class SceneEditor {
                 this._drawingRectangle = new Rectangle(this._mousePosition.X - sizes[0] / 2 + this._levelPosition, this._mousePosition.Y - sizes[1] / 2, this.GetObjectSize(this._selectedType)[0], this.GetObjectSize(this._selectedType)[1]);
         });
         addEventListener("wheel", (e) => {
-            this._selectedType = Math.clamp(this._selectedType - Math.sign(e.deltaY), -1, 12);
+            this._selectedType = Math.clamp(this._selectedType - Math.sign(e.deltaY), -1, 13);
             if (this._selectedType !== -1) {
                 const sizes = this.GetObjectSize(this._selectedType);
                 this._drawingRectangle = new Rectangle(this._mousePosition.X - sizes[0] / 2 + this._levelPosition, this._mousePosition.Y - sizes[1] / 2, this.GetObjectSize(this._selectedType)[0], this.GetObjectSize(this._selectedType)[1]);
@@ -178,11 +182,11 @@ export class SceneEditor {
             case "Wall":
                 return [ObjectType.Wall, new Rectangle(...x.Arguments)];
             case "Platform":
-                return [ObjectType.Platform, new Rectangle(...x.Arguments, 10)];
+                return [ObjectType.Platform, new Rectangle(...x.Arguments, 5)];
             case "Player":
                 return [ObjectType.Player, new Rectangle(...x.Arguments, 40, 100)];
             case "Boombox":
-                return [ObjectType.Boombox, new Rectangle(...x.Arguments, 100, 50)];
+                return [ObjectType.Boombox, new Rectangle(x.Arguments[0], x.Arguments[1], 100, 50)];
             case "Box":
                 return [ObjectType.Box, new Rectangle(...x.Arguments, 50, 50)];
             case "Spikes":
@@ -190,13 +194,13 @@ export class SceneEditor {
             case "Ladder":
                 return [ObjectType.Ladder, new Rectangle(x.Arguments[0], x.Arguments[1], 50, x.Arguments[2])];
             case "Artem":
-                return [ObjectType.Artem, new Rectangle(...x.Arguments, 50, 10)];
+                return [ObjectType.Artem, new Rectangle(...x.Arguments, 50, 100)];
             case "Elder":
-                return [ObjectType.Elder, new Rectangle(...x.Arguments, 50, 10)];
+                return [ObjectType.Elder, new Rectangle(...x.Arguments, 50, 100)];
             case "Trader":
-                return [ObjectType.Trader, new Rectangle(...x.Arguments, 50, 10)];
+                return [ObjectType.Trader, new Rectangle(...x.Arguments, 50, 100)];
             case "Backpack":
-                return [ObjectType.Backpack, new Rectangle(...x.Arguments, 50, 25)];
+                return [ObjectType.Backpack, new Rectangle(...x.Arguments, 50, 35)];
             case "HumanCorpse":
                 return [ObjectType.HumanCorpse, new Rectangle(...x.Arguments, 32 * 3, 9 * 3)];
             case "Human":
@@ -289,7 +293,7 @@ export class SceneEditor {
             case ObjectType.Artem:
                 return [50, 100];
             case ObjectType.Backpack:
-                return [50, 25];
+                return [50, 35];
             case ObjectType.HumanCorpse:
                 return [32 * 3, 9 * 3];
             case ObjectType.Rat:

@@ -93,7 +93,12 @@ export abstract class Weapon extends Item {
 			if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
 				Canvas.DrawImageWithAngleVFlipped(
 					this.Sprites.Image,
-					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale),
+					new Rectangle(
+						this._position.X - Scene.Current.GetLevelPosition(),
+						this._position.Y,
+						this._width,
+						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
+					),
 					this._angle,
 					this._handOffset.X,
 					this._handOffset.Y
@@ -101,7 +106,12 @@ export abstract class Weapon extends Item {
 			else
 				Canvas.DrawImageWithAngle(
 					this.Sprites.Image,
-					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale),
+					new Rectangle(
+						this._position.X - Scene.Current.GetLevelPosition(),
+						this._position.Y,
+						this._width,
+						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
+					),
 					this._angle,
 					this._handOffset.X,
 					this._handOffset.Y
@@ -110,7 +120,12 @@ export abstract class Weapon extends Item {
 			if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
 				Canvas.DrawImageWithAngleVFlipped(
 					this.Sprites.Image,
-					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale),
+					new Rectangle(
+						this._position.X - Scene.Current.GetLevelPosition(),
+						this._position.Y,
+						this._width,
+						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
+					),
 					this._angle,
 					this._handOffset.X,
 					this._handOffset.Y
@@ -118,7 +133,12 @@ export abstract class Weapon extends Item {
 			else
 				Canvas.DrawImageWithAngle(
 					this.Sprites.Image,
-					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale),
+					new Rectangle(
+						this._position.X - Scene.Current.GetLevelPosition(),
+						this._position.Y,
+						this._width,
+						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
+					),
 					this._angle,
 					this._handOffset.X,
 					this._handOffset.Y
@@ -246,7 +266,7 @@ export class AK extends Weapon {
 				Image: GetSprite("AK"),
 			},
 			{
-				Fire: GetSound("Shoot-1"),
+				Fire: GetSound("Shoot_1"),
 				Shell: GetSound("Shell"),
 			},
 			AK._fireCooldown,

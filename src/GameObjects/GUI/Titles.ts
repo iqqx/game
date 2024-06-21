@@ -86,14 +86,24 @@ export class Titles extends GameObject {
 		"© 2024 PENTAGON. Все права защищены.",
 	];
 
+	private _pressed = false;
+
 	constructor() {
 		super(GUI.Width, GUI.Height);
 
 		this._y = 450;
+
+		addEventListener("keydown", (e) => {
+			if (e.code === "Space") this._pressed = true;
+		});
+
+		addEventListener("keyup", (e) => {
+			if (e.code === "Space") this._pressed = false;
+		});
 	}
 
 	public Update(dt: number): void {
-		this._y -= Math.max(0.5, Math.ceil((dt * 0.05) / 0.5) * 0.5);
+		this._y -= Math.max(0.5, Math.ceil((dt * 0.05) / 0.5) * 0.5) * (this._pressed ? 10 : 1);
 
 		if (this._y < Titles._texts.length * -50 - 300) Scene.LoadFromFile("Assets/Scenes/Menu.json");
 	}

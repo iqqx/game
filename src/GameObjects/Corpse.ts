@@ -1,5 +1,5 @@
 import { Container } from "../Assets/Containers/Containers.js";
-import { Item } from "../Assets/Items/Item.js";
+import { DogTag, Item } from "../Assets/Items/Item.js";
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../Game.js";
 import { Scene } from "../Scene.js";
@@ -13,6 +13,7 @@ export class Corpse extends Container {
 		this._y = y;
 
 		for (const item of items) this.TryPushItem(item);
+		this.TryPushItem(new DogTag());
 	}
 
 	public override Render(): void {

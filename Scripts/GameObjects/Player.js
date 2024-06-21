@@ -1,4 +1,4 @@
-import { Bread, Item } from "../Assets/Items/Item.js";
+import { Item, Radio } from "../Assets/Items/Item.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -9,6 +9,10 @@ import { Rectangle, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
+import { Artem } from "./QuestGivers/Artem.js";
+import { Elder } from "./QuestGivers/Elder.js";
+import { EndGameFake } from "./QuestGivers/EndGameFake.js";
+import { GuardFake } from "./QuestGivers/GuardFake.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
     _frameIndex = 0;
@@ -18,10 +22,10 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new Bread(), null];
+    _inventory = [null, null];
     _backpack = null;
     _weapon = null;
-    _quests = [new Quest("Свет в конце туннеля", this).AddPlaceholderTask("Найти выход из метро")];
+    _quests;
     _armHeight = 0.65;
     _dialog = null;
     _dialogState = 0;
@@ -38,8 +42,13 @@ export class Player extends Entity {
     _framesToPunch = 0;
     _mainHand = true;
     // private _timeFromSpawn = 0;
-    _timeFromSpawn = 10000;
+    _timeFromSpawn = 4000;
+    _timeFromEnd = -1;
     _running = false;
+    _endFake = new EndGameFake();
+    _speaked = false;
+    _speaked2 = false;
+    _timeFromShootArtem = -1;
     static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -66,6 +75,7 @@ export class Player extends Entity {
         this._yTarget = 750 / 2;
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
+        this._quests = [];
         GetSound("Walk_2").Speed = 1.6;
         GetSound("Walk_2").Apply();
         addEventListener("keydown", (e) => {
@@ -322,8 +332,22 @@ export class Player extends Entity {
     Update(dt) {
         if (this._health <= 0) {
             this._timeFromDeath += dt;
-            if (this._timeFromDeath > 5000)
+            if (this._timeFromDeath > 5000 && this._timeFromEnd === -1)
                 Scene.LoadFromFile("Assets/Scenes/Main.json");
+        }
+        if (this._timeFromEnd > -1) {
+            this._timeFromEnd += dt;
+            if (Scene.Current.GetByType(Artem)[0].IsEnd() && !this._speaked) {
+                this._speaked = true;
+                this.SpeakWith(this._endFake);
+            }
+            if (this._timeFromShootArtem > 0 && Scene.Time - this._timeFromShootArtem > 1000 && !this._speaked2) {
+                this._speaked2 = true;
+                this.SpeakWith(this._endFake);
+            }
+            if (this._y > 800 && this._onLadder !== null) {
+                Scene.LoadFromFile("Assets/Scenes/Prolog.json");
+            }
         }
         if (this._dialog !== null && this._timeToNextChar > 0) {
             this._timeToNextChar -= dt;
@@ -334,8 +358,15 @@ export class Player extends Entity {
                     this._timeToNextChar = 50;
             }
         }
-        this._quests.forEach((quest) => {
+        this._quests.forEach((quest, i) => {
             quest.Update();
+            if (quest.IsCompleted()) {
+                if (quest.Giver === this) {
+                    this.SpeakWith(this._endFake);
+                    this._timeFromEnd = 0;
+                }
+                this._quests.splice(i, 1);
+            }
         });
         if (this._onLadder !== null) {
             const pos = this._onLadder.GetPosition();
@@ -344,16 +375,14 @@ export class Player extends Entity {
             const prevX = this._x;
             if (this._movingUp) {
                 if (this._y + this._collider.Height < pos.Y + size.Height)
-                    this._y += 5;
+                    this.MoveUp(dt);
             }
-            else if (this._movingDown) {
-                if (pos.Y < this._y)
-                    this._y -= 5;
-            }
+            else if (this._movingDown)
+                this.MoveDown(dt);
             if (this._movingLeft)
-                this.MoveLeft();
+                this.MoveLeft(dt);
             else if (this._movingRight)
-                this.MoveRight();
+                this.MoveRight(dt);
             if (!Scene.Current.IsCollide(this, Tag.Ladder))
                 this._onLadder = null;
             if (prevY !== this._y || prevX !== this._x) {
@@ -368,19 +397,25 @@ export class Player extends Entity {
         this.ApplyVForce();
         if (this._timeFromSpawn < 5000) {
             this._timeFromSpawn += dt;
+            if (this._timeFromSpawn >= 5000)
+                this._quests.push(new Quest("Свет в конце тоннеля", this).AddCompletedQuestsTask("Найти выход из метро", Scene.Current.GetByType(Elder)[0], 1).AddMoveTask(34200, "Выход"));
             return;
         }
         if (this._inventory[this._selectedHand] instanceof Item)
             this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
-        if (this.CanTarget()) {
+        if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() < 2) {
             if (this._timeToNextPunch > 0)
                 this._timeToNextPunch -= dt;
             this._framesToPunch--;
             const prevX = this._x;
-            if (this._movingLeft)
-                this.MoveLeft();
-            else if (this._movingRight)
-                this.MoveRight();
+            if (this._movingLeft) {
+                if (this._timeFromEnd === -1 || this._x > 33500)
+                    this.MoveLeft(dt);
+            }
+            else {
+                if (this._movingRight)
+                    this.MoveRight(dt);
+            }
             this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (prevX != this._x) {
                 this._timeToNextFrame -= dt;
@@ -513,35 +548,29 @@ export class Player extends Entity {
         if (this._health > 0)
             GUI.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.45, 0, 0.5);
         else {
-            GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
-            return;
-        }
-        if (this._needDrawRedVegnitte > 0) {
-            this._needDrawRedVegnitte--;
-            Canvas.DrawVignette(Color.Red);
-        }
-        if (this._needDrawAntiVegnitte > 0) {
-            this._needDrawAntiVegnitte--;
-            Canvas.DrawVignette(new Color(100, 100, 100));
-        }
-        if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
-            const items = this._hoveredObject.GetInteractives();
-            GUI.SetFillColor(new Color(70, 70, 70));
-            GUI.SetStroke(new Color(100, 100, 100), 2);
-            GUI.DrawRectangle(this._xTarget - 75, 750 - this._yTarget + 50, 150, 25 * items.length);
-            GUI.ClearStroke();
-            GUI.SetFillColor(Color.White);
-            GUI.SetFont(20);
-            for (let i = 0; i < items.length; i++) {
-                if (i == this._selectedInteraction) {
-                    GUI.SetFillColor(new Color(100, 100, 100));
-                    GUI.DrawRectangle(this._xTarget - 75 + 3, 750 - this._yTarget + 50 + 3 + 25 * i, 150 - 6, 25 - 6);
-                    GUI.SetFillColor(Color.White);
+            if (this._timeFromEnd === -1) {
+                GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
+                return;
+            }
+            else {
+                const sdt = Scene.Time - this._timeFromShootArtem;
+                if (sdt < 5000)
+                    GUI.DrawVignette(new Color(255, 0, 0), 0.45, 0.3, 1);
+                else {
+                    const r = 255 * Math.clamp(1 - (sdt - 5000) / 8000, 0, 1);
+                    const startRadius = 0.45 - Math.clamp((sdt - 5000) / 8000, 0, 0.45);
+                    const startAlpha = 0.3 + Math.clamp((sdt - 5000) / 8000, 0, 0.7);
+                    GUI.DrawVignette(new Color(r, 0, 0), startRadius, startAlpha, 1);
+                    if (sdt > 5000 + 8000)
+                        Scene.LoadFromFile("Assets/Scenes/Prolog.json");
+                    else if (sdt > 5000 + 6000)
+                        this.ContinueDialog();
                 }
-                GUI.DrawTextCenter(items[i], this._xTarget - 75, 750 - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
             }
         }
         if (this._dialog === null) {
+            if (this._endFake.GetCompletedQuestsCount() > 1)
+                return;
             const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
             if (this._backpack !== null) {
                 const firstXOffset = GUI.Width / 2 - 55 * 3;
@@ -683,6 +712,33 @@ export class Player extends Entity {
             if (this._dialog.Messages[this._dialogState].length === this._chars)
                 GUI.DrawTextCenter("ПРОДОЛЖИТЬ", GUI.Width / 2 + 500 / 2 - 140, GUI.Height - 200 - 72, 120);
         }
+        if (this._timeFromEnd > -1)
+            return;
+        if (this._needDrawRedVegnitte > 0) {
+            this._needDrawRedVegnitte--;
+            Canvas.DrawVignette(Color.Red);
+        }
+        if (this._needDrawAntiVegnitte > 0) {
+            this._needDrawAntiVegnitte--;
+            Canvas.DrawVignette(new Color(100, 100, 100));
+        }
+        if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
+            const items = this._hoveredObject.GetInteractives();
+            GUI.SetFillColor(new Color(70, 70, 70));
+            GUI.SetStroke(new Color(100, 100, 100), 2);
+            GUI.DrawRectangle(this._xTarget - 75, 750 - this._yTarget + 50, 150, 25 * items.length);
+            GUI.ClearStroke();
+            GUI.SetFillColor(Color.White);
+            GUI.SetFont(20);
+            for (let i = 0; i < items.length; i++) {
+                if (i == this._selectedInteraction) {
+                    GUI.SetFillColor(new Color(100, 100, 100));
+                    GUI.DrawRectangle(this._xTarget - 75 + 3, 750 - this._yTarget + 50 + 3 + 25 * i, 150 - 6, 25 - 6);
+                    GUI.SetFillColor(Color.White);
+                }
+                GUI.DrawTextCenter(items[i], this._xTarget - 75, 750 - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
+            }
+        }
         if (this._draggedItem !== null)
             GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
         GUI.ClearStroke();
@@ -758,7 +814,7 @@ export class Player extends Entity {
             });
     }
     GetQuestsBy(by) {
-        return this._quests.filter((x) => x.Giver === by);
+        return this._quests.filter((x) => x.Giver === by || (by === GuardFake && x.Giver instanceof by));
     }
     RemoveQuest(quest) {
         return this._quests.splice(this._quests.indexOf(quest), 1);
@@ -803,6 +859,9 @@ export class Player extends Entity {
     SpeakWith(character) {
         if (this._dialog !== null)
             return;
+        this._quests.forEach((quest) => {
+            quest.OnTalked(character);
+        });
         this._dialogState = 0;
         this._chars = 0;
         this._timeToNextChar = 75;
@@ -812,6 +871,8 @@ export class Player extends Entity {
         this._quests.push(quest);
     }
     ContinueDialog() {
+        if (this._dialog === null)
+            return;
         this._dialogState++;
         if (this._dialog.Messages.length == this._dialogState) {
             if (this._dialog.AfterAction !== undefined)
@@ -892,9 +953,17 @@ export class Player extends Entity {
             return;
         if (this._weapon === null) {
             if (this._inventory[this._selectedHand] instanceof Item) {
-                this._inventory[this._selectedHand].Use(() => {
-                    this._inventory[this._selectedHand] = null;
-                });
+                if (this._inventory[this._selectedHand] instanceof Radio) {
+                    if (this._quests.length === 0 || this._quests[0].Giver !== this || this._quests[0].IsCompleted()) {
+                        this.SpeakWith(this._endFake);
+                        this._xTarget = Canvas.GetSize().X / 2;
+                        this._inventory[this._selectedHand] = null;
+                    }
+                }
+                else
+                    this._inventory[this._selectedHand].Use(() => {
+                        this._inventory[this._selectedHand] = null;
+                    });
             }
             else if (this._timeToNextPunch <= 0) {
                 this._framesToPunch = 5;
@@ -919,6 +988,10 @@ export class Player extends Entity {
             return;
         this._health -= damage;
         this._needDrawRedVegnitte = 5;
+        if (this._timeFromEnd > 0) {
+            this._timeFromShootArtem = Scene.Time;
+            return;
+        }
         if (this._health <= 0) {
             this._timeFromDeath = 1;
             GetSound("Human_Death_1").Play();

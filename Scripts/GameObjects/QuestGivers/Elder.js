@@ -26,12 +26,9 @@ export class Elder extends Character {
                 Scene.Player.RemoveItem(DogTag);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
-                    Messages: ["Они все мертвы. Вот жетоны.", "Ладно."],
+                    Messages: ["Арсюша не придумал мне диалог который я буду\nговорить когда мой квест был выполнен.\nСкажите Арсюше чтобы он сделал это."],
                     Owner: this,
-                    OwnerFirst: false,
-                    AfterAction: () => {
-                        Scene.Player.GetQuestsBy(Scene.Player)[0].AddMoveTask(50000, "Выход");
-                    },
+                    OwnerFirst: true,
                 };
             }
             return {
@@ -55,9 +52,9 @@ export class Elder extends Character {
                     ],
                     AfterAction: () => {
                         Scene.Player.PushQuest(new Quest("Соседи", this)
-                            .AddFakeMoveTask(3400, "Станция", 3400)
+                            .AddFakeMoveTask(27500, "Станция", 30500)
                             .AddHasItemsTask("Собрать жетоны с трупов", [DogTag, 2])
-                            .AddPlaceholderTask("Вернуться к Старосте"));
+                            .AddTalkTask("Вернуться к Старосте", this));
                     },
                     Owner: this,
                     OwnerFirst: true,

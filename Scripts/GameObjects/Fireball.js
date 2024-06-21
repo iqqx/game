@@ -21,7 +21,7 @@ export class Fireball extends GameObject {
             this.Destroy();
     }
     Render() {
-        Canvas.DrawImageWithAngle(this._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 50, 25), this._angle, 0, 25 / 2 - this._offset.Y);
+        Canvas.DrawImageWithAngle(this._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 50), this._angle, 0, 50 / 2 - this._offset.Y);
     }
 }
 //# sourceMappingURL=Fireball.js.map

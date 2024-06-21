@@ -19,7 +19,7 @@ export class Human extends Enemy {
             Bend: GetSprite("Player_Arm_Bend"),
         },
     };
-    _weapon = new Glock();
+    _weapon;
     static _visibleDistance = 500;
     _armHeight = 0.65;
     _timeToNextFrame = 0;
@@ -28,13 +28,16 @@ export class Human extends Enemy {
     _timeFromNotice = -1;
     _timeFromSaw = -1;
     _aggresive = false;
+    _friendly = false;
     _timeToShoot = 500;
     _timeToTurn = 1500;
     _fakeCharacter = new GuardFake(0, 0);
-    constructor(x, y, type) {
+    constructor(x, y, type, direction = 1, weapon) {
         super(50, 100, 1, 100, type);
         this._x = x;
         this._y = y;
+        this._weapon = weapon ?? new Glock();
+        this.Direction = direction;
         this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
     }
     Update(dt) {
@@ -54,6 +57,7 @@ export class Human extends Enemy {
                 this._timeFromSaw = 0;
         }
         if (this.IsSpotPlayer()) {
+            this._timeFromNotice = this._timeToTurn + 1;
             this._angle = (() => {
                 const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this.Height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2));
                 if (this.Direction == 1)
@@ -67,9 +71,9 @@ export class Human extends Enemy {
                     const prevX = this._x;
                     if (this.GetDistanceToPlayer() < Human._visibleDistance) {
                         if (this.Direction == -1)
-                            this.MoveRight();
+                            this.MoveRight(dt);
                         else
-                            this.MoveLeft();
+                            this.MoveLeft(dt);
                         if (prevX != this._x) {
                             this._timeToNextFrame -= dt;
                             if (this._timeToNextFrame < 0) {
@@ -88,8 +92,13 @@ export class Human extends Enemy {
                     }
                 }
             }
-            else if (this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+            else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+                Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+                    if (x instanceof Human)
+                        x.MakeFriendly();
+                });
                 Scene.Player.SpeakWith(this._fakeCharacter);
+                this._friendly = true;
             }
         }
         else
@@ -127,7 +136,10 @@ export class Human extends Enemy {
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);
-        this._aggresive = true;
+        Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+            if (x instanceof Human)
+                x.MakeAgressive();
+        });
         this.Direction = this.GetDirectionToPlayer();
         if (this._timeFromNotice === -1)
             this._timeFromNotice = 0;
@@ -140,6 +152,12 @@ export class Human extends Enemy {
             s.volume = 1;
             s.play();
         }
+    }
+    MakeFriendly() {
+        this._friendly = true;
+    }
+    MakeAgressive() {
+        this._aggresive = true;
     }
 }
 //# sourceMappingURL=Human.js.map

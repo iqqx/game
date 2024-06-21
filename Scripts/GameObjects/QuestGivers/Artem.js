@@ -7,6 +7,7 @@ import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
 export class Artem extends Character {
+    _timeFromStartEnd = -1;
     constructor(x, y) {
         super(50, 100);
         this.Tag = Tag.NPC;
@@ -14,7 +15,7 @@ export class Artem extends Character {
         this._y = y;
     }
     Render() {
-        Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
     }
     GetDialog() {
         super.GetDialog();
@@ -38,7 +39,7 @@ export class Artem extends Character {
                     ],
                     AfterAction: () => {
                         Scene.Player.GiveQuestItem(new Radio());
-                        Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(18400, "Лагерь"));
+                        Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(21700, "Лагерь"));
                     },
                     Owner: this,
                     OwnerFirst: false,
@@ -53,6 +54,13 @@ export class Artem extends Character {
     }
     GetName() {
         return "Артём";
+    }
+    IsEnd() {
+        return this._timeFromStartEnd > 0 && Scene.Time - this._timeFromStartEnd >= 7000;
+    }
+    StartEnd() {
+        this._timeFromStartEnd = Scene.Time;
+        this._x = 32600;
     }
 }
 //# sourceMappingURL=Artem.js.map

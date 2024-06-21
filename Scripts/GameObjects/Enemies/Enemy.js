@@ -32,9 +32,9 @@ export class Enemy extends Entity {
             return;
         }
         if (this.Direction == 1)
-            this.MoveRight();
+            this.MoveRight(dt);
         else
-            this.MoveLeft();
+            this.MoveLeft(dt);
     }
     GetDistanceToPlayer() {
         const plr = Scene.Player.GetCenter();

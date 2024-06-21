@@ -9,16 +9,18 @@ export class Quest {
 	public readonly Title: string;
 	public readonly Giver: Character | Player;
 	public readonly Tasks: Task[] = [];
+	private readonly _afterComplete?: () => void;
 	private _stage = 1;
 
-	constructor(Title: string, Giver: Character | Player) {
+	constructor(Title: string, Giver: Character | Player, afterComplete?: () => void) {
 		this.Title = Title;
 		this.Giver = Giver;
+		this._afterComplete = afterComplete
 	}
 
 	public Update() {
 		for (const task of this.Tasks.slice(0, this._stage)) {
-			if (task instanceof MoveTask || task instanceof FakeMoveTask) task.Check();
+			if (task instanceof MoveTask || task instanceof FakeMoveTask || task instanceof CompletedQuestsTask) task.Check();
 		}
 	}
 
@@ -28,12 +30,18 @@ export class Quest {
 		}
 	}
 
+	public OnTalked(giver: Character) {
+		for (const task of this.Tasks.slice(0, this._stage)) {
+			if (task instanceof TalkTask && task.Subject === giver) task.Count();
+		}
+	}
+
 	public OnKilled(type: EnemyType) {
 		for (const task of this.Tasks) if (task instanceof KillTask && task.EnemyType === type) task.Count();
 	}
 
 	public IsCompleted() {
-		return this.Tasks[this.Tasks.length - 1] instanceof PlaceholderTask ? this._stage > this.Tasks.length - 1 : this._stage > this.Tasks.length;
+		return this._stage > this.Tasks.length;
 	}
 
 	public GetTasks() {
@@ -58,10 +66,14 @@ export class Quest {
 		return this;
 	}
 
-	public AddPlaceholderTask(text: string) {
-		if (this.Tasks.length === 0) this._stage++;
+	public AddTalkTask(text: string, subject: Character) {
+		this.Tasks.push(new TalkTask(this, () => this._stage++, text, subject));
 
-		this.Tasks.push(new PlaceholderTask(this, () => this._stage++, text));
+		return this;
+	}
+
+	public AddCompletedQuestsTask(text: string, giver: Character, goal: number) {
+		this.Tasks.push(new CompletedQuestsTask(this, () => this._stage++, giver, goal, text));
 
 		return this;
 	}
@@ -127,17 +139,24 @@ class KillTask extends Task {
 	}
 }
 
-class PlaceholderTask extends Task {
+class TalkTask extends Task {
 	private readonly _text: string;
+	public readonly Subject: Character;
 
-	constructor(quest: Quest, onComplete: () => void, placeholder: string) {
+	constructor(quest: Quest, onComplete: () => void, placeholder: string, subject: Character) {
 		super(quest, onComplete);
 
 		this._text = placeholder;
+		this.Subject = subject;
 	}
 
 	Check(): boolean {
-		return false;
+		return this._completed;
+	}
+
+	public Count() {
+		this._completed = true;
+		this._onComplete();
 	}
 
 	public override toString() {
@@ -245,6 +264,34 @@ class HasItemTask extends Task {
 		this._completed = true;
 
 		return true;
+	}
+
+	public override toString() {
+		return this._mask;
+	}
+}
+
+class CompletedQuestsTask extends Task {
+	private readonly _goal: number;
+	private readonly _questGiver: Character;
+	private _mask: string;
+
+	constructor(quest: Quest, onComplete: () => void, giver: Character, goal: number, mask: string) {
+		super(quest, onComplete);
+
+		this._mask = mask;
+		this._goal = goal;
+		this._questGiver = giver;
+	}
+
+	Check(): boolean {
+		if (!this._completed && this._questGiver.GetCompletedQuestsCount() >= this._goal) {
+			this._completed = true;
+
+			this._onComplete();
+		}
+
+		return this._completed;
 	}
 
 	public override toString() {

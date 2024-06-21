@@ -28,10 +28,10 @@ export class Fireball extends GameObject {
 	override Render(): void {
 		Canvas.DrawImageWithAngle(
 			this._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))],
-			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 50, 25),
+			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 50),
 			this._angle,
 			0,
-			25 / 2 - this._offset.Y
+			50 / 2 - this._offset.Y
 		);
 	}
 }

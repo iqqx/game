@@ -35,16 +35,16 @@ export class Entity extends GameObject {
 
 	public override Update(dt: number) {
 		if (this._onLadder !== null) {
-			if (this._movingUp) this._y += 5;
-			else if (this._movingDown) this._y -= 5;
+			if (this._movingUp) this.MoveUp(dt);
+			else if (this._movingDown) this.MoveDown(dt);
 
 			return;
 		}
 
 		this.ApplyVForce();
 
-		if (this._movingLeft) this.MoveLeft();
-		else if (this._movingRight) this.MoveRight();
+		if (this._movingLeft) this.MoveLeft(dt);
+		else if (this._movingRight) this.MoveRight(dt);
 
 		this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 	}
@@ -53,10 +53,10 @@ export class Entity extends GameObject {
 		return this._health > 0;
 	}
 
-	public MoveRight() {
+	public MoveRight(dt: number) {
 		if (!this.IsAlive()) return;
 
-		this._x += this._speed;
+		this._x += this._speed; // * (dt / 15);
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
 		if (collideOffsets !== false) {
@@ -68,10 +68,10 @@ export class Entity extends GameObject {
 		}
 	}
 
-	public MoveLeft() {
+	public MoveLeft(dt: number) {
 		if (!this.IsAlive()) return;
 
-		this._x -= this._speed;
+		this._x -= this._speed * (dt / 15);
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
 		if (collideOffsets !== false) {
@@ -80,6 +80,32 @@ export class Entity extends GameObject {
 			// if (collideOffsets.start.Y > 0 && collideOffsets.start.Y < 20) this._y += collideOffsets.start.Y;
 			// else
 			this._x += collideOffsets.end.X;
+		}
+	}
+
+	public MoveDown(dt: number) {
+		if (!this.IsAlive()) return;
+
+		this._y -= this._speed * (dt / 15);
+
+		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
+		if (collideOffsets !== false) {
+			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
+
+			this._y += collideOffsets.start.Y;
+		}
+	}
+
+	public MoveUp(dt: number) {
+		if (!this.IsAlive()) return;
+
+		this._y += this._speed * (dt / 15);
+
+		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
+		if (collideOffsets !== false) {
+			if (collideOffsets.instance instanceof Spikes) this.TakeDamage(100);
+
+			this._y -= collideOffsets.end.Y;
 		}
 	}
 
@@ -100,7 +126,7 @@ export class Entity extends GameObject {
 			// падаем
 			const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);
 
-			offsets.sort((a, b) => (a.instance.Tag === b.instance.Tag ? (a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y) : a.instance.Tag));
+			offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
 
 			if (offsets.length > 0 && offsets[0].start.Y >= 0) {
 				if (offsets[0].instance instanceof Spikes) this.TakeDamage(100);

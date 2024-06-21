@@ -25,6 +25,7 @@ export class Item {
 	}
 
 	public Use(callback: () => void) {
+		if (this.UseTime === undefined) return;
 		if (this._isUsing) return;
 		this._isUsing = true;
 

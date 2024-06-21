@@ -7,7 +7,7 @@ import { Container } from "./Containers.js";
 export class Backpack extends Container {
     OnPickup;
     constructor(x, y, ...content) {
-        super(50, 25, 4, 1);
+        super(50, 35, 4, 1);
         for (let i = 0; i < content.length; i++)
             this._items[0][i] = content[i];
         this.Tag = Tag.Pickable;

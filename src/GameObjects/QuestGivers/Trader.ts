@@ -64,7 +64,7 @@ export class Trader extends Character {
 						Scene.Player.PushQuest(
 							new Quest("Сенячка не смог придумать название для этого квеста", this)
 								.AddHasItemsTask("Добыть 3 хвоста крыс", [RatTail, 3])
-								.AddPlaceholderTask("Вернуться к Торгашу")
+								.AddTalkTask("Вернуться к Торгашу", this)
 						);
 					},
 					Owner: this,

@@ -2,6 +2,7 @@ import { Tag } from "../../Enums.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Character, Dialog } from "./Character.js";
+import { Elder } from "./Elder.js";
 
 export class GuardFake extends Character {
 	constructor(x: number, y: number) {
@@ -18,7 +19,7 @@ export class GuardFake extends Character {
 		return {
 			Messages: ["Стой кто идет покажи руки есть оружие?", "Тихо, тихо, убираю.", "Пойдем к нашему старосте он задаст тебе пару\nвопросов."],
 			AfterAction: () => {
-				Scene.Player.PushQuest(new Quest("Разговор", this).AddPlaceholderTask("Поговорить со старостой"));
+				Scene.Player.PushQuest(new Quest("Разговор", this).AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0] as Character));
 				this._completedQuests++;
 			},
 			Owner: this,

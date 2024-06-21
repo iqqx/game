@@ -5,6 +5,10 @@
 			"Arguments": []
 		},
 		{
+			"Type": "HintLabel",
+			"Arguments": ["Удерживайте ПРОБЕЛ чтобы ускорить", 1300, 700]
+		},
+		{
 			"Type": "Titles"
 		}
 	]

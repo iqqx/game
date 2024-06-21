@@ -8,6 +8,8 @@ import { Rectangle } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Artem extends Character {
+	private _timeFromStartEnd = -1;
+
 	constructor(x: number, y: number) {
 		super(50, 100);
 
@@ -17,7 +19,15 @@ export class Artem extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(
+			GetSprite("Artem"),
+			new Rectangle(
+				this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+				this._y,
+				this.Width,
+				this.Height
+			)
+		);
 	}
 
 	public override GetDialog(): Dialog {
@@ -44,7 +54,7 @@ export class Artem extends Character {
 					],
 					AfterAction: () => {
 						Scene.Player.GiveQuestItem(new Radio());
-						Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(18400, "Лагерь"));
+						Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(21700, "Лагерь"));
 					},
 					Owner: this,
 					OwnerFirst: false,
@@ -60,5 +70,14 @@ export class Artem extends Character {
 
 	public GetName(): string {
 		return "Артём";
+	}
+
+	public IsEnd() {
+		return this._timeFromStartEnd > 0 && Scene.Time - this._timeFromStartEnd >= 7000;
+	}
+
+	public StartEnd() {
+		this._timeFromStartEnd = Scene.Time;
+		this._x = 32600;
 	}
 }

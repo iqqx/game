@@ -64,15 +64,15 @@ export class Weapon extends Item {
     Render() {
         if (this.Heavy) {
             if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
-                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)), this._angle, this._handOffset.X, this._handOffset.Y);
             else
-                Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)), this._angle, this._handOffset.X, this._handOffset.Y);
         }
         else {
             if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
-                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)), this._angle, this._handOffset.X, this._handOffset.Y);
             else
-                Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width * this.Sprites.Image.Scale, 30 * this.Sprites.Image.Scale), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)), this._angle, this._handOffset.X, this._handOffset.Y);
         }
     }
     Reload() {
@@ -152,7 +152,7 @@ export class AK extends Weapon {
             Icon: GetSprite("AK_Icon"),
             Image: GetSprite("AK"),
         }, {
-            Fire: GetSound("Shoot-1"),
+            Fire: GetSound("Shoot_1"),
             Shell: GetSound("Shell"),
         }, AK._fireCooldown, AK._damage, AK._spread, true, true, 2500, 30, new Vector2(0, 18), new Vector2(0, 0));
     }

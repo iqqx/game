@@ -6,7 +6,7 @@ import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
-import { Glock } from "../../Assets/Weapons/Weapon.js";
+import { Glock, Weapon } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
 
@@ -20,7 +20,7 @@ export class Human extends Enemy {
 			Bend: GetSprite("Player_Arm_Bend") as Sprite,
 		},
 	};
-	private readonly _weapon = new Glock();
+	private readonly _weapon;
 	private static readonly _visibleDistance = 500;
 	private readonly _armHeight = 0.65;
 	private _timeToNextFrame = 0;
@@ -29,15 +29,18 @@ export class Human extends Enemy {
 	private _timeFromNotice = -1;
 	private _timeFromSaw = -1;
 	private _aggresive = false;
+	private _friendly = false;
 	private readonly _timeToShoot = 500;
 	private readonly _timeToTurn = 1500;
 	private readonly _fakeCharacter = new GuardFake(0, 0);
 
-	constructor(x: number, y: number, type: EnemyType) {
+	constructor(x: number, y: number, type: EnemyType, direction: -1 | 1 = 1, weapon?: Weapon) {
 		super(50, 100, 1, 100, type);
 
 		this._x = x;
 		this._y = y;
+		this._weapon = weapon ?? new Glock();
+		this.Direction = direction;
 
 		this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
 	}
@@ -61,6 +64,8 @@ export class Human extends Enemy {
 		}
 
 		if (this.IsSpotPlayer()) {
+			this._timeFromNotice = this._timeToTurn + 1;
+
 			this._angle = (() => {
 				const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this.Height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2));
 
@@ -75,8 +80,8 @@ export class Human extends Enemy {
 					const prevX = this._x;
 
 					if (this.GetDistanceToPlayer() < Human._visibleDistance) {
-						if (this.Direction == -1) this.MoveRight();
-						else this.MoveLeft();
+						if (this.Direction == -1) this.MoveRight(dt);
+						else this.MoveLeft(dt);
 
 						if (prevX != this._x) {
 							this._timeToNextFrame -= dt;
@@ -93,8 +98,13 @@ export class Human extends Enemy {
 						else this._weapon.TryShoot(Tag.Player);
 					}
 				}
-			} else if (this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+			} else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+				Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+					if (x instanceof Human) x.MakeFriendly();
+				});
+
 				Scene.Player.SpeakWith(this._fakeCharacter);
+				this._friendly = true;
 			}
 		} else this._frameIndex = 0;
 	}
@@ -192,7 +202,9 @@ export class Human extends Enemy {
 	override TakeDamage(damage: number): void {
 		super.TakeDamage(damage);
 
-		this._aggresive = true;
+		Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+			if (x instanceof Human) x.MakeAgressive();
+		});
 		this.Direction = this.GetDirectionToPlayer();
 		if (this._timeFromNotice === -1) this._timeFromNotice = 0;
 
@@ -207,5 +219,13 @@ export class Human extends Enemy {
 			s.volume = 1;
 			s.play();
 		}
+	}
+
+	public MakeFriendly() {
+		this._friendly = true;
+	}
+
+	public MakeAgressive() {
+		this._aggresive = true;
 	}
 }

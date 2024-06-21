@@ -40,8 +40,8 @@ export abstract class Enemy extends Entity {
 			return;
 		}
 
-		if (this.Direction == 1) this.MoveRight();
-		else this.MoveLeft();
+		if (this.Direction == 1) this.MoveRight(dt);
+		else this.MoveLeft(dt);
 	}
 
 	public GetDistanceToPlayer() {
