@@ -45,7 +45,7 @@ export class Player extends Entity {
 	private _selectedInteraction: number = 0;
 	private _timeToWalkSound = 0;
 	private _timeToNextPunch = 0;
-	private _framesToPunch = 0;
+	private _timeToPunch = 0;
 	private _mainHand = true;
 	private _timeFromSpawn = 0;
 	// private _timeFromSpawn = 4000;
@@ -362,6 +362,8 @@ export class Player extends Entity {
 			if (this._timeFromDeath > 5000 && this._timeFromEnd === -1) Scene.LoadFromFile("Assets/Scenes/Main.json");
 		}
 
+		if (this._timeToPunch > 0) this._timeToPunch -= dt;
+
 		if (this._timeFromEnd > -1) {
 			this._timeFromEnd += dt;
 
@@ -452,7 +454,6 @@ export class Player extends Entity {
 
 		if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() < 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
-			this._framesToPunch--;
 
 			const prevX = this._x;
 
@@ -534,9 +535,7 @@ export class Player extends Entity {
 			Canvas.DrawImage(this._frames.Ladder[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 		} else if (this.Direction == 1) {
 			if (this._weapon === null) {
-				if (this._framesToPunch > 0 && !this._mainHand) {
-					this._framesToPunch--;
-
+				if (this._timeToPunch > 0 && !this._mainHand) {
 					Canvas.DrawImageWithAngle(
 						this._frames.Hands.Straight,
 						new Rectangle(
@@ -612,7 +611,7 @@ export class Player extends Entity {
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
-				} else if (this._framesToPunch > 0 && this._mainHand) {
+				} else if (this._timeToPunch > 0 && this._mainHand) {
 					Canvas.DrawImageWithAngle(
 						this._frames.Hands.Straight,
 						new Rectangle(
@@ -670,7 +669,7 @@ export class Player extends Entity {
 			}
 		} else {
 			if (this._weapon === null) {
-				if (this._framesToPunch > 0 && this._mainHand)
+				if (this._timeToPunch > 0 && this._mainHand)
 					Canvas.DrawImageWithAngleVFlipped(
 						this._frames.Hands.Straight,
 						new Rectangle(
@@ -751,7 +750,7 @@ export class Player extends Entity {
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
-				} else if (this._framesToPunch > 0 && !this._mainHand)
+				} else if (this._timeToPunch > 0 && !this._mainHand)
 					Canvas.DrawImageWithAngleVFlipped(
 						this._frames.Hands.Straight,
 						new Rectangle(
@@ -1248,7 +1247,7 @@ export class Player extends Entity {
 						this._inventory[this._selectedHand] = null;
 					});
 			} else if (this._timeToNextPunch <= 0) {
-				this._framesToPunch = 5;
+				this._timeToPunch = 100;
 				this._timeToNextPunch = 250;
 				this._mainHand = !this._mainHand;
 
