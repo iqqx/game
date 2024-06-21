@@ -100,6 +100,8 @@ export class Entity extends GameObject {
         this._verticalAcceleration = this._jumpForce;
     }
     ApplyVForce(dt) {
+        if (dt === 200)
+            return;
         const prevY = this._y;
         this._verticalAcceleration -= (this._verticalAcceleration > 0 ? 2 : 3) * (dt / 15);
         this._y += this._verticalAcceleration * (dt / 15);
