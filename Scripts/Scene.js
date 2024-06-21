@@ -308,10 +308,11 @@ export class Scene {
             const plrTargetRaw = Scene.Current.Player.GetTarget();
             Scene.Current._levelPosition = Math.round(Lerp(Scene.Current._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
         }
+        const dt = Math.min(200, time - Scene.Time);
         for (const object of Scene.Current._gameObjects)
-            object.Update(time - Scene.Time);
+            object.Update(dt);
         for (const element of Scene.Current._GUIElements)
-            element.Update(time - Scene.Time, time);
+            element.Update(dt, time);
         Scene.Time = time;
         this._touch = null;
     }
