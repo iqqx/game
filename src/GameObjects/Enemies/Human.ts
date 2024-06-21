@@ -20,7 +20,7 @@ export class Human extends Enemy {
 			Bend: GetSprite("Player_Arm_Bend") as Sprite,
 		},
 	};
-	private readonly _weapon;
+	private readonly _weapon: Weapon;
 	private static readonly _visibleDistance = 500;
 	private readonly _armHeight = 0.65;
 	private _timeToNextFrame = 0;
@@ -136,18 +136,32 @@ export class Human extends Enemy {
 
 			this._weapon.Render();
 
-			Canvas.DrawImageWithAngle(
-				this._frames.Hands.Bend,
-				new Rectangle(
-					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-					this._y + this.Height * this._armHeight,
-					this._frames.Hands.Bend.BoundingBox.Width * scale,
-					this._frames.Hands.Bend.BoundingBox.Height * scale
-				),
-				this._angle,
-				-2 * scale,
-				(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
-			);
+			if (this._weapon.Heavy)
+				Canvas.DrawImageWithAngle(
+					this._frames.Hands.Bend,
+					new Rectangle(
+						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+						this._y + this.Height * this._armHeight,
+						this._frames.Hands.Bend.BoundingBox.Width * scale,
+						this._frames.Hands.Bend.BoundingBox.Height * scale
+					),
+					this._angle,
+					-2 * scale,
+					(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+				);
+			else
+				Canvas.DrawImageWithAngle(
+					this._frames.Hands.Straight,
+					new Rectangle(
+						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+						this._y + this.Height * this._armHeight,
+						this._frames.Hands.Straight.BoundingBox.Width * scale,
+						this._frames.Hands.Straight.BoundingBox.Height * scale
+					),
+					this._angle + 0.05,
+					-2 * scale,
+					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+				);
 		} else {
 			Canvas.DrawImageWithAngleVFlipped(
 				this._frames.Hands.Bend,

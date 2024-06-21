@@ -8,7 +8,7 @@ import { RatCorpse } from "../RatCorpse.js";
 import { RatTail } from "../../Assets/Items/Item.js";
 
 export class Rat extends Enemy {
-	public static readonly Damage = 10;
+	public static readonly Damage = 20;
 	public static readonly AttackCooldown = 500;
 	private static readonly _deathSound = new Audio("Sounds/rat_death.mp3");
 	private readonly _image = GetSprite("Rat") as Sprite;
@@ -31,12 +31,12 @@ export class Rat extends Enemy {
 
 		if (this._attackCooldown <= 0) {
 			if (Math.abs(distance) > 50 && Math.abs(distance) < 150) {
-				this._verticalAcceleration = 25;
+				this._verticalAcceleration = 20;
 
 				this._attackCooldown = Rat.AttackCooldown;
 			}
 
-			if (Math.abs(this.GetDistanceToPlayer()) <= 50 && this._y == plrPos.Y) {
+			if (Math.abs(this.GetDistanceToPlayer()) <= 100 && this._y == plrPos.Y) {
 				this._attackCooldown = Rat.AttackCooldown;
 
 				Scene.Current.Player.TakeDamage(Rat.Damage);

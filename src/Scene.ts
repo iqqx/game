@@ -12,7 +12,7 @@ import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { AidKit, Bread, DogTag, Radio, RatTail, Sausage, Vodka } from "./Assets/Items/Item.js";
+import { Adrenalin, AidKit, Bread, DogTag, Radio, RatTail, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -440,6 +440,8 @@ export class Scene {
 				return new DogTag();
 			case "RatTail":
 				return new RatTail();
+			case "Adrenalin":
+				return new Adrenalin();
 			default:
 				throw new Error("Предмет не удалось распарсить: " + raw);
 		}
