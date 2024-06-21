@@ -34,7 +34,7 @@ export class Entity extends GameObject {
                 this.MoveDown(dt);
             return;
         }
-        this.ApplyVForce();
+        this.ApplyVForce(dt);
         if (this._movingLeft)
             this.MoveLeft(dt);
         else if (this._movingRight)
@@ -47,7 +47,7 @@ export class Entity extends GameObject {
     MoveRight(dt) {
         if (!this.IsAlive())
             return;
-        this._x += this._speed; // * (dt / 15);
+        this._x += this._speed * (dt / 15);
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
         if (collideOffsets !== false) {
             if (collideOffsets.instance instanceof Spikes)
@@ -99,10 +99,10 @@ export class Entity extends GameObject {
             return;
         this._verticalAcceleration = this._jumpForce;
     }
-    ApplyVForce() {
+    ApplyVForce(dt) {
         const prevY = this._y;
         this._verticalAcceleration -= this._verticalAcceleration > 0 ? 2 : 3;
-        this._y += this._verticalAcceleration;
+        this._y += this._verticalAcceleration * (dt / 15);
         if (this._verticalAcceleration <= 0) {
             // падаем
             const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);

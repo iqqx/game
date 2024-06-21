@@ -45,7 +45,7 @@ export class Human extends Enemy {
             this._timeFromNotice += dt;
         if (this._timeFromSaw >= 0)
             this._timeFromSaw += dt;
-        this.ApplyVForce();
+        this.ApplyVForce(dt);
         this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();

@@ -23,7 +23,7 @@ export abstract class Enemy extends Entity {
 	}
 
 	public Update(dt: number) {
-		this.ApplyVForce();
+		this.ApplyVForce(dt);
 
 		if (!this.IsSpotPlayer()) return;
 

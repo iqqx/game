@@ -41,7 +41,7 @@ export class Entity extends GameObject {
 			return;
 		}
 
-		this.ApplyVForce();
+		this.ApplyVForce(dt);
 
 		if (this._movingLeft) this.MoveLeft(dt);
 		else if (this._movingRight) this.MoveRight(dt);
@@ -56,7 +56,7 @@ export class Entity extends GameObject {
 	public MoveRight(dt: number) {
 		if (!this.IsAlive()) return;
 
-		this._x += this._speed; // * (dt / 15);
+		this._x += this._speed * (dt / 15);
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
 		if (collideOffsets !== false) {
@@ -117,10 +117,10 @@ export class Entity extends GameObject {
 		this._verticalAcceleration = this._jumpForce;
 	}
 
-	protected ApplyVForce() {
+	protected ApplyVForce(dt: number) {
 		const prevY = this._y;
 		this._verticalAcceleration -= this._verticalAcceleration > 0 ? 2 : 3;
-		this._y += this._verticalAcceleration;
+		this._y += this._verticalAcceleration * (dt / 15);
 
 		if (this._verticalAcceleration <= 0) {
 			// падаем

@@ -41,8 +41,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _framesToPunch = 0;
     _mainHand = true;
-    // private _timeFromSpawn = 0;
-    _timeFromSpawn = 4000;
+    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 4000;
     _timeFromEnd = -1;
     _running = false;
     _endFake = new EndGameFake();
@@ -394,7 +394,7 @@ export class Player extends Entity {
             }
             return;
         }
-        this.ApplyVForce();
+        this.ApplyVForce(dt);
         if (this._timeFromSpawn < 5000) {
             this._timeFromSpawn += dt;
             if (this._timeFromSpawn >= 5000)

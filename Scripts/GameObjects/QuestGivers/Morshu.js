@@ -94,3 +94,4 @@ export class Morshu extends Character {
         }
     }
 }
+//# sourceMappingURL=Morshu.js.map
