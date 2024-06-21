@@ -15,7 +15,7 @@ export class FPSCounter extends GameObject {
         GUI.DrawRectangle(GUI.Width - this.Width, 0, this.Width, this.Height);
         GUI.SetFillColor(Color.White);
         GUI.SetFont(12);
-        GUI.DrawTextCenter(Math.round(1000 / this._delta).toString(), GUI.Width - this.Width, 0, this.Width, this.Height);
+        GUI.DrawTextCenter((1000 / this._delta).toFixed(1), GUI.Width - this.Width, 0, this.Width, this.Height);
     }
 }
 //# sourceMappingURL=FPSCounter.js.map

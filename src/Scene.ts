@@ -85,6 +85,8 @@ export class Scene {
 				if (e.button === 0) this._lmb = true;
 				if (e.button === 2) this._rmb = true;
 			}
+
+			for (const event of this._keyDownEvents) if (event[0] === "any") event[1]();
 		});
 
 		addEventListener("mouseup", (e) => {
