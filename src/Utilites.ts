@@ -131,6 +131,10 @@ export class Vector2 {
 	public GetLength(): number {
 		return Math.sqrt(this.X ** 2 + this.Y ** 2);
 	}
+
+	public static Sub(a: Vector2, b: Vector2) {
+		return new Vector2(a.X - b.X, a.Y - b.Y);
+	}
 }
 
 export type RaycastHit = {

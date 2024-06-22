@@ -12,7 +12,8 @@ export class Enemy extends Entity {
     }
     IsSpotPlayer() {
         const plrPos = Scene.Current.Player.GetCenter();
-        const hit = Scene.Current.Raycast(new Vector2(this._x, this._y + this.Height), new Vector2(plrPos.X - this._x, plrPos.Y - this._y), 1000, Tag.Player | Tag.Wall)[0];
+        const myPos = this.GetCenter();
+        const hit = Scene.Current.Raycast(myPos, Vector2.Sub(plrPos, myPos), 1000, Tag.Player | Tag.Wall)[0];
         return hit !== undefined && hit.instance instanceof Player && hit.instance.IsAlive();
     }
     Update(dt) {

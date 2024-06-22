@@ -99,6 +99,9 @@ export class Vector2 {
     GetLength() {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
+    static Sub(a, b) {
+        return new Vector2(a.X - b.X, a.Y - b.Y);
+    }
 }
 export function GetEnemyTypeName(enemyType) {
     switch (enemyType) {
