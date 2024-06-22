@@ -57,6 +57,14 @@ export class GameObject {
 		);
 	}
 
+	public static IsCollideByRect(who: Rectangle, other: GameObject): boolean {
+		const colliderOther = other.GetCollider();
+
+		return (
+			colliderOther !== undefined && who.X + who.Width > other._x && who.X < other._x + colliderOther.Width && who.Y + who.Height > other._y && who.Y < other._y + colliderOther.Height
+		);
+	}
+
 	public static GetCollide(who: GameObject, other: GameObject): RaycastHit | false {
 		if (this.IsCollide(who, other) === false) return false;
 
@@ -64,6 +72,23 @@ export class GameObject {
 		const xend = other._x + other.Width - who._x;
 		const ystart = other._y + other.Height - who._y;
 		const yend = other._y - (who._y + who.Height);
+
+		return {
+			instance: other,
+			position: new Vector2(0, 0),
+			Normal: new Vector2(Math.sign(xstart), Math.sign(ystart)),
+			start: new Vector2(xstart, ystart),
+			end: new Vector2(xend, yend),
+		};
+	}
+
+	public static GetCollideByRect(who: Rectangle, other: GameObject): RaycastHit | false {
+		if (this.IsCollideByRect(who, other) === false) return false;
+
+		const xstart = who.X + who.Width - other._x;
+		const ystart = other._y + other.Height - who.Y;
+		const xend = other._x + other.Width - who.X;
+		const yend = other._y - (who.Y + who.Height);
 
 		return {
 			instance: other,

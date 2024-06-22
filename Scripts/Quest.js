@@ -62,7 +62,9 @@ export class Quest {
     }
     AddHasItemsTask(mask, ...items) {
         const currentTasks = this.Tasks.length + 1;
-        this.Tasks.push(new HasItemTask(this, () => this._stage++, () => (this._stage = currentTasks), mask, items));
+        const task = new HasItemTask(this, () => this._stage++, () => (this._stage = currentTasks), mask, items);
+        this.Tasks.push(task);
+        task.Check();
         return this;
     }
 }

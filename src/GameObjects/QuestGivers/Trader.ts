@@ -1,4 +1,4 @@
-import { RatTail } from "../../Assets/Items/Item.js";
+import { RatTail, RifleBullet } from "../../Assets/Items/Item.js";
 import { AK } from "../../Assets/Weapons/Weapon.js";
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
@@ -40,6 +40,7 @@ export class Trader extends Character {
 					OwnerFirst: false,
 					AfterAction: () => {
 						Scene.Player.GiveQuestItem(new AK());
+						Scene.Player.GiveQuestItem(new RifleBullet(20));
 					},
 				};
 			}

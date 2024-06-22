@@ -1,7 +1,7 @@
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -28,7 +28,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [new AK(), null];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -47,8 +47,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4000;
+	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 4500;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
@@ -351,7 +351,7 @@ export class Player extends Entity {
 
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
 
-			this._xTarget = e.offsetX;
+			this._xTarget = Math.round(e.offsetX);
 			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
@@ -1279,12 +1279,6 @@ export class Player extends Entity {
 		if (this._movingLeft || this._movingRight) return this._sit ? 1 : 2;
 
 		return 0;
-	}
-
-	public override Jump() {
-		if (!this._grounded || this._sit) return;
-
-		this._verticalAcceleration = this._jumpForce;
 	}
 
 	private Shoot() {

@@ -111,45 +111,62 @@ export class Entity extends GameObject {
 
 	public Jump() {
 		if (!this.IsAlive()) return;
-
 		if (!this._grounded) return;
 
+		this._grounded = false;
 		this._verticalAcceleration = this._jumpForce;
 	}
 
 	protected ApplyVForce(dt: number) {
-		if (dt === 200) return;
+		if (this._verticalAcceleration === 0) {
+			// Проверка на стойкость
 
-		const prevY = this._y;
-		this._verticalAcceleration -= (this._verticalAcceleration > 0 ? 2 : 3) * (dt / 15);
-		this._y += this._verticalAcceleration * (dt / 15);
+			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y - 3 * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
 
-		if (this._verticalAcceleration <= 0) {
+			if (offsets.length === 0 || (offsets[0].instance.Tag === Tag.Platform && this._movingDown)) {
+				this._grounded = false;
+				this._verticalAcceleration -= (dt / 15) * 3;
+			}
+		} else if (this._verticalAcceleration < 0) {
 			// падаем
-			const offsets = Scene.Current.GetCollides(this, Tag.Wall | Tag.Platform);
+
+			const offsets = Scene.Current.GetCollidesByRect(
+				new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height),
+				Tag.Wall | Tag.Platform
+			);
 
 			offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
 
 			if (offsets.length > 0 && offsets[0].start.Y >= 0) {
 				if (offsets[0].instance instanceof Spikes) this.TakeDamage(100);
-				else if (offsets[0].instance instanceof Platform && (prevY < offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height || this._movingDown)) return;
+				else if (offsets[0].instance instanceof Platform && this._y <= offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height) {
+					this._y += this._verticalAcceleration * (dt / 15);
+					this._verticalAcceleration -= (dt / 15) * 3;
+
+					return;
+				}
 
 				this._verticalAcceleration = 0;
 
 				this._grounded = true;
-				this._y += offsets[0].start.Y;
+				this._y = offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height;
+			} else {
+				this._y += this._verticalAcceleration * (dt / 15);
+				this._verticalAcceleration -= (dt / 15) * 3;
 			}
 		} else if (this._verticalAcceleration > 0) {
 			// взлетаем
-			this._grounded = false;
-			const offsets = Scene.Current.GetCollides(this, Tag.Wall);
+
+			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall);
 
 			if (offsets.length > 0) {
 				this._verticalAcceleration = 0;
 
-				this._y += offsets.minBy((x) => x.instance.GetPosition().Y).end.Y;
-
-				return;
+				const r = offsets.minBy((x) => x.instance.GetPosition().Y);
+				this._y = r.instance.GetPosition().Y - this._collider.Height;
+			} else {
+				this._y += this._verticalAcceleration * (dt / 15);
+				this._verticalAcceleration -= (dt / 15) * 2;
 			}
 		}
 	}

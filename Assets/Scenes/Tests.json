@@ -133,8 +133,10 @@
 		{ "Type": "HumanCorpse", "Arguments": [28181, 153, "RatTail"] },
 		{ "Type": "HumanCorpse", "Arguments": [27419, 151] },
 		{ "Type": "Elder", "Arguments": [21752, 300] },
-		{ "Type": "Wall", "Arguments": [4700, 0, 100, 5000] },
-		{ "Type": "Human", "Arguments": [4500, 269, "Green"] },
-		{ "Type": "Player", "Arguments": [4000, 269] }
+		{ "Type": "Player", "Arguments": [4000, 269] },
+		{
+			"Type": "FPSCounter",
+			"Arguments": []
+		}
 	]
 }

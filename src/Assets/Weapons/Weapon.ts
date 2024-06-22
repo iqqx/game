@@ -27,7 +27,7 @@ export abstract class Weapon extends Item {
 	public declare readonly Heavy: boolean;
 	public Automatic: boolean;
 
-	private _loadedAmmo: number = 5;
+	private _loadedAmmo: number = 0;
 	private _position: Vector2 = Vector2.Zero;
 	private _angle: number = 0;
 	private _secondsToCooldown: number = 0;
@@ -65,7 +65,6 @@ export abstract class Weapon extends Item {
 
 		this._reloadTime = reloadTime;
 		this.MaxAmmoClip = clip;
-		this._loadedAmmo = clip;
 		this.Heavy = heavy;
 		this._automatic = auto;
 		this.Automatic = auto;
@@ -158,6 +157,10 @@ export abstract class Weapon extends Item {
 		this._sounds.Reload.Play(0.5);
 	}
 
+	public Load() {
+		this._loadedAmmo = this.MaxAmmoClip;
+	}
+
 	public GetLoadedAmmo() {
 		return this._loadedAmmo;
 	}
@@ -243,7 +246,7 @@ export class Glock extends Weapon {
 				Shell: GetSound("Shell"),
 			},
 			200,
-			1,
+			20,
 			0.1,
 			false,
 			false,
@@ -261,7 +264,7 @@ export class Glock extends Weapon {
 
 export class AK extends Weapon {
 	private static readonly _fireCooldown = 150;
-	private static readonly _damage = 40;
+	private static readonly _damage = 60;
 	private static readonly _spread = 0.01;
 
 	constructor() {

@@ -1,7 +1,7 @@
 import { EnemyType } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas, GUI } from "./Context.js";
-import { Vector2, Line, GetIntersectPoint, Lerp, Color, Rectangle } from "./Utilites.js";
+import { Vector2, Line, GetIntersectPoint, Color, Rectangle } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
@@ -260,6 +260,24 @@ export class Scene {
             }
         return result;
     }
+    GetCollidesByRect(who, tag) {
+        const result = [];
+        if (tag === undefined)
+            for (const object of Scene.Current._gameObjects) {
+                const collide = GameObject.GetCollideByRect(who, object);
+                if (collide !== false)
+                    result.push(collide);
+            }
+        else
+            for (const object of Scene.Current._gameObjects) {
+                if (object.Tag & tag) {
+                    const collide = GameObject.GetCollideByRect(who, object);
+                    if (collide !== false)
+                        result.push(collide);
+                }
+            }
+        return result;
+    }
     IsCollide(who, tag) {
         for (const object of Scene.Current._gameObjects) {
             if (tag !== undefined && (object.Tag & tag) === 0)
@@ -308,12 +326,13 @@ export class Scene {
         return null;
     }
     Update(time) {
+        const dt = Math.min(200, time - Scene.Time);
         if (Scene.Current.Player !== null && Scene.Current.Player.CanTarget()) {
             const plrPos = Scene.Current.Player.GetPosition();
             const plrTargetRaw = Scene.Current.Player.GetTarget();
-            Scene.Current._levelPosition = Math.round(Lerp(Scene.Current._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
+            const offset = Math.clamp(plrTargetRaw.X + 50 / 2 - 1500, 300 - 1500, -300) + plrPos.X - Scene.Current._levelPosition;
+            Scene.Current._levelPosition += dt * 0.005 * offset;
         }
-        const dt = Math.min(200, time - Scene.Time);
         for (const object of Scene.Current._gameObjects)
             object.Update(dt);
         for (const element of Scene.Current._GUIElements)

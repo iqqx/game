@@ -298,6 +298,27 @@ export class Scene {
 		return result;
 	}
 
+	public GetCollidesByRect(who: Rectangle, tag?: Tag): RaycastHit[] {
+		const result: RaycastHit[] = [];
+
+		if (tag === undefined)
+			for (const object of Scene.Current._gameObjects) {
+				const collide = GameObject.GetCollideByRect(who, object);
+
+				if (collide !== false) result.push(collide);
+			}
+		else
+			for (const object of Scene.Current._gameObjects) {
+				if (object.Tag & tag) {
+					const collide = GameObject.GetCollideByRect(who, object);
+
+					if (collide !== false) result.push(collide);
+				}
+			}
+
+		return result;
+	}
+
 	public IsCollide(who: GameObject, tag?: Tag) {
 		for (const object of Scene.Current._gameObjects) {
 			if (tag !== undefined && (object.Tag & tag) === 0) continue;
@@ -351,14 +372,16 @@ export class Scene {
 	}
 
 	public Update(time: number) {
+		const dt = Math.min(200, time - Scene.Time);
+
 		if (Scene.Current.Player !== null && Scene.Current.Player.CanTarget()) {
 			const plrPos = Scene.Current.Player.GetPosition();
 			const plrTargetRaw = Scene.Current.Player.GetTarget();
 
-			Scene.Current._levelPosition = Math.round(Lerp(Scene.Current._levelPosition, Math.clamp(-750 + (plrTargetRaw.X + 50 / 2 - 750), 300 - 1500, -300) + plrPos.X, 0.1));
-		}
+			const offset = Math.clamp(plrTargetRaw.X + 50 / 2 - 1500, 300 - 1500, -300) + plrPos.X - Scene.Current._levelPosition;
 
-		const dt = Math.min(200, time - Scene.Time);
+			Scene.Current._levelPosition += dt * 0.005 * offset;
+		}
 
 		for (const object of Scene.Current._gameObjects) object.Update(dt);
 		for (const element of Scene.Current._GUIElements) element.Update(dt, time);

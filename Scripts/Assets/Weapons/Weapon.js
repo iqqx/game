@@ -21,7 +21,7 @@ export class Weapon extends Item {
     MaxAmmoClip = 30;
     _automatic;
     Automatic;
-    _loadedAmmo = 5;
+    _loadedAmmo = 0;
     _position = Vector2.Zero;
     _angle = 0;
     _secondsToCooldown = 0;
@@ -44,7 +44,6 @@ export class Weapon extends Item {
         (this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
         this._reloadTime = reloadTime;
         this.MaxAmmoClip = clip;
-        this._loadedAmmo = clip;
         this.Heavy = heavy;
         this._automatic = auto;
         this.Automatic = auto;
@@ -85,6 +84,9 @@ export class Weapon extends Item {
         this._ammoToReload = toReload;
         this._secondsToReload = this._reloadTime;
         this._sounds.Reload.Play(0.5);
+    }
+    Load() {
+        this._loadedAmmo = this.MaxAmmoClip;
     }
     GetLoadedAmmo() {
         return this._loadedAmmo;
@@ -142,7 +144,7 @@ export class Glock extends Weapon {
         }, {
             Fire: GetSound("Shoot_3"),
             Shell: GetSound("Shell"),
-        }, 200, 1, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+        }, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
     }
     static toString() {
         return "Пистолет";
@@ -150,7 +152,7 @@ export class Glock extends Weapon {
 }
 export class AK extends Weapon {
     static _fireCooldown = 150;
-    static _damage = 40;
+    static _damage = 60;
     static _spread = 0.01;
     constructor() {
         super({

@@ -22,7 +22,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new AK(), null];
+    _inventory = [null, null];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -41,8 +41,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    // private _timeFromSpawn = 0;
-    _timeFromSpawn = 4000;
+    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 4500;
     _timeFromEnd = -1;
     _running = false;
     _endFake = new EndGameFake();
@@ -324,7 +324,7 @@ export class Player extends Entity {
                 return;
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
-            this._xTarget = e.offsetX;
+            this._xTarget = Math.round(e.offsetX);
             this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (this._dialog !== null) {
@@ -992,11 +992,6 @@ export class Player extends Entity {
         if (this._movingLeft || this._movingRight)
             return this._sit ? 1 : 2;
         return 0;
-    }
-    Jump() {
-        if (!this._grounded || this._sit)
-            return;
-        this._verticalAcceleration = this._jumpForce;
     }
     Shoot() {
         if (!this.CanTarget() || this._onLadder !== null)

@@ -15,7 +15,7 @@ export class Quest {
 	constructor(Title: string, Giver: Character | Player, afterComplete?: () => void) {
 		this.Title = Title;
 		this.Giver = Giver;
-		this._afterComplete = afterComplete
+		this._afterComplete = afterComplete;
 	}
 
 	public Update() {
@@ -80,15 +80,18 @@ export class Quest {
 
 	public AddHasItemsTask(mask: string, ...items: [typeof Item, number][]) {
 		const currentTasks = this.Tasks.length + 1;
-		this.Tasks.push(
-			new HasItemTask(
-				this,
-				() => this._stage++,
-				() => (this._stage = currentTasks),
-				mask,
-				items
-			)
+
+		const task = new HasItemTask(
+			this,
+			() => this._stage++,
+			() => (this._stage = currentTasks),
+			mask,
+			items
 		);
+
+		this.Tasks.push(task);
+
+		task.Check();
 
 		return this;
 	}

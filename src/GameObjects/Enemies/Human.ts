@@ -43,6 +43,8 @@ export class Human extends Enemy {
 		this.Direction = direction;
 
 		this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
+
+		this._weapon.Load();
 	}
 
 	override Update(dt: number): void {

@@ -39,6 +39,7 @@ export class Human extends Enemy {
         this._weapon = weapon ?? new Glock();
         this.Direction = direction;
         this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
+        this._weapon.Load();
     }
     Update(dt) {
         if (this._timeFromNotice >= 0)
