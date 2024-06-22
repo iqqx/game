@@ -49,6 +49,7 @@ export class Player extends Entity {
     _speaked = false;
     _speaked2 = false;
     _timeFromShootArtem = -1;
+    _timeFromGoodEnd = 0;
     static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -347,6 +348,12 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
+        if (this._timeFromGoodEnd > 0) {
+            this._timeFromGoodEnd += dt;
+            if (this._timeFromGoodEnd >= 2500)
+                Scene.LoadFromFile("Assets/Scenes/Prolog.json");
+            return;
+        }
         if (this._health <= 0) {
             this._timeFromDeath += dt;
             if (this._timeFromDeath > 5000 && this._timeFromEnd === -1)
@@ -365,9 +372,8 @@ export class Player extends Entity {
                 this.SpeakWith(this._endFake);
             }
         }
-        if (this._x > 33500 && this._y > 800 && this._onLadder !== null) {
-            Scene.LoadFromFile("Assets/Scenes/Prolog.json");
-        }
+        if (this._x > 33500 && this._y > 800 && this._onLadder !== null)
+            this._timeFromGoodEnd = dt;
         if (this._dialog !== null && this._timeToNextChar > 0) {
             this._timeToNextChar -= dt;
             if (this._timeToNextChar <= 0) {
@@ -560,6 +566,10 @@ export class Player extends Entity {
     RenderOverlay() {
         if (this._timeFromSpawn < 5000) {
             GUI.DrawVignette(Color.Black, this._timeFromSpawn / 11111, 1 - this._timeFromSpawn / 5000, 1 - this._timeFromSpawn / 10000);
+            return;
+        }
+        if (this._timeFromGoodEnd > 0) {
+            GUI.DrawVignette(Color.Black, Math.max(0, 0.5 - this._timeFromGoodEnd / 4000), Math.min(1, this._timeFromGoodEnd / 2000), Math.max(1, 0.5 + this._timeFromGoodEnd / 5000));
             return;
         }
         if (this._health > 0)

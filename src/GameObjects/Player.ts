@@ -55,6 +55,7 @@ export class Player extends Entity {
 	private _speaked = false;
 	private _speaked2 = false;
 	private _timeFromShootArtem = -1;
+	private _timeFromGoodEnd = 0;
 
 	private static readonly _name = "Макс";
 	private static readonly _speed = 5;
@@ -377,6 +378,14 @@ export class Player extends Entity {
 	}
 
 	public override Update(dt: number) {
+		if (this._timeFromGoodEnd > 0) {
+			this._timeFromGoodEnd += dt;
+
+			if (this._timeFromGoodEnd >= 2500) Scene.LoadFromFile("Assets/Scenes/Prolog.json");
+
+			return;
+		}
+
 		if (this._health <= 0) {
 			this._timeFromDeath += dt;
 
@@ -399,9 +408,7 @@ export class Player extends Entity {
 			}
 		}
 
-		if (this._x > 33500 && this._y > 800 && this._onLadder !== null) {
-			Scene.LoadFromFile("Assets/Scenes/Prolog.json");
-		}
+		if (this._x > 33500 && this._y > 800 && this._onLadder !== null) this._timeFromGoodEnd = dt;
 
 		if (this._dialog !== null && this._timeToNextChar > 0) {
 			this._timeToNextChar -= dt;
@@ -819,6 +826,12 @@ export class Player extends Entity {
 	public RenderOverlay() {
 		if (this._timeFromSpawn < 5000) {
 			GUI.DrawVignette(Color.Black, this._timeFromSpawn / 11111, 1 - this._timeFromSpawn / 5000, 1 - this._timeFromSpawn / 10000);
+
+			return;
+		}
+
+		if (this._timeFromGoodEnd > 0) {
+			GUI.DrawVignette(Color.Black, Math.max(0, 0.5 - this._timeFromGoodEnd / 4000), Math.min(1, this._timeFromGoodEnd / 2000), Math.max(1, 0.5 + this._timeFromGoodEnd / 5000));
 
 			return;
 		}
