@@ -210,7 +210,7 @@ export class Scene {
 				x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Red;
 				x.Arguments[4] = x.Arguments[4] === undefined ? undefined : this.ParseItem(x.Arguments[4]);
 
-				return new Human(...(x.Arguments as [number, number, EnemyType]));
+				return new Human(...(x.Arguments as [number, number, EnemyType.Red | EnemyType.Green]));
 			case "Rat":
 				return new Rat(...(x.Arguments as [number, number]));
 			default:

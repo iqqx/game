@@ -1,7 +1,7 @@
 import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
-import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
+import { Color, Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
@@ -15,17 +15,16 @@ import { Elder } from "../QuestGivers/Elder.js";
 
 export class Human extends Enemy {
 	private static readonly _deathSound = new Audio("Sounds/human_death-2.mp3");
-	private readonly _frames = {
-		Walk: GetSprite("Player_Walk") as Sprite[],
-		Sit: GetSprite("Player_Crouch") as Sprite[],
+	private readonly _frames: {
+		Walk: Sprite[];
 		Hands: {
-			Straight: GetSprite("Player_Arm_Straight") as Sprite,
-			Bend: GetSprite("Player_Arm_Bend") as Sprite,
-		},
+			Straight: Sprite;
+			Bend: Sprite;
+		};
 	};
 	private readonly _weapon: Weapon;
 	private static readonly _visibleDistance = 500;
-	private readonly _armHeight = 0.65;
+	private readonly _armHeight = 0.6;
 	private _timeToNextFrame = 0;
 	private _frameIndex = 0;
 	private _angle = 0;
@@ -39,7 +38,7 @@ export class Human extends Enemy {
 	private readonly _fakeEndCharacter = new FakeEndGuard();
 	private _warned = false;
 
-	constructor(x: number, y: number, type: EnemyType, direction: -1 | 1 = 1, weapon?: Weapon) {
+	constructor(x: number, y: number, type: EnemyType.Green | EnemyType.Red, direction: -1 | 1 = 1, weapon?: Weapon) {
 		super(50, 100, 1, 100, type);
 
 		this._x = x;
@@ -47,12 +46,29 @@ export class Human extends Enemy {
 		this._weapon = weapon ?? new Glock();
 		this.Direction = direction;
 
+		this._frames =
+			type === EnemyType.Green
+				? {
+						Walk: GetSprite("Human_Green_Walk"),
+						Hands: {
+							Straight: GetSprite("Human_Green_Arm_Straight"),
+							Bend: GetSprite("Human_Green_Arm_Bend"),
+						},
+				  }
+				: {
+						Walk: GetSprite("Human_Red_Walk"),
+						Hands: {
+							Straight: GetSprite("Human_Red_Arm_Straight"),
+							Bend: GetSprite("Human_Red_Arm_Bend"),
+						},
+				  };
+
 		this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
 
 		this._angle = this.Direction === -1 ? Math.PI : 0;
 
 		this._weapon.Load();
-		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
+		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
 	}
 
 	override Update(dt: number): void {
@@ -60,7 +76,7 @@ export class Human extends Enemy {
 		if (this._timeFromSaw >= 0) this._timeFromSaw += dt;
 
 		this.ApplyVForce(dt);
-		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
+		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
@@ -76,14 +92,9 @@ export class Human extends Enemy {
 		if (this.IsSpotPlayer()) {
 			this._timeFromNotice = this._timeToTurn + 1;
 
-			this._angle = (() => {
-				const angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this.Height * 0.6), plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2));
+			this._angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this.Height * this._armHeight), plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2));
 
-				if (this.Direction == 1) return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
-				else return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
-			})();
-
-			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
+			this._weapon?.Update(dt, new Vector2(this._x + this.Width / 2 + Math.cos(this._angle) * 20, this._y + this.Height * this._armHeight - Math.sin(this._angle) * 20), this._angle);
 
 			if (this._aggresive) {
 				if (this._timeFromSaw > this._timeToShoot) {
@@ -98,7 +109,7 @@ export class Human extends Enemy {
 
 							if (this._timeToNextFrame < 0) {
 								this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
-								this._timeToNextFrame = 70;
+								this._timeToNextFrame = 150;
 							}
 						} else this._frameIndex = 0;
 					}
@@ -149,18 +160,19 @@ export class Human extends Enemy {
 			Canvas.DrawImage(GetSprite("Notice") as Sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition() + widthOffset, this._y + this.Height + 15, 20, 20));
 
 		if (this.Direction == 1) {
-			Canvas.DrawImageWithAngle(
-				this._frames.Hands.Straight,
-				new Rectangle(
-					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-					this._y + this.Height * this._armHeight,
-					this._frames.Hands.Straight.BoundingBox.Width * scale,
-					this._frames.Hands.Straight.BoundingBox.Height * scale
-				),
-				this._angle + 0.05,
-				-2 * scale,
-				(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
-			);
+			if (this._weapon.Heavy)
+				Canvas.DrawImageWithAngle(
+					this._frames.Hands.Straight,
+					new Rectangle(
+						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+						this._y + this.Height * this._armHeight,
+						this._frames.Hands.Straight.BoundingBox.Width * scale,
+						this._frames.Hands.Straight.BoundingBox.Height * scale
+					),
+					this._angle - 0.05,
+					-4 * scale,
+					(this._frames.Hands.Straight.BoundingBox.Height - 3) * scale
+				);
 
 			Canvas.DrawImage(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 
@@ -176,8 +188,8 @@ export class Human extends Enemy {
 						this._frames.Hands.Bend.BoundingBox.Height * scale
 					),
 					this._angle,
-					-2 * scale,
-					(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+					-4 * scale,
+					(this._frames.Hands.Straight.BoundingBox.Height + 3) * scale
 				);
 			else
 				Canvas.DrawImageWithAngle(
@@ -188,23 +200,24 @@ export class Human extends Enemy {
 						this._frames.Hands.Straight.BoundingBox.Width * scale,
 						this._frames.Hands.Straight.BoundingBox.Height * scale
 					),
-					this._angle + 0.05,
-					-2 * scale,
-					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+					this._angle - 0.05,
+					-4 * scale,
+					(this._frames.Hands.Straight.BoundingBox.Height - 3) * scale
 				);
 		} else {
-			Canvas.DrawImageWithAngleVFlipped(
-				this._frames.Hands.Bend,
-				new Rectangle(
-					this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-					this._y + this.Height * this._armHeight,
-					this._frames.Hands.Bend.BoundingBox.Width * scale,
-					this._frames.Hands.Bend.BoundingBox.Height * scale
-				),
-				this._angle,
-				-2 * scale,
-				(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
-			);
+			if (this._weapon.Heavy)
+				Canvas.DrawImageWithAngleVFlipped(
+					this._frames.Hands.Bend,
+					new Rectangle(
+						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+						this._y + this.Height * this._armHeight,
+						this._frames.Hands.Bend.BoundingBox.Width * scale,
+						this._frames.Hands.Bend.BoundingBox.Height * scale
+					),
+					this._angle,
+					-4 * scale,
+					(this._frames.Hands.Straight.BoundingBox.Height + 3) * scale
+				);
 
 			Canvas.DrawImageFlipped(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 
@@ -218,9 +231,9 @@ export class Human extends Enemy {
 					this._frames.Hands.Straight.BoundingBox.Width * scale,
 					this._frames.Hands.Straight.BoundingBox.Height * scale
 				),
-				this._angle - 0.05,
-				-2 * scale,
-				(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+				this._angle + 0.05,
+				-4 * scale,
+				(this._frames.Hands.Straight.BoundingBox.Height - 3) * scale
 			);
 		}
 	}
