@@ -13,14 +13,14 @@ export class Blood extends GameObject {
 	private _onFloorOffset = 0;
 
 	constructor(position: Vector2, acceleration: Vector2) {
-		super(5, 5);
+		super(5, 2);
 
 		this._x = position.X;
 		this._y = position.Y;
 		this._accelerationX = acceleration.X;
 		this._accelerationY = acceleration.Y;
 
-		this._collider = new Rectangle(0, 0, 5, 5);
+		this._collider = new Rectangle(0, 0, 5, 2);
 	}
 
 	public override Update(dt: number): void {
@@ -37,7 +37,7 @@ export class Blood extends GameObject {
 				} else {
 					this._onWall = false;
 					this._timeFromFreeze = 0;
-					this.Height = 5;
+					this.Height = 2;
 					this._y = hits[0].position.Y;
 				}
 			} else {

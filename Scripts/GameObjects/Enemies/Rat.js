@@ -25,6 +25,7 @@ export class Rat extends Enemy {
         if (this._attackCooldown <= 0) {
             if (Math.abs(distance) > 50 && Math.abs(distance) < 150 && this._grounded) {
                 this._verticalAcceleration = 20;
+                this._grounded = false;
                 this._attackCooldown = Rat.AttackCooldown;
             }
             if (Math.abs(this.GetDistanceToPlayer()) <= 100 && this._y == plrPos.Y) {

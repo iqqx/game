@@ -1288,13 +1288,8 @@ export class Player extends Entity {
 
 		if (this._weapon === null) {
 			if (this._inventory[this._selectedHand] instanceof Item) {
-				if (this._inventory[this._selectedHand] instanceof Radio) {
-					// if (this._quests.length === 0 || this._quests[0].Giver !== this || this._quests[0].IsCompleted()) {
-					this.SpeakWith(this._endFake);
-					// this._xTarget = Canvas.GetSize().X / 2;
-					// this._inventory[this._selectedHand] = null;
-					// }
-				} else
+				if (this._inventory[this._selectedHand] instanceof Radio) this.SpeakWith(this._endFake);
+				else
 					this._inventory[this._selectedHand].Use(() => {
 						this._inventory[this._selectedHand] = null;
 					});
@@ -1310,9 +1305,7 @@ export class Player extends Entity {
 					(enemy[0].instance as Enemy).TakeDamage(10);
 
 					const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
-					Scene.Current.Instantiate(
-						new Blood(new Vector2(enemy[0].position.X + bloodDir.X * 100, enemy[0].position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 20, bloodDir.Y * 20))
-					);
+					Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].instance.GetCenter().X, enemy[0].instance.GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
 				} else GetSound("Punch").Play(0.15);
 			}
 		} else if (this._weapon.TryShoot()) this._needDrawAntiVegnitte = 2;

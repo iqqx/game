@@ -11,12 +11,12 @@ export class Blood extends GameObject {
     _onWall;
     _onFloorOffset = 0;
     constructor(position, acceleration) {
-        super(5, 5);
+        super(5, 2);
         this._x = position.X;
         this._y = position.Y;
         this._accelerationX = acceleration.X;
         this._accelerationY = acceleration.Y;
-        this._collider = new Rectangle(0, 0, 5, 5);
+        this._collider = new Rectangle(0, 0, 5, 2);
     }
     Update(dt) {
         if (this._freezed) {
@@ -32,7 +32,7 @@ export class Blood extends GameObject {
                 else {
                     this._onWall = false;
                     this._timeFromFreeze = 0;
-                    this.Height = 5;
+                    this.Height = 2;
                     this._y = hits[0].position.Y;
                 }
             }

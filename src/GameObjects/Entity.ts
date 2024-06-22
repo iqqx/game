@@ -121,9 +121,14 @@ export class Entity extends GameObject {
 		if (this._verticalAcceleration === 0) {
 			// Проверка на стойкость
 
-			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y - 3 * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
+			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y - 1, this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
 
-			if (offsets.length === 0 || (offsets[0].instance.Tag === Tag.Platform && this._movingDown)) {
+			offsets.sort((a, b) => a.start.Y - b.start.Y);
+
+			if (
+				offsets.length === 0 ||
+				(offsets[0].instance.Tag === Tag.Platform && (this._movingDown || this._y < offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height))
+			) {
 				this._grounded = false;
 				this._verticalAcceleration -= (dt / 15) * 3;
 			}
