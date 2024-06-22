@@ -151,7 +151,7 @@
 		{ "Type": "Rat", "Arguments": [5785, 152] },
 		{ "Type": "Rat", "Arguments": [13315, 152] },
 		{ "Type": "Rat", "Arguments": [16038, 156] },
-		{ "Type": "Human", "Arguments": [19590, 226, "Green", -1, "Glock"] },
+		{ "Type": "Human", "Arguments": [19590, 250, "Green", -1, "Glock"] },
 		{ "Type": "Human", "Arguments": [20076, 263, "Green", -1, "Glock"] },
 		{ "Type": "Human", "Arguments": [20978, 489, "Green", -1, "AK"] },
 		{ "Type": "Human", "Arguments": [21579, 490, "Green", -1, "AK"] },

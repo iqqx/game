@@ -1,17 +1,18 @@
 import { Radio } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
-import { GetSprite } from "../../Game.js";
+import { GetSound, GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle } from "../../Utilites.js";
+import { Rectangle, Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Artem extends Character {
 	private _timeFromStartEnd = -1;
+	private _timeFromShoot = -1;
 
 	constructor(x: number, y: number) {
-		super(50, 100);
+		super(100, 100);
 
 		this.Tag = Tag.NPC;
 		this._x = x;
@@ -19,15 +20,39 @@ export class Artem extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(
-			GetSprite("Artem"),
-			new Rectangle(
-				this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
-				this._y,
-				this.Width,
-				this.Height
-			)
-		);
+		if (this._timeFromStartEnd == -1) Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		else {
+			if (this._timeFromShoot > 0 && Scene.Time - this._timeFromShoot < 500)
+				Canvas.DrawImage(
+					GetSprite("Artem_Shoot"),
+					new Rectangle(
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._y,
+						this.Width,
+						this.Height
+					)
+				);
+			else if (this.IsEnd())
+				Canvas.DrawImage(
+					GetSprite("Artem_Walk")[0],
+					new Rectangle(
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._y,
+						this.Width,
+						this.Height
+					)
+				);
+			else
+				Canvas.DrawImage(
+					GetSprite("Artem_Walk")[Math.floor(((Scene.Time - this._timeFromStartEnd) / 100) % 4)],
+					new Rectangle(
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._y,
+						this.Width,
+						this.Height
+					)
+				);
+		}
 	}
 
 	public override GetDialog(): Dialog {
@@ -79,5 +104,12 @@ export class Artem extends Character {
 	public StartEnd() {
 		this._timeFromStartEnd = Scene.Time;
 		this._x = 32600;
+	}
+
+	public Shoot() {
+		this._timeFromShoot = Scene.Time;
+
+		GetSound("Shoot_3").Play(0.5);
+		Scene.Player.TakeDamage(500);
 	}
 }

@@ -1,5 +1,4 @@
 import { Tag } from "../../Enums.js";
-import { GetSound } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Artem } from "./Artem.js";
 import { Character } from "./Character.js";
@@ -43,8 +42,7 @@ export class EndGameFake extends Character {
                     Messages: ["Вот спасибо тебе большое, услужил."],
                     Owner: this,
                     AfterAction: () => {
-                        GetSound("Shoot_3").Play(0.5);
-                        Scene.Player.TakeDamage(500);
+                        Scene.Current.GetByType(Artem)[0].Shoot();
                     },
                     OwnerFirst: true,
                 };

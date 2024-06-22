@@ -54,7 +54,7 @@ export class Human extends Enemy {
         this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
         this._angle = this.Direction === -1 ? Math.PI : 0;
         this._weapon.Load();
-        this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
+        this._weapon.Update(0, new Vector2(this._x + this.Width / 2 + Math.cos(this._angle) * 20, this._y + this.Height * this._armHeight - Math.sin(this._angle) * 20), this._angle);
     }
     Update(dt) {
         if (this._timeFromNotice >= 0)
@@ -62,7 +62,6 @@ export class Human extends Enemy {
         if (this._timeFromSaw >= 0)
             this._timeFromSaw += dt;
         this.ApplyVForce(dt);
-        this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
         const plrPos = Scene.Current.Player.GetPosition();
         const plrSize = Scene.Current.Player.GetCollider();
         if (Scene.Current.Player.IsMoving() === 2 && this.GetDirectionToPlayer() != this.Direction && this.GetDistanceToPlayer() < Human._visibleDistance && this._timeFromNotice === -1)

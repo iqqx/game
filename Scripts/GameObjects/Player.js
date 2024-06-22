@@ -470,6 +470,16 @@ export class Player extends Entity {
             if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic)
                 this.Shoot();
         }
+        else if (this._endFake.GetCompletedQuestsCount() >= 2) {
+            this._angle = (() => {
+                const angle = -Math.atan2(this._yTarget - (this._y + this.Height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this.Width / 2));
+                if (this.Direction == 1)
+                    return Math.clamp(angle, -Math.PI / 2 + 0.4, Math.PI / 2 - 0.4);
+                else
+                    return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
+            })();
+            this._frameIndex = 0;
+        }
     }
     Render() {
         if (this._timeFromSpawn < 5000) {

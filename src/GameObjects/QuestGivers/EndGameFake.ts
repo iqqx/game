@@ -50,8 +50,7 @@ export class EndGameFake extends Character {
 					Messages: ["Вот спасибо тебе большое, услужил."],
 					Owner: this,
 					AfterAction: () => {
-						GetSound("Shoot_3").Play(0.5);
-						Scene.Player.TakeDamage(500);
+						(Scene.Current.GetByType(Artem)[0] as Artem).Shoot();
 					},
 					OwnerFirst: true,
 				};
