@@ -11,8 +11,11 @@ export class Item {
 	protected _isUsing = false;
 	protected _usingTime = -1;
 	protected _usingCallback: () => void;
-	public readonly Stack: number = 0;
 	protected _count = 0;
+
+	constructor(count?: number) {
+		this._count = Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack());
+	}
 
 	public Update(dt: number, position: Vector2, angle: number) {
 		if (this._usingTime >= 0) {
@@ -44,6 +47,14 @@ export class Item {
 
 	public GetCount() {
 		return this._count;
+	}
+
+	public Take(count: number) {
+		this._count = Math.clamp(this._count - count, 0, this.GetStack());
+	}
+
+	public GetStack() {
+		return 1;
 	}
 
 	protected OnUsed() {}
@@ -212,13 +223,7 @@ export class Bread extends Item {
 
 export class PistolBullet extends Item {
 	public readonly Icon: Sprite = GetSprite("Pistol_Bullet");
-	public readonly Stack: number = 60;
-
-	constructor(count: number) {
-		super();
-
-		this._count = count;
-	}
+	public declare readonly Stack = 60;
 
 	static toString(): string {
 		return "9x19";
@@ -231,17 +236,15 @@ export class PistolBullet extends Item {
 			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
 		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
 	}
+
+	public GetStack() {
+		return 60;
+	}
 }
 
 export class RifleBullet extends Item {
 	public readonly Icon: Sprite = GetSprite("Rifle_Bullet");
-	public readonly Stack: number = 60;
-
-	constructor(count: number) {
-		super();
-
-		this._count = count;
-	}
+	public declare readonly Stack = 60;
 
 	static toString(): string {
 		return "7,62x39";
@@ -253,5 +256,9 @@ export class RifleBullet extends Item {
 		if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
 			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
 		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+	}
+
+	public GetStack() {
+		return 30;
 	}
 }

@@ -18,7 +18,7 @@ export class Weapon extends Item {
     _width;
     _handOffset;
     _muzzleOffset;
-    _maxAmmoClip = 30;
+    MaxAmmoClip = 30;
     _automatic;
     Automatic;
     _loadedAmmo = 5;
@@ -26,8 +26,9 @@ export class Weapon extends Item {
     _angle = 0;
     _secondsToCooldown = 0;
     _secondsToReload = 0;
+    _ammoToReload = 0;
     constructor(images, sounds, fireCooldown, damage, spread, heavy, auto, reloadTime, clip, handOffset, muzzleOffset) {
-        super();
+        super(1);
         this.Icon = images.Icon;
         this.Sprites = images;
         this._sounds = {
@@ -42,7 +43,7 @@ export class Weapon extends Item {
         this._spread = spread;
         (this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
         this._reloadTime = reloadTime;
-        this._maxAmmoClip = clip;
+        this.MaxAmmoClip = clip;
         this._loadedAmmo = clip;
         this.Heavy = heavy;
         this._automatic = auto;
@@ -55,8 +56,9 @@ export class Weapon extends Item {
         if (this._secondsToReload > 0) {
             this._secondsToReload -= dt;
             if (this._secondsToReload <= 0) {
-                this._loadedAmmo = this._maxAmmoClip + (this._loadedAmmo > 0 ? 1 : 0);
+                this._loadedAmmo = this._loadedAmmo + this._ammoToReload;
                 this.Automatic = this._automatic;
+                this._ammoToReload = 0;
             }
         }
         this._secondsToCooldown -= dt;
@@ -75,9 +77,12 @@ export class Weapon extends Item {
                 Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)), this._angle, this._handOffset.X, this._handOffset.Y);
         }
     }
-    Reload() {
+    Reload(toReload = this.MaxAmmoClip) {
         if (this._secondsToReload > 0)
             return;
+        if (toReload <= 0)
+            return;
+        this._ammoToReload = toReload;
         this._secondsToReload = this._reloadTime;
         this._sounds.Reload.Play(0.5);
     }
@@ -88,7 +93,7 @@ export class Weapon extends Item {
         return this._secondsToReload > 0;
     }
     GetFillClipRatio() {
-        return this._loadedAmmo / (this._maxAmmoClip - 1);
+        return this._loadedAmmo / (this.MaxAmmoClip - 1);
     }
     TryShoot(tag = Tag.Enemy) {
         if (this._secondsToCooldown > 0 || this._secondsToReload > 0) {

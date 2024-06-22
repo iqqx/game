@@ -21,7 +21,7 @@ export abstract class Weapon extends Item {
 	private readonly _width: number;
 	private readonly _handOffset: Vector2;
 	private readonly _muzzleOffset: Vector2;
-	private readonly _maxAmmoClip: number = 30;
+	public readonly MaxAmmoClip: number = 30;
 	private readonly _automatic;
 
 	public declare readonly Heavy: boolean;
@@ -32,6 +32,7 @@ export abstract class Weapon extends Item {
 	private _angle: number = 0;
 	private _secondsToCooldown: number = 0;
 	private _secondsToReload: number = 0;
+	private _ammoToReload: number = 0;
 
 	constructor(
 		images: { Icon: Sprite; Image: Sprite },
@@ -46,7 +47,7 @@ export abstract class Weapon extends Item {
 		handOffset: Vector2,
 		muzzleOffset: Vector2
 	) {
-		super();
+		super(1);
 
 		this.Icon = images.Icon;
 		this.Sprites = images;
@@ -63,7 +64,7 @@ export abstract class Weapon extends Item {
 		(this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
 
 		this._reloadTime = reloadTime;
-		this._maxAmmoClip = clip;
+		this.MaxAmmoClip = clip;
 		this._loadedAmmo = clip;
 		this.Heavy = heavy;
 		this._automatic = auto;
@@ -80,8 +81,10 @@ export abstract class Weapon extends Item {
 			this._secondsToReload -= dt;
 
 			if (this._secondsToReload <= 0) {
-				this._loadedAmmo = this._maxAmmoClip + (this._loadedAmmo > 0 ? 1 : 0);
+				this._loadedAmmo = this._loadedAmmo + this._ammoToReload;
 				this.Automatic = this._automatic;
+
+				this._ammoToReload = 0;
 			}
 		}
 
@@ -146,9 +149,11 @@ export abstract class Weapon extends Item {
 		}
 	}
 
-	public Reload() {
+	public Reload(toReload = this.MaxAmmoClip) {
 		if (this._secondsToReload > 0) return;
+		if (toReload <= 0) return;
 
+		this._ammoToReload = toReload;
 		this._secondsToReload = this._reloadTime;
 		this._sounds.Reload.Play(0.5);
 	}
@@ -162,7 +167,7 @@ export abstract class Weapon extends Item {
 	}
 
 	public GetFillClipRatio() {
-		return this._loadedAmmo / (this._maxAmmoClip - 1);
+		return this._loadedAmmo / (this.MaxAmmoClip - 1);
 	}
 
 	public TryShoot(tag = Tag.Enemy): boolean {

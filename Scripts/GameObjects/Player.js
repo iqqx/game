@@ -1,5 +1,5 @@
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -22,7 +22,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new PistolBullet(13), new RifleBullet(6)];
+    _inventory = [new Glock(), new PistolBullet()];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -142,8 +142,23 @@ export class Player extends Entity {
                     this._movingRight = true;
                     break;
                 case "KeyR":
-                    if (this.CanTarget())
-                        this._weapon?.Reload();
+                    if (this.CanTarget() && this._weapon !== null) {
+                        const neededAmmo = this._weapon instanceof AK ? RifleBullet : PistolBullet;
+                        let findedAmmo = 0;
+                        for (let i = 0; i < this.GetItemsState().length; i++) {
+                            const item = this.GetItemsState()[i];
+                            if (item instanceof neededAmmo) {
+                                const toTake = Math.min(this._weapon.MaxAmmoClip - this._weapon.GetLoadedAmmo() + Math.sign(this._weapon.GetLoadedAmmo()) - findedAmmo, item.GetCount());
+                                findedAmmo += toTake;
+                                item.Take(toTake);
+                                if (item.GetCount() <= 0)
+                                    this.TakeItemFrom(i);
+                                if (findedAmmo >= this._weapon.MaxAmmoClip)
+                                    break;
+                            }
+                        }
+                        this._weapon.Reload(findedAmmo);
+                    }
                     break;
                 case "KeyE":
                     if (this._openedContainer !== null) {
@@ -617,9 +632,24 @@ export class Player extends Entity {
                             GUI.SetFont(12);
                             GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
                         }
+                        else if (this._inventory[i].GetCount() > 1) {
+                            GUI.SetFillColor(Color.White);
+                            GUI.SetFont(12);
+                            GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
+                        }
                     }
-                    else if (i >= 2 && this._backpack.GetItemAt(i - 2, 0) !== null)
-                        GUI.DrawImageScaled(this._backpack.GetItemAt(i - 2, 0).Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
+                    else if (i >= 2) {
+                        const item = this._backpack.GetItemAt(i - 2, 0);
+                        if (item !== null) {
+                            GUI.DrawImageScaled(item.Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
+                            const count = item.GetCount();
+                            if (count > 1) {
+                                GUI.SetFillColor(Color.White);
+                                GUI.SetFont(12);
+                                GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - count.toString().length * 7, y + 46 + 2, count.toString());
+                            }
+                        }
+                    }
                 }
             }
             else {
@@ -665,7 +695,7 @@ export class Player extends Entity {
                             GUI.SetFont(12);
                             GUI.DrawText(firstXOffset + i * 55 + 42 + 2 - displayAmmo.length * 7, y + 46 + 2, displayAmmo);
                         }
-                        else if (this._inventory[i].Stack > 0) {
+                        else if (this._inventory[i].GetCount() > 1) {
                             GUI.SetFillColor(Color.White);
                             GUI.SetFont(12);
                             GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
@@ -692,8 +722,14 @@ export class Player extends Entity {
                         GUI.SetFillColor(new Color(30, 30, 30));
                         GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
                         const item = this._openedContainer.GetItemAt(x, y);
-                        if (item !== null)
+                        if (item !== null) {
                             GUI.DrawImageScaled(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
+                            if (item.GetCount() > 1) {
+                                GUI.SetFillColor(Color.White);
+                                GUI.SetFont(12);
+                                GUI.DrawText(firstXOffset + x * 55 + 42 + 4 - item.GetCount().toString().length * 7, firstYOffset + 55 * y + 2 + 46, item.GetCount().toString());
+                            }
+                        }
                     }
             }
         }
@@ -907,6 +943,15 @@ export class Player extends Entity {
             for (let i = 0; i < this._backpack.SlotsSize.X; i++)
                 if (this._backpack.GetItemAt(i, 0) !== null)
                     copy.push(this._backpack.GetItemAt(i, 0));
+        return copy;
+    }
+    GetItemsState() {
+        const copy = [];
+        for (const item of this._inventory)
+            copy.push(item);
+        if (this._backpack !== null)
+            for (let i = 0; i < this._backpack.SlotsSize.X; i++)
+                copy.push(this._backpack.GetItemAt(i, 0));
         return copy;
     }
     OpenContainer(container) {

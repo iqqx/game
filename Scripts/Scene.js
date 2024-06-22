@@ -397,9 +397,9 @@ export class Scene {
             case "Adrenalin":
                 return new Adrenalin();
             case "PistolBullet":
-                return new PistolBullet(0);
+                return new PistolBullet();
             case "RifleBullet":
-                return new RifleBullet(0);
+                return new RifleBullet();
             default:
                 throw new Error("Предмет не удалось распарсить: " + raw);
         }

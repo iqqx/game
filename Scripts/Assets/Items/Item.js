@@ -10,8 +10,10 @@ export class Item {
     _isUsing = false;
     _usingTime = -1;
     _usingCallback;
-    Stack = 0;
     _count = 0;
+    constructor(count) {
+        this._count = Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack());
+    }
     Update(dt, position, angle) {
         if (this._usingTime >= 0) {
             this._usingTime += dt;
@@ -38,6 +40,12 @@ export class Item {
     }
     GetCount() {
         return this._count;
+    }
+    Take(count) {
+        this._count = Math.clamp(this._count - count, 0, this.GetStack());
+    }
+    GetStack() {
+        return 1;
     }
     OnUsed() { }
 }
@@ -173,11 +181,6 @@ export class Bread extends Item {
 }
 export class PistolBullet extends Item {
     Icon = GetSprite("Pistol_Bullet");
-    Stack = 60;
-    constructor(count) {
-        super();
-        this._count = count;
-    }
     static toString() {
         return "9x19";
     }
@@ -188,14 +191,12 @@ export class PistolBullet extends Item {
         else
             Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
     }
+    GetStack() {
+        return 60;
+    }
 }
 export class RifleBullet extends Item {
     Icon = GetSprite("Rifle_Bullet");
-    Stack = 60;
-    constructor(count) {
-        super();
-        this._count = count;
-    }
     static toString() {
         return "7,62x39";
     }
@@ -205,6 +206,9 @@ export class RifleBullet extends Item {
             Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
         else
             Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
+    }
+    GetStack() {
+        return 30;
     }
 }
 //# sourceMappingURL=Item.js.map
