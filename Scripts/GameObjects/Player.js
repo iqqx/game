@@ -1,5 +1,5 @@
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -22,7 +22,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new Glock(), new PistolBullet()];
+    _inventory = [new AK(), null];
     _backpack = null;
     _weapon = null;
     _quests;

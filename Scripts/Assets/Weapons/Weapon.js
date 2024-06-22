@@ -116,7 +116,7 @@ export class Weapon extends Item {
             for (let i = 0; i < bloodCount; i++) {
                 const offset = (Math.random() - 0.5) / 2;
                 const bloodDir = new Vector2(Math.cos(this._angle + offset), -Math.sin(this._angle + offset));
-                Scene.Current.Instantiate(new Blood(new Vector2(hit.position.X + bloodDir.X * 100, hit.position.Y + bloodDir.Y * 100), new Vector2(bloodDir.X * 50, bloodDir.Y * 30)));
+                Scene.Current.Instantiate(new Blood(new Vector2(hit.position.X, hit.position.Y), new Vector2(bloodDir.X * 50, bloodDir.Y * 30)));
             }
         }
         else if (hit !== undefined) {
@@ -142,7 +142,7 @@ export class Glock extends Weapon {
         }, {
             Fire: GetSound("Shoot_3"),
             Shell: GetSound("Shell"),
-        }, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+        }, 200, 1, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
     }
     static toString() {
         return "Пистолет";

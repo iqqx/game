@@ -9,33 +9,40 @@ export class Blood extends GameObject {
 	private _accelerationY: number;
 	private _freezed = false;
 	private _timeFromFreeze = 0;
-	private _rotated: boolean;
+	private _onWall: boolean;
+	private _onFloorOffset = 0;
 
 	constructor(position: Vector2, acceleration: Vector2) {
-		super(10, 10);
+		super(5, 5);
 
 		this._x = position.X;
 		this._y = position.Y;
 		this._accelerationX = acceleration.X;
 		this._accelerationY = acceleration.Y;
 
-		this._collider = new Rectangle(0, 0, 10, 10);
+		this._collider = new Rectangle(0, 0, 5, 5);
 	}
 
 	public override Update(dt: number): void {
 		if (this._freezed) {
-			if (this._timeFromFreeze > 5000 && !this._rotated) return;
+			if (this._timeFromFreeze > 5000 && !this._onWall) return;
 			this._timeFromFreeze += dt;
 
-			if (this._rotated) {
-				const hits = Scene.Current.Raycast(new Vector2(this._x, this._y - 25), new Vector2(0, -1), 1, Tag.Wall);
+			if (this._onWall) {
+				const hits = Scene.Current.Raycast(new Vector2(this._x, this._y), new Vector2(0, -1), 1, Tag.Wall);
 
-				if (hits.length === 0) this._y -= 0.1;
-				else {
-					this._rotated = false;
+				if (hits.length === 0) {
+					this.Height += 0.1;
+					this._y -= 0.2;
+				} else {
+					this._onWall = false;
 					this._timeFromFreeze = 0;
+					this.Height = 5;
 					this._y = hits[0].position.Y;
 				}
+			} else {
+				this.Width = 5 + 100 * (this._timeFromFreeze / 5000);
+				this._onFloorOffset = this.Width * (this._timeFromFreeze / 10000);
 			}
 
 			return;
@@ -57,7 +64,7 @@ export class Blood extends GameObject {
 			this._x = hits[0].position.X;
 			this._y = hits[0].position.Y;
 
-			this._rotated = hits[0].Normal.X !== 0;
+			this._onWall = hits[0].Normal.X !== 0;
 		} else {
 			this._x += this._accelerationX;
 			this._y += this._accelerationY;
@@ -68,12 +75,6 @@ export class Blood extends GameObject {
 		Canvas.SetFillColor(Color.Red);
 		Canvas.ClearStroke();
 
-		if (this._freezed) {
-			if (this._rotated) {
-				const progress = 15 * Math.min(this._timeFromFreeze / 1000, 1);
-
-				Canvas.DrawEllipse(this._x - Scene.Current.GetLevelPosition(), this._y - progress * 2, 2, 2 + progress);
-			} else Canvas.DrawEllipse(this._x - Scene.Current.GetLevelPosition(), this._y, 2 + 15 * Math.min(this._timeFromFreeze / 1000, 1), 2);
-		} else Canvas.DrawCircle(this._x - Scene.Current.GetLevelPosition(), this._y, 2);
+		Canvas.DrawRectangleEx(new Rectangle(this._x - Scene.Current.GetLevelPosition() - this._onFloorOffset, this._y, this.Width, this.Height));
 	}
 }
