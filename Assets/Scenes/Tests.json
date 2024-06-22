@@ -134,9 +134,6 @@
 		{ "Type": "HumanCorpse", "Arguments": [27419, 151] },
 		{ "Type": "Elder", "Arguments": [21752, 300] },
 		{ "Type": "Player", "Arguments": [4000, 269] },
-		{
-			"Type": "FPSCounter",
-			"Arguments": []
-		}
+		{ "Type": "Human", "Arguments": [4894, 266, "Red", -1, "AK"] }
 	]
 }

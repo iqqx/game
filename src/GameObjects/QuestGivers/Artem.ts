@@ -35,7 +35,7 @@ export class Artem extends Character {
 
 		if (Scene.Player.GetQuestsBy(this).length > 0)
 			return {
-				Messages: ["Арсюша не придумал мне диалог который я буду\nговорить когда мой квест еще не выполнен.\nСкажите Арсюше чтобы он сделал это."],
+				Messages: ["Ну что там с выходом?", "Ещё не нашел.", "Ну так ищи быстрее."],
 				Owner: this,
 				OwnerFirst: true,
 			};
@@ -61,7 +61,7 @@ export class Artem extends Character {
 				};
 			default:
 				return {
-					Messages: ["Арсюша не придумал мне диалог который я буду\nговорить когда мой квест выполнен. Скажите\nАрсюше чтобы он сделал это."],
+					Messages: ["Cпасибо."],
 					Owner: this,
 					OwnerFirst: true,
 				};

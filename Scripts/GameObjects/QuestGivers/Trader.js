@@ -28,7 +28,12 @@ export class Trader extends Character {
                 Scene.Player.RemoveItem(RatTail);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
-                    Messages: ["Они все мертвы. Вот хвосты.", "Держи награду."],
+                    Messages: [
+                        "Ну что вот твои крысы.",
+                        "ООО, спасибо тебе большое, удачи тебе в твоих похождениях.",
+                        "ЭЭЭ, ты не чего не забыл, а как же моя награда?",
+                        "А, да точно, чуть не забыл, вот возми.",
+                    ],
                     Owner: this,
                     OwnerFirst: false,
                     AfterAction: () => {
@@ -38,7 +43,7 @@ export class Trader extends Character {
                 };
             }
             return {
-                Messages: ["Арсюша не придумал мне диалог который я буду\nговорить когда мой квест еще не выполнен.\nСкажите Арсюше чтобы он сделал это."],
+                Messages: ["Ну что где там мои крысы, не забудь, что ты обещал их принести.", "Да помню, помню."],
                 Owner: this,
                 OwnerFirst: true,
             };
@@ -53,16 +58,14 @@ export class Trader extends Character {
                         "Хорошо договорились.",
                     ],
                     AfterAction: () => {
-                        Scene.Player.PushQuest(new Quest("Сенячка не смог придумать название для этого квеста", this)
-                            .AddHasItemsTask("Добыть 6 хвостов крыс", [RatTail, 6])
-                            .AddTalkTask("Вернуться к Торгашу", this));
+                        Scene.Player.PushQuest(new Quest("Шкурки", this).AddHasItemsTask("Добыть 6 хвостов крыс", [RatTail, 6]).AddTalkTask("Вернуться к Торгашу", this));
                     },
                     Owner: this,
                     OwnerFirst: true,
                 };
             default:
                 return {
-                    Messages: ["Арсюша не придумал мне диалог который я буду\nговорить когда мой квест выполнен. Скажите\nАрсюше чтобы он сделал это."],
+                    Messages: ["Cпасибо."],
                     Owner: this,
                     OwnerFirst: true,
                 };

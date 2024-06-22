@@ -1,4 +1,4 @@
-import { Tag } from "../../Enums.js";
+import { EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Vector2 } from "../../Utilites.js";
@@ -9,6 +9,8 @@ import { AidKit } from "../../Assets/Items/Item.js";
 import { Glock } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
+import { FakeEndGuard } from "../QuestGivers/FakeEndGuard.js";
+import { Elder } from "../QuestGivers/Elder.js";
 export class Human extends Enemy {
     static _deathSound = new Audio("Sounds/human_death-2.mp3");
     _frames = {
@@ -32,6 +34,8 @@ export class Human extends Enemy {
     _timeToShoot = 500;
     _timeToTurn = 1500;
     _fakeCharacter = new GuardFake(0, 0);
+    _fakeEndCharacter = new FakeEndGuard();
+    _warned = false;
     constructor(x, y, type, direction = 1, weapon) {
         super(50, 100, 1, 100, type);
         this._x = x;
@@ -39,7 +43,9 @@ export class Human extends Enemy {
         this._weapon = weapon ?? new Glock();
         this.Direction = direction;
         this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
+        this._angle = this.Direction === -1 ? Math.PI : 0;
         this._weapon.Load();
+        this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
     }
     Update(dt) {
         if (this._timeFromNotice >= 0)
@@ -93,13 +99,38 @@ export class Human extends Enemy {
                     }
                 }
             }
-            else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
-                Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
-                    if (x instanceof Human)
-                        x.MakeFriendly();
-                });
-                Scene.Player.SpeakWith(this._fakeCharacter);
-                this._friendly = true;
+            else {
+                if (this._type === EnemyType.Red) {
+                    if (Scene.Current.GetByType(Elder)[0].GetCompletedQuestsCount() === 1) {
+                        if (!this._warned) {
+                            Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+                                if (x instanceof Human)
+                                    x.MakeWarned();
+                            });
+                            Scene.Player.SpeakWith(this._fakeEndCharacter);
+                        }
+                    }
+                    else if (this.GetDistanceToPlayer() < 700 && !this._warned) {
+                        this._warned = true;
+                        Scene.Player.SpeakWith(this._fakeEndCharacter);
+                    }
+                    else if (this.GetDistanceToPlayer() < 500 && this._warned) {
+                        this._aggresive = true;
+                    }
+                    else if (this.GetDistanceToPlayer() > 1000)
+                        Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+                            if (x instanceof Human)
+                                x.MakeUnwarned();
+                        });
+                }
+                else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+                    Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+                        if (x instanceof Human)
+                            x.MakeFriendly();
+                    });
+                    Scene.Player.SpeakWith(this._fakeCharacter);
+                    this._friendly = true;
+                }
             }
         }
         else
@@ -162,6 +193,14 @@ export class Human extends Enemy {
     }
     MakeAgressive() {
         this._aggresive = true;
+    }
+    MakeWarned() {
+        if (this._type === EnemyType.Red)
+            this._warned = true;
+    }
+    MakeUnwarned() {
+        if (this._type === EnemyType.Red)
+            this._warned = false;
     }
 }
 //# sourceMappingURL=Human.js.map

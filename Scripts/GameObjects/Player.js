@@ -104,8 +104,10 @@ export class Player extends Entity {
                     }
                     break;
                 case "Space":
-                    this._onLadder = null;
-                    this.Jump();
+                    if (!this._sit) {
+                        this._onLadder = null;
+                        this.Jump();
+                    }
                     break;
                 case "Digit1":
                     this.ChangeActiveHand(0);
@@ -362,9 +364,9 @@ export class Player extends Entity {
                 this._speaked2 = true;
                 this.SpeakWith(this._endFake);
             }
-            if (this._y > 800 && this._onLadder !== null) {
-                Scene.LoadFromFile("Assets/Scenes/Prolog.json");
-            }
+        }
+        if (this._x > 33500 && this._y > 800 && this._onLadder !== null) {
+            Scene.LoadFromFile("Assets/Scenes/Prolog.json");
         }
         if (this._dialog !== null && this._timeToNextChar > 0) {
             this._timeToNextChar -= dt;
@@ -378,7 +380,7 @@ export class Player extends Entity {
         this._quests.forEach((quest, i) => {
             quest.Update();
             if (quest.IsCompleted()) {
-                if (quest.Giver === this) {
+                if (quest.Giver === this && Scene.Current.GetByType(Artem)[0].IsTalked()) {
                     this.SpeakWith(this._endFake);
                     this._timeFromEnd = 0;
                 }
@@ -584,7 +586,7 @@ export class Player extends Entity {
             }
         }
         if (this._dialog === null) {
-            if (this._endFake.GetCompletedQuestsCount() > 1)
+            if (this._endFake.GetCompletedQuestsCount() > 2)
                 return;
             const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
             if (this._backpack !== null) {
@@ -999,11 +1001,11 @@ export class Player extends Entity {
         if (this._weapon === null) {
             if (this._inventory[this._selectedHand] instanceof Item) {
                 if (this._inventory[this._selectedHand] instanceof Radio) {
-                    if (this._quests.length === 0 || this._quests[0].Giver !== this || this._quests[0].IsCompleted()) {
-                        this.SpeakWith(this._endFake);
-                        this._xTarget = Canvas.GetSize().X / 2;
-                        this._inventory[this._selectedHand] = null;
-                    }
+                    // if (this._quests.length === 0 || this._quests[0].Giver !== this || this._quests[0].IsCompleted()) {
+                    this.SpeakWith(this._endFake);
+                    // this._xTarget = Canvas.GetSize().X / 2;
+                    // this._inventory[this._selectedHand] = null;
+                    // }
                 }
                 else
                     this._inventory[this._selectedHand].Use(() => {

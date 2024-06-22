@@ -9,6 +9,9 @@ import { AidKit } from "../../Assets/Items/Item.js";
 import { Glock, Weapon } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
+import { FakeEndGuard } from "../QuestGivers/FakeEndGuard.js";
+import { Character } from "../QuestGivers/Character.js";
+import { Elder } from "../QuestGivers/Elder.js";
 
 export class Human extends Enemy {
 	private static readonly _deathSound = new Audio("Sounds/human_death-2.mp3");
@@ -33,6 +36,8 @@ export class Human extends Enemy {
 	private readonly _timeToShoot = 500;
 	private readonly _timeToTurn = 1500;
 	private readonly _fakeCharacter = new GuardFake(0, 0);
+	private readonly _fakeEndCharacter = new FakeEndGuard();
+	private _warned = false;
 
 	constructor(x: number, y: number, type: EnemyType, direction: -1 | 1 = 1, weapon?: Weapon) {
 		super(50, 100, 1, 100, type);
@@ -44,7 +49,10 @@ export class Human extends Enemy {
 
 		this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
 
+		this._angle = this.Direction === -1 ? Math.PI : 0;
+
 		this._weapon.Load();
+		this._weapon?.Update(0, new Vector2(this._x + this.Width / 2, this._y + this.Height * 0.6), this._angle);
 	}
 
 	override Update(dt: number): void {
@@ -100,13 +108,33 @@ export class Human extends Enemy {
 						else this._weapon.TryShoot(Tag.Player);
 					}
 				}
-			} else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
-				Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
-					if (x instanceof Human) x.MakeFriendly();
-				});
+			} else {
+				if (this._type === EnemyType.Red) {
+					if ((Scene.Current.GetByType(Elder)[0] as Character).GetCompletedQuestsCount() === 1) {
+						if (!this._warned) {
+							Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+								if (x instanceof Human) x.MakeWarned();
+							});
 
-				Scene.Player.SpeakWith(this._fakeCharacter);
-				this._friendly = true;
+							Scene.Player.SpeakWith(this._fakeEndCharacter);
+						}
+					} else if (this.GetDistanceToPlayer() < 700 && !this._warned) {
+						this._warned = true;
+						Scene.Player.SpeakWith(this._fakeEndCharacter);
+					} else if (this.GetDistanceToPlayer() < 500 && this._warned) {
+						this._aggresive = true;
+					} else if (this.GetDistanceToPlayer() > 1000)
+						Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+							if (x instanceof Human) x.MakeUnwarned();
+						});
+				} else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
+					Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+						if (x instanceof Human) x.MakeFriendly();
+					});
+
+					Scene.Player.SpeakWith(this._fakeCharacter);
+					this._friendly = true;
+				}
 			}
 		} else this._frameIndex = 0;
 	}
@@ -243,5 +271,13 @@ export class Human extends Enemy {
 
 	public MakeAgressive() {
 		this._aggresive = true;
+	}
+
+	public MakeWarned() {
+		if (this._type === EnemyType.Red) this._warned = true;
+	}
+
+	public MakeUnwarned() {
+		if (this._type === EnemyType.Red) this._warned = false;
 	}
 }
