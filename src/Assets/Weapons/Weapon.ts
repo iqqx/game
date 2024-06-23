@@ -22,7 +22,7 @@ export abstract class Weapon extends Item {
 	private readonly _handOffset: Vector2;
 	private readonly _muzzleOffset: Vector2;
 	public readonly MaxAmmoClip: number = 30;
-	private readonly _automatic;
+	private readonly _automatic: boolean;
 
 	public declare readonly Heavy: boolean;
 	public Automatic: boolean;
@@ -33,6 +33,7 @@ export abstract class Weapon extends Item {
 	private _secondsToCooldown: number = 0;
 	private _secondsToReload: number = 0;
 	private _ammoToReload: number = 0;
+	private _timeToRecoilStop = 0;
 
 	constructor(
 		images: { Icon: Sprite; Image: Sprite },
@@ -75,6 +76,7 @@ export abstract class Weapon extends Item {
 	public Update(dt: number, position: Vector2, angle: number) {
 		this._position = position;
 		this._angle = angle;
+		if (this._timeToRecoilStop > 0) this._timeToRecoilStop -= dt;
 
 		if (this._secondsToReload > 0) {
 			this._secondsToReload -= dt;
@@ -186,12 +188,15 @@ export abstract class Weapon extends Item {
 		}
 
 		this._secondsToCooldown = this._fireCooldown;
+		this._timeToRecoilStop += 100;
 
 		const muzzlePosition = new Vector2(
 			this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X),
 			this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y)
 		);
-		const dir = this._angle - (Math.random() - 0.5) * this._spread;
+		const offset = (Math.random() - 0.5) * this._spread * (this._timeToRecoilStop * 0.02);
+		console.log(offset);
+		const dir = this._angle - offset;
 		const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
 
 		if (hit !== undefined && hit.instance instanceof Entity) {
@@ -247,7 +252,7 @@ export class Glock extends Weapon {
 			},
 			200,
 			20,
-			0.1,
+			0.05,
 			false,
 			false,
 			2500,
@@ -265,7 +270,7 @@ export class Glock extends Weapon {
 export class AK extends Weapon {
 	private static readonly _fireCooldown = 150;
 	private static readonly _damage = 60;
-	private static readonly _spread = 0.01;
+	private static readonly _spread = 0.2;
 
 	constructor() {
 		super(

@@ -27,6 +27,7 @@ export class Weapon extends Item {
     _secondsToCooldown = 0;
     _secondsToReload = 0;
     _ammoToReload = 0;
+    _timeToRecoilStop = 0;
     constructor(images, sounds, fireCooldown, damage, spread, heavy, auto, reloadTime, clip, handOffset, muzzleOffset) {
         super(1);
         this.Icon = images.Icon;
@@ -52,6 +53,8 @@ export class Weapon extends Item {
     Update(dt, position, angle) {
         this._position = position;
         this._angle = angle;
+        if (this._timeToRecoilStop > 0)
+            this._timeToRecoilStop -= dt;
         if (this._secondsToReload > 0) {
             this._secondsToReload -= dt;
             if (this._secondsToReload <= 0) {
@@ -108,8 +111,11 @@ export class Weapon extends Item {
             return false;
         }
         this._secondsToCooldown = this._fireCooldown;
+        this._timeToRecoilStop += 100;
         const muzzlePosition = new Vector2(this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X), this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y));
-        const dir = this._angle - (Math.random() - 0.5) * this._spread;
+        const offset = (Math.random() - 0.5) * this._spread * (this._timeToRecoilStop * 0.02);
+        console.log(offset);
+        const dir = this._angle - offset;
         const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
         if (hit !== undefined && hit.instance instanceof Entity) {
             hit.instance.TakeDamage(this._damage);
@@ -144,7 +150,7 @@ export class Glock extends Weapon {
         }, {
             Fire: GetSound("Shoot_3"),
             Shell: GetSound("Shell"),
-        }, 200, 20, 0.1, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
+        }, 200, 20, 0.05, false, false, 2500, 7, new Vector2(40, 10), new Vector2(30, 10));
     }
     static toString() {
         return "Пистолет";
@@ -153,7 +159,7 @@ export class Glock extends Weapon {
 export class AK extends Weapon {
     static _fireCooldown = 150;
     static _damage = 60;
-    static _spread = 0.01;
+    static _spread = 0.2;
     constructor() {
         super({
             Icon: GetSprite("AK_Icon"),

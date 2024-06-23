@@ -29,14 +29,13 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
+	private _inventory: [Item | null, Item | null] = [new Glock(), new AK()];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
 	private _armHeight: 0.5 | 0.65 = 0.65;
 	private _dialog: Dialog | null = null;
 	private _dialogState = 0;
-	private _dialogContinueHovered: boolean = false;
 	private _chars = 0;
 	private _timeToNextChar = 0;
 	private _timeFromDeath: number = 0;
@@ -95,6 +94,9 @@ export class Player extends Entity {
 
 		GetSound("Walk_2").Speed = 1.6;
 		GetSound("Walk_2").Apply();
+
+		(this._inventory[0] as AK).Load();
+		(this._inventory[1] as AK).Load();
 
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;

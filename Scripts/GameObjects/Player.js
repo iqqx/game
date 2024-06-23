@@ -1,6 +1,6 @@
 import { Animation } from "../Animation.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -23,14 +23,13 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [null, null];
+    _inventory = [new Glock(), new AK()];
     _backpack = null;
     _weapon = null;
     _quests;
     _armHeight = 0.65;
     _dialog = null;
     _dialogState = 0;
-    _dialogContinueHovered = false;
     _chars = 0;
     _timeToNextChar = 0;
     _timeFromDeath = 0;
@@ -85,6 +84,8 @@ export class Player extends Entity {
         this._quests = [];
         GetSound("Walk_2").Speed = 1.6;
         GetSound("Walk_2").Apply();
+        this._inventory[0].Load();
+        this._inventory[1].Load();
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
