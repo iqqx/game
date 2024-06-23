@@ -131,7 +131,6 @@
 		{ "Type": "Platform", "Arguments": [4258, 367, 192] },
 		{ "Type": "Ladder", "Arguments": [4290, 274, 197] },
 		{ "Type": "Elder", "Arguments": [21752, 300] },
-		{ "Type": "Human", "Arguments": [4200, 269, "Green", -1, "AK"] },
 		{ "Type": "Player", "Arguments": [4000, 269] }
 	]
 }

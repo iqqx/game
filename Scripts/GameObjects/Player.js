@@ -1,3 +1,4 @@
+import { Animation } from "../Animation.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
@@ -50,6 +51,11 @@ export class Player extends Entity {
     _speaked2 = false;
     _timeFromShootArtem = -1;
     _timeFromGoodEnd = 0;
+    _animations = {
+        Walk: new Animation(100, 0, -0.1, 0, 0.2, 0.1, 0),
+        Use: new Animation(200, 1, 2, 3),
+    };
+    _currentAnimation = null;
     static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -89,6 +95,7 @@ export class Player extends Entity {
                         this._sit = true;
                         this._timeToWalkSound -= 200;
                         this._armHeight = 0.5;
+                        this._animations.Walk.SetDuration(300);
                         this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
                         this._speed = Player._speed * Player._sitSpeedModifier;
                     }
@@ -99,6 +106,7 @@ export class Player extends Entity {
                         }
                         else {
                             this._sit = false;
+                            this._animations.Walk.SetDuration(this._running ? 100 : 200);
                             this._armHeight = 0.65;
                             this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
                         }
@@ -129,6 +137,7 @@ export class Player extends Entity {
                     break;
                 case "KeyA":
                     this._movingLeft = true;
+                    this._currentAnimation = this._animations.Walk;
                     break;
                 case "KeyS":
                     this._movingDown = true;
@@ -143,6 +152,7 @@ export class Player extends Entity {
                     break;
                 case "KeyD":
                     this._movingRight = true;
+                    this._currentAnimation = this._animations.Walk;
                     break;
                 case "KeyR":
                     if (this.CanTarget() && this._weapon !== null) {
@@ -190,6 +200,7 @@ export class Player extends Entity {
                         return;
                     this._running = true;
                     this._weapon = null;
+                    this._animations.Walk.SetDuration(100);
                     this._speed = Player._speed * Player._runningSpeedModifier;
                     break;
                 default:
@@ -203,18 +214,21 @@ export class Player extends Entity {
                     break;
                 case "KeyA":
                     this._movingLeft = false;
+                    this._currentAnimation = null;
                     break;
                 case "KeyS":
                     this._movingDown = false;
                     break;
                 case "KeyD":
                     this._movingRight = false;
+                    this._currentAnimation = null;
                     break;
                 case "ShiftLeft":
                     this._running = false;
                     if (this._inventory[this._selectedHand] instanceof Weapon)
                         this._weapon = this._inventory[this._selectedHand];
                     this._speed = Player._speed;
+                    this._animations.Walk.SetDuration(200);
                     break;
                 default:
                     break;
@@ -336,6 +350,7 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
+        this._currentAnimation?.Update(dt);
         if (this._timeFromGoodEnd > 0) {
             this._timeFromGoodEnd += dt;
             if (this._timeFromGoodEnd >= 2500)
@@ -496,10 +511,10 @@ export class Player extends Entity {
         else if (this.Direction == 1) {
             if (this._weapon === null) {
                 if (this._timeToPunch > 0 && !this._mainHand) {
-                    Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle, -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
                 }
                 else
-                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle - Math.PI / 4, -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle - Math.PI / 4 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
             }
             else if (this._weapon.Heavy)
                 Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + 0.05, -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
@@ -512,13 +527,13 @@ export class Player extends Entity {
                         this._inventory[this._selectedHand].Render(new Vector2(this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(Math.PI / 2), this._y + this.Height * this._armHeight - 23 * Math.sin(Math.PI / 2 + 0.2)), 0);
                     else
                         this._inventory[this._selectedHand].Render(new Vector2(this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle), this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)), this._angle);
-                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle, -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), (this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle) + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
                 }
                 else if (this._timeToPunch > 0 && this._mainHand) {
-                    Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle, -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
                 }
                 else
-                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle, -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition(), this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
             }
             else {
                 this._weapon.Render();

@@ -1,3 +1,4 @@
+import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
@@ -56,6 +57,11 @@ export class Player extends Entity {
 	private _speaked2 = false;
 	private _timeFromShootArtem = -1;
 	private _timeFromGoodEnd = 0;
+	private _animations = {
+		Walk: new Animation(100, 0, -0.1, 0, 0.2, 0.1, 0),
+		Use: new Animation(200, 1, 2, 3),
+	};
+	private _currentAnimation: Animation | null = null;
 
 	private static readonly _name = "Макс";
 	private static readonly _speed = 5;
@@ -100,6 +106,7 @@ export class Player extends Entity {
 						this._sit = true;
 						this._timeToWalkSound -= 200;
 						this._armHeight = 0.5;
+						this._animations.Walk.SetDuration(300);
 
 						this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
 
@@ -111,6 +118,7 @@ export class Player extends Entity {
 							this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
 						} else {
 							this._sit = false;
+							this._animations.Walk.SetDuration(this._running ? 100 : 200);
 							this._armHeight = 0.65;
 							this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
 						}
@@ -144,6 +152,7 @@ export class Player extends Entity {
 					break;
 				case "KeyA":
 					this._movingLeft = true;
+					this._currentAnimation = this._animations.Walk;
 					break;
 				case "KeyS":
 					this._movingDown = true;
@@ -160,6 +169,7 @@ export class Player extends Entity {
 					break;
 				case "KeyD":
 					this._movingRight = true;
+					this._currentAnimation = this._animations.Walk;
 					break;
 				case "KeyR":
 					if (this.CanTarget() && this._weapon !== null) {
@@ -211,6 +221,7 @@ export class Player extends Entity {
 
 					this._running = true;
 					this._weapon = null;
+					this._animations.Walk.SetDuration(100);
 					this._speed = Player._speed * Player._runningSpeedModifier;
 					break;
 				default:
@@ -225,17 +236,20 @@ export class Player extends Entity {
 					break;
 				case "KeyA":
 					this._movingLeft = false;
+					this._currentAnimation = null;
 					break;
 				case "KeyS":
 					this._movingDown = false;
 					break;
 				case "KeyD":
 					this._movingRight = false;
+					this._currentAnimation = null;
 					break;
 				case "ShiftLeft":
 					this._running = false;
 					if (this._inventory[this._selectedHand] instanceof Weapon) this._weapon = this._inventory[this._selectedHand] as Weapon;
 					this._speed = Player._speed;
+					this._animations.Walk.SetDuration(200);
 					break;
 				default:
 					break;
@@ -366,6 +380,8 @@ export class Player extends Entity {
 	}
 
 	public override Update(dt: number) {
+		this._currentAnimation?.Update(dt);
+
 		if (this._timeFromGoodEnd > 0) {
 			this._timeFromGoodEnd += dt;
 
@@ -569,7 +585,7 @@ export class Player extends Entity {
 							this._frames.Hands.Straight.BoundingBox.Width * scale,
 							this._frames.Hands.Straight.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 					);
@@ -582,7 +598,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle - Math.PI / 4,
+						this._angle - Math.PI / 4 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -632,7 +648,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle,
+						(this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle) + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -645,7 +661,7 @@ export class Player extends Entity {
 							this._frames.Hands.Straight.BoundingBox.Width * scale,
 							this._frames.Hands.Straight.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 					);
@@ -658,7 +674,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
