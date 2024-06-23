@@ -95,7 +95,6 @@ function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
     scene.Update(timeStamp);
     scene.Render();
-    scene.RenderOverlay();
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);

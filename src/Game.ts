@@ -110,7 +110,6 @@ function gameLoop(timeStamp: number) {
 
 	scene.Update(timeStamp);
 	scene.Render();
-	scene.RenderOverlay();
 }
 
 function loadLoop() {
