@@ -2,7 +2,7 @@ import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -29,7 +29,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [new Glock(), new AK()];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -47,8 +47,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4500;
+	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 4500;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
@@ -58,7 +58,6 @@ export class Player extends Entity {
 	private _timeFromGoodEnd = 0;
 	private _animations = {
 		Walk: new Animation(100, 0, -0.1, 0, 0.2, 0.1, 0),
-		Use: new Animation(200, 1, 2, 3),
 	};
 	private _currentAnimation: Animation | null = null;
 
@@ -94,9 +93,6 @@ export class Player extends Entity {
 
 		GetSound("Walk_2").Speed = 1.6;
 		GetSound("Walk_2").Apply();
-
-		(this._inventory[0] as AK).Load();
-		(this._inventory[1] as AK).Load();
 
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
@@ -613,7 +609,7 @@ export class Player extends Entity {
 						this._frames.Hands.Straight.BoundingBox.Width * scale,
 						this._frames.Hands.Straight.BoundingBox.Height * scale
 					),
-					this._angle + 0.05,
+					this._angle + 0.05 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 					-2 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 				);
@@ -639,7 +635,7 @@ export class Player extends Entity {
 								this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle),
 								this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)
 							),
-							this._angle
+							this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
 						);
 
 					Canvas.DrawImageWithAngle(
@@ -692,7 +688,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -705,7 +701,7 @@ export class Player extends Entity {
 							this._frames.Hands.Straight.BoundingBox.Width * scale,
 							this._frames.Hands.Straight.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 					);
@@ -721,7 +717,7 @@ export class Player extends Entity {
 							this._frames.Hands.Straight.BoundingBox.Width * scale,
 							this._frames.Hands.Straight.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 					);
@@ -734,7 +730,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle + Math.PI / 4,
+						this._angle + Math.PI / 4 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -748,7 +744,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -778,7 +774,7 @@ export class Player extends Entity {
 								this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle),
 								this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)
 							),
-							this._angle
+							this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
 						);
 
 					Canvas.DrawImageWithAngleVFlipped(
@@ -789,7 +785,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle,
+						this._inventory[this._selectedHand].Big ? Math.PI / 2 : this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -802,7 +798,7 @@ export class Player extends Entity {
 							this._frames.Hands.Straight.BoundingBox.Width * scale,
 							this._frames.Hands.Straight.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 					);
@@ -815,7 +811,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle,
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -830,7 +826,7 @@ export class Player extends Entity {
 						this._frames.Hands.Straight.BoundingBox.Width * scale,
 						this._frames.Hands.Straight.BoundingBox.Height * scale
 					),
-					this._angle - 0.05,
+					this._angle - 0.05 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 					-2 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 				);
