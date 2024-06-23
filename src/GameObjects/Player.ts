@@ -468,7 +468,7 @@ export class Player extends Entity {
 		if (this._inventory[this._selectedHand] instanceof Item)
 			this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
 
-		if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() < 2) {
+		if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() <= 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
 
 			const prevX = this._x;
@@ -490,7 +490,7 @@ export class Player extends Entity {
 					this._timeToNextFrame = Player._animationFrameDuration * (this._sit ? 1.7 : this._running ? 0.5 : 1);
 				}
 
-				if (this._timeToWalkSound <= 0) {
+				if (this._timeToWalkSound <= 0 && this._grounded) {
 					GetSound("Walk_2").Play(0.5);
 					this._timeToWalkSound = this._sit ? 500 : this._running ? 150 : 300;
 				}
@@ -510,7 +510,7 @@ export class Player extends Entity {
 			if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
 
 			if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic) this.Shoot();
-		} else if (this._endFake.GetCompletedQuestsCount() >= 2) {
+		} else if (this._endFake.GetCompletedQuestsCount() > 2) {
 			this._angle = (() => {
 				const angle = -Math.atan2(this._yTarget - (this._y + this.Height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this.Width / 2));
 
@@ -1024,7 +1024,12 @@ export class Player extends Entity {
 			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 		}
 
-		if (this._timeFromEnd > -1) return;
+		if (this._timeFromEnd > -1) {
+			Canvas.SetFillColor(Color.White);
+			Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+
+			return;
+		}
 
 		if (this._needDrawRedVegnitte > 0) {
 			this._needDrawRedVegnitte--;

@@ -48,7 +48,7 @@ export class EndGameFake extends Character {
                 };
             case 4:
                 return {
-                    Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы не кто не покинул\nэто метро."],
+                    Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы никто не покинул\nэто метро."],
                     Owner: this,
                     OwnerFirst: true,
                 };
