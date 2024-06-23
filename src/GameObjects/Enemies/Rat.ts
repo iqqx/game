@@ -37,7 +37,7 @@ export class Rat extends Enemy {
 				this._attackCooldown = Rat.AttackCooldown;
 			}
 
-			if (Math.abs(this.GetDistanceToPlayer()) <= 100 && this._y == plrPos.Y) {
+			if (Math.abs(this.GetDistanceToPlayer()) <= 100 && Math.abs(this._y - plrPos.Y) < 20) {
 				this._attackCooldown = Rat.AttackCooldown;
 
 				Scene.Current.Player.TakeDamage(Rat.Damage);

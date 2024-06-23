@@ -47,8 +47,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 4500;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4500;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
@@ -270,11 +270,7 @@ export class Player extends Entity {
 				this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
 				if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
 
-				if (this._dialog !== null) {
-					if (this._dialog.Messages[this._dialogState].length === this._chars) this.ContinueDialog();
-
-					return;
-				} else if (this._openedContainer !== null) {
+				if (this._openedContainer !== null) {
 					const hotbarY = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
 
 					if (this._yTarget < GUI.Height - hotbarY + 10) {
@@ -358,14 +354,6 @@ export class Player extends Entity {
 			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
-
-			if (this._dialog !== null) {
-				this._dialogContinueHovered =
-					e.offsetX > GUI.Width / 2 + 500 / 2 - 155 &&
-					e.offsetY > GUI.Height - 200 - 95 &&
-					e.offsetX < GUI.Width / 2 + 500 / 2 - 155 + 150 &&
-					e.offsetY < GUI.Height - 200 - 95 + 35;
-			}
 		});
 
 		addEventListener("wheel", (e) => {
@@ -1022,24 +1010,18 @@ export class Player extends Entity {
 			}
 		} else {
 			GUI.SetStroke(new Color(100, 100, 100), 2);
-			GUI.SetFillColor(new Color(70, 70, 70));
+			GUI.SetFillColor(new Color(0, 0, 0, 150));
 			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2, GUI.Height - 200 - 100, 500, 200);
-			GUI.SetFillColor(new Color(50, 50, 50));
-			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2 + 5, GUI.Height - 200 - 95, 335, 35);
-			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2 + 5, GUI.Height - 150 - 100 - 5, 490, 150);
 
-			if (this._dialogContinueHovered) GUI.SetFillColor(new Color(75, 75, 75));
-
-			if (this._dialog.Messages[this._dialogState].length === this._chars) GUI.DrawRectangle(GUI.Width / 2 + 500 / 2 - 155, GUI.Height - 200 - 95, 150, 35);
+			GUI.ClearStroke();
+			GUI.SetFillColor(new Color(100, 100, 100));
+			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2, GUI.Height - 200 - 100, 500, 35);
 
 			GUI.SetFillColor(Color.White);
 			GUI.SetFont(24);
-			GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 70, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+			GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
 			GUI.SetFont(16);
-			// GUI.DrawTextWrapped(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235, this._dialog.Messages[this._dialogState].slice(0, this._chars), 490);
-			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 235);
-
-			if (this._dialog.Messages[this._dialogState].length === this._chars) GUI.DrawTextCenter("ПРОДОЛЖИТЬ", GUI.Width / 2 + 500 / 2 - 140, GUI.Height - 200 - 72, 120);
+			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 		}
 
 		if (this._timeFromEnd > -1) return;
@@ -1221,15 +1203,19 @@ export class Player extends Entity {
 	private ContinueDialog() {
 		if (this._dialog === null) return;
 
-		this._dialogState++;
-
-		if (this._dialog.Messages.length == this._dialogState) {
-			if (this._dialog.AfterAction !== undefined) this._dialog.AfterAction();
-
-			this._dialog = null;
+		if (this._chars < this._dialog.Messages[this._dialogState].length) {
+			this._chars = this._dialog.Messages[this._dialogState].length;
 		} else {
-			this._chars = 0;
-			this._timeToNextChar = 75;
+			this._dialogState++;
+
+			if (this._dialog.Messages.length == this._dialogState) {
+				if (this._dialog.AfterAction !== undefined) this._dialog.AfterAction();
+
+				this._dialog = null;
+			} else {
+				this._chars = 0;
+				this._timeToNextChar = 75;
+			}
 		}
 	}
 

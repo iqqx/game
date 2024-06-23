@@ -17,7 +17,7 @@ export class GuardFake extends Character {
 		super.GetDialog();
 
 		return {
-			Messages: ["Стой кто идет покажи руки есть оружие?", "Тихо, тихо, убираю.", "Пойдем к нашему старосте он задаст тебе пару\nвопросов."],
+			Messages: ["Стой кто идет? Покажи руки, оружие есть?", "Тихо, тихо, убираю.", "Пойдем к нашему старосте он задаст тебе пару\nвопросов."],
 			AfterAction: () => {
 				Scene.Player.PushQuest(new Quest("Разговор", this).AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0] as Character));
 				this._completedQuests++;
