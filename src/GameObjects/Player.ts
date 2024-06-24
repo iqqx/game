@@ -64,7 +64,7 @@ export class Player extends Entity {
 	private static readonly _animationFrameDuration = 50;
 	private static readonly _sitHeightModifier = 0.85;
 	private static readonly _sitSpeedModifier = 0.75;
-	private static readonly _runningSpeedModifier = 10.5;
+	private static readonly _runningSpeedModifier = 1.5;
 	private readonly _frames = {
 		Walk: GetSprite("Player_Walk") as Sprite[],
 		Sit: GetSprite("Player_Crouch") as Sprite[],
@@ -79,7 +79,7 @@ export class Player extends Entity {
 	};
 
 	constructor(x: number, y: number) {
-		super(40, 100, Player._speed, 1000);
+		super(40, 100, Player._speed, 100);
 
 		this._x = x;
 		this._y = y;
@@ -150,10 +150,10 @@ export class Player extends Entity {
 					this._movingLeft = true;
 					this._currentAnimation = this._animations.Walk;
 					break;
-				case "KeyF":
-					this._x = this._xTarget + Scene.Current.GetLevelPosition();
-					this._y = this._yTarget;
-					break;
+				// case "KeyF":
+				// 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
+				// 	this._y = this._yTarget;
+				// 	break;
 				case "KeyS":
 					this._movingDown = true;
 

@@ -56,7 +56,7 @@ export class Player extends Entity {
     static _animationFrameDuration = 50;
     static _sitHeightModifier = 0.85;
     static _sitSpeedModifier = 0.75;
-    static _runningSpeedModifier = 10.5;
+    static _runningSpeedModifier = 1.5;
     _frames = {
         Walk: GetSprite("Player_Walk"),
         Sit: GetSprite("Player_Crouch"),
@@ -70,7 +70,7 @@ export class Player extends Entity {
         Backpack: GetSprite("Player_Backpack"),
     };
     constructor(x, y) {
-        super(40, 100, Player._speed, 1000);
+        super(40, 100, Player._speed, 100);
         this._x = x;
         this._y = y;
         this._xTarget = 900;
@@ -134,10 +134,10 @@ export class Player extends Entity {
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
                     break;
-                case "KeyF":
-                    this._x = this._xTarget + Scene.Current.GetLevelPosition();
-                    this._y = this._yTarget;
-                    break;
+                // case "KeyF":
+                // 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
+                // 	this._y = this._yTarget;
+                // 	break;
                 case "KeyS":
                     this._movingDown = true;
                     if (this._onLadder === null) {

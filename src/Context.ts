@@ -294,6 +294,15 @@ export namespace GUI {
 		if (strokeStyle !== null) ctx.stroke();
 	}
 
+	export function DrawRoundedRectangle(x: number, y: number, width: number, height: number, round: number) {
+		ctx.beginPath();
+
+		ctx.roundRect(x, y, width, height, round);
+
+		if (fillStyle !== null) ctx.fill();
+		if (strokeStyle !== null) ctx.stroke();
+	}
+
 	export function DrawCircle(x: number, y: number, radius: number) {
 		ctx.beginPath();
 

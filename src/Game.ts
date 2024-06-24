@@ -1,6 +1,7 @@
+import { GUI } from "./Context.js";
 import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
-import { Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
+import { Color, Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
 
 const sprites = new Map<string, Sprite | Sprite[]>();
 const sounds = new Map<string, Sound>();
@@ -114,6 +115,20 @@ function gameLoop(timeStamp: number) {
 
 function loadLoop() {
 	const n = window.requestAnimationFrame(loadLoop);
+
+	GUI.SetFillColor(Color.Black);
+	GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
+	GUI.SetFont(48);
+
+	GUI.SetStroke(new Color(155, 155, 155), 5);
+	GUI.SetFillColor(new Color(70, 70, 70));
+	GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400, 50, 25);
+
+	GUI.ClearStroke();
+	GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400 * (imagesLoaded.length / imagesToLoad), 50, 25);
+
+	GUI.SetFillColor(Color.Pink);
+	GUI.DrawTextCenter(`${Math.round(imagesLoaded.length / imagesToLoad) * 100}%`, GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
 
 	if (imagesLoaded.length < imagesToLoad) return;
 

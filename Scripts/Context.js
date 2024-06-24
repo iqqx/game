@@ -237,6 +237,15 @@ export var GUI;
             ctx.stroke();
     }
     GUI.DrawRectangle = DrawRectangle;
+    function DrawRoundedRectangle(x, y, width, height, round) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, round);
+        if (fillStyle !== null)
+            ctx.fill();
+        if (strokeStyle !== null)
+            ctx.stroke();
+    }
+    GUI.DrawRoundedRectangle = DrawRoundedRectangle;
     function DrawCircle(x, y, radius) {
         ctx.beginPath();
         ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
