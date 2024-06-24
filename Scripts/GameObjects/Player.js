@@ -4,16 +4,15 @@ import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
-import { Quest } from "../Quest.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
-import { Elder } from "./QuestGivers/Elder.js";
 import { EndGameFake } from "./QuestGivers/EndGameFake.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
+import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
     _frameIndex = 0;
@@ -46,6 +45,7 @@ export class Player extends Entity {
     _timeFromEnd = -1;
     _running = false;
     _endFake = new EndGameFake();
+    _character = new PlayerCharacter();
     _speaked = false;
     _speaked2 = false;
     _timeFromShootArtem = -1;
@@ -424,7 +424,7 @@ export class Player extends Entity {
         if (this._timeFromSpawn < 5000) {
             this._timeFromSpawn += dt;
             if (this._timeFromSpawn >= 5000)
-                this._quests.push(new Quest("Свет в конце тоннеля", this).AddCompletedQuestsTask("Найти выход из метро", Scene.Current.GetByType(Elder)[0], 1).AddMoveTask(34200, "Выход"));
+                this.SpeakWith(this._character);
             return;
         }
         if (this._inventory[this._selectedHand] instanceof Item)

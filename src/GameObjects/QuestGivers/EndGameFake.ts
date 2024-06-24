@@ -1,5 +1,4 @@
 import { Tag } from "../../Enums.js";
-import { GetSound } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Artem } from "./Artem.js";
 import { Character, Dialog } from "./Character.js";

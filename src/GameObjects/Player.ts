@@ -16,9 +16,9 @@ import { Interactable } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
-import { Elder } from "./QuestGivers/Elder.js";
 import { EndGameFake } from "./QuestGivers/EndGameFake.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
+import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 
 export class Player extends Entity {
 	private _timeToNextFrame = 0;
@@ -52,6 +52,7 @@ export class Player extends Entity {
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
+	private readonly _character = new PlayerCharacter();
 	private _speaked = false;
 	private _speaked2 = false;
 	private _timeFromShootArtem = -1;
@@ -471,10 +472,7 @@ export class Player extends Entity {
 		if (this._timeFromSpawn < 5000) {
 			this._timeFromSpawn += dt;
 
-			if (this._timeFromSpawn >= 5000)
-				this._quests.push(
-					new Quest("Свет в конце тоннеля", this).AddCompletedQuestsTask("Найти выход из метро", Scene.Current.GetByType(Elder)[0] as Character, 1).AddMoveTask(34200, "Выход")
-				);
+			if (this._timeFromSpawn >= 5000) this.SpeakWith(this._character);
 
 			return;
 		}
