@@ -46,8 +46,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4900;
+	private _timeFromSpawn = 0;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;

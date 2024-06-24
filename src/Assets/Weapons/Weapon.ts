@@ -112,7 +112,7 @@ export abstract class Weapon extends Item {
 					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio),
 					this._angle,
 					this._handOffset.X + this._clipOffset.X,
-					this._handOffset.Y + this._clipOffset.X
+					this._handOffset.Y + this._clipOffset.Y
 				);
 
 			Canvas.DrawImageWithAngleVFlipped(

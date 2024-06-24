@@ -103,7 +103,7 @@ export class Titles extends GameObject {
 	}
 
 	public Update(dt: number): void {
-		this._y -= Math.max(0.5, Math.ceil((dt * 0.05) / 0.5) * 0.5) * (this._pressed ? 10 : 1);
+		this._y -= dt * (this._pressed ? 0.5 : 0.05);
 
 		if (this._y < Titles._texts.length * -50 - 300) Scene.LoadFromFile("Assets/Scenes/Menu.json");
 	}
@@ -113,9 +113,9 @@ export class Titles extends GameObject {
 		GUI.ClearStroke();
 
 		GUI.SetFont(32);
-		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, this._y + i * 32 * 1.5, this.Width, this.Height);
+		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, Math.round(this._y) + i * 32 * 1.5, this.Width, this.Height);
 
 		GUI.SetFont(72);
-		GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(this._y, Titles._texts.length * -50) + Titles._texts.length * 50, this.Width, this.Height);
+		GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(Math.round(this._y), Titles._texts.length * -50) + Titles._texts.length * 50, this.Width, this.Height);
 	}
 }

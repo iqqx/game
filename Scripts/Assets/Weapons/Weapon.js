@@ -77,7 +77,7 @@ export class Weapon extends Item {
             Canvas.DrawImage(clip, new Rectangle(clipPos.X - Scene.Current.GetLevelPosition(), clipPos.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio));
         if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2) {
             if (this._hasClip)
-                Canvas.DrawImageWithAngleVFlipped(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this._handOffset.X + this._clipOffset.X, this._handOffset.Y + this._clipOffset.X);
+                Canvas.DrawImageWithAngleVFlipped(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this._handOffset.X + this._clipOffset.X, this._handOffset.Y + this._clipOffset.Y);
             Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio), this._angle, this._handOffset.X, this._handOffset.Y);
         }
         else {

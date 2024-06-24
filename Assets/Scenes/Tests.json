@@ -130,7 +130,9 @@
 		{ "Type": "Platform", "Arguments": [27458, 181, 56] },
 		{ "Type": "Platform", "Arguments": [4258, 367, 192] },
 		{ "Type": "Ladder", "Arguments": [4290, 274, 197] },
+		{ "Type": "Artem", "Arguments": [21752, 300] },
 		{ "Type": "Elder", "Arguments": [21752, 300] },
+		{ "Type": "Human", "Arguments": [4300, 300, "Green", 1, "AK"] },
 		{ "Type": "Player", "Arguments": [4000, 269] }
 	]
 }
