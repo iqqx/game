@@ -102,6 +102,9 @@ export class Vector2 {
     static Sub(a, b) {
         return new Vector2(a.X - b.X, a.Y - b.Y);
     }
+    static Add(a, b) {
+        return new Vector2(a.X + b.X, a.Y + b.Y);
+    }
 }
 export function GetEnemyTypeName(enemyType) {
     switch (enemyType) {

@@ -12,7 +12,6 @@ import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
 import { EndGameFake } from "./QuestGivers/EndGameFake.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
-import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 export class Player extends Entity {
     _timeToNextFrame = 0;
     _frameIndex = 0;
@@ -40,12 +39,11 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
-    // private _timeFromSpawn = 4500;
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4900;
     _timeFromEnd = -1;
     _running = false;
     _endFake = new EndGameFake();
-    _character = new PlayerCharacter();
     _speaked = false;
     _speaked2 = false;
     _timeFromShootArtem = -1;
@@ -423,12 +421,11 @@ export class Player extends Entity {
         this.ApplyVForce(dt);
         if (this._timeFromSpawn < 5000) {
             this._timeFromSpawn += dt;
-            if (this._timeFromSpawn >= 5000)
-                this.SpeakWith(this._character);
+            // if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
             return;
         }
         if (this._inventory[this._selectedHand] instanceof Item)
-            this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
+            this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
         if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() <= 2) {
             if (this._timeToNextPunch > 0)
                 this._timeToNextPunch -= dt;

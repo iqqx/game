@@ -135,6 +135,10 @@ export class Vector2 {
 	public static Sub(a: Vector2, b: Vector2) {
 		return new Vector2(a.X - b.X, a.Y - b.Y);
 	}
+
+	public static Add(a: Vector2, b: Vector2) {
+		return new Vector2(a.X + b.X, a.Y + b.Y);
+	}
 }
 
 export type RaycastHit = {

@@ -2,7 +2,7 @@ import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
+import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -47,12 +47,11 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 4500;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4900;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private readonly _endFake = new EndGameFake();
-	private readonly _character = new PlayerCharacter();
 	private _speaked = false;
 	private _speaked2 = false;
 	private _timeFromShootArtem = -1;
@@ -472,13 +471,17 @@ export class Player extends Entity {
 		if (this._timeFromSpawn < 5000) {
 			this._timeFromSpawn += dt;
 
-			if (this._timeFromSpawn >= 5000) this.SpeakWith(this._character);
+			// if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
 
 			return;
 		}
 
 		if (this._inventory[this._selectedHand] instanceof Item)
-			this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle);
+			this._inventory[this._selectedHand].Update(
+				dt,
+				new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
+				this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
+			);
 
 		if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() <= 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;

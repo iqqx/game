@@ -21,8 +21,10 @@ export abstract class Weapon extends Item {
 	private readonly _width: number;
 	private readonly _handOffset: Vector2;
 	private readonly _muzzleOffset: Vector2;
+	private readonly _clipOffset: Vector2;
 	public readonly MaxAmmoClip: number = 30;
 	private readonly _automatic: boolean;
+	private readonly _droppedClips: Vector2[] = [];
 
 	public declare readonly Heavy: boolean;
 	public Automatic: boolean;
@@ -34,6 +36,7 @@ export abstract class Weapon extends Item {
 	private _secondsToReload: number = 0;
 	private _ammoToReload: number = 0;
 	private _timeToRecoilStop = 0;
+	private _hasClip = false;
 
 	constructor(
 		images: { Icon: Sprite; Image: Sprite },
@@ -46,7 +49,8 @@ export abstract class Weapon extends Item {
 		reloadTime: number,
 		clip: number,
 		handOffset: Vector2,
-		muzzleOffset: Vector2
+		muzzleOffset: Vector2,
+		clipOffset: Vector2
 	) {
 		super(1);
 
@@ -64,6 +68,7 @@ export abstract class Weapon extends Item {
 		this._spread = spread;
 		(this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
 
+		this._clipOffset = clipOffset;
 		this._reloadTime = reloadTime;
 		this.MaxAmmoClip = clip;
 		this.Heavy = heavy;
@@ -85,6 +90,7 @@ export abstract class Weapon extends Item {
 				this._loadedAmmo = this._loadedAmmo + this._ammoToReload;
 				this.Automatic = this._automatic;
 
+				this._hasClip = true;
 				this._ammoToReload = 0;
 			}
 		}
@@ -93,60 +99,46 @@ export abstract class Weapon extends Item {
 	}
 
 	public Render() {
-		if (this.Heavy) {
-			if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
+		const ratio = this._width / this.Sprites.Image.BoundingBox.Width;
+		const clip = GetSprite("Rifle_Clip") as Sprite;
+
+		for (const clipPos of this._droppedClips)
+			Canvas.DrawImage(clip, new Rectangle(clipPos.X - Scene.Current.GetLevelPosition(), clipPos.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio));
+
+		if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2) {
+			if (this._hasClip)
 				Canvas.DrawImageWithAngleVFlipped(
-					this.Sprites.Image,
-					new Rectangle(
-						this._position.X - Scene.Current.GetLevelPosition(),
-						this._position.Y,
-						this._width,
-						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
-					),
+					clip,
+					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio),
 					this._angle,
-					this._handOffset.X,
-					this._handOffset.Y
+					this._handOffset.X + this._clipOffset.X,
+					this._handOffset.Y + this._clipOffset.X
 				);
-			else
-				Canvas.DrawImageWithAngle(
-					this.Sprites.Image,
-					new Rectangle(
-						this._position.X - Scene.Current.GetLevelPosition(),
-						this._position.Y,
-						this._width,
-						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
-					),
-					this._angle,
-					this._handOffset.X,
-					this._handOffset.Y
-				);
+
+			Canvas.DrawImageWithAngleVFlipped(
+				this.Sprites.Image,
+				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio),
+				this._angle,
+				this._handOffset.X,
+				this._handOffset.Y
+			);
 		} else {
-			if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2)
-				Canvas.DrawImageWithAngleVFlipped(
-					this.Sprites.Image,
-					new Rectangle(
-						this._position.X - Scene.Current.GetLevelPosition(),
-						this._position.Y,
-						this._width,
-						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
-					),
-					this._angle,
-					this._handOffset.X,
-					this._handOffset.Y
-				);
-			else
+			if (this._hasClip)
 				Canvas.DrawImageWithAngle(
-					this.Sprites.Image,
-					new Rectangle(
-						this._position.X - Scene.Current.GetLevelPosition(),
-						this._position.Y,
-						this._width,
-						this.Sprites.Image.BoundingBox.Height * (this._width / this.Sprites.Image.BoundingBox.Width)
-					),
+					clip,
+					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio),
 					this._angle,
-					this._handOffset.X,
-					this._handOffset.Y
+					this._handOffset.X + this._clipOffset.X,
+					this._handOffset.Y + this._clipOffset.Y
 				);
+
+			Canvas.DrawImageWithAngle(
+				this.Sprites.Image,
+				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio),
+				this._angle,
+				this._handOffset.X,
+				this._handOffset.Y
+			);
 		}
 	}
 
@@ -154,12 +146,17 @@ export abstract class Weapon extends Item {
 		if (this._secondsToReload > 0) return;
 		if (toReload <= 0) return;
 
+		this._hasClip = false;
+		const hits = Scene.Current.Raycast(Vector2.Add(this._position, this._clipOffset), Vector2.Down, 1000, Tag.Wall);
+		this._droppedClips.push(new Vector2(this._position.X + this._clipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
+
 		this._ammoToReload = toReload;
 		this._secondsToReload = this._reloadTime;
 		this._sounds.Reload.Play(0.5);
 	}
 
 	public Load() {
+		this._hasClip = true;
 		this._loadedAmmo = this.MaxAmmoClip;
 	}
 
@@ -188,14 +185,14 @@ export abstract class Weapon extends Item {
 		}
 
 		this._secondsToCooldown = this._fireCooldown;
-		this._timeToRecoilStop += 100;
+		this._timeToRecoilStop += 20;
 
 		const muzzlePosition = new Vector2(
 			this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X),
 			this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y)
 		);
 		const offset = (Math.random() - 0.5) * this._spread * (this._timeToRecoilStop * 0.02);
-		console.log(offset);
+
 		const dir = this._angle - offset;
 		const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
 
@@ -258,7 +255,8 @@ export class Glock extends Weapon {
 			2500,
 			7,
 			new Vector2(40, 10),
-			new Vector2(30, 10)
+			new Vector2(30, 10),
+			new Vector2(0, 0)
 		);
 	}
 
@@ -290,7 +288,8 @@ export class AK extends Weapon {
 			2500,
 			30,
 			new Vector2(5, 18),
-			new Vector2(0, 0)
+			new Vector2(0, 0),
+			new Vector2(25, 0)
 		);
 	}
 
