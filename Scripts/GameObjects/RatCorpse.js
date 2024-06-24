@@ -1,13 +1,15 @@
 import { Container } from "../Assets/Containers/Containers.js";
 import { Canvas } from "../Context.js";
+import { Tag } from "../Enums.js";
 import { GetSprite } from "../Game.js";
 import { Scene } from "../Scene.js";
-import { Rectangle } from "../Utilites.js";
+import { Rectangle, Vector2 } from "../Utilites.js";
 export class RatCorpse extends Container {
     constructor(x, y, ...items) {
         super(32 * 2, 10 * 2, 3, 1);
         this._x = x;
-        this._y = y;
+        const hits = Scene.Current.Raycast(new Vector2(this._x, y), Vector2.Down, 1000, Tag.Platform | Tag.Wall);
+        this._y = hits.length > 0 ? hits[0].position.Y : y;
         for (const item of items)
             this.TryPushItem(item);
     }
