@@ -102,13 +102,18 @@ function loadLoop() {
     GUI.SetFillColor(Color.Black);
     GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
     GUI.SetFont(48);
-    GUI.SetStroke(new Color(155, 155, 155), 5);
+    const ratio = imagesLoaded.length / imagesToLoad;
+    const rad = 25 - Math.clamp(400 - 400 * ratio + 5, 0, 25);
+    GUI.ClearStroke();
     GUI.SetFillColor(new Color(70, 70, 70));
     GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400, 50, 25);
-    GUI.ClearStroke();
-    GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400 * (imagesLoaded.length / imagesToLoad), 50, 25);
-    GUI.SetFillColor(Color.Pink);
-    GUI.DrawTextCenter(`${Math.round(imagesLoaded.length / imagesToLoad) * 100}%`, GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
+    GUI.SetFillColor(new Color(155, 155, 155));
+    GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400 * ratio, 50, [25, rad, rad, 25]);
+    GUI.SetFillColor(Color.White);
+    GUI.DrawTextCenter(`${Math.round(ratio * 100)}%`, GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
+    GUI.SetStroke(new Color(155, 155, 155), 2);
+    GUI.SetFillColor(Color.Transparent);
+    GUI.DrawRoundedRectangle(GUI.Width / 2 - 200, GUI.Height / 2 - 25, 400, 50, 25);
     if (imagesLoaded.length < imagesToLoad)
         return;
     window.cancelAnimationFrame(n);

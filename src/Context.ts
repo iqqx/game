@@ -294,7 +294,7 @@ export namespace GUI {
 		if (strokeStyle !== null) ctx.stroke();
 	}
 
-	export function DrawRoundedRectangle(x: number, y: number, width: number, height: number, round: number) {
+	export function DrawRoundedRectangle(x: number, y: number, width: number, height: number, round: number | [number, number, number, number]) {
 		ctx.beginPath();
 
 		ctx.roundRect(x, y, width, height, round);
