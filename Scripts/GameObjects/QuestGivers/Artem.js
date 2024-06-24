@@ -29,14 +29,9 @@ export class Artem extends Character {
     }
     GetDialog() {
         super.GetDialog();
-        if (Scene.Player.GetQuestsBy(this).length > 0)
-            return {
-                Messages: ["Ну что там с выходом?", "Ещё не нашел.", "Ну так ищи быстрее."],
-                Owner: this,
-                OwnerFirst: true,
-            };
         switch (this._completedQuests) {
             case 0:
+                this._completedQuests++;
                 return {
                     Messages: [
                         "Стой ты кто, что произошло?",
@@ -53,6 +48,38 @@ export class Artem extends Character {
                     },
                     Owner: this,
                     OwnerFirst: false,
+                };
+            case 1:
+                return {
+                    Messages: ["Ну что там с выходом?", "Ещё не нашел.", "Ну так ищи быстрее."],
+                    Owner: this,
+                    OwnerFirst: true,
+                };
+            case 2:
+                this._completedQuests++;
+                return {
+                    Messages: ["Артем, прием, я его нашел, нашел выход,\nон находится, не доходя до центральной\nветки.", "Принял, не мог бы ты подождать меня у него?", "Хорошо."],
+                    Owner: this,
+                    AfterAction: () => {
+                        Scene.Current.GetByType(Artem)[0].StartEnd();
+                    },
+                    OwnerFirst: false,
+                };
+            case 3:
+                this._completedQuests++;
+                return {
+                    Messages: ["Вот спасибо тебе большое, услужил."],
+                    Owner: this,
+                    AfterAction: () => {
+                        Scene.Current.GetByType(Artem)[0].Shoot();
+                    },
+                    OwnerFirst: true,
+                };
+            case 4:
+                return {
+                    Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы никто не покинул\nэто метро."],
+                    Owner: this,
+                    OwnerFirst: true,
                 };
             default:
                 return {
@@ -76,6 +103,9 @@ export class Artem extends Character {
         this._timeFromShoot = Scene.Time;
         GetSound("Shoot_3").Play(0.5);
         Scene.Player.TakeDamage(500);
+    }
+    End() {
+        this._completedQuests++;
     }
 }
 //# sourceMappingURL=Artem.js.map

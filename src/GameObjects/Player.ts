@@ -16,7 +16,6 @@ import { Interactable } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
-import { EndGameFake } from "./QuestGivers/EndGameFake.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
 import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 
@@ -51,7 +50,6 @@ export class Player extends Entity {
 	private _timeFromSpawn = 4900;
 	private _timeFromEnd = -1;
 	private _running = false;
-	private readonly _endFake = new EndGameFake();
 	private _speaked = false;
 	private _speaked2 = false;
 	private _timeFromShootArtem = -1;
@@ -60,13 +58,14 @@ export class Player extends Entity {
 		Walk: new Animation(100, 0, -0.1, 0, 0.2, 0.1, 0),
 	};
 	private _currentAnimation: Animation | null = null;
+	private _artem: Artem;
 
 	private static readonly _name = "Макс";
 	private static readonly _speed = 5;
 	private static readonly _animationFrameDuration = 50;
 	private static readonly _sitHeightModifier = 0.85;
 	private static readonly _sitSpeedModifier = 0.75;
-	private static readonly _runningSpeedModifier = 1.5;
+	private static readonly _runningSpeedModifier = 10.5;
 	private readonly _frames = {
 		Walk: GetSprite("Player_Walk") as Sprite[],
 		Sit: GetSprite("Player_Crouch") as Sprite[],
@@ -81,7 +80,7 @@ export class Player extends Entity {
 	};
 
 	constructor(x: number, y: number) {
-		super(40, 100, Player._speed, 100);
+		super(40, 100, Player._speed, 1000);
 
 		this._x = x;
 		this._y = y;
@@ -151,6 +150,10 @@ export class Player extends Entity {
 				case "KeyA":
 					this._movingLeft = true;
 					this._currentAnimation = this._animations.Walk;
+					break;
+				case "KeyF":
+					this._x = this._xTarget + Scene.Current.GetLevelPosition();
+					this._y = this._yTarget;
 					break;
 				case "KeyS":
 					this._movingDown = true;
@@ -399,14 +402,14 @@ export class Player extends Entity {
 		if (this._timeFromEnd > -1) {
 			this._timeFromEnd += dt;
 
-			if ((Scene.Current.GetByType(Artem)[0] as Artem).IsEnd() && !this._speaked) {
+			if (this._artem.IsEnd() && !this._speaked) {
 				this._speaked = true;
-				this.SpeakWith(this._endFake);
+				this.SpeakWith(this._artem);
 			}
 
 			if (this._timeFromShootArtem > 0 && Scene.Time - this._timeFromShootArtem > 1000 && !this._speaked2) {
 				this._speaked2 = true;
-				this.SpeakWith(this._endFake);
+				this.SpeakWith(this._artem);
 			}
 		}
 
@@ -428,9 +431,10 @@ export class Player extends Entity {
 			quest.Update();
 
 			if (quest.IsCompleted()) {
-				if (quest.Giver === this && (Scene.Current.GetByType(Artem)[0] as Artem).IsTalked()) {
-					this.SpeakWith(this._endFake);
+				if (quest.Giver.constructor.name === PlayerCharacter.name && this._artem.IsTalked()) {
 					this._timeFromEnd = 0;
+					this._artem.End();
+					this.SpeakWith(quest.Giver as Character);
 				}
 
 				this._quests.splice(i, 1);
@@ -471,7 +475,8 @@ export class Player extends Entity {
 		if (this._timeFromSpawn < 5000) {
 			this._timeFromSpawn += dt;
 
-			// if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
+			if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
+			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
 
 			return;
 		}
@@ -483,16 +488,14 @@ export class Player extends Entity {
 				this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
 			);
 
-		if (this.CanTarget() && this._endFake.GetCompletedQuestsCount() <= 2) {
+		if (this.CanTarget() && this._artem.GetCompletedQuestsCount() <= 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
 
 			const prevX = this._x;
 
 			if (this._movingLeft) {
 				if (this._timeFromEnd === -1 || this._x > 33500) this.MoveLeft(dt);
-			} else {
-				if (this._movingRight) this.MoveRight(dt);
-			}
+			} else if (this._movingRight) this.MoveRight(dt);
 
 			this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 
@@ -525,7 +528,7 @@ export class Player extends Entity {
 			if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
 
 			if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic) this.Shoot();
-		} else if (this._endFake.GetCompletedQuestsCount() > 2) {
+		} else if (this._artem.GetCompletedQuestsCount() > 2) {
 			this._angle = (() => {
 				const angle = -Math.atan2(this._yTarget - (this._y + this.Height * this._armHeight), this._xTarget + Scene.Current.GetLevelPosition() - (this._x + this.Width / 2));
 
@@ -872,7 +875,7 @@ export class Player extends Entity {
 		}
 
 		if (this._dialog === null) {
-			if (this._endFake.GetCompletedQuestsCount() > 2) return;
+			if (this._artem.GetCompletedQuestsCount() > 2) return;
 
 			const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
 
@@ -1316,7 +1319,7 @@ export class Player extends Entity {
 
 		if (this._weapon === null) {
 			if (this._inventory[this._selectedHand] instanceof Item) {
-				if (this._inventory[this._selectedHand] instanceof Radio) this.SpeakWith(this._endFake);
+				if (this._inventory[this._selectedHand] instanceof Radio) this.SpeakWith(this._artem);
 				else
 					this._inventory[this._selectedHand].Use(() => {
 						this._inventory[this._selectedHand] = null;

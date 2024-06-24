@@ -5,6 +5,7 @@ export class Quest {
     Giver;
     Tasks = [];
     _afterComplete;
+    _completed = false;
     _stage = 1;
     constructor(Title, Giver, afterComplete) {
         this.Title = Title;
@@ -12,27 +13,44 @@ export class Quest {
         this._afterComplete = afterComplete;
     }
     Update() {
-        for (const task of this.Tasks.slice(0, this._stage)) {
+        for (const task of this.Tasks.slice(0, this._stage))
             if (task instanceof MoveTask || task instanceof FakeMoveTask || task instanceof CompletedQuestsTask)
                 task.Check();
+        if (this.IsCompleted() && !this._completed) {
+            this._completed = true;
+            if (this._afterComplete !== undefined)
+                this._afterComplete();
         }
     }
     InventoryChanged() {
-        for (const task of this.Tasks.slice(0, this._stage)) {
+        for (const task of this.Tasks.slice(0, this._stage))
             if (task instanceof HasItemTask)
                 task.Check();
+        if (this.IsCompleted() && !this._completed) {
+            this._completed = true;
+            if (this._afterComplete !== undefined)
+                this._afterComplete();
         }
     }
     OnTalked(giver) {
-        for (const task of this.Tasks.slice(0, this._stage)) {
+        for (const task of this.Tasks.slice(0, this._stage))
             if (task instanceof TalkTask && task.Subject === giver)
                 task.Count();
+        if (this.IsCompleted() && !this._completed) {
+            this._completed = true;
+            if (this._afterComplete !== undefined)
+                this._afterComplete();
         }
     }
     OnKilled(type) {
         for (const task of this.Tasks)
             if (task instanceof KillTask && task.EnemyType === type)
                 task.Count();
+        if (this.IsCompleted() && !this._completed) {
+            this._completed = true;
+            if (this._afterComplete !== undefined)
+                this._afterComplete();
+        }
     }
     IsCompleted() {
         return this._stage > this.Tasks.length;

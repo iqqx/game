@@ -10,6 +10,7 @@ export class Quest {
 	public readonly Giver: Character | Player;
 	public readonly Tasks: Task[] = [];
 	private readonly _afterComplete?: () => void;
+	private _completed = false;
 	private _stage = 1;
 
 	constructor(Title: string, Giver: Character | Player, afterComplete?: () => void) {
@@ -19,25 +20,39 @@ export class Quest {
 	}
 
 	public Update() {
-		for (const task of this.Tasks.slice(0, this._stage)) {
-			if (task instanceof MoveTask || task instanceof FakeMoveTask || task instanceof CompletedQuestsTask) task.Check();
+		for (const task of this.Tasks.slice(0, this._stage)) if (task instanceof MoveTask || task instanceof FakeMoveTask || task instanceof CompletedQuestsTask) task.Check();
+
+		if (this.IsCompleted() && !this._completed) {
+			this._completed = true;
+			if (this._afterComplete !== undefined) this._afterComplete();
 		}
 	}
 
 	public InventoryChanged() {
-		for (const task of this.Tasks.slice(0, this._stage)) {
-			if (task instanceof HasItemTask) task.Check();
+		for (const task of this.Tasks.slice(0, this._stage)) if (task instanceof HasItemTask) task.Check();
+
+		if (this.IsCompleted() && !this._completed) {
+			this._completed = true;
+			if (this._afterComplete !== undefined) this._afterComplete();
 		}
 	}
 
 	public OnTalked(giver: Character) {
-		for (const task of this.Tasks.slice(0, this._stage)) {
-			if (task instanceof TalkTask && task.Subject === giver) task.Count();
+		for (const task of this.Tasks.slice(0, this._stage)) if (task instanceof TalkTask && task.Subject === giver) task.Count();
+
+		if (this.IsCompleted() && !this._completed) {
+			this._completed = true;
+			if (this._afterComplete !== undefined) this._afterComplete();
 		}
 	}
 
 	public OnKilled(type: EnemyType) {
 		for (const task of this.Tasks) if (task instanceof KillTask && task.EnemyType === type) task.Count();
+
+		if (this.IsCompleted() && !this._completed) {
+			this._completed = true;
+			if (this._afterComplete !== undefined) this._afterComplete();
+		}
 	}
 
 	public IsCompleted() {
