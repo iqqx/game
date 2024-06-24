@@ -44,8 +44,8 @@ export class Trader extends Character {
 					Owner: this,
 					OwnerFirst: false,
 					AfterAction: () => {
-						Scene.Player.GiveQuestItem(new AK());
-						Scene.Player.GiveQuestItem(new RifleBullet(20));
+						Scene.Player.GiveQuestItem(new RifleBullet(30));
+						Scene.Player.GiveQuestItem(new RifleBullet(30));
 					},
 				};
 			}
