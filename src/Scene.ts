@@ -69,15 +69,15 @@ export class Scene {
 		addEventListener("mousemove", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
 
-			Scene.Current._mouseX = e.offsetX;
-			Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
+			Scene.Current._mouseX = Math.round(e.offsetX * Canvas.GetAspectRatio());
+			Scene.Current._mouseY = Math.round(Canvas.GetSize().Y - e.offsetY * Canvas.GetAspectRatio());
 		});
 
 		addEventListener("mousedown", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
 
-			Scene.Current._mouseX = e.offsetX;
-			Scene.Current._mouseY = Canvas.GetClientRectangle().height - e.offsetY;
+			Scene.Current._mouseX = Math.round(e.offsetX * Canvas.GetAspectRatio());
+			Scene.Current._mouseY = Math.round(Canvas.GetSize().Y - e.offsetY * Canvas.GetAspectRatio());
 
 			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent)) {
 				this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);

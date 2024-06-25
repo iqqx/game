@@ -1,5 +1,5 @@
 import { Animation } from "../Animation.js";
-import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
+import { DogTag, Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -21,7 +21,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [null, null];
+    _inventory = [new DogTag(), new DogTag()];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -39,7 +39,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4900;
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -70,7 +71,7 @@ export class Player extends Entity {
         Backpack: GetSprite("Player_Backpack"),
     };
     constructor(x, y) {
-        super(40, 100, Player._speed, 10000);
+        super(40, 100, Player._speed, 100);
         this._x = x;
         this._y = y;
         this._xTarget = 900;
@@ -248,8 +249,8 @@ export class Player extends Entity {
                         }
                     }
             }
-            this._xTarget = e.offsetX;
-            this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
+            // this._xTarget = e.offsetX;
+            // this._yTarget = Canvas.GetSize().Y - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (e.button === 0) {
                 const lastHover = this._hoveredObject;
@@ -331,12 +332,11 @@ export class Player extends Entity {
         addEventListener("mousemove", (e) => {
             if (e.target.tagName !== "CANVAS")
                 return;
-            if (e.sourceCapabilities.firesTouchEvents === true)
-                return;
+            // if (e.sourceCapabilities.firesTouchEvents === true) return;
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
-            this._xTarget = Math.round(e.offsetX);
-            this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
+            // this._xTarget = Math.round(e.offsetX);
+            // this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
         });
         addEventListener("wheel", (e) => {
@@ -349,6 +349,8 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
+        this._xTarget = Scene.Current.GetMousePosition().X;
+        this._yTarget = Scene.Current.GetMousePosition().Y;
         this._currentAnimation?.Update(dt);
         if (this._timeFromGoodEnd > 0) {
             this._timeFromGoodEnd += dt;

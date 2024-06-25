@@ -16,6 +16,10 @@ let fillStyle;
 let strokeStyle;
 export var Canvas;
 (function (Canvas) {
+    function GetAspectRatio() {
+        return ctxMain.canvas.width / ctxMain.canvas.clientWidth;
+    }
+    Canvas.GetAspectRatio = GetAspectRatio;
     function SwitchOn() {
         ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
         ctx = ctxMain;

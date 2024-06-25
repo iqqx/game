@@ -22,6 +22,10 @@ let fillStyle: string | CanvasGradient | CanvasPattern | null;
 let strokeStyle: [string | CanvasGradient | CanvasPattern, number] | null;
 
 export namespace Canvas {
+	export function GetAspectRatio() {
+		return ctxMain.canvas.width / ctxMain.canvas.clientWidth;
+	}
+
 	export function SwitchOn() {
 		ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
 		ctx = ctxMain;

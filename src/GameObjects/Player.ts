@@ -1,7 +1,7 @@
 import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
-import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
+import { DogTag, Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Glock, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -28,7 +28,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
+	private _inventory: [Item | null, Item | null] = [new DogTag(), new DogTag()];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -46,7 +46,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4900;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -79,7 +80,7 @@ export class Player extends Entity {
 	};
 
 	constructor(x: number, y: number) {
-		super(40, 100, Player._speed, 10000);
+		super(40, 100, Player._speed, 100);
 
 		this._x = x;
 		this._y = y;
@@ -274,8 +275,8 @@ export class Player extends Entity {
 					}
 			}
 
-			this._xTarget = e.offsetX;
-			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
+			// this._xTarget = e.offsetX;
+			// this._yTarget = Canvas.GetSize().Y - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 
@@ -360,12 +361,12 @@ export class Player extends Entity {
 
 		addEventListener("mousemove", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-			if (e.sourceCapabilities.firesTouchEvents === true) return;
+			// if (e.sourceCapabilities.firesTouchEvents === true) return;
 
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
 
-			this._xTarget = Math.round(e.offsetX);
-			this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
+			// this._xTarget = Math.round(e.offsetX);
+			// this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 		});
@@ -380,6 +381,9 @@ export class Player extends Entity {
 	}
 
 	public override Update(dt: number) {
+		this._xTarget = Scene.Current.GetMousePosition().X;
+		this._yTarget = Scene.Current.GetMousePosition().Y;
+
 		this._currentAnimation?.Update(dt);
 
 		if (this._timeFromGoodEnd > 0) {

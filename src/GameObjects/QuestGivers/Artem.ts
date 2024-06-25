@@ -24,7 +24,7 @@ export class Artem extends Character {
 					GetSprite("Artem_Shoot"),
 					new Rectangle(
 						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
-						this._y,
+						149,
 						this.Width,
 						this.Height
 					)
@@ -34,7 +34,7 @@ export class Artem extends Character {
 					GetSprite("Artem_Walk")[0],
 					new Rectangle(
 						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
-						this._y,
+						149,
 						this.Width,
 						this.Height
 					)
@@ -44,7 +44,7 @@ export class Artem extends Character {
 					GetSprite("Artem_Walk")[Math.floor(((Scene.Time - this._timeFromStartEnd) / 100) % 4)],
 					new Rectangle(
 						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
-						this._y,
+						149,
 						this.Width,
 						this.Height
 					)
