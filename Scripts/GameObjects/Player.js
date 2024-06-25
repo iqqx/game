@@ -21,7 +21,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [null, null];
+    _inventory = [new AK(), new RifleBullet(30)];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -134,10 +134,10 @@ export class Player extends Entity {
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
                     break;
-                // case "KeyF":
-                // 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
-                // 	this._y = this._yTarget;
-                // 	break;
+                case "KeyF":
+                    this._x = this._xTarget + Scene.Current.GetLevelPosition();
+                    this._y = this._yTarget;
+                    break;
                 case "KeyS":
                     this._movingDown = true;
                     if (this._onLadder === null) {
