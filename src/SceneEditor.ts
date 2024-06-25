@@ -299,7 +299,7 @@ export class SceneEditor {
 			case "Rat":
 				return [ObjectType.Rat, new Rectangle(...(x.Arguments as [number, number]), 100, 50)];
 			default:
-				throw new Error("Не удалось распарсить: " + x.Type);
+				console.error("Не удалось распарсить: " + x.Type);
 		}
 	}
 

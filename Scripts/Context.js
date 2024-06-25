@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
+// ctxMain.canvas.width = ctxMain.canvas.clientWidth;
+// ctxMain.canvas.height = ctxMain.canvas.clientHeight;
 ctxMain.imageSmoothingEnabled = false;
 const ctxOverlay = document.createElement("canvas").getContext("2d");
 ctxOverlay.canvas.className = "123";
