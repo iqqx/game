@@ -42,6 +42,9 @@ export class Quest {
                 this._afterComplete();
         }
     }
+    SetStage(stage) {
+        this._stage = stage;
+    }
     OnKilled(type) {
         for (const task of this.Tasks)
             if (task instanceof KillTask && task.EnemyType === type)
@@ -59,31 +62,36 @@ export class Quest {
         return this.Tasks.slice(0, this._stage);
     }
     AddKillTask(enemyType, count, absolute = false, mask) {
-        this.Tasks.push(new KillTask(this, enemyType, count, absolute, () => this._stage++, mask));
+        const nextStage = this.Tasks.length + 2;
+        this.Tasks.push(new KillTask(this, enemyType, count, absolute, () => (this._stage = Math.max(this._stage, nextStage)), mask));
         return this;
     }
     AddMoveTask(to, location) {
-        this.Tasks.push(new MoveTask(this, () => this._stage++, location, to));
+        const nextStage = this.Tasks.length + 2;
+        this.Tasks.push(new MoveTask(this, () => (this._stage = Math.max(this._stage, nextStage)), location, to));
         return this;
     }
     AddFakeMoveTask(to, location, fakeTo) {
-        this.Tasks.push(new FakeMoveTask(this, () => this._stage++, location, to, fakeTo));
+        const nextStage = this.Tasks.length + 2;
+        this.Tasks.push(new FakeMoveTask(this, () => (this._stage = Math.max(this._stage, nextStage)), location, to, fakeTo));
         return this;
     }
     AddTalkTask(text, subject) {
-        this.Tasks.push(new TalkTask(this, () => this._stage++, text, subject));
+        const nextStage = this.Tasks.length + 2;
+        this.Tasks.push(new TalkTask(this, () => (this._stage = Math.max(this._stage, nextStage)), text, subject));
         return this;
     }
     AddCompletedQuestsTask(text, giver, goal) {
-        this.Tasks.push(new CompletedQuestsTask(this, () => this._stage++, giver, goal, text));
+        const nextStage = this.Tasks.length + 2;
+        this.Tasks.push(new CompletedQuestsTask(this, () => (this._stage = Math.max(this._stage, nextStage)), giver, goal, text));
         return this;
     }
     AddHasItemsTask(mask, ...items) {
-        const currentTasks = this.Tasks.length + 1;
+        const nextStage = this.Tasks.length + 1;
         const task = new HasItemTask(this, () => {
-            if (this._stage >= currentTasks)
-                this._stage++;
-        }, () => (this._stage = currentTasks), mask, items);
+            if (this._stage >= nextStage)
+                this._stage = Math.max(this._stage, nextStage + 1);
+        }, () => (this._stage = nextStage), mask, items);
         this.Tasks.push(task);
         task.Check();
         return this;

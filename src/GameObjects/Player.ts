@@ -16,6 +16,7 @@ import { Interactable } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
 import { Character, Dialog } from "./QuestGivers/Character.js";
+import { Elder } from "./QuestGivers/Elder.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
 import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 
@@ -28,7 +29,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [new AK(), new RifleBullet(30)];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -46,7 +47,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4550;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -360,12 +361,8 @@ export class Player extends Entity {
 
 		addEventListener("mousemove", (e) => {
 			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-			// if (e.sourceCapabilities.firesTouchEvents === true) return;
 
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
-
-			// this._xTarget = Math.round(e.offsetX);
-			// this._yTarget = Canvas.GetClientRectangle().height - e.offsetY;
 
 			this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
 		});
@@ -432,6 +429,8 @@ export class Player extends Entity {
 		this._quests.forEach((quest, i) => {
 			quest.Update();
 
+			// if (this._x > 33500 && quest.Giver.constructor.name === PlayerCharacter.name) this._quests.splice(i, 1);
+
 			if (quest.IsCompleted()) {
 				if (quest.Giver.constructor.name === PlayerCharacter.name && this._artem.IsTalked()) {
 					this._timeFromEnd = 0;
@@ -440,6 +439,13 @@ export class Player extends Entity {
 				}
 
 				this._quests.splice(i, 1);
+			} else if (
+				i === 0 &&
+				quest.Giver.constructor.name === PlayerCharacter.name &&
+				!this._artem.IsTalked() &&
+				(Scene.Current.GetByType(Elder)[0] as Elder).GetCompletedQuestsCount() > 0
+			) {
+				quest.SetStage(3);
 			}
 		});
 

@@ -16,7 +16,7 @@ export class PlayerCharacter extends Character {
 		switch (this._completedQuests) {
 			case 0:
 				return {
-					Messages: ["Где это я?", "Нужно побыстрее выбираться."],
+					Messages: ["Где это я? Как же болит голова.", "Нужно побыстрее выбираться.\nКажется в левой части тоннеля был выход."],
 					Owner: this,
 					AfterAction: () => {
 						Scene.Player.PushQuest(
@@ -24,7 +24,8 @@ export class PlayerCharacter extends Character {
 								this._completedQuests++;
 								Scene.Player.SpeakWith(this);
 							})
-								.AddCompletedQuestsTask("Найти выход из метро", Scene.Current.GetByType(Elder)[0] as Character, 1)
+								.AddMoveTask(4000, "Выход")
+								.AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0] as Character, 1)
 								.AddMoveTask(34200, "Выход")
 						);
 					},
