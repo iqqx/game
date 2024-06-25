@@ -1,4 +1,5 @@
 import { GUI } from "../../Context.js";
+import { GetSound } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Color } from "../../Utilites.js";
 import { GameObject } from "../GameObject.js";
@@ -92,20 +93,31 @@ export class Titles extends GameObject {
 		super(GUI.Width, GUI.Height);
 
 		this._y = 450;
+		GetSound("Titles_Background").Volume = 0.1;
+		GetSound("Titles_Background").Apply();
+		GetSound("Titles_Background").PlayOriginal();
 
 		addEventListener("keydown", (e) => {
-			if (e.code === "Space") this._pressed = true;
+			if (e.code === "Space") {
+				this._pressed = true;
+			}
 		});
 
 		addEventListener("keyup", (e) => {
-			if (e.code === "Space") this._pressed = false;
+			if (e.code === "Space") {
+				this._pressed = false;
+			}
 		});
 	}
 
 	public Update(dt: number): void {
 		this._y -= dt * (this._pressed ? 0.5 : 0.05);
 
-		if (this._y < Titles._texts.length * -50 - 300) Scene.LoadFromFile("Assets/Scenes/Menu.json");
+		if (this._y < Titles._texts.length * -50 - 300) {
+			GetSound("Titles_Background").StopOriginal();
+
+			Scene.LoadFromFile("Assets/Scenes/Menu.json");
+		}
 	}
 
 	public Render(): void {

@@ -93,6 +93,7 @@ function LoadSound(source: string): Sound {
 			s.playbackRate = this.Speed;
 		},
 		PlayOriginal: function () {
+			s.currentTime = 0;
 			s.play();
 		},
 		IsPlayingOriginal: function () {
