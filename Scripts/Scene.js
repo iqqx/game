@@ -221,7 +221,7 @@ export class Scene {
         ]);
     }
     GetLevelPosition() {
-        return Scene.Current._levelPosition;
+        return Math.round(Scene.Current._levelPosition);
     }
     GetMousePosition() {
         return new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);

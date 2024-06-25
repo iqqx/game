@@ -34,7 +34,7 @@ export class Human extends Enemy {
 	private _friendly = false;
 	private readonly _timeToShoot = 500;
 	private readonly _timeToTurn = 1500;
-	private readonly _fakeCharacter = new GuardFake(0, 0);
+	private readonly _fakeCharacter = new GuardFake();
 	private readonly _fakeEndCharacter = new FakeEndGuard();
 	private _warned = false;
 

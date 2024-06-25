@@ -1,25 +1,12 @@
 import { DogTag } from "../../Assets/Items/Item.js";
-import { Canvas } from "../../Context.js";
-import { Tag } from "../../Enums.js";
 import { GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
-import { FakeEndGuard } from "./FakeEndGuard.js";
-import { GuardFake } from "./GuardFake.js";
 
 export class Elder extends Character {
 	constructor(x: number, y: number) {
-		super(50, 100);
-
-		this.Tag = Tag.NPC;
-		this._x = x;
-		this._y = y;
-	}
-
-	override Render(): void {
-		Canvas.DrawImage(GetSprite("Elder"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		super(x, y, GetSprite("Elder"));
 	}
 
 	public override GetDialog(): Dialog {

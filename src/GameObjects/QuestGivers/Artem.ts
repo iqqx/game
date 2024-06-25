@@ -1,10 +1,9 @@
 import { Radio } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
-import { Tag } from "../../Enums.js";
 import { GetSound, GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle, Sprite } from "../../Utilites.js";
+import { Rectangle } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Artem extends Character {
@@ -12,11 +11,9 @@ export class Artem extends Character {
 	private _timeFromShoot = -1;
 
 	constructor(x: number, y: number) {
-		super(100, 100);
+		super(x, y, GetSprite("Artem"));
 
-		this.Tag = Tag.NPC;
-		this._x = x;
-		this._y = y;
+		this.Width = 100;
 	}
 
 	override Render(): void {

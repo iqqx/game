@@ -1,6 +1,5 @@
 import { Radio } from "../../Assets/Items/Item.js";
 import { Canvas } from "../../Context.js";
-import { Tag } from "../../Enums.js";
 import { GetSound, GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
@@ -10,10 +9,8 @@ export class Artem extends Character {
     _timeFromStartEnd = -1;
     _timeFromShoot = -1;
     constructor(x, y) {
-        super(100, 100);
-        this.Tag = Tag.NPC;
-        this._x = x;
-        this._y = y;
+        super(x, y, GetSprite("Artem"));
+        this.Width = 100;
     }
     Render() {
         if (this._timeFromStartEnd == -1)

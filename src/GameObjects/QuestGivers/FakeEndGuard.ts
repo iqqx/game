@@ -1,13 +1,11 @@
-import { Tag } from "../../Enums.js";
+import { GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";
 
 export class FakeEndGuard extends Character {
 	constructor() {
-		super(50, 100);
-
-		this.Tag = Tag.NPC;
+		super(0, 0, GetSprite("Elder"));
 	}
 
 	public override GetDialog(): Dialog {

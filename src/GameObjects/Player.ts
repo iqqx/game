@@ -79,7 +79,7 @@ export class Player extends Entity {
 	};
 
 	constructor(x: number, y: number) {
-		super(40, 100, Player._speed, 100);
+		super(40, 100, Player._speed, 10000);
 
 		this._x = x;
 		this._y = y;
@@ -150,10 +150,10 @@ export class Player extends Entity {
 					this._movingLeft = true;
 					this._currentAnimation = this._animations.Walk;
 					break;
-				// case "KeyF":
-				// 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
-				// 	this._y = this._yTarget;
-				// 	break;
+				case "KeyF":
+					this._x = this._xTarget + Scene.Current.GetLevelPosition();
+					this._y = this._yTarget;
+					break;
 				case "KeyS":
 					this._movingDown = true;
 

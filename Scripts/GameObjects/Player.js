@@ -70,7 +70,7 @@ export class Player extends Entity {
         Backpack: GetSprite("Player_Backpack"),
     };
     constructor(x, y) {
-        super(40, 100, Player._speed, 100);
+        super(40, 100, Player._speed, 10000);
         this._x = x;
         this._y = y;
         this._xTarget = 900;
@@ -134,10 +134,10 @@ export class Player extends Entity {
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
                     break;
-                // case "KeyF":
-                // 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
-                // 	this._y = this._yTarget;
-                // 	break;
+                case "KeyF":
+                    this._x = this._xTarget + Scene.Current.GetLevelPosition();
+                    this._y = this._yTarget;
+                    break;
                 case "KeyS":
                     this._movingDown = true;
                     if (this._onLadder === null) {

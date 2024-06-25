@@ -131,7 +131,7 @@
 		{ "Type": "Boombox", "Arguments": [22545, 300, 3000, "Music_1", "Music_2", "Music_3", "Music_4", "Music_5"] },
 		{ "Type": "HumanCorpse", "Arguments": [28181, 153, "RatTail"] },
 		{ "Type": "HumanCorpse", "Arguments": [27419, 151, "AK"] },
-		{ "Type": "Artem", "Arguments": [12089, 150] },
+		{ "Type": "Artem", "Arguments": [4000, 264] },
 		{ "Type": "Trader", "Arguments": [21084, 263] },
 		{ "Type": "Elder", "Arguments": [21752, 300] },
 		{
@@ -167,6 +167,6 @@
 		{ "Type": "Rat", "Arguments": [27250, 147] },
 		{ "Type": "Rat", "Arguments": [26876, 152] },
 		{ "Type": "Rat", "Arguments": [28590, 154] },
-		{ "Type": "Player", "Arguments": [4000, 269] }
+		{ "Type": "Player", "Arguments": [12089, 200] }
 	]
 }

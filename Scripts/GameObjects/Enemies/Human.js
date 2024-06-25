@@ -26,7 +26,7 @@ export class Human extends Enemy {
     _friendly = false;
     _timeToShoot = 500;
     _timeToTurn = 1500;
-    _fakeCharacter = new GuardFake(0, 0);
+    _fakeCharacter = new GuardFake();
     _fakeEndCharacter = new FakeEndGuard();
     _warned = false;
     constructor(x, y, type, direction = 1, weapon) {

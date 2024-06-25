@@ -251,7 +251,7 @@ export class Scene {
 	}
 
 	public GetLevelPosition() {
-		return Scene.Current._levelPosition;
+		return Math.round(Scene.Current._levelPosition);
 	}
 
 	public GetMousePosition() {
