@@ -249,8 +249,6 @@ export class Player extends Entity {
                         }
                     }
             }
-            // this._xTarget = e.offsetX;
-            // this._yTarget = Canvas.GetSize().Y - e.offsetY;
             this.Direction = e.x > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
             if (e.button === 0) {
                 const lastHover = this._hoveredObject;
@@ -274,6 +272,7 @@ export class Player extends Entity {
                                 }
                                 else if (xCell <= 5)
                                     this.SwapItemAt(xCell);
+                                this._quests.forEach((quest) => quest.InventoryChanged());
                             }
                         }
                         else {
@@ -289,6 +288,7 @@ export class Player extends Entity {
                                 }
                                 else
                                     this.SwapItemAt(xCell);
+                                this._quests.forEach((quest) => quest.InventoryChanged());
                             }
                         }
                     }
@@ -301,11 +301,13 @@ export class Player extends Entity {
                         const firstYOffset = GUI.Height / 2 - Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 - 25;
                         const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
                         const yCell = Math.floor((750 - this._yTarget - firstYOffset) / 55);
-                        if (this._openedContainer.CellInContainer(xCell, yCell))
+                        if (this._openedContainer.CellInContainer(xCell, yCell)) {
                             if (e.shiftKey && this.TryPushItem(this._openedContainer.GetItemAt(xCell, yCell)))
                                 this._openedContainer.TakeItemFrom(xCell, yCell);
                             else
                                 this._draggedItem = this._openedContainer.SwapItem(xCell, yCell, this._draggedItem);
+                            this._quests.forEach((quest) => quest.InventoryChanged());
+                        }
                     }
                 }
                 const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
@@ -386,7 +388,6 @@ export class Player extends Entity {
         }
         this._quests.forEach((quest, i) => {
             quest.Update();
-            // if (this._x > 33500 && quest.Giver.constructor.name === PlayerCharacter.name) this._quests.splice(i, 1);
             if (quest.IsCompleted()) {
                 if (quest.Giver.constructor.name === PlayerCharacter.name && this._artem.IsTalked()) {
                     this._timeFromEnd = 0;
@@ -776,6 +777,8 @@ export class Player extends Entity {
             GUI.SetFont(16);
             GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
         }
+        if (this._draggedItem !== null)
+            GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
         if (this._timeFromEnd > -1) {
             Canvas.SetFillColor(Color.White);
             Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
@@ -806,8 +809,6 @@ export class Player extends Entity {
                 GUI.DrawTextCenter(items[i], this._xTarget - 75, 750 - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
             }
         }
-        if (this._draggedItem !== null)
-            GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
         GUI.ClearStroke();
         GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
         let offset = 0;
@@ -897,9 +898,7 @@ export class Player extends Entity {
                 else
                     this._weapon = null;
         }
-        this._quests.forEach((quest) => {
-            quest.InventoryChanged();
-        });
+        this._quests.forEach((quest) => quest.InventoryChanged());
     }
     Heal(by) {
         if (by <= 0)

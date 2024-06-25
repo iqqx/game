@@ -74,7 +74,7 @@ export class Artem extends Character {
                 };
             case 4:
                 return {
-                    Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы никто не покинул\nэто метро..."],
+                    Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы никто не поки..."],
                     Owner: this,
                     OwnerFirst: true,
                 };

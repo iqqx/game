@@ -22,7 +22,6 @@ export class PlayerCharacter extends Character {
 						Scene.Player.PushQuest(
 							new Quest("Свет в конце тоннеля", this, () => {
 								this._completedQuests++;
-								Scene.Player.SpeakWith(this);
 							})
 								.AddMoveTask(4000, "Выход")
 								.AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0] as Character, 1)
