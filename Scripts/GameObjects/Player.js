@@ -40,7 +40,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 4550;
+    _timeFromSpawn = 0;
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -52,6 +52,8 @@ export class Player extends Entity {
     };
     _currentAnimation = null;
     _artem;
+    _lastPressedKeys = "";
+    _easterActivated = false;
     static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -84,6 +86,13 @@ export class Player extends Entity {
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
+            if (!this._easterActivated) {
+                if (this._lastPressedKeys.length > 100)
+                    this._lastPressedKeys = e.key;
+                else
+                    this._lastPressedKeys += e.key;
+                this.CheckForEaster();
+            }
             switch (e.code) {
                 case "KeyC":
                     if (this._sit === false) {
@@ -134,10 +143,6 @@ export class Player extends Entity {
                 case "KeyA":
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
-                    break;
-                case "KeyF":
-                    this._x = this._xTarget + Scene.Current.GetLevelPosition();
-                    this._y = this._yTarget;
                     break;
                 case "KeyS":
                     this._movingDown = true;
@@ -842,8 +847,14 @@ export class Player extends Entity {
         Canvas.SetFillColor(Color.White);
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
-    IsAlive() {
-        return this._health > 0;
+    CheckForEaster() {
+        const cheatCode = "HESOYAM";
+        if (this._lastPressedKeys.slice(-7).toUpperCase() === cheatCode && !this._easterActivated) {
+            this._easterActivated = true;
+            GetSound("Easter").PlayOriginal();
+            this._frames.Walk = GetSprite("Easter_Player_Walk");
+            this._frames.Sit = GetSprite("Easter_Player_Sit");
+        }
     }
     OnKilled(type) {
         this._quests.forEach((x) => x.OnKilled(type));

@@ -47,7 +47,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 4550;
+	private _timeFromSpawn = 0;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -59,6 +59,8 @@ export class Player extends Entity {
 	};
 	private _currentAnimation: Animation | null = null;
 	private _artem: Artem;
+	private _lastPressedKeys = "";
+	private _easterActivated = false;
 
 	private static readonly _name = "Макс";
 	private static readonly _speed = 5;
@@ -95,6 +97,12 @@ export class Player extends Entity {
 
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
+
+			if (!this._easterActivated) {
+				if (this._lastPressedKeys.length > 100) this._lastPressedKeys = e.key;
+				else this._lastPressedKeys += e.key;
+				this.CheckForEaster();
+			}
 
 			switch (e.code) {
 				case "KeyC":
@@ -150,10 +158,6 @@ export class Player extends Entity {
 				case "KeyA":
 					this._movingLeft = true;
 					this._currentAnimation = this._animations.Walk;
-					break;
-				case "KeyF":
-					this._x = this._xTarget + Scene.Current.GetLevelPosition();
-					this._y = this._yTarget;
 					break;
 				case "KeyS":
 					this._movingDown = true;
@@ -1130,8 +1134,17 @@ export class Player extends Entity {
 		Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
 	}
 
-	public IsAlive(): boolean {
-		return this._health > 0;
+	public CheckForEaster() {
+		const cheatCode = "HESOYAM";
+
+		if (this._lastPressedKeys.slice(-7).toUpperCase() === cheatCode && !this._easterActivated) {
+			this._easterActivated = true;
+
+			GetSound("Easter").PlayOriginal();
+
+			this._frames.Walk = GetSprite("Easter_Player_Walk");
+			this._frames.Sit = GetSprite("Easter_Player_Sit");
+		}
 	}
 
 	public OnKilled(type: EnemyType) {

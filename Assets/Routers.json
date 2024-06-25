@@ -24,6 +24,8 @@
 			"Images/Player/Walk/4.png",
 			"Images/Player/Walk/5.png"
 		],
+		"Easter_Player_Walk": ["Images/Player/Easter/Walk/0.png", "Images/Player/Easter/Walk/1.png", "Images/Player/Easter/Walk/2.png", "Images/Player/Easter/Walk/3.png"],
+		"Easter_Player_Sit": ["Images/Player/Easter/Crouch/0.png", "Images/Player/Easter/Crouch/1.png", "Images/Player/Easter/Crouch/2.png", "Images/Player/Easter/Crouch/3.png"],
 		"Player_Spawn": ["Images/Player/Spawn/0.png", "Images/Player/Spawn/1.png"],
 		"Player_Death": ["Images/Player/Death/0.png", "Images/Player/Death/1.png"],
 		"Player_Arm_Straight": "Images/Player/Arm_left.png",
