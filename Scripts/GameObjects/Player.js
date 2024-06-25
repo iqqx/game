@@ -1039,8 +1039,11 @@ export class Player extends Entity {
             return;
         if (this._weapon === null) {
             if (this._inventory[this._selectedHand] instanceof Item) {
-                if (this._inventory[this._selectedHand] instanceof Radio)
+                if (this._inventory[this._selectedHand] instanceof Radio) {
                     this.SpeakWith(this._artem);
+                    if (this._artem.GetCompletedQuestsCount() > 2)
+                        this._inventory[this._selectedHand] = null;
+                }
                 else
                     this._inventory[this._selectedHand].Use(() => {
                         this._inventory[this._selectedHand] = null;

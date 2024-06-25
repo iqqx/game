@@ -196,6 +196,8 @@ export class Scene {
         switch (x.Type) {
             case "LoadScene":
                 return () => Scene.LoadFromFile(x.Source);
+            case "GotoUrl":
+                return () => (window.location.href = x.Source);
             case "LoadSceneEditor":
                 return () => SceneEditor.LoadFromFile(x.Source);
             case "Replace":

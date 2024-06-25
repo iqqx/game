@@ -21,8 +21,16 @@
 			}
 		},
 		{
+			"Type": "TextButton",
+			"Arguments": [750, 480, 150, 40, "ВЫХОД", 24],
+			"Action": {
+				"Type": "GotoUrl",
+				"Source": "https://mi1nor.github.io/new-v/index.html"
+			}
+		},
+		{
 			"Type": "HintLabel",
-			"Arguments": ["1.0 Pre-Release", 750, 730]
+			"Arguments": ["1.0", 750, 730]
 		},
 		{
 			"Type": "Image",
