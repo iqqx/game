@@ -1,4 +1,5 @@
 import { Tag } from "../Enums.js";
+import { GetSound } from "../Game.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
@@ -113,6 +114,7 @@ export class Entity extends GameObject {
 		if (!this.IsAlive()) return;
 		if (!this._grounded) return;
 
+		GetSound("Jump").Play()
 		this._grounded = false;
 		this._verticalAcceleration = this._jumpForce;
 	}
