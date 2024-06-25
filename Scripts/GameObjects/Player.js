@@ -1,5 +1,5 @@
 import { Animation } from "../Animation.js";
-import { DogTag, Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
+import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -21,7 +21,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new DogTag(), new DogTag()];
+    _inventory = [null, null];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -39,8 +39,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    // private _timeFromSpawn = 0;
-    _timeFromSpawn = 4900;
+    _timeFromSpawn = 0;
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -135,10 +134,10 @@ export class Player extends Entity {
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
                     break;
-                case "KeyF":
-                    this._x = this._xTarget + Scene.Current.GetLevelPosition();
-                    this._y = this._yTarget;
-                    break;
+                // case "KeyF":
+                // 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
+                // 	this._y = this._yTarget;
+                // 	break;
                 case "KeyS":
                     this._movingDown = true;
                     if (this._onLadder === null) {

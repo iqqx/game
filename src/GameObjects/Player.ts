@@ -28,7 +28,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [new DogTag(), new DogTag()];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -46,8 +46,7 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4900;
+	private _timeFromSpawn = 0;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -151,10 +150,10 @@ export class Player extends Entity {
 					this._movingLeft = true;
 					this._currentAnimation = this._animations.Walk;
 					break;
-				case "KeyF":
-					this._x = this._xTarget + Scene.Current.GetLevelPosition();
-					this._y = this._yTarget;
-					break;
+				// case "KeyF":
+				// 	this._x = this._xTarget + Scene.Current.GetLevelPosition();
+				// 	this._y = this._yTarget;
+				// 	break;
 				case "KeyS":
 					this._movingDown = true;
 

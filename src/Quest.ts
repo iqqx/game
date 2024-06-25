@@ -98,7 +98,9 @@ export class Quest {
 
 		const task = new HasItemTask(
 			this,
-			() => this._stage++,
+			() => {
+				if (this._stage >= currentTasks) this._stage++;
+			},
 			() => (this._stage = currentTasks),
 			mask,
 			items

@@ -117,7 +117,7 @@ function loadLoop() {
     if (imagesLoaded.length < imagesToLoad)
         return;
     window.cancelAnimationFrame(n);
-    Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
+    Scene.LoadFromFile("Assets/Scenes/Menu.json").then((x) => {
         scene = x;
         gameLoop(0);
     });
