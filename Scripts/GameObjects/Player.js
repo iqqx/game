@@ -40,7 +40,7 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
+    _timeFromSpawn = 4550;
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -899,10 +899,23 @@ export class Player extends Entity {
         return this._quests.splice(this._quests.indexOf(quest), 1);
     }
     SwapItemAt(x) {
-        if (this._backpack !== null && x >= 2)
-            this._draggedItem = this._backpack.SwapItem(x - 2, 0, this._draggedItem);
+        if (this._backpack !== null && x >= 2) {
+            if (this._draggedItem !== null && this._backpack.GetItemAt(x - 2, 0) !== null && this._draggedItem.Icon === this._backpack.GetItemAt(x - 2, 0).Icon) {
+                this._draggedItem.Take(this._backpack.GetItemAt(x - 2, 0).Add(this._draggedItem.GetCount()));
+                if (this._draggedItem.GetCount() === 0)
+                    this._draggedItem = null;
+            }
+            else
+                this._draggedItem = this._backpack.SwapItem(x - 2, 0, this._draggedItem);
+        }
         else {
-            [this._draggedItem, this._inventory[x]] = [this._inventory[x], this._draggedItem];
+            if (this._draggedItem !== null && this._inventory[x] !== null && this._draggedItem.Icon === this._inventory[x].Icon) {
+                this._draggedItem.Take(this._inventory[x].Add(this._draggedItem.GetCount()));
+                if (this._draggedItem.GetCount() === 0)
+                    this._draggedItem = null;
+            }
+            else
+                [this._draggedItem, this._inventory[x]] = [this._inventory[x], this._draggedItem];
             if (x === this._selectedHand)
                 if (this._inventory[x] instanceof Weapon)
                     this._weapon = this._inventory[x];

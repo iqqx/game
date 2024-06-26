@@ -44,6 +44,12 @@ export class Item {
     Take(count) {
         this._count = Math.clamp(this._count - count, 0, this.GetStack());
     }
+    Add(count) {
+        count = Math.abs(count);
+        const toAdd = Math.min(count, this.GetStack() - this._count);
+        this._count += toAdd;
+        return toAdd;
+    }
     GetStack() {
         return 1;
     }
@@ -106,7 +112,9 @@ export class RatTail extends Item {
         else
             Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 15 * ratio, 15), angle, -10, 10);
     }
-    Use(callback) { }
+    GetStack() {
+        return 3;
+    }
 }
 export class AidKit extends Item {
     UseTime = 5500;

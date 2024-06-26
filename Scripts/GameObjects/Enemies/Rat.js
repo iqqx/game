@@ -47,7 +47,7 @@ export class Rat extends Enemy {
         super.TakeDamage(damage);
         if (this._health <= 0) {
             this.Destroy();
-            Scene.Current.Instantiate(new RatCorpse(this._x, this._y, new RatTail()));
+            Scene.Current.Instantiate(new RatCorpse(this._x, this._y, new RatTail(1)));
             const s = Rat._deathSound.cloneNode();
             s.volume = 0.25;
             s.play();
