@@ -30,7 +30,7 @@
 		},
 		{
 			"Type": "HintLabel",
-			"Arguments": ["1.0", 750, 730]
+			"Arguments": ["1.1", 750, 730]
 		},
 		{
 			"Type": "Image",
