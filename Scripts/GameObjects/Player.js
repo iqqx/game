@@ -86,11 +86,10 @@ export class Player extends Entity {
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
-            if (!this._easterActivated) {
-                if (this._lastPressedKeys.length > 100)
-                    this._lastPressedKeys = e.key;
-                else
-                    this._lastPressedKeys += e.key;
+            if (!this._easterActivated && e.code.startsWith("Key")) {
+                if (this._lastPressedKeys.length >= 100)
+                    this._lastPressedKeys = "";
+                this._lastPressedKeys += e.code[e.code.length - 1];
                 this.CheckForEaster();
             }
             switch (e.code) {
@@ -143,6 +142,12 @@ export class Player extends Entity {
                 case "KeyA":
                     this._movingLeft = true;
                     this._currentAnimation = this._animations.Walk;
+                    break;
+                case "KeyF":
+                    if (this._easterActivated) {
+                        this._x = this._xTarget + Scene.Current.GetLevelPosition();
+                        this._y = this._yTarget;
+                    }
                     break;
                 case "KeyS":
                     this._movingDown = true;
@@ -850,10 +855,11 @@ export class Player extends Entity {
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
     CheckForEaster() {
-        const cheatCode = "HESOYAM";
-        if (this._lastPressedKeys.slice(-7).toUpperCase() === cheatCode && !this._easterActivated) {
+        const cheatCode = "hesoyam";
+        if (this._lastPressedKeys.slice(-7).toLowerCase() === cheatCode && !this._easterActivated) {
             this._easterActivated = true;
             GetSound("Easter").PlayOriginal();
+            this._health = 1000000000;
             this._frames.Walk = GetSprite("Easter_Player_Walk");
             this._frames.Sit = GetSprite("Easter_Player_Sit");
         }
