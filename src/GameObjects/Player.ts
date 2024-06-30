@@ -388,6 +388,13 @@ export class Player extends Entity {
 		this._xTarget = Scene.Current.GetMousePosition().X;
 		this._yTarget = Scene.Current.GetMousePosition().Y;
 
+		if (this._inventory[this._selectedHand] instanceof Item)
+			this._inventory[this._selectedHand].Update(
+				dt,
+				new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
+				this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
+			);
+
 		this._currentAnimation?.Update(dt);
 
 		if (this._timeFromGoodEnd > 0) {
