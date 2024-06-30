@@ -283,8 +283,8 @@ class HasItemTask extends Task {
 		const m = new Map<string, number>();
 
 		for (const pitem of Scene.Current.Player.GetItems())
-			if (m.has(pitem.constructor.name)) m.set(pitem.constructor.name, m.get(pitem.constructor.name) + 1);
-			else m.set(pitem.constructor.name, 1);
+			if (m.has(pitem.constructor.name)) m.set(pitem.constructor.name, m.get(pitem.constructor.name) + pitem.GetCount());
+			else m.set(pitem.constructor.name, pitem.GetCount());
 
 		for (const item of this.NeededItems)
 			if (m.get(item[0].name) === undefined || m.get(item[0].name) < item[1]) {
