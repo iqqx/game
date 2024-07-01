@@ -67,6 +67,7 @@ export class Player extends Entity {
         [
             "dota",
             () => {
+                GetSound("DotaCheat").PlayOriginal();
                 Player._name = "Рома";
                 this._avatar = GetSprite("Player_Avatar");
             },

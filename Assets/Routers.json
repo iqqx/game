@@ -64,6 +64,7 @@
 	"Sounds": {
 		"Titles_Background": "Sounds/Title.mp3",
 		"Easter": "Sounds/Easter.mp3",
+		"DotaCheat": "Sounds/dotaCheat.mp3",
 		"Jump": "Sounds/jump.mp3",
 		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",
 		"Dialog": "Sounds/dialog.mp3",
