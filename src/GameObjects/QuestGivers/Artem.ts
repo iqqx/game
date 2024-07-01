@@ -3,7 +3,7 @@ import { Canvas } from "../../Context.js";
 import { GetSound, GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle } from "../../Utilites.js";
+import { Rectangle, Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Artem extends Character {
@@ -137,6 +137,10 @@ export class Artem extends Character {
 
 		GetSound("Shoot_3").Play(0.5);
 		Scene.Player.TakeDamage(500);
+	}
+
+	public GetAvatar() {
+		return GetSprite("Artem_Avatar") as Sprite;
 	}
 
 	public End() {

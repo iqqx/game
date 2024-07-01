@@ -25,6 +25,9 @@ export class Character extends Interactable {
     IsTalked() {
         return this._isTalked;
     }
+    GetAvatar() {
+        return null;
+    }
     GetInteractives() {
         return ["говорить"];
     }

@@ -1,5 +1,6 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
+import { GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle, Sprite } from "../../Utilites.js";
 import { Interactable } from "../GameObject.js";
@@ -32,6 +33,10 @@ export class Character extends Interactable {
 
 	public IsTalked() {
 		return this._isTalked;
+	}
+
+	public GetAvatar(): Sprite | null {
+		return null;
 	}
 
 	GetInteractives(): string[] {

@@ -101,6 +101,9 @@ export class Artem extends Character {
         GetSound("Shoot_3").Play(0.5);
         Scene.Player.TakeDamage(500);
     }
+    GetAvatar() {
+        return GetSprite("Artem_Avatar");
+    }
     End() {
         this._completedQuests++;
     }

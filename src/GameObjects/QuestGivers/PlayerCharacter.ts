@@ -2,6 +2,7 @@ import { Tag } from "../../Enums.js";
 import { GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
+import { Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";
 
@@ -39,7 +40,11 @@ export class PlayerCharacter extends Character {
 		}
 	}
 
+	public GetAvatar() {
+		return null
+	}
+
 	public GetName(): string {
-		return "Мысли Макса";
+		return "Мысли";
 	}
 }

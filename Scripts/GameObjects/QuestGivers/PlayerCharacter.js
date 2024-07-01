@@ -32,8 +32,11 @@ export class PlayerCharacter extends Character {
                 };
         }
     }
+    GetAvatar() {
+        return null;
+    }
     GetName() {
-        return "Мысли Макса";
+        return "Мысли";
     }
 }
 //# sourceMappingURL=PlayerCharacter.js.map

@@ -3,7 +3,7 @@ import { Canvas } from "../../Context.js";
 import { GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle } from "../../Utilites.js";
+import { Rectangle, Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Trader extends Character {
@@ -73,6 +73,10 @@ export class Trader extends Character {
 					OwnerFirst: true,
 				};
 		}
+	}
+
+	public GetAvatar() {
+		return GetSprite("Trader_Avatar") as Sprite;
 	}
 
 	public GetName(): string {

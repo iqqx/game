@@ -60,9 +60,30 @@ export class Player extends Entity {
 	private _currentAnimation: Animation | null = null;
 	private _artem: Artem;
 	private _lastPressedKeys = "";
-	private _easterActivated = false;
+	private _cheatCodes: [string, () => void][] = [
+		[
+			"hesoyam",
+			() => {
+				GetSound("Easter").PlayOriginal();
 
-	private static readonly _name = "Макс";
+				this._tpActivated = true;
+				this._health = 1000000000;
+				this._frames.Walk = GetSprite("Easter_Player_Walk");
+				this._frames.Sit = GetSprite("Easter_Player_Sit");
+			},
+		],
+		[
+			"dota",
+			() => {
+				Player._name = "Рома";
+				this._avatar = GetSprite("Player_Avatar");
+			},
+		],
+	];
+	private _tpActivated = false;
+
+	private _avatar: Sprite | null = null;
+	private static _name = "Макс";
 	private static readonly _speed = 5;
 	private static readonly _animationFrameDuration = 50;
 	private static readonly _sitHeightModifier = 0.85;
@@ -98,9 +119,9 @@ export class Player extends Entity {
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
 
-			if (!this._easterActivated && e.code.startsWith("Key")) {
+			if (this._cheatCodes.length > 0 && e.code.startsWith("Key")) {
 				if (this._lastPressedKeys.length >= 100) this._lastPressedKeys = "";
-				this._lastPressedKeys += e.code[e.code.length - 1];
+				this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
 				this.CheckForEaster();
 			}
 
@@ -160,7 +181,7 @@ export class Player extends Entity {
 					this._currentAnimation = this._animations.Walk;
 					break;
 				case "KeyF":
-					if (this._easterActivated) {
+					if (this._tpActivated) {
 						this._x = this._xTarget + Scene.Current.GetLevelPosition();
 						this._y = this._yTarget;
 					}
@@ -1062,9 +1083,16 @@ export class Player extends Entity {
 			GUI.SetFillColor(new Color(100, 100, 100));
 			GUI.DrawRectangle(GUI.Width / 2 - 500 / 2, GUI.Height - 200 - 100, 500, 35);
 
+			const avatar = this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? this._avatar : this._dialog.Owner.GetAvatar();
 			GUI.SetFillColor(Color.White);
 			GUI.SetFont(24);
-			GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+			if (avatar !== null) {
+				GUI.DrawImage(avatar, GUI.Width / 2 - 500 / 2 + 3, GUI.Height - 200 - 98, 30, 30);
+				GUI.DrawText(GUI.Width / 2 - 500 / 2 + 40, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+			} else {
+				GUI.DrawText(GUI.Width / 2 - 500 / 2 + 10, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+			}
+
 			GUI.SetFont(16);
 			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 		}
@@ -1148,17 +1176,7 @@ export class Player extends Entity {
 	}
 
 	public CheckForEaster() {
-		const cheatCode = "hesoyam";
-
-		if (this._lastPressedKeys.slice(-7).toLowerCase() === cheatCode && !this._easterActivated) {
-			this._easterActivated = true;
-
-			GetSound("Easter").PlayOriginal();
-
-			this._health = 1000000000;
-			this._frames.Walk = GetSprite("Easter_Player_Walk");
-			this._frames.Sit = GetSprite("Easter_Player_Sit");
-		}
+		for (let i = 0; i < this._cheatCodes.length; i++) if (this._lastPressedKeys.endsWith(this._cheatCodes[i][0])) this._cheatCodes.splice(i, 1)[0][1]();
 	}
 
 	public OnKilled(type: EnemyType) {

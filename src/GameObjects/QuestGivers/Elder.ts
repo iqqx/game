@@ -2,6 +2,7 @@ import { DogTag } from "../../Assets/Items/Item.js";
 import { GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
+import { Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 
 export class Elder extends Character {
@@ -78,6 +79,10 @@ export class Elder extends Character {
 					OwnerFirst: true,
 				};
 		}
+	}
+
+	public GetAvatar() {
+		return GetSprite("Elder_Avatar") as Sprite;
 	}
 
 	public GetName(): string {

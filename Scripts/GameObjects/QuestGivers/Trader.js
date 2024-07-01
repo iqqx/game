@@ -66,6 +66,9 @@ export class Trader extends Character {
                 };
         }
     }
+    GetAvatar() {
+        return GetSprite("Trader_Avatar");
+    }
     GetName() {
         return "Торгаш";
     }

@@ -69,6 +69,9 @@ export class Elder extends Character {
                 };
         }
     }
+    GetAvatar() {
+        return GetSprite("Elder_Avatar");
+    }
     GetName() {
         return "Староста";
     }

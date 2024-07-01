@@ -55,6 +55,10 @@
 		"Trader": "Images/Characters/Trader.png",
 		"Pistol_Bullet": "Images/Glock_Bullet.png",
 		"Rifle_Bullet": "Images/Rifle_Bullet.png",
+		"Elder_Avatar": "Images/Characters/ElderFrame.png",
+		"Trader_Avatar": "Images/Characters/TraderFrame.png",
+		"Artem_Avatar": "Images/Characters/Artem/Avatar.png",
+		"Player_Avatar": "Images/Characters/PlayerAvatar.jpeg",
 		"Rifle_Clip": "Images/Rifle_Clip.png"
 	},
 	"Sounds": {

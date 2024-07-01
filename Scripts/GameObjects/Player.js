@@ -53,7 +53,27 @@ export class Player extends Entity {
     _currentAnimation = null;
     _artem;
     _lastPressedKeys = "";
-    _easterActivated = false;
+    _cheatCodes = [
+        [
+            "hesoyam",
+            () => {
+                GetSound("Easter").PlayOriginal();
+                this._tpActivated = true;
+                this._health = 1000000000;
+                this._frames.Walk = GetSprite("Easter_Player_Walk");
+                this._frames.Sit = GetSprite("Easter_Player_Sit");
+            },
+        ],
+        [
+            "dota",
+            () => {
+                Player._name = "Рома";
+                this._avatar = GetSprite("Player_Avatar");
+            },
+        ],
+    ];
+    _tpActivated = false;
+    _avatar = null;
     static _name = "Макс";
     static _speed = 5;
     static _animationFrameDuration = 50;
@@ -86,10 +106,10 @@ export class Player extends Entity {
         addEventListener("keydown", (e) => {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
-            if (!this._easterActivated && e.code.startsWith("Key")) {
+            if (this._cheatCodes.length > 0 && e.code.startsWith("Key")) {
                 if (this._lastPressedKeys.length >= 100)
                     this._lastPressedKeys = "";
-                this._lastPressedKeys += e.code[e.code.length - 1];
+                this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
                 this.CheckForEaster();
             }
             switch (e.code) {
@@ -144,7 +164,7 @@ export class Player extends Entity {
                     this._currentAnimation = this._animations.Walk;
                     break;
                 case "KeyF":
-                    if (this._easterActivated) {
+                    if (this._tpActivated) {
                         this._x = this._xTarget + Scene.Current.GetLevelPosition();
                         this._y = this._yTarget;
                     }
@@ -783,9 +803,16 @@ export class Player extends Entity {
             GUI.ClearStroke();
             GUI.SetFillColor(new Color(100, 100, 100));
             GUI.DrawRectangle(GUI.Width / 2 - 500 / 2, GUI.Height - 200 - 100, 500, 35);
+            const avatar = this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? this._avatar : this._dialog.Owner.GetAvatar();
             GUI.SetFillColor(Color.White);
             GUI.SetFont(24);
-            GUI.DrawText(GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+            if (avatar !== null) {
+                GUI.DrawImage(avatar, GUI.Width / 2 - 500 / 2 + 3, GUI.Height - 200 - 98, 30, 30);
+                GUI.DrawText(GUI.Width / 2 - 500 / 2 + 40, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+            }
+            else {
+                GUI.DrawText(GUI.Width / 2 - 500 / 2 + 10, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
+            }
             GUI.SetFont(16);
             GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
         }
@@ -855,14 +882,9 @@ export class Player extends Entity {
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
     CheckForEaster() {
-        const cheatCode = "hesoyam";
-        if (this._lastPressedKeys.slice(-7).toLowerCase() === cheatCode && !this._easterActivated) {
-            this._easterActivated = true;
-            GetSound("Easter").PlayOriginal();
-            this._health = 1000000000;
-            this._frames.Walk = GetSprite("Easter_Player_Walk");
-            this._frames.Sit = GetSprite("Easter_Player_Sit");
-        }
+        for (let i = 0; i < this._cheatCodes.length; i++)
+            if (this._lastPressedKeys.endsWith(this._cheatCodes[i][0]))
+                this._cheatCodes.splice(i, 1)[0][1]();
     }
     OnKilled(type) {
         this._quests.forEach((x) => x.OnKilled(type));
