@@ -97,7 +97,7 @@ export class Player extends Entity {
         super(40, 100, Player._speed, 100);
         this._x = x;
         this._y = y;
-        this._xTarget = 900;
+        this._xTarget = GUI.Width / 2;
         this._yTarget = 750 / 2;
         this.Tag = Tag.Player;
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
@@ -379,6 +379,14 @@ export class Player extends Entity {
         });
     }
     Update(dt) {
+        if (this._timeFromSpawn < 5000) {
+            this._timeFromSpawn += dt;
+            this.ApplyVForce(dt);
+            if (this._timeFromSpawn >= 5000)
+                this.SpeakWith(new PlayerCharacter());
+            this._artem = Scene.Current.GetByType(Artem)[0];
+            return;
+        }
         this._xTarget = Scene.Current.GetMousePosition().X;
         this._yTarget = Scene.Current.GetMousePosition().Y;
         if (this._inventory[this._selectedHand] instanceof Item)
@@ -463,13 +471,6 @@ export class Player extends Entity {
             return;
         }
         this.ApplyVForce(dt);
-        if (this._timeFromSpawn < 5000) {
-            this._timeFromSpawn += dt;
-            if (this._timeFromSpawn >= 5000)
-                this.SpeakWith(new PlayerCharacter());
-            this._artem = Scene.Current.GetByType(Artem)[0];
-            return;
-        }
         if (this._inventory[this._selectedHand] instanceof Item)
             this._inventory[this._selectedHand].Update(dt, new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
         if (this.CanTarget() && this._artem.GetCompletedQuestsCount() <= 2) {

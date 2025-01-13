@@ -108,7 +108,7 @@ export class Player extends Entity {
 
 		this._x = x;
 		this._y = y;
-		this._xTarget = 900;
+		this._xTarget = GUI.Width / 2;
 		this._yTarget = 750 / 2;
 		this.Tag = Tag.Player;
 		this._collider = new Rectangle(0, 0, this.Width, this.Height);
@@ -413,6 +413,17 @@ export class Player extends Entity {
 	}
 
 	public override Update(dt: number) {
+		if (this._timeFromSpawn < 5000) {
+			this._timeFromSpawn += dt;
+
+			this.ApplyVForce(dt);
+
+			if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
+			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
+
+			return;
+		}
+
 		this._xTarget = Scene.Current.GetMousePosition().X;
 		this._yTarget = Scene.Current.GetMousePosition().Y;
 
@@ -520,15 +531,6 @@ export class Player extends Entity {
 		}
 
 		this.ApplyVForce(dt);
-
-		if (this._timeFromSpawn < 5000) {
-			this._timeFromSpawn += dt;
-
-			if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
-			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
-
-			return;
-		}
 
 		if (this._inventory[this._selectedHand] instanceof Item)
 			this._inventory[this._selectedHand].Update(
