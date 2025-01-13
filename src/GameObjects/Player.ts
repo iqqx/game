@@ -29,7 +29,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [new DogTag(), new DogTag()];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -1234,7 +1234,7 @@ export class Player extends Entity {
 				if (this._draggedItem.GetCount() === 0) this._draggedItem = null;
 			} else this._draggedItem = this._backpack.SwapItem(x - 2, 0, this._draggedItem);
 		} else {
-			if (this._draggedItem !== null && this._inventory[x] !== null && this._draggedItem.Icon === this._inventory[x].Icon) {
+			if (this._draggedItem !== null && this._inventory[x] !== null && this._draggedItem.Icon === this._inventory[x].Icon && this._draggedItem.GetStack() > 1) {
 				this._draggedItem.Take(this._inventory[x].Add(this._draggedItem.GetCount()));
 
 				if (this._draggedItem.GetCount() === 0) this._draggedItem = null;
