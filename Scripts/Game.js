@@ -4,15 +4,21 @@ import { Color, Rectangle, Vector2 } from "./Utilites.js";
 const sprites = new Map();
 const sounds = new Map();
 let imagesToLoad = 0;
-await (async () => {
-    const routers = await fetch("Assets/Routers.json");
-    if (!routers.ok)
-        return Scene.GetErrorScene("Не найдено: Assets/Routers.json");
-    const parsedRouters = await routers.json();
+fetch("Assets/Routers.json")
+    .then((routers) => {
+    if (!routers.ok) {
+        if (routers.status === 404)
+            return Promise.reject("Не найдено.");
+        else
+            return Promise.reject(`Неизвестная ошибка. Код: ${routers.status}`);
+    }
+    return routers.json();
+})
+    .then((parsedRouters) => {
     if (parsedRouters.Images === undefined)
-        return Scene.GetErrorScene("Изображения не найдены в Assets/Routers.json");
+        return Promise.reject(`Изображения не найдены.\nМаксимально похожий ключ на 'Images': '${GetMaxIdentityString("Images", Object.keys(parsedRouters))}'`);
     if (parsedRouters.Sounds === undefined)
-        return Scene.GetErrorScene("Звуки не найдены в Assets/Routers.json");
+        return Promise.reject(`Звуки не найдены.\nМаксимально похожий ключ на 'Sounds': '${GetMaxIdentityString("Sounds", Object.keys(parsedRouters))}'`);
     for (const imageKey in parsedRouters.Images) {
         const object = parsedRouters.Images[imageKey];
         if (typeof object === "string") {
@@ -24,16 +30,21 @@ await (async () => {
             sprites.set(imageKey, object.map((x) => LoadImage(x)));
         }
         else
-            return Scene.GetErrorScene(`Недопустимый тип изображения: ${imageKey}`);
+            return Promise.reject(`Недопустимый тип изображения: ${imageKey}.`);
     }
     for (const soundKey in parsedRouters.Sounds) {
         const object = parsedRouters.Sounds[soundKey];
         if (typeof object === "string")
             sounds.set(soundKey, LoadSound(object));
         else
-            return Scene.GetErrorScene(`Недопустимый тип звука: ${soundKey}`);
+            return Promise.reject(`Недопустимый тип звука: ${soundKey}.`);
     }
-})();
+    loadLoop();
+})
+    .catch((res) => {
+    scene = Scene.GetErrorScene(`${res}\nat [Assets/Routers.json]`);
+    gameLoop(0);
+});
 export function GetSprite(key) {
     if (!sprites.has(key))
         console.error("Sprite key dont found: " + key);
@@ -41,6 +52,29 @@ export function GetSprite(key) {
 }
 export function GetSound(key) {
     return sounds.get(key);
+}
+function CompareStrings(a, b) {
+    let result = -5 * Math.abs(a.length - b.length);
+    const m = a.length > b.length ? b : a;
+    for (let i = 0; i < m.length; i++) {
+        if (a[i] === b[i])
+            result += 10;
+        else if (a[i].toLowerCase() === b[i].toLowerCase())
+            result += 5;
+    }
+    return result;
+}
+function GetMaxIdentityString(text, variants) {
+    let result = variants[0];
+    let last = 0;
+    for (const variant of variants) {
+        const c = CompareStrings(text, variant);
+        if (c > last) {
+            last = c;
+            result = variant;
+        }
+    }
+    return result;
 }
 const imagesLoaded = [];
 function LoadImage(source, boundingBox, scale) {
@@ -101,6 +135,7 @@ function gameLoop(timeStamp) {
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
     GUI.SetFillColor(Color.Black);
+    GUI.ClearStroke();
     GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
     GUI.SetFont(48);
     const ratio = imagesLoaded.length / imagesToLoad;
@@ -123,5 +158,4 @@ function loadLoop() {
         gameLoop(0);
     });
 }
-loadLoop();
 //# sourceMappingURL=Game.js.map

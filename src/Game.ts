@@ -7,37 +7,50 @@ const sprites = new Map<string, Sprite | Sprite[]>();
 const sounds = new Map<string, Sound>();
 let imagesToLoad = 0;
 
-await (async () => {
-	const routers = await fetch("Assets/Routers.json");
-	if (!routers.ok) return Scene.GetErrorScene("Не найдено: Assets/Routers.json");
+fetch("Assets/Routers.json")
+	.then((routers) => {
+		if (!routers.ok) {
+			if (routers.status === 404) return Promise.reject("Не найдено.");
+			else return Promise.reject(`Неизвестная ошибка. Код: ${routers.status}`);
+		}
 
-	const parsedRouters = await routers.json();
-	if (parsedRouters.Images === undefined) return Scene.GetErrorScene("Изображения не найдены в Assets/Routers.json");
-	if (parsedRouters.Sounds === undefined) return Scene.GetErrorScene("Звуки не найдены в Assets/Routers.json");
+		return routers.json();
+	})
+	.then((parsedRouters) => {
+		if (parsedRouters.Images === undefined)
+			return Promise.reject(`Изображения не найдены.\nМаксимально похожий ключ на 'Images': '${GetMaxIdentityString("Images", Object.keys(parsedRouters))}'`);
+		if (parsedRouters.Sounds === undefined)
+			return Promise.reject(`Звуки не найдены.\nМаксимально похожий ключ на 'Sounds': '${GetMaxIdentityString("Sounds", Object.keys(parsedRouters))}'`);
 
-	for (const imageKey in parsedRouters.Images) {
-		const object = parsedRouters.Images[imageKey];
+		for (const imageKey in parsedRouters.Images) {
+			const object = parsedRouters.Images[imageKey];
 
-		if (typeof object === "string") {
-			imagesToLoad++;
-			sprites.set(imageKey, LoadImage(object as string));
-		} else if (object instanceof Array) {
-			imagesToLoad += object.length;
+			if (typeof object === "string") {
+				imagesToLoad++;
+				sprites.set(imageKey, LoadImage(object as string));
+			} else if (object instanceof Array) {
+				imagesToLoad += object.length;
 
-			sprites.set(
-				imageKey,
-				object.map((x) => LoadImage(x))
-			);
-		} else return Scene.GetErrorScene(`Недопустимый тип изображения: ${imageKey}`);
-	}
+				sprites.set(
+					imageKey,
+					object.map((x) => LoadImage(x))
+				);
+			} else return Promise.reject(`Недопустимый тип изображения: ${imageKey}.`);
+		}
 
-	for (const soundKey in parsedRouters.Sounds) {
-		const object = parsedRouters.Sounds[soundKey];
+		for (const soundKey in parsedRouters.Sounds) {
+			const object = parsedRouters.Sounds[soundKey];
 
-		if (typeof object === "string") sounds.set(soundKey, LoadSound(object as string));
-		else return Scene.GetErrorScene(`Недопустимый тип звука: ${soundKey}`);
-	}
-})();
+			if (typeof object === "string") sounds.set(soundKey, LoadSound(object as string));
+			else return Promise.reject(`Недопустимый тип звука: ${soundKey}.`);
+		}
+
+		loadLoop();
+	})
+	.catch((res) => {
+		scene = Scene.GetErrorScene(`${res}\nat [Assets/Routers.json]`);
+		gameLoop(0);
+	});
 
 export function GetSprite<T extends Sprite | Sprite[]>(key: string): T {
 	if (!sprites.has(key)) console.error("Sprite key dont found: " + key);
@@ -47,6 +60,35 @@ export function GetSprite<T extends Sprite | Sprite[]>(key: string): T {
 
 export function GetSound(key: string): Sound {
 	return sounds.get(key);
+}
+
+function CompareStrings(a: string, b: string): number {
+	let result = -5 * Math.abs(a.length - b.length);
+
+	const m = a.length > b.length ? b : a;
+
+	for (let i = 0; i < m.length; i++) {
+		if (a[i] === b[i]) result += 10;
+		else if (a[i].toLowerCase() === b[i].toLowerCase()) result += 5;
+	}
+
+	return result;
+}
+
+function GetMaxIdentityString(text: string, variants: string[]) {
+	let result = variants[0];
+	let last = 0;
+
+	for (const variant of variants) {
+		const c = CompareStrings(text, variant);
+
+		if (c > last) {
+			last = c;
+			result = variant;
+		}
+	}
+
+	return result;
 }
 
 const imagesLoaded: string[] = [];
@@ -118,6 +160,7 @@ function loadLoop() {
 	const n = window.requestAnimationFrame(loadLoop);
 
 	GUI.SetFillColor(Color.Black);
+	GUI.ClearStroke();
 	GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
 	GUI.SetFont(48);
 
@@ -147,5 +190,3 @@ function loadLoop() {
 		gameLoop(0);
 	});
 }
-
-loadLoop();

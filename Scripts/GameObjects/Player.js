@@ -1,5 +1,5 @@
 import { Animation } from "../Animation.js";
-import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
+import { DogTag, Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
@@ -22,7 +22,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [null, null];
+    _inventory = [new DogTag(), new DogTag()];
     _backpack = null;
     _weapon = null;
     _quests;

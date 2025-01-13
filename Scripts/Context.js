@@ -318,6 +318,17 @@ export var GUI;
         }
     }
     GUI.DrawTextWrapped = DrawTextWrapped;
+    function DrawTextCenterLineBreaked(x, y, text) {
+        const descent = ctx.measureText("").fontBoundingBoxAscent;
+        const height = ctx.measureText("").fontBoundingBoxDescent + descent;
+        const lines = text.split("\n");
+        const lastAlign = ctx.textAlign;
+        ctx.textAlign = "center";
+        for (let l = 0; l < lines.length; l++)
+            ctx.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
+        ctx.textAlign = lastAlign;
+    }
+    GUI.DrawTextCenterLineBreaked = DrawTextCenterLineBreaked;
     function DrawImage(image, x, y, width, height) {
         ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
     }
@@ -363,5 +374,17 @@ export var GUI;
         ctx.fillRect(0, 0, GUI.Width, GUI.Height);
     }
     GUI.DrawVignette = DrawVignette;
+    function GetTextSize(text, includeLineBrakes = true) {
+        if (includeLineBrakes) {
+            const height = ctx.measureText("").fontBoundingBoxDescent + ctx.measureText("").fontBoundingBoxAscent;
+            const measures = text.split("\n").map((x) => ctx.measureText(x).width);
+            return new Vector2(Math.max(...measures), height * measures.length);
+        }
+        else {
+            const measure = ctx.measureText(text);
+            return new Vector2(measure.width, measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
+        }
+    }
+    GUI.GetTextSize = GetTextSize;
 })(GUI || (GUI = {}));
 //# sourceMappingURL=Context.js.map

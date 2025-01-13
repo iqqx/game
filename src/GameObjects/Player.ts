@@ -1,7 +1,7 @@
 import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
-import { Item, PistolBullet, Radio, RatTail, RifleBullet } from "../Assets/Items/Item.js";
+import { DogTag, Item, PistolBullet, Radio, RatTail, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -29,7 +29,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
+	private _inventory: [Item | null, Item | null] = [new DogTag(), new DogTag()];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];

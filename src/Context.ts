@@ -381,6 +381,19 @@ export namespace GUI {
 		}
 	}
 
+	export function DrawTextCenterLineBreaked(x: number, y: number, text: string) {
+		const descent = ctx.measureText("").fontBoundingBoxAscent;
+		const height = ctx.measureText("").fontBoundingBoxDescent + descent;
+		const lines: string[] = text.split("\n");
+
+		const lastAlign = ctx.textAlign;
+		ctx.textAlign = "center";
+
+		for (let l = 0; l < lines.length; l++) ctx.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
+
+		ctx.textAlign = lastAlign;
+	}
+
 	export function DrawImage(image: Sprite, x: number, y: number, width: number, height: number) {
 		ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
 	}
@@ -427,5 +440,18 @@ export namespace GUI {
 
 		ctx.fillStyle = grd;
 		ctx.fillRect(0, 0, Width, Height);
+	}
+
+	export function GetTextSize(text: string, includeLineBrakes = true) {
+		if (includeLineBrakes) {
+			const height = ctx.measureText("").fontBoundingBoxDescent + ctx.measureText("").fontBoundingBoxAscent;
+			const measures = text.split("\n").map((x) => ctx.measureText(x).width);
+
+			return new Vector2(Math.max(...measures), height * measures.length);
+		} else {
+			const measure = ctx.measureText(text);
+
+			return new Vector2(measure.width, measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
+		}
 	}
 }

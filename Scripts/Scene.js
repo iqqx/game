@@ -216,10 +216,13 @@ export class Scene {
         this._keyDownEvents.push([key, action]);
     }
     static GetErrorScene(error) {
+        GUI.SetFont(32); // for blinking text
+        const textSize = GUI.GetTextSize("КРИТИЧЕСКАЯ ОШИБКА", true);
         return new Scene(null, [
             new GUIRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height), Color.Black),
-            new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width / 2, GUI.Height / 2), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingLabel(error, GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
+            new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2 - (textSize.Y + 100), textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", GUI.Width / 2, GUI.Height / 2 - (textSize.Y + 100), GUI.Width, GUI.Height, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
+            new Label(error, GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height, 24, Color.Red),
         ]);
     }
     GetLevelPosition() {

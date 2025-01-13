@@ -1,2 +1,3 @@
 tsconfig.tsbuildinfo
 *.js.map
+.vscode
