@@ -12,7 +12,7 @@ export class Item {
     _usingCallback;
     _count = 0;
     constructor(count) {
-        this._count = Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack());
+        this._count = this.GetStack() > 1 ? Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack()) : 1;
     }
     Update(dt, position, angle) {
         if (this._usingTime >= 0) {

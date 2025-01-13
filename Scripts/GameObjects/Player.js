@@ -230,6 +230,7 @@ export class Player extends Entity {
                         if (this._inventory[this._selectedHand] === this._weapon)
                             this._weapon = null;
                         this._inventory[this._selectedHand] = null;
+                        this._quests.forEach((quest) => quest.InventoryChanged());
                     }
                     break;
                 case "ShiftLeft":
@@ -950,7 +951,10 @@ export class Player extends Entity {
     }
     SwapItemAt(x) {
         if (this._backpack !== null && x >= 2) {
-            if (this._draggedItem !== null && this._backpack.GetItemAt(x - 2, 0) !== null && this._draggedItem.Icon === this._backpack.GetItemAt(x - 2, 0).Icon) {
+            if (this._draggedItem !== null &&
+                this._backpack.GetItemAt(x - 2, 0) !== null &&
+                this._draggedItem.Icon === this._backpack.GetItemAt(x - 2, 0).Icon &&
+                this._draggedItem.GetStack() > 1) {
                 this._draggedItem.Take(this._backpack.GetItemAt(x - 2, 0).Add(this._draggedItem.GetCount()));
                 if (this._draggedItem.GetCount() === 0)
                     this._draggedItem = null;

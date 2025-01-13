@@ -1,7 +1,7 @@
 import { Animation } from "../Animation.js";
 import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Container } from "../Assets/Containers/Containers.js";
-import { DogTag, Item, PistolBullet, Radio, RatTail, RifleBullet } from "../Assets/Items/Item.js";
+import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
 import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType } from "../Enums.js";
@@ -254,6 +254,8 @@ export class Player extends Entity {
 						if (this._inventory[this._selectedHand] === this._weapon) this._weapon = null;
 
 						this._inventory[this._selectedHand] = null;
+
+						this._quests.forEach((quest) => quest.InventoryChanged());
 					}
 
 					break;
@@ -1255,7 +1257,12 @@ export class Player extends Entity {
 
 	private SwapItemAt(x: number) {
 		if (this._backpack !== null && x >= 2) {
-			if (this._draggedItem !== null && this._backpack.GetItemAt(x - 2, 0) !== null && this._draggedItem.Icon === this._backpack.GetItemAt(x - 2, 0).Icon) {
+			if (
+				this._draggedItem !== null &&
+				this._backpack.GetItemAt(x - 2, 0) !== null &&
+				this._draggedItem.Icon === this._backpack.GetItemAt(x - 2, 0).Icon &&
+				this._draggedItem.GetStack() > 1
+			) {
 				this._draggedItem.Take(this._backpack.GetItemAt(x - 2, 0).Add(this._draggedItem.GetCount()));
 				if (this._draggedItem.GetCount() === 0) this._draggedItem = null;
 			} else this._draggedItem = this._backpack.SwapItem(x - 2, 0, this._draggedItem);

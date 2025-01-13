@@ -14,7 +14,7 @@ export class Item {
 	protected _count = 0;
 
 	constructor(count?: number) {
-		this._count = Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack());
+		this._count = this.GetStack() > 1 ? Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack()) : 1;
 	}
 
 	public Update(dt: number, position: Vector2, angle: number) {
