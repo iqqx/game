@@ -42,7 +42,7 @@
 		},
 		{
 			"Type": "Label",
-			"Arguments": ["© 2024 PENTAGON. Все права защищены.", 1330, 730, 50, 50]
+			"Arguments": ["© 2025 PENTAGON. Все права защищены.", 1330, 730, 50, 50]
 		},
 		{
 			"Type": "FPSCounter",
