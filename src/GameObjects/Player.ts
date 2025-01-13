@@ -21,6 +21,7 @@ import { GuardFake } from "./QuestGivers/GuardFake.js";
 import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 
 export class Player extends Entity {
+	private _keysPressed = [];
 	private _timeToNextFrame = 0;
 	private _frameIndex = 0;
 	private _LMBPressed = false;
@@ -120,6 +121,8 @@ export class Player extends Entity {
 		addEventListener("keydown", (e) => {
 			if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000) return;
 
+			this._keysPressed[e.code] = true;
+
 			if (this._cheatCodes.length > 0 && e.code.startsWith("Key")) {
 				if (this._lastPressedKeys.length >= 100) this._lastPressedKeys = "";
 				this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
@@ -178,8 +181,10 @@ export class Player extends Entity {
 					}
 					break;
 				case "KeyA":
-					this._movingLeft = true;
-					this._currentAnimation = this._animations.Walk;
+					if (this._grounded) {
+						this._movingLeft = true;
+						this._currentAnimation = this._animations.Walk;
+					}
 					break;
 				case "KeyF":
 					if (this._tpActivated) {
@@ -201,8 +206,11 @@ export class Player extends Entity {
 					}
 					break;
 				case "KeyD":
-					this._movingRight = true;
-					this._currentAnimation = this._animations.Walk;
+					if (this._grounded) {
+						this._movingRight = true;
+						this._currentAnimation = this._animations.Walk;
+					}
+
 					break;
 				case "KeyR":
 					if (this.CanTarget() && this._weapon !== null) {
@@ -263,20 +271,28 @@ export class Player extends Entity {
 		});
 
 		addEventListener("keyup", (e) => {
+			this._keysPressed[e.code] = false;
+
 			switch (e.code) {
 				case "KeyW":
 					this._movingUp = false;
 					break;
 				case "KeyA":
-					this._movingLeft = false;
-					this._currentAnimation = null;
+					if (this._grounded) {
+						this._movingLeft = false;
+						this._currentAnimation = null;
+					}
+
 					break;
 				case "KeyS":
 					this._movingDown = false;
 					break;
 				case "KeyD":
-					this._movingRight = false;
-					this._currentAnimation = null;
+					if (this._grounded) {
+						this._movingRight = false;
+						this._currentAnimation = null;
+					}
+
 					break;
 				case "ShiftLeft":
 					this._running = false;
@@ -530,7 +546,15 @@ export class Player extends Entity {
 			return;
 		}
 
+		const lastGround = this._grounded;
 		this.ApplyVForce(dt);
+		if (lastGround === false && this._grounded === true) {
+			GetSound("Fall").Play(0.5);
+
+			this._movingLeft = this._keysPressed["KeyA"];
+			this._movingRight = this._keysPressed["KeyD"];
+			this._currentAnimation = (this._movingLeft || this._movingRight) && this._currentAnimation === null ? this._animations.Walk : null;
+		}
 
 		if (this._inventory[this._selectedHand] instanceof Item)
 			this._inventory[this._selectedHand].Update(

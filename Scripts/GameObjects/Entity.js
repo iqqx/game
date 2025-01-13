@@ -36,10 +36,12 @@ export class Entity extends GameObject {
             return;
         }
         this.ApplyVForce(dt);
-        if (this._movingLeft)
-            this.MoveLeft(dt);
-        else if (this._movingRight)
-            this.MoveRight(dt);
+        if (this._grounded) {
+            if (this._movingLeft)
+                this.MoveLeft(dt);
+            else if (this._movingRight)
+                this.MoveRight(dt);
+        }
         this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
     }
     IsAlive() {
@@ -143,8 +145,9 @@ export class Entity extends GameObject {
                 this._y = r.instance.GetPosition().Y - this._collider.Height;
             }
             else {
-                this._y += this._verticalAcceleration * (dt / 15);
-                this._verticalAcceleration -= (dt / 15) * 2;
+                const mod = 1.65;
+                this._y += this._verticalAcceleration * (dt / 15 / mod);
+                this._verticalAcceleration -= (dt / 15) * mod;
             }
         }
     }
