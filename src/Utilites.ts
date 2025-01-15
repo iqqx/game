@@ -171,6 +171,7 @@ export type Sound = {
 	StopOriginal: () => void;
 	Speed: number;
 	Volume: number;
+	Length: number;
 };
 
 export function GetEnemyTypeName(enemyType: EnemyType) {

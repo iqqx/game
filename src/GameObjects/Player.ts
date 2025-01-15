@@ -30,7 +30,7 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [null, null];
+	private _inventory: [Item | null, Item | null] = [new AK(), new RifleBullet(100)];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -48,7 +48,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4990;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -81,6 +82,12 @@ export class Player extends Entity {
 				this._avatar = GetSprite("Player_Avatar");
 			},
 		],
+		[
+			"extramag",
+			() => {
+				this.GiveQuestItem(new RifleBullet(30));
+			},
+		],
 	];
 	private _tpActivated = false;
 
@@ -100,6 +107,7 @@ export class Player extends Entity {
 		Hands: {
 			Straight: GetSprite("Player_Arm_Straight") as Sprite,
 			Bend: GetSprite("Player_Arm_Bend") as Sprite,
+			RifleReload: GetSprite("Player_Rifle_Reload") as Sprite[],
 		},
 		Backpack: GetSprite("Player_Backpack") as Sprite,
 	};
@@ -184,6 +192,7 @@ export class Player extends Entity {
 					if (this._grounded) {
 						this._movingLeft = true;
 						this._currentAnimation = this._animations.Walk;
+						// this._currentAnimation.Reset();
 					}
 					break;
 				case "KeyF":
@@ -209,6 +218,7 @@ export class Player extends Entity {
 					if (this._grounded) {
 						this._movingRight = true;
 						this._currentAnimation = this._animations.Walk;
+						// this._currentAnimation.Reset();
 					}
 
 					break;
@@ -558,12 +568,13 @@ export class Player extends Entity {
 			this._currentAnimation = (this._movingLeft || this._movingRight) && this._currentAnimation === null ? this._animations.Walk : null;
 		}
 
-		if (this._inventory[this._selectedHand] instanceof Item)
-			this._inventory[this._selectedHand].Update(
-				dt,
-				new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
-				this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
-			);
+		/// Зачем оно тут было?
+		// if (this._inventory[this._selectedHand] instanceof Item)
+		// 	this._inventory[this._selectedHand].Update(
+		// 		dt,
+		// 		new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
+		// 		this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
+		// 	);
 
 		if (this.CanTarget() && this._artem.GetCompletedQuestsCount() <= 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
@@ -760,20 +771,40 @@ export class Player extends Entity {
 			} else {
 				this._weapon.Render();
 
-				if (this._weapon.Heavy)
+				if (this._weapon.Heavy) {
+					// Canvas.DrawImageWithAngle(
+					// 	this._frames.Hands.Bend,
+					// 	new Rectangle(
+					// 		this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+					// 		this._y + this.Height * this._armHeight,
+					// 		this._frames.Hands.Bend.BoundingBox.Width * scale,
+					// 		this._frames.Hands.Bend.BoundingBox.Height * scale
+					// 	),
+					// 	this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+					// 	-2 * scale,
+					// 	(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+					// );
+
+					const reloadFrame = this._weapon.IsReloading() ? Math.floor(this._weapon.GetReloadProgress() * this._frames.Hands.RifleReload.length) : 0;
+					if (reloadFrame === 1) {
+						this._weapon.DropMag();
+					} else if (reloadFrame === 5) this._weapon.ConnectMag();
+					// console.log("FRAME: " + this._weapon.GetReloadProgress());
+					// console.log("FRAME: " + this._weapon/);
+
 					Canvas.DrawImageWithAngle(
-						this._frames.Hands.Bend,
+						this._frames.Hands.RifleReload[reloadFrame],
 						new Rectangle(
 							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
 							this._y + this.Height * this._armHeight,
-							this._frames.Hands.Bend.BoundingBox.Width * scale,
-							this._frames.Hands.Bend.BoundingBox.Height * scale
+							this._frames.Hands.RifleReload[reloadFrame].BoundingBox.Width * scale,
+							this._frames.Hands.RifleReload[reloadFrame].BoundingBox.Height * scale
 						),
 						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
-						-2 * scale,
-						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+						-4 * scale,
+						(this._frames.Hands.RifleReload[reloadFrame].BoundingBox.Height - 4) * scale
 					);
-				else
+				} else
 					Canvas.DrawImageWithAngle(
 						this._frames.Hands.Straight,
 						new Rectangle(

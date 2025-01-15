@@ -146,18 +146,18 @@ export abstract class Weapon extends Item {
 		if (this._secondsToReload > 0) return;
 		if (toReload <= 0) return;
 
-		this._hasClip = false;
-		const hits = Scene.Current.Raycast(Vector2.Add(this._position, this._clipOffset), Vector2.Down, 1000, Tag.Wall);
-		this._droppedClips.push(new Vector2(this._position.X + this._clipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
-
 		this._ammoToReload = toReload;
 		this._secondsToReload = this._reloadTime;
-		this._sounds.Reload.Play(0.5);
+		this._sounds.Reload.Play(0.5, (this._sounds.Reload.Length * 1000) / this._reloadTime);
 	}
 
 	public Load() {
 		this._hasClip = true;
 		this._loadedAmmo = this.MaxAmmoClip;
+	}
+
+	public GetReloadProgress() {
+		return 1 - this._secondsToReload / this._reloadTime;
 	}
 
 	public GetLoadedAmmo() {
@@ -170,6 +170,20 @@ export abstract class Weapon extends Item {
 
 	public GetFillClipRatio() {
 		return this._loadedAmmo / (this.MaxAmmoClip - 1);
+	}
+
+	public DropMag() {
+		if (!this._hasClip) return;
+
+		this._hasClip = false;
+		const hits = Scene.Current.Raycast(Vector2.Add(this._position, this._clipOffset), Vector2.Down, 1000, Tag.Wall);
+		this._droppedClips.push(new Vector2(this._position.X + this._clipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
+	}
+
+	public ConnectMag() {
+		if (this._hasClip) return;
+
+		this._hasClip = true;
 	}
 
 	public TryShoot(tag = Tag.Enemy): boolean {
@@ -266,7 +280,7 @@ export class Glock extends Weapon {
 }
 
 export class AK extends Weapon {
-	private static readonly _fireCooldown = 150;
+	private static readonly _fireCooldown = 120;
 	private static readonly _damage = 60;
 	private static readonly _spread = 0.2;
 

@@ -97,9 +97,10 @@ function LoadImage(source, boundingBox, scale) {
 function LoadSound(source) {
     const s = new Audio(source);
     s.volume = 1;
-    return {
+    const newSound = {
         Speed: 1,
         Volume: 1,
+        Length: 1,
         Play: function (volume, speed) {
             if (volume === undefined && speed === undefined)
                 s.cloneNode().play();
@@ -125,6 +126,10 @@ function LoadSound(source) {
             s.pause();
         },
     };
+    s.onloadedmetadata = () => {
+        newSound.Length = s.duration;
+    };
+    return newSound;
 }
 let scene = undefined;
 function gameLoop(timeStamp) {

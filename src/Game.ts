@@ -118,9 +118,10 @@ function LoadSound(source: string): Sound {
 	const s = new Audio(source);
 	s.volume = 1;
 
-	return {
+	const newSound = {
 		Speed: 1,
 		Volume: 1,
+		Length: 1,
 		Play: function (volume?: number, speed?: number) {
 			if (volume === undefined && speed === undefined) (s.cloneNode() as HTMLAudioElement).play();
 			else {
@@ -145,6 +146,12 @@ function LoadSound(source: string): Sound {
 			s.pause();
 		},
 	};
+
+	s.onloadedmetadata = () => {
+		newSound.Length = s.duration;
+	};
+
+	return newSound;
 }
 
 let scene: SceneEditor | Scene = undefined;
@@ -184,7 +191,7 @@ function loadLoop() {
 	if (imagesLoaded.length < imagesToLoad) return;
 
 	window.cancelAnimationFrame(n);
-	Scene.LoadFromFile("Assets/Scenes/Menu.json").then((x) => {
+		Scene.LoadFromFile("Assets/Scenes/Menu.json").then((x) => {
 		scene = x;
 
 		gameLoop(0);

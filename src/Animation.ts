@@ -30,4 +30,8 @@ export class Animation {
 	public SetDuration(newDuration: number) {
 		this._keyTime = newDuration;
 	}
+
+	public Reset() {
+		this._currentKey = 0;
+	}
 }
