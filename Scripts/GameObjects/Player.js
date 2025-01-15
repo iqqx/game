@@ -56,30 +56,34 @@ export class Player extends Entity {
     _artem;
     _lastPressedKeys = "";
     _cheatCodes = [
-        [
-            "hesoyam",
-            () => {
+        {
+            Code: "hesoyam",
+            Action: () => {
                 GetSound("Easter").PlayOriginal();
                 this._tpActivated = true;
                 this._health = 1000000000;
                 this._frames.Walk = GetSprite("Easter_Player_Walk");
                 this._frames.Sit = GetSprite("Easter_Player_Sit");
             },
-        ],
-        [
-            "dota",
-            () => {
+            SingleUse: true,
+        },
+        {
+            Code: "dota",
+            Action: () => {
                 GetSound("DotaCheat").PlayOriginal();
                 Player._name = "Рома";
                 this._avatar = GetSprite("Player_Avatar");
             },
-        ],
-        [
-            "extramag",
-            () => {
+            SingleUse: true,
+        },
+        {
+            Code: "extramag",
+            Action: () => {
+                GetSound("CheatCode").PlayOriginal();
                 this.GiveQuestItem(new RifleBullet(30));
             },
-        ],
+            SingleUse: false,
+        },
     ];
     _tpActivated = false;
     _avatar = null;
@@ -117,7 +121,7 @@ export class Player extends Entity {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
             this._keysPressed[e.code] = true;
-            if (this._cheatCodes.length > 0 && e.code.startsWith("Key")) {
+            if (e.code.startsWith("Key")) {
                 if (this._lastPressedKeys.length >= 100)
                     this._lastPressedKeys = "";
                 this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
@@ -940,8 +944,12 @@ export class Player extends Entity {
     }
     CheckForEaster() {
         for (let i = 0; i < this._cheatCodes.length; i++)
-            if (this._lastPressedKeys.endsWith(this._cheatCodes[i][0]))
-                this._cheatCodes.splice(i, 1)[0][1]();
+            if (this._lastPressedKeys.endsWith(this._cheatCodes[i].Code)) {
+                this._cheatCodes[i].Action();
+                if (this._cheatCodes[i].SingleUse)
+                    this._cheatCodes.splice(i, 1);
+                this._lastPressedKeys = "";
+            }
     }
     OnKilled(type) {
         this._quests.forEach((x) => x.OnKilled(type));

@@ -107,6 +107,7 @@
 		"AidKit": "Sounds/aid_kit.mp3",
 		"Drink": "Sounds/drink.mp3",
 		"Syringe": "Sounds/syringe.mp3",
-		"Fall": "Sounds/fall.mp3"
+		"Fall": "Sounds/fall.mp3",
+		"CheatCode": "Sounds/cheat.mp3"
 	}
 }

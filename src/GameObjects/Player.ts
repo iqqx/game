@@ -62,10 +62,10 @@ export class Player extends Entity {
 	private _currentAnimation: Animation | null = null;
 	private _artem: Artem;
 	private _lastPressedKeys = "";
-	private _cheatCodes: [string, () => void][] = [
-		[
-			"hesoyam",
-			() => {
+	private _cheatCodes = [
+		{
+			Code: "hesoyam",
+			Action: () => {
 				GetSound("Easter").PlayOriginal();
 
 				this._tpActivated = true;
@@ -73,21 +73,25 @@ export class Player extends Entity {
 				this._frames.Walk = GetSprite("Easter_Player_Walk");
 				this._frames.Sit = GetSprite("Easter_Player_Sit");
 			},
-		],
-		[
-			"dota",
-			() => {
+			SingleUse: true,
+		},
+		{
+			Code: "dota",
+			Action: () => {
 				GetSound("DotaCheat").PlayOriginal();
 				Player._name = "Рома";
 				this._avatar = GetSprite("Player_Avatar");
 			},
-		],
-		[
-			"extramag",
-			() => {
+			SingleUse: true,
+		},
+		{
+			Code: "extramag",
+			Action: () => {
+				GetSound("CheatCode").PlayOriginal();
 				this.GiveQuestItem(new RifleBullet(30));
 			},
-		],
+			SingleUse: false,
+		},
 	];
 	private _tpActivated = false;
 
@@ -131,7 +135,7 @@ export class Player extends Entity {
 
 			this._keysPressed[e.code] = true;
 
-			if (this._cheatCodes.length > 0 && e.code.startsWith("Key")) {
+			if (e.code.startsWith("Key")) {
 				if (this._lastPressedKeys.length >= 100) this._lastPressedKeys = "";
 				this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
 				this.CheckForEaster();
@@ -1236,7 +1240,13 @@ export class Player extends Entity {
 	}
 
 	public CheckForEaster() {
-		for (let i = 0; i < this._cheatCodes.length; i++) if (this._lastPressedKeys.endsWith(this._cheatCodes[i][0])) this._cheatCodes.splice(i, 1)[0][1]();
+		for (let i = 0; i < this._cheatCodes.length; i++)
+			if (this._lastPressedKeys.endsWith(this._cheatCodes[i].Code)) {
+				this._cheatCodes[i].Action();
+				if (this._cheatCodes[i].SingleUse) this._cheatCodes.splice(i, 1);
+
+				this._lastPressedKeys = "";
+			}
 	}
 
 	public OnKilled(type: EnemyType) {
