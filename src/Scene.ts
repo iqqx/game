@@ -405,7 +405,9 @@ export class Scene {
 		} else Canvas.DrawBackground(Scene.Current._background, Scene.Current._levelPosition);
 
 		for (const object of Scene.Current._gameObjects) object.Render();
+	}
 
+	public RenderOverlay() {
 		if (Scene.Current.Player !== null) Scene.Current.Player.RenderOverlay();
 
 		for (const element of Scene.Current._GUIElements) element.Render();

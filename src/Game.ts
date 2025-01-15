@@ -2,6 +2,7 @@ import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { GUI } from "./Context.js";
 import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
+import { SceneWeaponEditor } from "./SceneWeaponEditor.js";
 import { Color, Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
 
 const sprites = new Map<string, Sprite | Sprite[]>();
@@ -168,13 +169,14 @@ function LoadSound(source: string): Sound {
 	return newSound;
 }
 
-let scene: SceneEditor | Scene = undefined;
+let scene: SceneEditor | Scene | SceneWeaponEditor = undefined;
 
 function gameLoop(timeStamp: number) {
 	window.requestAnimationFrame(gameLoop);
 
 	scene.Update(timeStamp);
 	scene.Render();
+	scene.RenderOverlay();
 }
 
 function loadLoop() {
@@ -230,6 +232,7 @@ function loadLoop() {
 		})
 	)
 		.then(() => {
+			// SceneWeaponEditor.LoadFromFile(Weapon.GetById("AK12")).then((x) => {
 			Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
 				scene = x;
 

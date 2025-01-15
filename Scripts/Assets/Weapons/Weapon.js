@@ -17,9 +17,9 @@ export class Weapon extends Item {
     _damage;
     _spread;
     _width;
-    _handOffset;
-    _muzzleOffset;
-    _clipOffset;
+    HandOffset;
+    MuzzleOffset;
+    ClipOffset;
     MaxAmmoClip = 30;
     _automatic;
     _droppedClips = [];
@@ -49,9 +49,9 @@ export class Weapon extends Item {
         this._fireCooldown = fireCooldown;
         this._damage = damage;
         this._spread = spread;
-        this._handOffset = handOffset;
-        this._muzzleOffset = muzzleOffset;
-        this._clipOffset = clipOffset;
+        this.HandOffset = handOffset;
+        this.MuzzleOffset = muzzleOffset;
+        this.ClipOffset = clipOffset;
         this._reloadTime = reloadTime * 1000;
         this.MaxAmmoClip = clip;
         this.Heavy = heavy;
@@ -91,13 +91,13 @@ export class Weapon extends Item {
             Canvas.DrawImage(clip, new Rectangle(clipPos.X - Scene.Current.GetLevelPosition(), clipPos.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio));
         if (this._angle < Math.PI / -2 || this._angle > Math.PI / 2) {
             if (this._hasClip)
-                Canvas.DrawImageWithAngleVFlipped(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this._handOffset.X + this._clipOffset.X, this._handOffset.Y + this._clipOffset.Y);
-            Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngleVFlipped(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this.HandOffset.X + this.ClipOffset.X, this.HandOffset.Y + this.ClipOffset.Y);
+            Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio), this._angle, this.HandOffset.X, this.HandOffset.Y);
         }
         else {
             if (this._hasClip)
-                Canvas.DrawImageWithAngle(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this._handOffset.X + this._clipOffset.X, this._handOffset.Y + this._clipOffset.Y);
-            Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio), this._angle, this._handOffset.X, this._handOffset.Y);
+                Canvas.DrawImageWithAngle(clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio), this._angle, this.HandOffset.X + this.ClipOffset.X, this.HandOffset.Y + this.ClipOffset.Y);
+            Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio), this._angle, this.HandOffset.X, this.HandOffset.Y);
         }
     }
     Reload(toReload = this.MaxAmmoClip) {
@@ -129,8 +129,8 @@ export class Weapon extends Item {
         if (!this._hasClip)
             return;
         this._hasClip = false;
-        const hits = Scene.Current.Raycast(Vector2.Add(this._position, this._clipOffset), Vector2.Down, 1000, Tag.Wall);
-        this._droppedClips.push(new Vector2(this._position.X + this._clipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
+        const hits = Scene.Current.Raycast(Vector2.Add(this._position, this.ClipOffset), Vector2.Down, 1000, Tag.Wall);
+        this._droppedClips.push(new Vector2(this._position.X + this.ClipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
     }
     ConnectMag() {
         if (this._hasClip)
@@ -149,7 +149,7 @@ export class Weapon extends Item {
         }
         this._secondsToCooldown = this._fireCooldown;
         this._timeToRecoilStop += 20;
-        const muzzlePosition = new Vector2(this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X), this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y));
+        const muzzlePosition = new Vector2(this._position.X + Math.cos(this._angle) * (this._width + this.MuzzleOffset.X), this._position.Y - Math.sin(this._angle) * (this._width + this.MuzzleOffset.Y));
         const offset = (Math.random() - 0.5) * this._spread * (this._timeToRecoilStop * 0.02);
         const dir = this._angle - offset;
         const hit = Scene.Current.Raycast(muzzlePosition, new Vector2(Math.cos(dir), -Math.sin(dir)), 1500, tag | Tag.Wall)[0];
@@ -169,7 +169,7 @@ export class Weapon extends Item {
         Scene.Current.Instantiate(new Bullet(muzzlePosition.X + Math.cos(this._angle) * 100, muzzlePosition.Y - Math.sin(this._angle) * 100, hit === undefined
             ? 2000
             : Math.sqrt((muzzlePosition.X + Math.cos(this._angle) * 100 - hit.position.X) ** 2 + (muzzlePosition.Y - Math.sin(this._angle) * 100 - hit.position.Y) ** 2), dir));
-        Scene.Current.Instantiate(new Fireball(muzzlePosition.X, muzzlePosition.Y, this._angle, this._muzzleOffset));
+        Scene.Current.Instantiate(new Fireball(muzzlePosition.X, muzzlePosition.Y, this._angle, this.MuzzleOffset));
         this._loadedAmmo--;
         this._sounds.Fire.Play(0.5);
         setTimeout(() => {

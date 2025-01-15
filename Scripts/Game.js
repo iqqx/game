@@ -149,6 +149,7 @@ function gameLoop(timeStamp) {
     window.requestAnimationFrame(gameLoop);
     scene.Update(timeStamp);
     scene.Render();
+    scene.RenderOverlay();
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
@@ -194,6 +195,7 @@ function loadLoop() {
         }
     }))
         .then(() => {
+        // SceneWeaponEditor.LoadFromFile(Weapon.GetById("AK12")).then((x) => {
         Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
             scene = x;
             gameLoop(0);

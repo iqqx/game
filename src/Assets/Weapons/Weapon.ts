@@ -20,9 +20,9 @@ export class Weapon extends Item {
 	private readonly _damage: number;
 	private readonly _spread: number;
 	private readonly _width: number;
-	private readonly _handOffset: Vector2;
-	private readonly _muzzleOffset: Vector2;
-	private readonly _clipOffset: Vector2;
+	public readonly HandOffset: Vector2;
+	public readonly MuzzleOffset: Vector2;
+	public readonly ClipOffset: Vector2;
 	public readonly MaxAmmoClip: number = 30;
 	private readonly _automatic: boolean;
 	private readonly _droppedClips: Vector2[] = [];
@@ -71,10 +71,10 @@ export class Weapon extends Item {
 		this._fireCooldown = fireCooldown;
 		this._damage = damage;
 		this._spread = spread;
-		this._handOffset = handOffset;
-		this._muzzleOffset = muzzleOffset;
+		this.HandOffset = handOffset;
+		this.MuzzleOffset = muzzleOffset;
 
-		this._clipOffset = clipOffset;
+		this.ClipOffset = clipOffset;
 		this._reloadTime = reloadTime * 1000;
 		this.MaxAmmoClip = clip;
 		this.Heavy = heavy;
@@ -167,16 +167,16 @@ export class Weapon extends Item {
 					clip,
 					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio),
 					this._angle,
-					this._handOffset.X + this._clipOffset.X,
-					this._handOffset.Y + this._clipOffset.Y
+					this.HandOffset.X + this.ClipOffset.X,
+					this.HandOffset.Y + this.ClipOffset.Y
 				);
 
 			Canvas.DrawImageWithAngleVFlipped(
 				this.Sprites.Image,
 				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio),
 				this._angle,
-				this._handOffset.X,
-				this._handOffset.Y
+				this.HandOffset.X,
+				this.HandOffset.Y
 			);
 		} else {
 			if (this._hasClip)
@@ -184,16 +184,16 @@ export class Weapon extends Item {
 					clip,
 					new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, clip.BoundingBox.Width * ratio, clip.BoundingBox.Height * ratio),
 					this._angle,
-					this._handOffset.X + this._clipOffset.X,
-					this._handOffset.Y + this._clipOffset.Y
+					this.HandOffset.X + this.ClipOffset.X,
+					this.HandOffset.Y + this.ClipOffset.Y
 				);
 
 			Canvas.DrawImageWithAngle(
 				this.Sprites.Image,
 				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this._width, this.Sprites.Image.BoundingBox.Height * ratio),
 				this._angle,
-				this._handOffset.X,
-				this._handOffset.Y
+				this.HandOffset.X,
+				this.HandOffset.Y
 			);
 		}
 	}
@@ -232,8 +232,8 @@ export class Weapon extends Item {
 		if (!this._hasClip) return;
 
 		this._hasClip = false;
-		const hits = Scene.Current.Raycast(Vector2.Add(this._position, this._clipOffset), Vector2.Down, 1000, Tag.Wall);
-		this._droppedClips.push(new Vector2(this._position.X + this._clipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
+		const hits = Scene.Current.Raycast(Vector2.Add(this._position, this.ClipOffset), Vector2.Down, 1000, Tag.Wall);
+		this._droppedClips.push(new Vector2(this._position.X + this.ClipOffset.X, hits === undefined ? this._position.Y : hits[0].position.Y));
 	}
 
 	public ConnectMag() {
@@ -258,8 +258,8 @@ export class Weapon extends Item {
 		this._timeToRecoilStop += 20;
 
 		const muzzlePosition = new Vector2(
-			this._position.X + Math.cos(this._angle) * (this._width + this._muzzleOffset.X),
-			this._position.Y - Math.sin(this._angle) * (this._width + this._muzzleOffset.Y)
+			this._position.X + Math.cos(this._angle) * (this._width + this.MuzzleOffset.X),
+			this._position.Y - Math.sin(this._angle) * (this._width + this.MuzzleOffset.Y)
 		);
 		const offset = (Math.random() - 0.5) * this._spread * (this._timeToRecoilStop * 0.02);
 
@@ -294,7 +294,7 @@ export class Weapon extends Item {
 			)
 		);
 
-		Scene.Current.Instantiate(new Fireball(muzzlePosition.X, muzzlePosition.Y, this._angle, this._muzzleOffset));
+		Scene.Current.Instantiate(new Fireball(muzzlePosition.X, muzzlePosition.Y, this._angle, this.MuzzleOffset));
 
 		this._loadedAmmo--;
 		this._sounds.Fire.Play(0.5);

@@ -108,7 +108,7 @@ export var Canvas;
     Canvas.DrawImageFlipped = DrawImageFlipped;
     function DrawCircle(x, y, radius) {
         ctx.beginPath();
-        ctx.ellipse(x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
+        ctx.ellipse(x, ctx.canvas.height - y, radius, radius, 0, 0, Math.PI * 2);
         ctx.fill();
     }
     Canvas.DrawCircle = DrawCircle;
@@ -225,6 +225,14 @@ export var GUI;
         strokeStyle = null;
     }
     GUI.ClearStroke = ClearStroke;
+    function SetBaselineTop() {
+        ctx.textBaseline = "top";
+    }
+    GUI.SetBaselineTop = SetBaselineTop;
+    function SetBaselineDefault() {
+        ctx.textBaseline = "alphabetic";
+    }
+    GUI.SetBaselineDefault = SetBaselineDefault;
     function Clear() {
         ctx.clearRect(0, 0, GUI.Width, GUI.Height);
     }

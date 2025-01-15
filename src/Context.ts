@@ -144,7 +144,7 @@ export namespace Canvas {
 
 	export function DrawCircle(x: number, y: number, radius: number) {
 		ctx.beginPath();
-		ctx.ellipse(x, ctx.canvas.height - radius / 2 - y, radius, radius, 0, 0, Math.PI * 2);
+		ctx.ellipse(x, ctx.canvas.height - y, radius, radius, 0, 0, Math.PI * 2);
 		ctx.fill();
 	}
 
@@ -282,6 +282,14 @@ export namespace GUI {
 
 	export function ClearStroke() {
 		strokeStyle = null;
+	}
+
+	export function SetBaselineTop() {
+		ctx.textBaseline = "top";
+	}
+
+	export function SetBaselineDefault() {
+		ctx.textBaseline = "alphabetic";
 	}
 
 	export function Clear() {
