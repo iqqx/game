@@ -1,0 +1,22 @@
+{
+	"Sprites": {
+		"Icon": "AK_Icon",
+		"Main": "AK"
+	},
+	"Sounds": {
+		"Shoot": "Shoot_1",
+		"ShellImpact": "Shell"
+	},
+	"Damage": 60,
+	"IsHeavy": true,
+	"IsAutomatic": true,
+	"ClipCapacity": 30,
+	"Spread": 0.2,
+	"ReloadTime": 2.5,
+	"ShootsPerSecond": 8,
+	"PixelsOffsets": {
+		"Grip": { "X": 5, "Y": 18 },
+		"Muzzle": { "X": 0, "Y": 0 },
+		"Clip": { "X": 25, "Y": 0 }
+	}
+}

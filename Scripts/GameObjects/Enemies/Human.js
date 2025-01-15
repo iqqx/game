@@ -6,7 +6,7 @@ import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
 import { AidKit } from "../../Assets/Items/Item.js";
-import { Glock } from "../../Assets/Weapons/Weapon.js";
+import { Weapon } from "../../Assets/Weapons/Weapon.js";
 import { GetSprite } from "../../Game.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
 import { FakeEndGuard } from "../QuestGivers/FakeEndGuard.js";
@@ -33,7 +33,7 @@ export class Human extends Enemy {
         super(50, 100, 1, 100, type);
         this._x = x;
         this._y = y;
-        this._weapon = weapon ?? new Glock();
+        this._weapon = weapon ?? Weapon.GetById("Glock");
         this.Direction = direction;
         this._frames =
             type === EnemyType.Green

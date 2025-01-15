@@ -1,6 +1,6 @@
 import { Animation } from "../Animation.js";
 import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
-import { AK, Weapon } from "../Assets/Weapons/Weapon.js";
+import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { GetSound, GetSprite } from "../Game.js";
@@ -23,7 +23,7 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    _inventory = [new AK(), new RifleBullet(100)];
+    _inventory = [Weapon.GetById("AK12"), new RifleBullet(100)];
     _backpack = null;
     _weapon = null;
     _quests;
@@ -207,7 +207,7 @@ export class Player extends Entity {
                     break;
                 case "KeyR":
                     if (this.CanTarget() && this._weapon !== null) {
-                        const neededAmmo = this._weapon instanceof AK ? RifleBullet : PistolBullet;
+                        const neededAmmo = "AK12" === this._weapon.Id ? RifleBullet : PistolBullet;
                         let findedAmmo = 0;
                         for (let i = 0; i < this.GetItemsState().length; i++) {
                             const item = this.GetItemsState()[i];

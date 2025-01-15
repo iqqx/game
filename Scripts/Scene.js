@@ -26,7 +26,7 @@ import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
-import { AK, Glock } from "./Assets/Weapons/Weapon.js";
+// import { AK, Glock } from "./Assets/Weapons/Weapon.js";
 import { Titles } from "./GameObjects/GUI/Titles.js";
 import { Artem } from "./GameObjects/QuestGivers/Artem.js";
 import { Elder } from "./GameObjects/QuestGivers/Elder.js";
@@ -34,6 +34,7 @@ import { Trader } from "./GameObjects/QuestGivers/Trader.js";
 import { Corpse } from "./GameObjects/Corpse.js";
 import { SceneEditor } from "./SceneEditor.js";
 import { FPSCounter } from "./GameObjects/GUI/FPSCounter.js";
+import { Weapon } from "./Assets/Weapons/Weapon.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -407,9 +408,9 @@ export class Scene {
             case "AidKit":
                 return new AidKit();
             case "AK":
-                return new AK();
+                return Weapon.GetById("AK12");
             case "Glock":
-                return new Glock();
+                return Weapon.GetById("Glock");
             case "Radio":
                 return new Radio();
             case "DogTag":

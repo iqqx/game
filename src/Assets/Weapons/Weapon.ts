@@ -9,10 +9,11 @@ import { Scene } from "../../Scene.js";
 import { Sprite, Sound, Vector2, Rectangle } from "../../Utilites.js";
 import { Item } from "../Items/Item.js";
 
-export abstract class Weapon extends Item {
+export class Weapon extends Item {
 	public declare readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite };
 	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
+	public readonly Id: string;
 
 	private readonly _fireCooldown: number;
 	private readonly _reloadTime: number;
@@ -26,7 +27,7 @@ export abstract class Weapon extends Item {
 	private readonly _automatic: boolean;
 	private readonly _droppedClips: Vector2[] = [];
 
-	public declare readonly Heavy: boolean;
+	public readonly Heavy: boolean;
 	public Automatic: boolean;
 
 	private _loadedAmmo: number = 0;
@@ -38,7 +39,10 @@ export abstract class Weapon extends Item {
 	private _timeToRecoilStop = 0;
 	private _hasClip = false;
 
+	private static readonly _weapons: Weapon[] = [];
+
 	constructor(
+		id: string,
 		images: { Icon: Sprite; Image: Sprite },
 		sounds: { Fire: Sound; Shell?: Sound },
 		fireCooldown: number,
@@ -54,6 +58,7 @@ export abstract class Weapon extends Item {
 	) {
 		super(1);
 
+		this.Id = id;
 		this.Icon = images.Icon;
 		this.Sprites = images;
 		this._sounds = {
@@ -66,16 +71,67 @@ export abstract class Weapon extends Item {
 		this._fireCooldown = fireCooldown;
 		this._damage = damage;
 		this._spread = spread;
-		(this._handOffset = handOffset), (this._muzzleOffset = muzzleOffset);
+		this._handOffset = handOffset;
+		this._muzzleOffset = muzzleOffset;
 
 		this._clipOffset = clipOffset;
-		this._reloadTime = reloadTime;
+		this._reloadTime = reloadTime * 1000;
 		this.MaxAmmoClip = clip;
 		this.Heavy = heavy;
 		this._automatic = auto;
 		this.Automatic = auto;
 
 		this._width = 30 * (this.Sprites.Image.BoundingBox.Width / this.Sprites.Image.BoundingBox.Height);
+	}
+
+	public static GetById(id: string) {
+		const w = Weapon._weapons.find((x) => x.Id === id);
+
+		if (w === undefined) console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+
+		return w;
+	}
+
+	public static Register(rawJson: {
+		Sprites: {
+			Icon: string;
+			Main: string;
+		};
+		Sounds: {
+			Shoot: string;
+			ShellImpact: string;
+		};
+		Id: string;
+		Damage: number;
+		IsHeavy: boolean;
+		IsAutomatic: boolean;
+		ClipCapacity: number;
+		Spread: number;
+		ReloadTime: number;
+		ShootsPerSecond: number;
+		PixelsOffsets: {
+			Grip: { X: number; Y: number };
+			Muzzle: { X: number; Y: number };
+			Clip: { X: number; Y: number };
+		};
+	}) {
+		Weapon._weapons.push(
+			new Weapon(
+				rawJson.Id,
+				{ Icon: GetSprite(rawJson.Sprites.Icon) as Sprite, Image: GetSprite(rawJson.Sprites.Main) as Sprite },
+				{ Fire: GetSound(rawJson.Sounds.Shoot), Shell: rawJson.Sounds.ShellImpact === undefined ? undefined : GetSound(rawJson.Sounds.ShellImpact) },
+				1000 / rawJson.ShootsPerSecond,
+				rawJson.Damage,
+				rawJson.Spread,
+				rawJson.IsHeavy,
+				rawJson.IsAutomatic,
+				rawJson.ReloadTime,
+				rawJson.ClipCapacity,
+				new Vector2(rawJson.PixelsOffsets.Grip.X, rawJson.PixelsOffsets.Grip.Y),
+				new Vector2(rawJson.PixelsOffsets.Muzzle.X, rawJson.PixelsOffsets.Muzzle.Y),
+				new Vector2(rawJson.PixelsOffsets.Clip.X, rawJson.PixelsOffsets.Clip.Y)
+			)
+		);
 	}
 
 	public Update(dt: number, position: Vector2, angle: number) {
@@ -250,64 +306,64 @@ export abstract class Weapon extends Item {
 	}
 }
 
-export class Glock extends Weapon {
-	constructor() {
-		super(
-			{
-				Icon: GetSprite("Glock_Icon"),
-				Image: GetSprite("Glock"),
-			},
-			{
-				Fire: GetSound("Shoot_3"),
-				Shell: GetSound("Shell"),
-			},
-			200,
-			20,
-			0.05,
-			false,
-			false,
-			2500,
-			7,
-			new Vector2(40, 10),
-			new Vector2(30, 10),
-			new Vector2(0, 0)
-		);
-	}
+// export class Glock extends Weapon {
+// 	constructor() {
+// 		super(
+// 			{
+// 				Icon: GetSprite("Glock_Icon"),
+// 				Image: GetSprite("Glock"),
+// 			},
+// 			{
+// 				Fire: GetSound("Shoot_3"),
+// 				Shell: GetSound("Shell"),
+// 			},
+// 			200,
+// 			20,
+// 			0.05,
+// 			false,
+// 			false,
+// 			2500,
+// 			7,
+// 			new Vector2(40, 10),
+// 			new Vector2(30, 10),
+// 			new Vector2(0, 0)
+// 		);
+// 	}
 
-	static toString(): string {
-		return "Пистолет";
-	}
-}
+// 	static toString(): string {
+// 		return "Пистолет";
+// 	}
+// }
 
-export class AK extends Weapon {
-	private static readonly _fireCooldown = 120;
-	private static readonly _damage = 60;
-	private static readonly _spread = 0.2;
+// export class AK extends Weapon {
+// 	private static readonly _fireCooldown = 120;
+// 	private static readonly _damage = 60;
+// 	private static readonly _spread = 0.2;
 
-	constructor() {
-		super(
-			{
-				Icon: GetSprite("AK_Icon"),
-				Image: GetSprite("AK"),
-			},
-			{
-				Fire: GetSound("Shoot_1"),
-				Shell: GetSound("Shell"),
-			},
-			AK._fireCooldown,
-			AK._damage,
-			AK._spread,
-			true,
-			true,
-			2500,
-			30,
-			new Vector2(5, 18),
-			new Vector2(0, 0),
-			new Vector2(25, 0)
-		);
-	}
+// 	constructor() {
+// 		super(
+// 			{
+// 				Icon: GetSprite("AK_Icon"),
+// 				Image: GetSprite("AK"),
+// 			},
+// 			{
+// 				Fire: GetSound("Shoot_1"),
+// 				Shell: GetSound("Shell"),
+// 			},
+// 			AK._fireCooldown,
+// 			AK._damage,
+// 			AK._spread,
+// 			true,
+// 			true,
+// 			2500,
+// 			30,
+// 			new Vector2(5, 18),
+// 			new Vector2(0, 0),
+// 			new Vector2(25, 0)
+// 		);
+// 	}
 
-	static toString(): string {
-		return "Калак 12";
-	}
-}
+// 	static toString(): string {
+// 		return "Калак 12";
+// 	}
+// }

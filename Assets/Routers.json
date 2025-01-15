@@ -49,7 +49,7 @@
 		"Human_Green_Arm_Bend": "Images/Guard/Green/Arm_right.png",
 		"Drop_Backpack": "Images/Drop_backpack.png",
 		"Glock": "Images/Pistol.png",
-		"AK": "Images/Rifle.png",
+		"AK": { "Image": "Images/Rifle.png", "Scale": 1 },
 		"Controls": "Images/Controls-2.png",
 		"Loading_Icon": "Images/Loading.png",
 		"Notice": "Images/Notice.png",
@@ -109,5 +109,9 @@
 		"Syringe": "Sounds/syringe.mp3",
 		"Fall": "Sounds/fall.mp3",
 		"CheatCode": "Sounds/cheat.mp3"
+	},
+	"Weapons": {
+		"AK12": "Weapons/AK12.json",
+		"Glock": "Weapons/Glock.json"
 	}
 }

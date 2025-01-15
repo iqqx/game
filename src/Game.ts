@@ -1,3 +1,4 @@
+import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { GUI } from "./Context.js";
 import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
@@ -6,6 +7,8 @@ import { Color, Rectangle, Sound, Sprite, Vector2 } from "./Utilites.js";
 const sprites = new Map<string, Sprite | Sprite[]>();
 const sounds = new Map<string, Sound>();
 let imagesToLoad = 0;
+
+let parsedRouters: any;
 
 fetch("Assets/Routers.json")
 	.then((routers) => {
@@ -16,11 +19,15 @@ fetch("Assets/Routers.json")
 
 		return routers.json();
 	})
-	.then((parsedRouters) => {
+	.then((ps) => {
+		parsedRouters = ps;
+
 		if (parsedRouters.Images === undefined)
 			return Promise.reject(`Изображения не найдены.\nМаксимально похожий ключ на 'Images': '${GetMaxIdentityString("Images", Object.keys(parsedRouters))}'`);
 		if (parsedRouters.Sounds === undefined)
 			return Promise.reject(`Звуки не найдены.\nМаксимально похожий ключ на 'Sounds': '${GetMaxIdentityString("Sounds", Object.keys(parsedRouters))}'`);
+		if (parsedRouters.Weapons === undefined)
+			return Promise.reject(`Оружия не найдены.\nМаксимально похожий ключ на 'Weapons': '${GetMaxIdentityString("Weapons", Object.keys(parsedRouters))}'`);
 
 		for (const imageKey in parsedRouters.Images) {
 			const object = parsedRouters.Images[imageKey];
@@ -35,6 +42,12 @@ fetch("Assets/Routers.json")
 					imageKey,
 					object.map((x) => LoadImage(x))
 				);
+			} else if (typeof object === "object") {
+				imagesToLoad++;
+
+				if (object.Image === undefined) return Promise.reject(`Недопустимое изображение: ${imageKey}.`);
+
+				sprites.set(imageKey, LoadImage(object.Image, undefined, object.Scale));
 			} else return Promise.reject(`Недопустимый тип изображения: ${imageKey}.`);
 		}
 
@@ -44,11 +57,12 @@ fetch("Assets/Routers.json")
 			if (typeof object === "string") sounds.set(soundKey, LoadSound(object as string));
 			else return Promise.reject(`Недопустимый тип звука: ${soundKey}.`);
 		}
-
+	})
+	.then(() => {
 		loadLoop();
 	})
 	.catch((res) => {
-		scene = Scene.GetErrorScene(`${res}\nat [Assets/Routers.json]`);
+		scene = Scene.GetErrorScene(`${res.stack}\nat [Assets/Routers.json]`);
 		gameLoop(0);
 	});
 
@@ -191,9 +205,40 @@ function loadLoop() {
 	if (imagesLoaded.length < imagesToLoad) return;
 
 	window.cancelAnimationFrame(n);
-	Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
-		scene = x;
 
-		gameLoop(0);
-	});
+	Promise.all(
+		Object.keys(parsedRouters.Weapons).map((weaponKey) => {
+			const object = parsedRouters.Weapons[weaponKey];
+
+			if (typeof object === "string") {
+				return fetch("Assets/" + object)
+					.then((x) => {
+						if (!x.ok) {
+							if (x.status === 404) return Promise.reject(`Не найдено.\nat [${object}]`);
+							else return Promise.reject(`Неизвестная ошибка. Код: ${x.status}`);
+						}
+
+						return x.json();
+					})
+					.then((x) => {
+						x.Id = weaponKey;
+						Weapon.Register(x);
+					});
+			} else {
+				return Promise.reject("Недопустимый тип пути оружия: ${weaponKey}\nat [Routers.json/Weapons]");
+			}
+		})
+	)
+		.then(() => {
+			Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
+				scene = x;
+
+				gameLoop(0);
+			});
+		})
+		.catch((err) => {
+			scene = Scene.GetErrorScene(`${err.stack}\nat [Routers.json/Weapons]`);
+
+			gameLoop(0);
+		});
 }

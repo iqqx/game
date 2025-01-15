@@ -1,0 +1,22 @@
+{
+	"Sprites": {
+		"Icon": "Glock_Icon",
+		"Main": "Glock"
+	},
+	"Sounds": {
+		"Shoot": "Shoot_3",
+		"ShellImpact": "Shell"
+	},
+	"Damage": 20,
+	"IsHeavy": false,
+	"IsAutomatic": false,
+	"ClipCapacity": 7,
+	"Spread": 0.05,
+	"ReloadTime": 2.5,
+	"ShootsPerSecond": 5,
+	"PixelsOffsets": {
+		"Grip": { "X": 40, "Y": 10 },
+		"Muzzle": { "X": 30, "Y": 10 },
+		"Clip": { "X": 0, "Y": 0 }
+	}
+}
