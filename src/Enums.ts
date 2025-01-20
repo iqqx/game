@@ -13,4 +13,10 @@ export enum Tag {
 	NPC = 2 ** 4,
 	Pickable = 2 ** 5,
 	Ladder = 2 ** 6,
+	Clip = 2 ** 7,
+}
+
+export enum Direction {
+	Right = 1,
+	Left = -1,
 }

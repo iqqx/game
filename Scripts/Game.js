@@ -35,10 +35,18 @@ fetch("Assets/Routers.json")
             sprites.set(imageKey, object.map((x) => LoadImage(x)));
         }
         else if (typeof object === "object") {
-            imagesToLoad++;
-            if (object.Image === undefined)
+            if (object.Images !== undefined) {
+                imagesToLoad += object.Images.length;
+                sprites.set(imageKey, object.Images.map((x) => LoadImage(x, undefined, object.Scale)));
+            }
+            else if (object.Image !== undefined) {
+                imagesToLoad++;
+                if (object.Image === undefined)
+                    return Promise.reject(`Недопустимое изображение: ${imageKey}.`);
+                sprites.set(imageKey, LoadImage(object.Image, undefined, object.Scale));
+            }
+            else
                 return Promise.reject(`Недопустимое изображение: ${imageKey}.`);
-            sprites.set(imageKey, LoadImage(object.Image, undefined, object.Scale));
         }
         else
             return Promise.reject(`Недопустимый тип изображения: ${imageKey}.`);
@@ -101,7 +109,7 @@ function LoadImage(source, boundingBox, scale) {
     img.onload = () => {
         cte.Scale = scale ?? 1;
         cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
-        cte.ScaledSize = new Vector2(cte.BoundingBox.Width * scale, cte.BoundingBox.Height * scale);
+        cte.ScaledSize = new Vector2(cte.BoundingBox.Width * cte.Scale, cte.BoundingBox.Height * cte.Scale);
         imagesLoaded.push(source);
     };
     img.src = source;
@@ -194,16 +202,13 @@ function loadLoop() {
             return Promise.reject("Недопустимый тип пути оружия: ${weaponKey}\nat [Routers.json/Weapons]");
         }
     }))
-        .then(() => {
-        // SceneWeaponEditor.LoadFromFile(Weapon.GetById("AK12")).then((x) => {
-        Scene.LoadFromFile("Assets/Scenes/Main.json").then((x) => {
-            scene = x;
-            gameLoop(0);
-        });
-    })
+        .then(() => 
+    // SceneWeaponEditor.LoadFromFile(Weapon.GetById("Glock"))
+    Scene.LoadFromFile("Assets/Scenes/Menu.json"))
+        .then((x) => (scene = x))
         .catch((err) => {
         scene = Scene.GetErrorScene(`${err.stack}\nat [Routers.json/Weapons]`);
-        gameLoop(0);
-    });
+    })
+        .finally(() => gameLoop(0));
 }
 //# sourceMappingURL=Game.js.map

@@ -1,6 +1,6 @@
 import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "./Context.js";
-import { Vector2, Sprite, Color, Rectangle } from "./Utilites.js";
+import { Vector2, Color, Rectangle } from "./Utilites.js";
 
 export class SceneWeaponEditor {
 	private readonly _weapon: Weapon;
@@ -19,9 +19,9 @@ export class SceneWeaponEditor {
 	constructor(weapon: Weapon) {
 		this._weapon = weapon;
 
-		this._offsets.Grip = weapon.HandOffset;
-		this._offsets.Muzzle = weapon.MuzzleOffset;
-		this._offsets.Clip = weapon.ClipOffset;
+		this._offsets.Grip = Vector2.Div(weapon.GripOffset, weapon.Sprites.Image.Scale);
+		this._offsets.Muzzle = Vector2.Div(weapon.MuzzleOffset, weapon.Sprites.Image.Scale);
+		this._offsets.Clip = Vector2.Div(weapon.ClipOffset, weapon.Sprites.Clip.Scale);
 
 		addEventListener("keydown", (e) => {
 			switch (e.code) {
@@ -38,10 +38,10 @@ export class SceneWeaponEditor {
 				case "ShiftLeft":
 					break;
 				case "ArrowUp":
-					this._offsets[Object.keys(this._offsets)[this._selectedParameter]].Y--;
+					this._offsets[Object.keys(this._offsets)[this._selectedParameter]].Y++;
 					break;
 				case "ArrowDown":
-					this._offsets[Object.keys(this._offsets)[this._selectedParameter]].Y++;
+					this._offsets[Object.keys(this._offsets)[this._selectedParameter]].Y--;
 					break;
 				case "ArrowRight":
 					this._offsets[Object.keys(this._offsets)[this._selectedParameter]].X++;
@@ -117,16 +117,46 @@ export class SceneWeaponEditor {
 		GUI.SetFont(16);
 
 		GUI.SetFillColor(Color.White);
-		GUI.DrawCircle(GUI.Width / 2 + this._offsets.Grip.X * this._scale, GUI.Height / 2 + this._offsets.Grip.Y * this._scale, 4);
-		GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + this._offsets.Grip.X * this._scale, GUI.Height / 2 + this._offsets.Grip.Y * this._scale + 10, "Рукоять");
+		GUI.DrawCircle(
+			GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale,
+			GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale,
+			4
+		);
+
+		if (this._selectedParameter === 0)
+			GUI.DrawTextCenterLineBreaked(
+				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale,
+				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale + 10,
+				"Рукоять"
+			);
 
 		GUI.SetFillColor(Color.White);
-		GUI.DrawCircle(GUI.Width / 2 + this._offsets.Muzzle.X * this._scale, GUI.Height / 2 + this._offsets.Muzzle.Y * this._scale, 4);
-		GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + this._offsets.Muzzle.X * this._scale, GUI.Height / 2 + this._offsets.Muzzle.Y * this._scale + 10, "Дуло");
+		GUI.DrawCircle(
+			GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale,
+			GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale,
+			4
+		);
+
+		if (this._selectedParameter === 1)
+			GUI.DrawTextCenterLineBreaked(
+				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale,
+				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale + 10,
+				"Дуло"
+			);
 
 		GUI.SetFillColor(Color.White);
-		GUI.DrawCircle(GUI.Width / 2 + this._offsets.Clip.X * this._scale, GUI.Height / 2 + this._offsets.Clip.Y * this._scale, 4);
-		GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + this._offsets.Clip.X * this._scale, GUI.Height / 2 + this._offsets.Clip.Y * this._scale + 20, "Шахта\nмагазина");
+		GUI.DrawCircle(
+			GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale,
+			GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale,
+			4
+		);
+
+		if (this._selectedParameter === 2)
+			GUI.DrawTextCenterLineBreaked(
+				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale,
+				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale + 20,
+				"Шахта\nмагазина"
+			);
 
 		GUI.DrawRectangle(25, 50 + this._selectedParameter * 20, 16, 16);
 

@@ -30,7 +30,8 @@ export class Player extends Entity {
 	private _needDrawAntiVegnitte = 0;
 	private _needDrawRedVegnitte = 0;
 	private _selectedHand: 0 | 1 = 0;
-	private _inventory: [Item | null, Item | null] = [Weapon.GetById("AK12"), new RifleBullet(100)];
+	// private _inventory: [Item | null, Item | null] = [Weapon.GetById("Glock"), new PistolBullet(55)];
+	private _inventory: [Item | null, Item | null] = [null, null];
 	private _backpack: Backpack | null = null;
 	private _weapon: Weapon | null = null;
 	private readonly _quests: Quest[];
@@ -48,8 +49,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4990;
+	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 4990;
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -112,6 +113,7 @@ export class Player extends Entity {
 			Straight: GetSprite("Player_Arm_Straight") as Sprite,
 			Bend: GetSprite("Player_Arm_Bend") as Sprite,
 			RifleReload: GetSprite("Player_Rifle_Reload") as Sprite[],
+			PistolReload: GetSprite("Player_Pistol_Reload") as Sprite[],
 		},
 		Backpack: GetSprite("Player_Backpack") as Sprite,
 	};
@@ -126,6 +128,9 @@ export class Player extends Entity {
 		this.Tag = Tag.Player;
 		this._collider = new Rectangle(0, 0, this.Width, this.Height);
 		this._quests = [];
+
+		// FOR DEBUG
+		// this._weapon = this._inventory[0] as Weapon;
 
 		GetSound("Walk_2").Speed = 1.6;
 		GetSound("Walk_2").Apply();
@@ -171,6 +176,17 @@ export class Player extends Entity {
 					if (!this._sit) {
 						this._onLadder = null;
 						this.Jump();
+					} else {
+						this._collider = new Rectangle(0, 0, this.Width, this.Height);
+
+						if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
+							this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+						} else {
+							this._sit = false;
+							this._animations.Walk.SetDuration(this._running ? 100 : 200);
+							this._armHeight = 0.65;
+							this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
+						}
 					}
 					break;
 				case "Digit1":
@@ -195,8 +211,7 @@ export class Player extends Entity {
 				case "KeyA":
 					if (this._grounded) {
 						this._movingLeft = true;
-						this._currentAnimation = this._animations.Walk;
-						// this._currentAnimation.Reset();
+						if (this._currentAnimation !== this._animations.Walk) this._currentAnimation = this._animations.Walk;
 					}
 					break;
 				case "KeyF":
@@ -221,8 +236,7 @@ export class Player extends Entity {
 				case "KeyD":
 					if (this._grounded) {
 						this._movingRight = true;
-						this._currentAnimation = this._animations.Walk;
-						// this._currentAnimation.Reset();
+						if (this._currentAnimation !== this._animations.Walk) this._currentAnimation = this._animations.Walk;
 					}
 
 					break;
@@ -296,7 +310,7 @@ export class Player extends Entity {
 				case "KeyA":
 					if (this._grounded) {
 						this._movingLeft = false;
-						this._currentAnimation = null;
+						if (!this._keysPressed["KeyD"]) this._currentAnimation = null;
 					}
 
 					break;
@@ -306,7 +320,7 @@ export class Player extends Entity {
 				case "KeyD":
 					if (this._grounded) {
 						this._movingRight = false;
-						this._currentAnimation = null;
+						if (!this._keysPressed["KeyA"]) this._currentAnimation = null;
 					}
 
 					break;
@@ -450,7 +464,11 @@ export class Player extends Entity {
 
 			this.ApplyVForce(dt);
 
-			if (this._timeFromSpawn >= 5000) this.SpeakWith(new PlayerCharacter());
+			if (this._timeFromSpawn >= 5000) {
+				//// FOR DEBUG
+				this.SpeakWith(new PlayerCharacter());
+			}
+
 			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
 
 			return;
@@ -459,12 +477,13 @@ export class Player extends Entity {
 		this._xTarget = Scene.Current.GetMousePosition().X;
 		this._yTarget = Scene.Current.GetMousePosition().Y;
 
-		if (this._inventory[this._selectedHand] instanceof Item)
-			this._inventory[this._selectedHand].Update(
-				dt,
-				new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
-				this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
-			);
+		/// FOR DEBUG
+		// this._xTarget = 10000;
+		// this._yTarget = 22222;
+		// this._xTarget = 20000;
+		// this._yTarget = 500;
+		// this._xTarget = 1500 / 2 + 50;
+		// this._yTarget = this._y + this._collider.Height * this._armHeight;
 
 		this._currentAnimation?.Update(dt);
 
@@ -572,14 +591,6 @@ export class Player extends Entity {
 			this._currentAnimation = (this._movingLeft || this._movingRight) && this._currentAnimation === null ? this._animations.Walk : null;
 		}
 
-		/// Зачем оно тут было?
-		// if (this._inventory[this._selectedHand] instanceof Item)
-		// 	this._inventory[this._selectedHand].Update(
-		// 		dt,
-		// 		new Vector2(this._x + this.Width / 2, this._y + this.Height * this._armHeight),
-		// 		this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
-		// 	);
-
 		if (this.CanTarget() && this._artem.GetCompletedQuestsCount() <= 2) {
 			if (this._timeToNextPunch > 0) this._timeToNextPunch -= dt;
 
@@ -618,6 +629,20 @@ export class Player extends Entity {
 			const lastHover = this._hoveredObject;
 			this._hoveredObject = Scene.Current.GetInteractiveAt(this._xTarget + Scene.Current.GetLevelPosition(), this._yTarget);
 			if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
+
+			const itemInHands = this._inventory[this._selectedHand];
+			if (itemInHands !== null) {
+				const angleWithAnimation = this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
+				const c = Math.cos(angleWithAnimation);
+				const s = Math.sin(angleWithAnimation);
+				const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
+				const handPosition =
+					this._weapon !== null && this._weapon.Heavy
+						? new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s)
+						: new Vector2(this._x + this.Width / 2 + 16 * scale * c, this._y + this.Height * this._armHeight - 16 * scale * s);
+
+				itemInHands.Update(dt, handPosition, angleWithAnimation);
+			}
 
 			if (this._LMBPressed && this._weapon !== null && this._weapon.Automatic) this.Shoot();
 		} else if (this._artem.GetCompletedQuestsCount() > 2) {
@@ -705,10 +730,29 @@ export class Player extends Entity {
 						this._frames.Hands.Straight.BoundingBox.Width * scale,
 						this._frames.Hands.Straight.BoundingBox.Height * scale
 					),
-					this._angle + 0.05 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+					this._angle + 0.05 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0) - this._weapon.GetRecoilOffset(),
 					-2 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 				);
+			else {
+				const reloadFrame = this._weapon.IsReloading() ? Math.floor(this._weapon.GetReloadProgress() * this._frames.Hands.PistolReload.length) : 0;
+
+				if (reloadFrame === 1) this._weapon.DropMag();
+				else if (reloadFrame === 2) this._weapon.ConnectMag();
+
+				Canvas.DrawImageWithAngle(
+					this._frames.Hands.PistolReload[reloadFrame],
+					new Rectangle(
+						this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+						this._y + this.Height * this._armHeight,
+						this._frames.Hands.PistolReload[reloadFrame].BoundingBox.Width * scale,
+						this._frames.Hands.PistolReload[reloadFrame].BoundingBox.Height * scale
+					),
+					this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+					-4 * scale,
+					(this._frames.Hands.PistolReload[reloadFrame].BoundingBox.Height - 2) * scale
+				);
+			}
 
 			Canvas.DrawImage(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
 
@@ -776,25 +820,10 @@ export class Player extends Entity {
 				this._weapon.Render();
 
 				if (this._weapon.Heavy) {
-					// Canvas.DrawImageWithAngle(
-					// 	this._frames.Hands.Bend,
-					// 	new Rectangle(
-					// 		this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
-					// 		this._y + this.Height * this._armHeight,
-					// 		this._frames.Hands.Bend.BoundingBox.Width * scale,
-					// 		this._frames.Hands.Bend.BoundingBox.Height * scale
-					// 	),
-					// 	this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
-					// 	-2 * scale,
-					// 	(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
-					// );
-
 					const reloadFrame = this._weapon.IsReloading() ? Math.floor(this._weapon.GetReloadProgress() * this._frames.Hands.RifleReload.length) : 0;
-					if (reloadFrame === 1) {
-						this._weapon.DropMag();
-					} else if (reloadFrame === 5) this._weapon.ConnectMag();
-					// console.log("FRAME: " + this._weapon.GetReloadProgress());
-					// console.log("FRAME: " + this._weapon/);
+
+					if (reloadFrame === 1) this._weapon.DropMag();
+					else if (reloadFrame === 5) this._weapon.ConnectMag();
 
 					Canvas.DrawImageWithAngle(
 						this._frames.Hands.RifleReload[reloadFrame],
@@ -851,9 +880,14 @@ export class Player extends Entity {
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
 			} else {
-				if (this._weapon.Heavy)
+				if (this._weapon.Heavy) {
+					const reloadFrame = this._weapon.IsReloading() ? Math.floor(this._weapon.GetReloadProgress() * this._frames.Hands.RifleReload.length) : 0;
+
+					if (reloadFrame === 1) this._weapon.DropMag();
+					else if (reloadFrame === 5) this._weapon.ConnectMag();
+
 					Canvas.DrawImageWithAngleVFlipped(
-						this._frames.Hands.Bend,
+						this._frames.Hands.RifleReload[reloadFrame],
 						new Rectangle(
 							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
 							this._y + this.Height * this._armHeight,
@@ -864,6 +898,25 @@ export class Player extends Entity {
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
+				} else {
+					const reloadFrame = this._weapon.IsReloading() ? Math.floor(this._weapon.GetReloadProgress() * this._frames.Hands.PistolReload.length) : 0;
+
+					if (reloadFrame === 1) this._weapon.DropMag();
+					else if (reloadFrame === 2) this._weapon.ConnectMag();
+
+					Canvas.DrawImageWithAngleVFlipped(
+						this._frames.Hands.PistolReload[reloadFrame],
+						new Rectangle(
+							this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+							this._y + this.Height * this._armHeight,
+							this._frames.Hands.Straight.BoundingBox.Width * scale,
+							this._frames.Hands.Straight.BoundingBox.Height * scale
+						),
+						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+						-2 * scale,
+						(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
+					);
+				}
 			}
 
 			Canvas.DrawImageFlipped(framesPack[this._frameIndex], new Rectangle(this._x - Scene.Current.GetLevelPosition() - widthOffset, this._y, scaledWidth, this.Height));
@@ -942,12 +995,15 @@ export class Player extends Entity {
 						this._frames.Hands.Straight.BoundingBox.Width * scale,
 						this._frames.Hands.Straight.BoundingBox.Height * scale
 					),
-					this._angle - 0.05 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+					this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 					-2 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 2) * scale
 				);
 			}
 		}
+
+		// Canvas.SetFillColor(Color.Red);
+		// Canvas.DrawCircle(this._x + this.Width / 2 - Scene.Current.GetLevelPosition() + 7 * scale, this._y + this.Height * this._armHeight - scale, scale/2);
 	}
 
 	public RenderOverlay() {
@@ -1468,7 +1524,12 @@ export class Player extends Entity {
 				this._timeToNextPunch = 250;
 				this._mainHand = !this._mainHand;
 
-				const enemy = Scene.Current.Raycast(this.GetCenter(), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 50, Tag.Enemy);
+				const enemy = Scene.Current.Raycast(
+					new Vector2(this._x + this._collider.Width * 0.5, this._y + this._collider.Height * this._armHeight),
+					new Vector2(Math.cos(this._angle), -Math.sin(this._angle)),
+					75,
+					Tag.Enemy
+				);
 
 				if (enemy.length > 0) {
 					GetSound("PunchHit").Play(0.15);

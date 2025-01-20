@@ -14,7 +14,7 @@ export class Rat extends Enemy {
     _attackSound = GetSound("Rat_Attack");
     _attackCooldown = 0;
     constructor(x, y) {
-        super(100, 50, 4, 5, EnemyType.Rat);
+        super(GetSprite("Rat").ScaledSize.X, GetSprite("Rat").ScaledSize.Y, 4, 5, EnemyType.Rat);
         this._x = x;
         this._y = y;
     }

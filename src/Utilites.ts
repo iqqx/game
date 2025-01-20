@@ -133,12 +133,24 @@ export class Vector2 {
 		return Math.sqrt(this.X ** 2 + this.Y ** 2);
 	}
 
+	public static Length(a: Vector2, b: Vector2) {
+		return Math.sqrt((a.X - b.X) ** 2 + (a.Y - b.Y) ** 2);
+	}
+
 	public static Sub(a: Vector2, b: Vector2) {
 		return new Vector2(a.X - b.X, a.Y - b.Y);
 	}
 
 	public static Add(a: Vector2, b: Vector2) {
 		return new Vector2(a.X + b.X, a.Y + b.Y);
+	}
+
+	public static Mul(a: Vector2, b: number) {
+		return new Vector2(a.X * b, a.Y * b);
+	}
+
+	public static Div(a: Vector2, b: number) {
+		return new Vector2(a.X / b, a.Y / b);
 	}
 }
 

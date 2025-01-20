@@ -14,5 +14,11 @@ export var Tag;
     Tag[Tag["NPC"] = 16] = "NPC";
     Tag[Tag["Pickable"] = 32] = "Pickable";
     Tag[Tag["Ladder"] = 64] = "Ladder";
+    Tag[Tag["Clip"] = 128] = "Clip";
 })(Tag || (Tag = {}));
+export var Direction;
+(function (Direction) {
+    Direction[Direction["Right"] = 1] = "Right";
+    Direction[Direction["Left"] = -1] = "Left";
+})(Direction || (Direction = {}));
 //# sourceMappingURL=Enums.js.map

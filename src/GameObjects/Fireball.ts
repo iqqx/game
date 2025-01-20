@@ -7,16 +7,17 @@ import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
 	private readonly _frames: Sprite[] = GetSprite("Fireball");
 	private readonly _angle: number;
-	private readonly _offset: Vector2;
-	private _lifetime = 100;
+	private _lifetime = 80;
+	private readonly _frameNumber;
 
-	constructor(x: number, y: number, angle: number, offset: Vector2) {
+	constructor(position: Vector2, angle: number) {
 		super(length, 2);
 
-		this._x = x;
-		this._y = y;
+		this._x = position.X;
+		this._y = position.Y;
 		this._angle = angle;
-		this._offset = this._angle < Math.PI / -2 || this._angle > Math.PI / 2 ? new Vector2(-offset.X, -offset.Y) : offset;
+
+		this._frameNumber = Math.floor(Math.random() * this._frames.length) % this._frames.length;
 	}
 
 	override Update(dt: number) {
@@ -26,12 +27,14 @@ export class Fireball extends GameObject {
 	}
 
 	override Render(): void {
+		const frame = this._frames[this._frameNumber];
+
 		Canvas.DrawImageWithAngle(
-			this._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))],
-			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 50),
+			frame,
+			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, frame.ScaledSize.X, frame.ScaledSize.Y),
 			this._angle,
 			0,
-			50 / 2 - this._offset.Y
+			frame.ScaledSize.Y * 0.5
 		);
 	}
 }

@@ -26,5 +26,8 @@ export class Animation {
     SetDuration(newDuration) {
         this._keyTime = newDuration;
     }
+    Reset() {
+        this._currentKey = 0;
+    }
 }
 //# sourceMappingURL=Animation.js.map

@@ -100,11 +100,20 @@ export class Vector2 {
     GetLength() {
         return Math.sqrt(this.X ** 2 + this.Y ** 2);
     }
+    static Length(a, b) {
+        return Math.sqrt((a.X - b.X) ** 2 + (a.Y - b.Y) ** 2);
+    }
     static Sub(a, b) {
         return new Vector2(a.X - b.X, a.Y - b.Y);
     }
     static Add(a, b) {
         return new Vector2(a.X + b.X, a.Y + b.Y);
+    }
+    static Mul(a, b) {
+        return new Vector2(a.X * b, a.Y * b);
+    }
+    static Div(a, b) {
+        return new Vector2(a.X / b, a.Y / b);
     }
 }
 export function GetEnemyTypeName(enemyType) {

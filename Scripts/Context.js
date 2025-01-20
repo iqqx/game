@@ -112,6 +112,13 @@ export var Canvas;
         ctx.fill();
     }
     Canvas.DrawCircle = DrawCircle;
+    function DrawLine(from, to) {
+        ctx.beginPath();
+        ctx.moveTo(from.X, ctx.canvas.height - from.Y);
+        ctx.lineTo(to.X, ctx.canvas.height - to.Y);
+        ctx.stroke();
+    }
+    Canvas.DrawLine = DrawLine;
     function DrawEllipse(x, y, radiusX, radiusY) {
         ctx.beginPath();
         ctx.ellipse(x, ctx.canvas.height - radiusY / 2 - y, radiusX, radiusY, 0, 0, Math.PI * 2);

@@ -1,19 +1,19 @@
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../Game.js";
 import { Scene } from "../Scene.js";
-import { Rectangle, Vector2 } from "../Utilites.js";
+import { Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
     _frames = GetSprite("Fireball");
     _angle;
-    _offset;
-    _lifetime = 100;
-    constructor(x, y, angle, offset) {
+    _lifetime = 80;
+    _frameNumber;
+    constructor(position, angle) {
         super(length, 2);
-        this._x = x;
-        this._y = y;
+        this._x = position.X;
+        this._y = position.Y;
         this._angle = angle;
-        this._offset = this._angle < Math.PI / -2 || this._angle > Math.PI / 2 ? new Vector2(-offset.X, -offset.Y) : offset;
+        this._frameNumber = Math.floor(Math.random() * this._frames.length) % this._frames.length;
     }
     Update(dt) {
         this._lifetime -= dt;
@@ -21,7 +21,8 @@ export class Fireball extends GameObject {
             this.Destroy();
     }
     Render() {
-        Canvas.DrawImageWithAngle(this._frames[Math.floor(3 * Math.max(0, this._lifetime / 100))], new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, 100, 50), this._angle, 0, 50 / 2 - this._offset.Y);
+        const frame = this._frames[this._frameNumber];
+        Canvas.DrawImageWithAngle(frame, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, frame.ScaledSize.X, frame.ScaledSize.Y), this._angle, 0, frame.ScaledSize.Y * 0.5);
     }
 }
 //# sourceMappingURL=Fireball.js.map

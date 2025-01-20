@@ -1,22 +1,25 @@
 {
 	"Sprites": {
 		"Icon": "AK_Icon",
-		"Main": "AK"
+		"Main": "AK",
+		"Clip": "Rifle_Clip"
 	},
 	"Sounds": {
 		"Shoot": "Shoot_1",
-		"ShellImpact": "Shell"
+		"ShellImpact": "Shell",
+		"Reload": "Reload"
 	},
 	"Damage": 60,
 	"IsHeavy": true,
 	"IsAutomatic": true,
 	"ClipCapacity": 30,
-	"Spread": 0.2,
+	"Spread": 0.025,
+	"Recoil": 0.1,
 	"ReloadTime": 2.5,
 	"ShootsPerSecond": 8,
 	"PixelsOffsets": {
-		"Grip": { "X": 5, "Y": 18 },
-		"Muzzle": { "X": 0, "Y": 0 },
-		"Clip": { "X": 25, "Y": 0 }
+		"Grip": { "X": 10, "Y": 5 },
+		"Muzzle": { "X": 44, "Y": 7 },
+		"Clip": { "X": 14, "Y": 7 }
 	}
 }

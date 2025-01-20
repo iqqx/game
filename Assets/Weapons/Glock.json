@@ -1,22 +1,25 @@
 {
 	"Sprites": {
 		"Icon": "Glock_Icon",
-		"Main": "Glock"
+		"Main": "Glock",
+		"Clip": "Glock_Clip"
 	},
 	"Sounds": {
 		"Shoot": "Shoot_3",
-		"ShellImpact": "Shell"
+		"ShellImpact": "Shell",
+		"Reload": "PistolReload"
 	},
 	"Damage": 20,
 	"IsHeavy": false,
 	"IsAutomatic": false,
 	"ClipCapacity": 7,
 	"Spread": 0.05,
-	"ReloadTime": 2.5,
+	"Recoil": 1,
+	"ReloadTime": 2,
 	"ShootsPerSecond": 5,
 	"PixelsOffsets": {
-		"Grip": { "X": 40, "Y": 10 },
-		"Muzzle": { "X": 30, "Y": 10 },
-		"Clip": { "X": 0, "Y": 0 }
+		"Grip": { "X": 12, "Y": 10 },
+		"Muzzle": { "X": 35, "Y": 20 },
+		"Clip": { "X": -1, "Y": 14 }
 	}
 }

@@ -148,6 +148,13 @@ export namespace Canvas {
 		ctx.fill();
 	}
 
+	export function DrawLine(from: Vector2, to: Vector2) {
+		ctx.beginPath();
+		ctx.moveTo(from.X, ctx.canvas.height - from.Y);
+		ctx.lineTo(to.X, ctx.canvas.height - to.Y);
+		ctx.stroke();
+	}
+
 	export function DrawEllipse(x: number, y: number, radiusX: number, radiusY: number) {
 		ctx.beginPath();
 

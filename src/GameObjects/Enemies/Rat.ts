@@ -17,7 +17,7 @@ export class Rat extends Enemy {
 	private _attackCooldown = 0;
 
 	constructor(x: number, y: number) {
-		super(100, 50, 4, 5, EnemyType.Rat);
+		super((GetSprite("Rat") as Sprite).ScaledSize.X, (GetSprite("Rat") as Sprite).ScaledSize.Y, 4, 5, EnemyType.Rat);
 
 		this._x = x;
 		this._y = y;

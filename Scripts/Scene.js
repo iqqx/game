@@ -409,10 +409,6 @@ export class Scene {
                 return new Sausage();
             case "AidKit":
                 return new AidKit();
-            case "AK":
-                return Weapon.GetById("AK12");
-            case "Glock":
-                return Weapon.GetById("Glock");
             case "Radio":
                 return new Radio();
             case "DogTag":
@@ -426,6 +422,9 @@ export class Scene {
             case "RifleBullet":
                 return new RifleBullet();
             default:
+                const weapon = Weapon.GetById(raw);
+                if (weapon !== undefined)
+                    return weapon;
                 throw new Error("Предмет не удалось распарсить: " + raw);
         }
     }
