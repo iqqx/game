@@ -1,7 +1,7 @@
 import { Canvas, GUI } from "./Context.js";
 import { Vector2, Color, Rectangle } from "./Utilites.js";
 import { Scene } from "./Scene.js";
-import { GetSprite } from "./Game.js";
+import { GetSprite } from "./AssetsLoader.js";
 var ObjectType;
 (function (ObjectType) {
     ObjectType[ObjectType["Wall"] = 0] = "Wall";

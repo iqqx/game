@@ -1,6 +1,6 @@
+import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";

@@ -1,6 +1,6 @@
-import { RatTail, RifleBullet } from "../../Assets/Items/Item.js";
+import { RatTail, RifleBullet } from "../../Assets/Items/Items.js";
 import { Canvas } from "../../Context.js";
-import { GetSprite } from "../../Game.js";
+import { GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";

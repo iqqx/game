@@ -1,4 +1,4 @@
-import { GetSprite } from "../../Game.js";
+import { GetSprite } from "../../AssetsLoader.js";
 import { Scene } from "../../Scene.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";

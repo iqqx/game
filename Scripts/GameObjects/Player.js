@@ -1,9 +1,10 @@
 import { Animation } from "../Animation.js";
-import { Item, PistolBullet, Radio, RifleBullet } from "../Assets/Items/Item.js";
+import { PistolBullet, Radio, RifleBullet } from "../Assets/Items/Items.js";
+import { Throwable } from "../Assets/Throwable.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { GetSound, GetSprite } from "../Game.js";
+import { GetSound, GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Vector2, Color } from "../Utilites.js";
 import { Blood } from "./Blood.js";
@@ -13,6 +14,7 @@ import { Artem } from "./QuestGivers/Artem.js";
 import { Elder } from "./QuestGivers/Elder.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
 import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
+import { Item } from "../Assets/Items/Item.js";
 export class Player extends Entity {
     _keysPressed = [];
     _timeToNextFrame = 0;
@@ -23,7 +25,6 @@ export class Player extends Entity {
     _needDrawAntiVegnitte = 0;
     _needDrawRedVegnitte = 0;
     _selectedHand = 0;
-    // private _inventory: [Item | null, Item | null] = [Weapon.GetById("Glock"), new PistolBullet(55)];
     _inventory = [null, null];
     _backpack = null;
     _weapon = null;
@@ -42,8 +43,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
-    // private _timeFromSpawn = 4990;
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4990; /// DEBUG
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -118,7 +119,9 @@ export class Player extends Entity {
         this._collider = new Rectangle(0, 0, this.Width, this.Height);
         this._quests = [];
         // FOR DEBUG
-        // this._weapon = this._inventory[0] as Weapon;
+        // this.GiveQuestItem(Weapon.GetById("AK12"));
+        // this.GiveQuestItem(Weapon.GetById("Glock"));
+        this.GiveQuestItem(Throwable.GetById("RGN"));
         GetSound("Walk_2").Speed = 1.6;
         GetSound("Walk_2").Apply();
         addEventListener("keydown", (e) => {
@@ -428,7 +431,7 @@ export class Player extends Entity {
             this.ApplyVForce(dt);
             if (this._timeFromSpawn >= 5000) {
                 //// FOR DEBUG
-                this.SpeakWith(new PlayerCharacter());
+                // this.SpeakWith(new PlayerCharacter());
             }
             this._artem = Scene.Current.GetByType(Artem)[0];
             return;
@@ -436,10 +439,6 @@ export class Player extends Entity {
         this._xTarget = Scene.Current.GetMousePosition().X;
         this._yTarget = Scene.Current.GetMousePosition().Y;
         /// FOR DEBUG
-        // this._xTarget = 10000;
-        // this._yTarget = 22222;
-        // this._xTarget = 20000;
-        // this._yTarget = 500;
         // this._xTarget = 1500 / 2 + 50;
         // this._yTarget = this._y + this._collider.Height * this._armHeight;
         this._currentAnimation?.Update(dt);
@@ -572,7 +571,7 @@ export class Player extends Entity {
                 const c = Math.cos(angleWithAnimation);
                 const s = Math.sin(angleWithAnimation);
                 const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
-                const handPosition = this._weapon !== null && this._weapon.Heavy
+                const handPosition = this._weapon === null || this._weapon.Heavy
                     ? new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s)
                     : new Vector2(this._x + this.Width / 2 + 16 * scale * c, this._y + this.Height * this._armHeight - 16 * scale * s);
                 itemInHands.Update(dt, handPosition, angleWithAnimation);
@@ -1187,14 +1186,20 @@ export class Player extends Entity {
         if (!this.CanTarget() || this._onLadder !== null)
             return;
         if (this._weapon === null) {
-            if (this._inventory[this._selectedHand] instanceof Item) {
-                if (this._inventory[this._selectedHand] instanceof Radio) {
+            const inHand = this._inventory[this._selectedHand];
+            if (inHand instanceof Throwable) {
+                inHand.Throw();
+                GetSound("Swing").Play(0.5);
+                this._inventory[this._selectedHand] = null;
+            }
+            else if (inHand instanceof Item) {
+                if (inHand instanceof Radio) {
                     this.SpeakWith(this._artem);
                     if (this._artem.GetCompletedQuestsCount() > 2)
                         this._inventory[this._selectedHand] = null;
                 }
                 else
-                    this._inventory[this._selectedHand].Use(() => {
+                    inHand.Use(() => {
                         this._inventory[this._selectedHand] = null;
                     });
             }

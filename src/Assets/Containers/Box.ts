@@ -3,7 +3,7 @@ import { Canvas } from "../../Context.js";
 import { Scene } from "../../Scene.js";
 import { Color, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
-import { GetSprite } from "../../Game.js";
+import { GetSprite } from "../../AssetsLoader.js";
 
 export class Box extends Container {
 	constructor(x: number, y: number, ...items: { Item: Item; Chance: number }[]) {

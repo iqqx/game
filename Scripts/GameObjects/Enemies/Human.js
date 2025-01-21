@@ -5,12 +5,12 @@ import { Rectangle, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
-import { AidKit } from "../../Assets/Items/Item.js";
+import { AidKit } from "../../Assets/Items/Items.js";
 import { Weapon } from "../../Assets/Weapons/Weapon.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
 import { FakeEndGuard } from "../QuestGivers/FakeEndGuard.js";
 import { Elder } from "../QuestGivers/Elder.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 export class Human extends Enemy {
     _deathSound = GetSound("Human_Death_2");
     _frames;

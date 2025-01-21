@@ -1,9 +1,10 @@
 import { Container } from "../Assets/Containers/Containers.js";
-import { DogTag, Item } from "../Assets/Items/Item.js";
+import { DogTag } from "../Assets/Items/Items.js";
 import { Canvas } from "../Context.js";
-import { GetSprite } from "../Game.js";
+import { GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
 import { Rectangle } from "../Utilites.js";
+import { Item } from "../Assets/Items/Item.js";
 
 export class Corpse extends Container {
 	constructor(x: number, y: number, ...items: Item[]) {

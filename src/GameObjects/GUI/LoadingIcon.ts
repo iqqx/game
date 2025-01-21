@@ -1,5 +1,5 @@
+import { GetSprite } from "../../AssetsLoader.js";
 import { GUI } from "../../Context.js";
-import { GetSprite } from "../../Game.js";
 import { Sprite } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 

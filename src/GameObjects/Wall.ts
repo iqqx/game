@@ -12,9 +12,4 @@ export class Wall extends GameObject {
 
 		this._collider = new Rectangle(0, 0, width, height);
 	}
-
-	override Render(): void {
-		// Canvas.SetFillColor(new Color(255, 255, 0, 100));
-		// Canvas.DrawRectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._width, this._height);
-	}
 }

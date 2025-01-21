@@ -1,5 +1,5 @@
-import { DogTag } from "../../Assets/Items/Item.js";
-import { GetSprite } from "../../Game.js";
+import { DogTag } from "../../Assets/Items/Items.js";
+import { GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Character } from "./Character.js";

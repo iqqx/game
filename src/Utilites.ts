@@ -198,3 +198,32 @@ export function GetEnemyTypeName(enemyType: EnemyType) {
 			return "Боец Ордена";
 	}
 }
+
+export function CompareStrings(a: string, b: string): number {
+	let result = -5 * Math.abs(a.length - b.length);
+
+	const m = a.length > b.length ? b : a;
+
+	for (let i = 0; i < m.length; i++) {
+		if (a[i] === b[i]) result += 10;
+		else if (a[i].toLowerCase() === b[i].toLowerCase()) result += 5;
+	}
+
+	return result;
+}
+
+export function GetMaxIdentityString(text: string, variants: string[]) {
+	let result = variants[0];
+	let last = 0;
+
+	for (const variant of variants) {
+		const c = CompareStrings(text, variant);
+
+		if (c > last) {
+			last = c;
+			result = variant;
+		}
+	}
+
+	return result;
+}

@@ -1,6 +1,6 @@
-import { Radio } from "../../Assets/Items/Item.js";
+import { Radio } from "../../Assets/Items/Items.js";
+import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";

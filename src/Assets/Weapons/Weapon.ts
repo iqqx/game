@@ -1,14 +1,14 @@
+import { Item } from "../Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { Direction, Tag } from "../../Enums.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { Blood } from "../../GameObjects/Blood.js";
 import { Bullet } from "../../GameObjects/Bullet.js";
 import { DroppedClip } from "../../GameObjects/DroppedClip.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Sprite, Sound, Vector2, Rectangle, Color } from "../../Utilites.js";
-import { Item } from "../Items/Item.js";
+import { Sprite, Sound, Vector2, Rectangle } from "../../Utilites.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 
 export class Weapon extends Item {
 	public declare readonly Icon: Sprite;
@@ -89,7 +89,11 @@ export class Weapon extends Item {
 	public static GetById(id: string) {
 		const w = Weapon._weapons.find((x) => x.Id === id);
 
-		if (w === undefined) console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+		if (w === undefined) {
+			// console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+
+			return undefined;
+		}
 
 		return new Weapon(
 			w.Id,

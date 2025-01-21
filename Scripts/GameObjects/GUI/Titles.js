@@ -1,5 +1,5 @@
+import { GetSound } from "../../AssetsLoader.js";
 import { GUI } from "../../Context.js";
-import { GetSound } from "../../Game.js";
 import { Scene } from "../../Scene.js";
 import { Color } from "../../Utilites.js";
 import { GameObject } from "../GameObject.js";

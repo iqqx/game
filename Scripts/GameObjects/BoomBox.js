@@ -2,7 +2,7 @@ import { Scene } from "../Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
-import { GetSound, GetSprite } from "../Game.js";
+import { GetSound, GetSprite } from "../AssetsLoader.js";
 export class AudioSource extends Interactable {
     _volume;
     _life = 0;

@@ -1,6 +1,6 @@
+import { Item } from "../Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { Direction, Tag } from "../../Enums.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { Blood } from "../../GameObjects/Blood.js";
 import { Bullet } from "../../GameObjects/Bullet.js";
 import { DroppedClip } from "../../GameObjects/DroppedClip.js";
@@ -8,7 +8,7 @@ import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
 import { Vector2, Rectangle } from "../../Utilites.js";
-import { Item } from "../Items/Item.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 export class Weapon extends Item {
     Sprites;
     _sounds;
@@ -62,8 +62,10 @@ export class Weapon extends Item {
     }
     static GetById(id) {
         const w = Weapon._weapons.find((x) => x.Id === id);
-        if (w === undefined)
-            console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+        if (w === undefined) {
+            // console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+            return undefined;
+        }
         return new Weapon(w.Id, { Icon: w.Icon, ...w.Sprites }, w._sounds, w._fireCooldown, w._damage, w._spread, w.Heavy, w.Automatic, w._reloadTime / 1000, w.MaxAmmoClip, w._recoil, Vector2.Div(w.GripOffset, w.Sprites.Image.Scale), Vector2.Div(w.MuzzleOffset, w.Sprites.Image.Scale), Vector2.Div(w.ClipOffset, w.Sprites.Image.Scale));
     }
     static Register(rawJson) {

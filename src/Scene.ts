@@ -7,12 +7,10 @@ import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
 import { BlinkingLabel } from "./GameObjects/GUI/BlinkingLabel.js";
 import { GUIBase } from "./GameObjects/GUI/GUIBase.js";
-import { GetSprite } from "./Game.js";
 import { Cursor } from "./GameObjects/GUI/Cursor.js";
 import { TextButton } from "./GameObjects/GUI/TextButton.js";
 import { Backpack } from "./Assets/Containers/Backpack.js";
 import { Box } from "./Assets/Containers/Box.js";
-import { Adrenalin, AidKit, Bread, DogTag, PistolBullet, Radio, RatTail, RifleBullet, Sausage, Vodka } from "./Assets/Items/Item.js";
 import { AudioSource } from "./GameObjects/BoomBox.js";
 import { Human } from "./GameObjects/Enemies/Human.js";
 import { Rat } from "./GameObjects/Enemies/Rat.js";
@@ -27,7 +25,6 @@ import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
-// import { AK, Glock } from "./Assets/Weapons/Weapon.js";
 import { Titles } from "./GameObjects/GUI/Titles.js";
 import { Artem } from "./GameObjects/QuestGivers/Artem.js";
 import { Elder } from "./GameObjects/QuestGivers/Elder.js";
@@ -36,6 +33,9 @@ import { Corpse } from "./GameObjects/Corpse.js";
 import { SceneEditor } from "./SceneEditor.js";
 import { FPSCounter } from "./GameObjects/GUI/FPSCounter.js";
 import { Weapon } from "./Assets/Weapons/Weapon.js";
+import { Throwable } from "./Assets/Throwable.js";
+import { GetSprite } from "./AssetsLoader.js";
+import { Bread, Vodka, Sausage, AidKit, Radio, DogTag, RatTail, Adrenalin, PistolBullet, RifleBullet } from "./Assets/Items/Items.js";
 
 export class Scene {
 	public static Current: Scene;
@@ -418,7 +418,7 @@ export class Scene {
 	}
 
 	public GetByTag(tag: Tag) {
-		return Scene.Current._gameObjects.filter((x) => x.Tag == tag);
+		return Scene.Current._gameObjects.filter((x) => (x.Tag & tag) > 0);
 	}
 
 	public GetByType(type: typeof GameObject) {
@@ -482,6 +482,8 @@ export class Scene {
 			default:
 				const weapon = Weapon.GetById(raw);
 				if (weapon !== undefined) return weapon;
+				const throwable = Throwable.GetById(raw);
+				if (throwable !== undefined) return throwable;
 
 				throw new Error("Предмет не удалось распарсить: " + raw);
 		}

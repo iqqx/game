@@ -1,5 +1,5 @@
 import { Canvas } from "../Context.js";
-import { GetSprite } from "../Game.js";
+import { GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Sprite, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";

@@ -3,9 +3,9 @@ import { Canvas } from "../../Context.js";
 import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
-import { GetSound, GetSprite } from "../../Game.js";
 import { RatCorpse } from "../RatCorpse.js";
-import { RatTail } from "../../Assets/Items/Item.js";
+import { RatTail } from "../../Assets/Items/Items.js";
+import { GetSprite, GetSound } from "../../AssetsLoader.js";
 export class Rat extends Enemy {
     static Damage = 20;
     static AttackCooldown = 500;

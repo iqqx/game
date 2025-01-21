@@ -1,8 +1,8 @@
 import { Container } from "../Assets/Containers/Containers.js";
 import { Item } from "../Assets/Items/Item.js";
+import { GetSprite } from "../AssetsLoader.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { GetSprite } from "../Game.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 
