@@ -1,4 +1,5 @@
 import { Radio } from "../../Assets/Items/Items.js";
+import { Throwable } from "../../Assets/Throwable.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
 import { Quest } from "../../Quest.js";
@@ -35,12 +36,15 @@ export class Artem extends Character {
                         "Я Артем, искал выход из этого чертового\nметро.",
                         "Ну и как успехи?",
                         "Все завалено не пройти.",
-                        "Эх жаль, я тоже ищу выход. Не знаешь что с\nдругими станциями?",
+                        "Эх жаль, я тоже ищу выход, но с другой\nстороны живет монстр. Не знаешь что с\nдругими станциями?",
                         "Cлышал, что на соседней станции люди\nпостроили себе убежище, а про другие знать\nне знаю. Слушай давай ты поможешь мне, а я\nтебе. Если вдруг найдешь выход, то свяжись\nсо мной, а я тебе, если вдруг найду, тоже\nтебе сообщу.\nВот возьми рацию, частота 102,75.",
+                        "А как я пройду через монстра?",
+                        "Вот это должно помочь.",
                         "Хорошо договорились.",
                     ],
                     AfterAction: () => {
                         Scene.Player.GiveQuestItem(new Radio());
+                        Scene.Player.GiveQuestItem(Throwable.GetById("RGN"));
                         Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(21700, "Лагерь"));
                     },
                     Owner: this,

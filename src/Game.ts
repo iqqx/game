@@ -5,7 +5,7 @@ import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
 import { SceneWeaponEditor } from "./SceneWeaponEditor.js";
 import { Color } from "./Utilites.js";
-import { GetImageLoadingProgress, GetLoadingImage, IsParsed, Parse } from "./AssetsLoader.js";
+import { GetImageLoadingProgress, GetLoadingImage, GetLoadings, IsParsed, Parse } from "./AssetsLoader.js";
 
 let parsedRouters: any;
 
@@ -52,7 +52,7 @@ function loadLoop() {
 		GUI.DrawTextCenter(`${Math.round(ratio * 100)}%`, GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
 
 		GUI.SetFont(16);
-		GUI.DrawTextCenterLineBreaked(GUI.Width / 2, GUI.Height / 2 + 50, GetLoadingImage());
+		GUI.DrawTextCenterLineBreaked(GUI.Width / 2, GUI.Height / 2 + 50, GetLoadings());
 
 		if (ratio < 1) return;
 	} else {

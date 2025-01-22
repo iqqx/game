@@ -35,6 +35,7 @@ import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { Throwable } from "./Assets/Throwable.js";
 import { GetSprite } from "./AssetsLoader.js";
 import { Bread, Vodka, Sausage, AidKit, Radio, DogTag, RatTail, Adrenalin, PistolBullet, RifleBullet } from "./Assets/Items/Items.js";
+import { Monster } from "./GameObjects/Enemies/Monster.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -188,6 +189,8 @@ export class Scene {
                 return new Human(...x.Arguments);
             case "Rat":
                 return new Rat(...x.Arguments);
+            case "Monster":
+                return new Monster(...x.Arguments);
             default:
                 throw new Error("Не удалось распарсить: " + x.Type);
         }
@@ -276,7 +279,7 @@ export class Scene {
             }
         else
             for (const object of Scene.Current._gameObjects) {
-                if (object.Tag & tag) {
+                if ((object.Tag & tag) > 0) {
                     const collide = GameObject.GetCollideByRect(who, object);
                     if (collide !== false)
                         result.push(collide);

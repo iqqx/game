@@ -16,7 +16,7 @@ export class Label extends GameObject {
     Render() {
         GUI.SetFillColor(this._color);
         GUI.SetFont(this._size);
-        GUI.DrawTextCenterLineBreaked(this._x, this._y, this._text);
+        GUI.DrawText2CenterLineBreaked(this._x, this._y, this._text);
     }
 }
 //# sourceMappingURL=Label.js.map

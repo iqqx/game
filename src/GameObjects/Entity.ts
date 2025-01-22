@@ -1,5 +1,5 @@
 import { GetSound } from "../AssetsLoader.js";
-import { Tag } from "../Enums.js";
+import { Direction, Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
@@ -22,7 +22,7 @@ export class Entity extends GameObject {
 	protected _yTarget = 0;
 	protected _onLadder: Ladder | null = null;
 
-	public Direction: -1 | 1 = 1;
+	public Direction: Direction = 1;
 
 	constructor(width: number, height: number, speed: number, maxHealth: number) {
 		super(width, height);
@@ -174,7 +174,7 @@ export class Entity extends GameObject {
 				const r = offsets.minBy((x) => x.instance.GetPosition().Y);
 				this._y = r.instance.GetPosition().Y - this._collider.Height;
 			} else {
-				const mod = 1.65
+				const mod = 1.65;
 
 				this._y += this._verticalAcceleration * (dt / 15 / mod);
 				this._verticalAcceleration -= (dt / 15) * mod;

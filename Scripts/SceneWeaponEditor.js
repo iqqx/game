@@ -94,15 +94,15 @@ export class SceneWeaponEditor {
         GUI.SetFillColor(Color.White);
         GUI.DrawCircle(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale, 4);
         if (this._selectedParameter === 0)
-            GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale + 10, "Рукоять");
+            GUI.DrawText2CenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale + 10, "Рукоять");
         GUI.SetFillColor(Color.White);
         GUI.DrawCircle(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale, 4);
         if (this._selectedParameter === 1)
-            GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale + 10, "Дуло");
+            GUI.DrawText2CenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale + 10, "Дуло");
         GUI.SetFillColor(Color.White);
         GUI.DrawCircle(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale, 4);
         if (this._selectedParameter === 2)
-            GUI.DrawTextCenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale + 20, "Шахта\nмагазина");
+            GUI.DrawText2CenterLineBreaked(GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale, GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale + 20, "Шахта\nмагазина");
         GUI.DrawRectangle(25, 50 + this._selectedParameter * 20, 16, 16);
         GUI.DrawText(50, 50, `Рукоять: ${this._offsets.Grip.X} | ${this._offsets.Grip.Y}`);
         GUI.DrawText(50, 70, `Дуло: ${this._offsets.Muzzle.X} | ${this._offsets.Muzzle.Y}`);

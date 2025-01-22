@@ -126,7 +126,7 @@
 		{ "Type": "Wall", "Arguments": [31835, 282, 30, 38] },
 		{ "Type": "Wall", "Arguments": [31851, 277, 33, 24] },
 		{ "Type": "Platform", "Arguments": [27458, 181, 56] },
-		{ "Type": "Backpack", "Arguments": [15648, 298, "Bread", "Vodka", "PistolBullet", "RGN"] },
+		{ "Type": "Backpack", "Arguments": [15648, 298, "Bread", "Vodka", "PistolBullet"] },
 		{ "Type": "Boombox", "Arguments": [22545, 300, 3000, "Music_1", "Music_2", "Music_3", "Music_4", "Music_5"] },
 		{ "Type": "HumanCorpse", "Arguments": [28181, 153, "RatTail"] },
 		{ "Type": "HumanCorpse", "Arguments": [27419, 151, "AK12"] },
@@ -159,7 +159,6 @@
 		{ "Type": "Rat", "Arguments": [27250, 200] },
 		{ "Type": "Rat", "Arguments": [5072, 200] },
 		{ "Type": "Rat", "Arguments": [5785, 200] },
-		{ "Type": "Rat", "Arguments": [13315, 200] },
 		{ "Type": "Rat", "Arguments": [16038, 200] },
 		{ "Type": "Rat", "Arguments": [28376, 200] },
 		{ "Type": "Rat", "Arguments": [28012, 200] },
@@ -167,6 +166,7 @@
 		{ "Type": "Rat", "Arguments": [27250, 200] },
 		{ "Type": "Rat", "Arguments": [26876, 200] },
 		{ "Type": "Rat", "Arguments": [28590, 200] },
+		{ "Type": "Monster", "Arguments": [14500, 200] },
 		{ "Type": "Player", "Arguments": [12250, 200] }
 	]
 }

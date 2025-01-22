@@ -27,7 +27,7 @@ export class BlinkingLabel extends GameObject {
         GUI.SetFillColor(this._on ? this._colorOn : this._colorOff);
         GUI.ClearStroke();
         GUI.SetFont(32);
-        GUI.DrawTextCenterLineBreaked(this._x, this._y, this._text);
+        GUI.DrawText2CenterLineBreaked(this._x, this._y, this._text);
     }
 }
 //# sourceMappingURL=BlinkingLabel.js.map

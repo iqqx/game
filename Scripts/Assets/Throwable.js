@@ -7,7 +7,6 @@ import { Vector2, Rectangle } from "../Utilites.js";
 import { Item } from "./Items/Item.js";
 export class Throwable extends Item {
     Sprite;
-    // private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
     Id;
     _position = Vector2.Zero;
     _angle = 0;
@@ -30,13 +29,13 @@ export class Throwable extends Item {
         this.Icon = images.Icon;
         this.Sprite = images.View;
     }
-    Update(dt, position, angle) {
-        this._position = new Vector2(position.X, position.Y);
-        this._direction = angle < Math.PI * -0.5 || angle > Math.PI * 0.5 ? Direction.Left : Direction.Right;
+    Update(dt, position, angle, direction) {
+        this._position = position;
+        this._direction = direction;
         this._angle = angle;
     }
     Render() {
-        const gripOffset = new Vector2(-7 * this.Sprite.Scale, 10 * this.Sprite.Scale);
+        const gripOffset = new Vector2(this.Sprite.ScaledSize.X * -0.5, this.Sprite.ScaledSize.Y * 0.5);
         if (this._direction === Direction.Left) {
             Canvas.DrawImageWithAngleVFlipped(this.Sprite, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }

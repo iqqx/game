@@ -3,7 +3,7 @@ import { Throwable } from "./Assets/Throwable.js";
 import { GUI } from "./Context.js";
 import { Scene } from "./Scene.js";
 import { Color } from "./Utilites.js";
-import { GetImageLoadingProgress, GetLoadingImage, IsParsed, Parse } from "./AssetsLoader.js";
+import { GetImageLoadingProgress, GetLoadings, IsParsed, Parse } from "./AssetsLoader.js";
 let parsedRouters;
 Parse()
     .then((x) => (parsedRouters = x))
@@ -37,7 +37,7 @@ function loadLoop() {
         GUI.SetFont(48);
         GUI.DrawTextCenter(`${Math.round(ratio * 100)}%`, GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
         GUI.SetFont(16);
-        GUI.DrawTextCenterLineBreaked(GUI.Width / 2, GUI.Height / 2 + 50, GetLoadingImage());
+        GUI.DrawTextCenterLineBreaked(GUI.Width / 2, GUI.Height / 2 + 50, GetLoadings());
         if (ratio < 1)
             return;
     }

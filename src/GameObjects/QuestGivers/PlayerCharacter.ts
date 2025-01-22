@@ -1,6 +1,7 @@
 import { GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
+import { Artem } from "./Artem.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";
 
@@ -22,6 +23,7 @@ export class PlayerCharacter extends Character {
 							new Quest("Свет в конце тоннеля", this, () => {
 								this._completedQuests++;
 							})
+								.AddTalkTask("Найти выход", Scene.Current.GetByType(Artem)[0] as Character)
 								.AddMoveTask(4000, "Выход")
 								.AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0] as Character, 1)
 								.AddMoveTask(34200, "Выход")

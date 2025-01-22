@@ -74,7 +74,8 @@
 		"Artem_Avatar": "Images/Characters/Artem/Avatar.png",
 		"Player_Avatar": "Images/Characters/PlayerAvatar.jpeg",
 		"RGN": "Images/RGN/Main.png",
-		"RGN_Icon": "Images/RGN/Icon.png"
+		"RGN_Icon": "Images/RGN/Icon.png",
+		"Monster_Walk": { "Scale": 3, "Images": ["Images/Monster/0.png", "Images/Monster/1.png"] }
 	},
 	"Sounds": {
 		"Titles_Background": "Sounds/Title.mp3",

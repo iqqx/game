@@ -37,6 +37,6 @@ export class BlinkingLabel extends GameObject {
 		GUI.ClearStroke();
 
 		GUI.SetFont(32);
-		GUI.DrawTextCenterLineBreaked(this._x, this._y, this._text);
+		GUI.DrawText2CenterLineBreaked(this._x, this._y, this._text);
 	}
 }

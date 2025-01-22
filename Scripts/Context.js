@@ -333,7 +333,7 @@ export var GUI;
         }
     }
     GUI.DrawTextWrapped = DrawTextWrapped;
-    function DrawTextCenterLineBreaked(x, y, text) {
+    function DrawText2CenterLineBreaked(x, y, text) {
         const descent = ctx.measureText("").fontBoundingBoxAscent;
         const height = ctx.measureText("").fontBoundingBoxDescent + descent;
         const lines = text.split("\n");
@@ -341,6 +341,16 @@ export var GUI;
         ctx.textAlign = "center";
         for (let l = 0; l < lines.length; l++)
             ctx.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
+        ctx.textAlign = lastAlign;
+    }
+    GUI.DrawText2CenterLineBreaked = DrawText2CenterLineBreaked;
+    function DrawTextCenterLineBreaked(x, y, lines) {
+        const descent = ctx.measureText("").fontBoundingBoxAscent;
+        const height = ctx.measureText("").fontBoundingBoxDescent + descent;
+        const lastAlign = ctx.textAlign;
+        ctx.textAlign = "center";
+        for (let l = 0; l < lines.length; l++)
+            ctx.fillText(lines[l], x, y + height * l + descent);
         ctx.textAlign = lastAlign;
     }
     GUI.DrawTextCenterLineBreaked = DrawTextCenterLineBreaked;

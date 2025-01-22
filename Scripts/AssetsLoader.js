@@ -17,7 +17,9 @@ export function LoadImage(source, boundingBox, scale) {
         cte.Scale = scale ?? 1;
         cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
         cte.ScaledSize = new Vector2(cte.BoundingBox.Width * cte.Scale, cte.BoundingBox.Height * cte.Scale);
+        // setTimeout(() => {
         assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+        // }, Math.random() * 20000);
     };
     img.src = source;
     return cte;
@@ -55,10 +57,12 @@ export function LoadSound(source) {
             s.pause();
         },
     };
-    s.addEventListener("canplaythrough", () => {
+    s.onloadedmetadata = () => {
         newSound.Length = s.duration;
+        // setTimeout(() => {
         assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
-    });
+        // }, Math.random() * 20000);
+    };
     s.preload = "auto";
     s.src = source;
     s.load();
@@ -80,6 +84,9 @@ export function IsParsed() {
 }
 export function GetLoadingImage() {
     return assetsToLoad.length > 0 ? assetsToLoad[assetsToLoad.length - 1] : "DONE";
+}
+export function GetLoadings() {
+    return assetsToLoad;
 }
 export async function Parse() {
     return fetch("Assets/Routers.json")

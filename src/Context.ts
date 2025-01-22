@@ -396,7 +396,7 @@ export namespace GUI {
 		}
 	}
 
-	export function DrawTextCenterLineBreaked(x: number, y: number, text: string) {
+	export function DrawText2CenterLineBreaked(x: number, y: number, text: string) {
 		const descent = ctx.measureText("").fontBoundingBoxAscent;
 		const height = ctx.measureText("").fontBoundingBoxDescent + descent;
 		const lines: string[] = text.split("\n");
@@ -405,6 +405,18 @@ export namespace GUI {
 		ctx.textAlign = "center";
 
 		for (let l = 0; l < lines.length; l++) ctx.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
+
+		ctx.textAlign = lastAlign;
+	}
+
+	export function DrawTextCenterLineBreaked(x: number, y: number, lines: string[]) {
+		const descent = ctx.measureText("").fontBoundingBoxAscent;
+		const height = ctx.measureText("").fontBoundingBoxDescent + descent;
+
+		const lastAlign = ctx.textAlign;
+		ctx.textAlign = "center";
+
+		for (let l = 0; l < lines.length; l++) ctx.fillText(lines[l], x, y + height * l + descent);
 
 		ctx.textAlign = lastAlign;
 	}

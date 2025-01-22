@@ -1,15 +1,14 @@
 import { GetSprite } from "../AssetsLoader.js";
 import { Canvas } from "../Context.js";
-import { Direction, Tag } from "../Enums.js";
+import { Direction } from "../Enums.js";
 import { FlyingThrowable } from "../GameObjects/FlyingThrowable.js";
 import { Scene } from "../Scene.js";
-import { Sprite, Sound, Vector2, Rectangle, Color } from "../Utilites.js";
+import { Sprite, Vector2, Rectangle } from "../Utilites.js";
 import { Item } from "./Items/Item.js";
 
 export class Throwable extends Item {
 	public declare readonly Icon: Sprite;
 	public readonly Sprite: Sprite;
-	// private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
 	public readonly Id: string;
 
 	private _position: Vector2 = Vector2.Zero;
@@ -48,14 +47,14 @@ export class Throwable extends Item {
 		this.Sprite = images.View;
 	}
 
-	public Update(dt: number, position: Vector2, angle: number) {
-		this._position = new Vector2(position.X, position.Y);
-		this._direction = angle < Math.PI * -0.5 || angle > Math.PI * 0.5 ? Direction.Left : Direction.Right;
+	public Update(dt: number, position: Vector2, angle: number, direction?: Direction) {
+		this._position = position;
+		this._direction = direction;
 		this._angle = angle;
 	}
 
 	public Render() {
-		const gripOffset = new Vector2(-7 * this.Sprite.Scale, 10 * this.Sprite.Scale);
+		const gripOffset = new Vector2(this.Sprite.ScaledSize.X * -0.5, this.Sprite.ScaledSize.Y * 0.5);
 
 		if (this._direction === Direction.Left) {
 			Canvas.DrawImageWithAngleVFlipped(

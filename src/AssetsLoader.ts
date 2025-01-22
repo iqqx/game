@@ -22,10 +22,12 @@ export function LoadImage(source: string, boundingBox?: Rectangle, scale?: numbe
 		cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
 		cte.ScaledSize = new Vector2(cte.BoundingBox.Width * cte.Scale, cte.BoundingBox.Height * cte.Scale);
 
+		// setTimeout(() => {
 		assetsToLoad.splice(
 			assetsToLoad.findIndex((x) => x === source),
 			1
 		);
+		// }, Math.random() * 20000);
 	};
 	img.src = source;
 
@@ -66,14 +68,16 @@ export function LoadSound(source: string): Sound {
 		},
 	};
 
-	s.addEventListener("canplaythrough", () => {
+	s.onloadedmetadata = () => {
 		newSound.Length = s.duration;
 
+		// setTimeout(() => {
 		assetsToLoad.splice(
 			assetsToLoad.findIndex((x) => x === source),
 			1
 		);
-	});
+		// }, Math.random() * 20000);
+	};
 
 	s.preload = "auto";
 	s.src = source;
@@ -102,6 +106,10 @@ export function IsParsed() {
 
 export function GetLoadingImage() {
 	return assetsToLoad.length > 0 ? assetsToLoad[assetsToLoad.length - 1] : "DONE";
+}
+
+export function GetLoadings() {
+	return assetsToLoad;
 }
 
 export async function Parse() {

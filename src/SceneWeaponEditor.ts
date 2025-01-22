@@ -124,7 +124,7 @@ export class SceneWeaponEditor {
 		);
 
 		if (this._selectedParameter === 0)
-			GUI.DrawTextCenterLineBreaked(
+			GUI.DrawText2CenterLineBreaked(
 				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Grip.X) * this._scale,
 				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Grip.Y) * this._scale + 10,
 				"Рукоять"
@@ -138,7 +138,7 @@ export class SceneWeaponEditor {
 		);
 
 		if (this._selectedParameter === 1)
-			GUI.DrawTextCenterLineBreaked(
+			GUI.DrawText2CenterLineBreaked(
 				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Muzzle.X) * this._scale,
 				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Muzzle.Y) * this._scale + 10,
 				"Дуло"
@@ -152,7 +152,7 @@ export class SceneWeaponEditor {
 		);
 
 		if (this._selectedParameter === 2)
-			GUI.DrawTextCenterLineBreaked(
+			GUI.DrawText2CenterLineBreaked(
 				GUI.Width / 2 + (-this._weapon.Sprites.Image.BoundingBox.Width / 2 + this._offsets.Clip.X) * this._scale,
 				GUI.Height / 2 + (this._weapon.Sprites.Image.BoundingBox.Height / 2 - this._offsets.Clip.Y) * this._scale + 20,
 				"Шахта\nмагазина"
