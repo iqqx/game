@@ -15,7 +15,7 @@
 
     <script>
         function ToggleLL() {
-            const db = indexedDB.open("game_options", 4);
+            const db = indexedDB.open("game_options");
             db.onupgradeneeded = () => {
                 db.result.createObjectStore("table");
             };
