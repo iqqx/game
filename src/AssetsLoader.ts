@@ -139,16 +139,13 @@ export async function Parse() {
 			const db = indexedDB.open("game_options");
 
 			return new Promise(function (res, rej) {
-				db.onupgradeneeded = res;
+				db.onupgradeneeded = () => {
+					db.result.createObjectStore("table");
+				};
 				db.onsuccess = res;
 			})
 				.then(() => {
-					if (db.readyState !== "done") db.result.createObjectStore("table");
-
-					return Promise.resolve(db.result);
-				})
-				.then((db) => {
-					const tx = db.transaction("table", "readonly");
+					const tx = db.result.transaction("table", "readonly");
 					const table = tx.objectStore("table");
 					const get = table.get("long_load");
 
