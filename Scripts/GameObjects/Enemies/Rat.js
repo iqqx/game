@@ -4,8 +4,8 @@ import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { EnemyType } from "../../Enums.js";
 import { RatCorpse } from "../RatCorpse.js";
-import { RatTail } from "../../Assets/Items/Items.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
+import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 export class Rat extends Enemy {
     static Damage = 20;
     static AttackCooldown = 500;
@@ -47,7 +47,7 @@ export class Rat extends Enemy {
         super.TakeDamage(damage);
         if (this._health <= 0) {
             this.Destroy();
-            Scene.Current.Instantiate(new RatCorpse(this._x, this._y, new RatTail(1)));
+            Scene.Current.Instantiate(new RatCorpse(this._x, this._y, ItemRegistry.GetById("RatTail")));
             const s = Rat._deathSound.cloneNode();
             s.volume = 0.25;
             s.play();

@@ -1,0 +1,14 @@
+{
+	"Icon": "AidKit",
+	"Stack": 1,
+	"IsBig": true,
+	"AfterUse": {
+		"Sound": "AidKit",
+		"Time": 5,
+		"Animation": "AidKit",
+		"Action": {
+			"Type": "Heal",
+			"By": 100
+		}
+	}
+}

@@ -1,20 +1,18 @@
 import { Container } from "../Assets/Containers/Containers.js";
-import { DogTag } from "../Assets/Items/Items.js";
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
-import { Rectangle } from "../Utilites.js";
-import { Item } from "../Assets/Items/Item.js";
+import { IItem, Rectangle } from "../Utilites.js";
 
 export class Corpse extends Container {
-	constructor(x: number, y: number, ...items: Item[]) {
+	constructor(x: number, y: number, ...items: IItem[]) {
 		super(32 * 3, 9 * 3, 3, 1);
 
 		this._x = x;
 		this._y = y;
 
 		for (const item of items) this.TryPushItem(item);
-		this.TryPushItem(new DogTag());
+		// this.TryPushItem(new DogTag());
 	}
 
 	public override Render(): void {

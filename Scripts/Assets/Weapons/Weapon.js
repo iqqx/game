@@ -1,4 +1,3 @@
-import { Item } from "../Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { Direction, Tag } from "../../Enums.js";
 import { Blood } from "../../GameObjects/Blood.js";
@@ -9,10 +8,12 @@ import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
 import { Vector2, Rectangle } from "../../Utilites.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
-export class Weapon extends Item {
+export class Weapon {
     Sprites;
+    IsBig = true;
+    MaxStack = 1;
+    AmmoId;
     _sounds;
-    Id;
     _fireCooldown;
     _reloadTime;
     _damage;
@@ -36,11 +37,26 @@ export class Weapon extends Item {
     _hasClip;
     _direction;
     static _weapons = [];
-    constructor(id, images, sounds, fireCooldown, damage, spread, heavy, auto, reloadTime, clip, recoil, handOffset, muzzleOffset, clipOffset) {
-        super(1);
+    static GetById(id) {
+        const w = Weapon._weapons.find((x) => x.Id === id);
+        if (w === undefined) {
+            // console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
+            return undefined;
+        }
+        return w.Clone();
+    }
+    static Register(rawJson) {
+        Weapon._weapons.push(new Weapon(rawJson.Id, { Icon: GetSprite(rawJson.Sprites.Icon), Image: GetSprite(rawJson.Sprites.Main), Clip: GetSprite(rawJson.Sprites.Clip) }, {
+            Fire: GetSound(rawJson.Sounds.Shoot),
+            Shell: rawJson.Sounds.ShellImpact === undefined ? undefined : GetSound(rawJson.Sounds.ShellImpact),
+            Reload: GetSound(rawJson.Sounds.Reload),
+        }, 1000 / rawJson.ShootsPerSecond, rawJson.AmmoId, rawJson.Damage, rawJson.Spread, rawJson.IsHeavy, rawJson.IsAutomatic, rawJson.ReloadTime, rawJson.ClipCapacity, rawJson.Recoil, new Vector2(rawJson.PixelsOffsets.Grip.X, rawJson.PixelsOffsets.Grip.Y), new Vector2(rawJson.PixelsOffsets.Muzzle.X, rawJson.PixelsOffsets.Muzzle.Y), new Vector2(rawJson.PixelsOffsets.Clip.X, rawJson.PixelsOffsets.Clip.Y)));
+    }
+    constructor(id, images, sounds, fireCooldown, ammoId, damage, spread, heavy, auto, reloadTime, clip, recoil, handOffset, muzzleOffset, clipOffset) {
         this.Id = id;
         this.Icon = images.Icon;
         this.Sprites = images;
+        this.AmmoId = ammoId;
         this._sounds = {
             ...sounds,
             EmptyFire: GetSound("Shoot_Empty"),
@@ -60,24 +76,24 @@ export class Weapon extends Item {
         this._automatic = auto;
         this.Automatic = auto;
     }
-    static GetById(id) {
-        const w = Weapon._weapons.find((x) => x.Id === id);
-        if (w === undefined) {
-            // console.error(`Оружие с идентификатором '${id}' не зарегистрировано.`);
-            return undefined;
-        }
-        return new Weapon(w.Id, { Icon: w.Icon, ...w.Sprites }, w._sounds, w._fireCooldown, w._damage, w._spread, w.Heavy, w.Automatic, w._reloadTime / 1000, w.MaxAmmoClip, w._recoil, Vector2.Div(w.GripOffset, w.Sprites.Image.Scale), Vector2.Div(w.MuzzleOffset, w.Sprites.Image.Scale), Vector2.Div(w.ClipOffset, w.Sprites.Image.Scale));
+    GetCount() {
+        return 1;
     }
-    static Register(rawJson) {
-        Weapon._weapons.push(new Weapon(rawJson.Id, { Icon: GetSprite(rawJson.Sprites.Icon), Image: GetSprite(rawJson.Sprites.Main), Clip: GetSprite(rawJson.Sprites.Clip) }, {
-            Fire: GetSound(rawJson.Sounds.Shoot),
-            Shell: rawJson.Sounds.ShellImpact === undefined ? undefined : GetSound(rawJson.Sounds.ShellImpact),
-            Reload: GetSound(rawJson.Sounds.Reload),
-        }, 1000 / rawJson.ShootsPerSecond, rawJson.Damage, rawJson.Spread, rawJson.IsHeavy, rawJson.IsAutomatic, rawJson.ReloadTime, rawJson.ClipCapacity, rawJson.Recoil, new Vector2(rawJson.PixelsOffsets.Grip.X, rawJson.PixelsOffsets.Grip.Y), new Vector2(rawJson.PixelsOffsets.Muzzle.X, rawJson.PixelsOffsets.Muzzle.Y), new Vector2(rawJson.PixelsOffsets.Clip.X, rawJson.PixelsOffsets.Clip.Y)));
+    Take(count) {
+        throw new Error("Method not implemented.");
     }
-    Update(dt, position, angle) {
+    Add(count) {
+        throw new Error("Method not implemented.");
+    }
+    Clone() {
+        return new Weapon(this.Id, { Icon: this.Icon, ...this.Sprites }, this._sounds, this._fireCooldown, this.AmmoId, this._damage, this._spread, this.Heavy, this.Automatic, this._reloadTime / 1000, this.MaxAmmoClip, this._recoil, Vector2.Div(this.GripOffset, this.Sprites.Image.Scale), Vector2.Div(this.MuzzleOffset, this.Sprites.Image.Scale), Vector2.Div(this.ClipOffset, this.Sprites.Image.Scale));
+    }
+    Is(other) {
+        return this.Id == other.Id;
+    }
+    Update(dt, position, angle, direction) {
         this._position = new Vector2(position.X - (this._recoilCompensationAcceleration < dt ? 2 : 0), position.Y);
-        this._direction = angle < Math.PI * -0.5 || angle > Math.PI * 0.5 ? Direction.Left : Direction.Right;
+        this._direction = direction;
         angle -= this.GetRecoilOffset() * this._direction;
         const dir = angle >= 0 ? angle : 2 * Math.PI + angle;
         const c = Math.cos(dir);

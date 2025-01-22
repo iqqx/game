@@ -1,4 +1,3 @@
-import { Item } from "../Items/Item.js";
 import { Canvas } from "../../Context.js";
 import { Direction, Tag } from "../../Enums.js";
 import { Blood } from "../../GameObjects/Blood.js";
@@ -7,14 +6,17 @@ import { DroppedClip } from "../../GameObjects/DroppedClip.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Sprite, Sound, Vector2, Rectangle } from "../../Utilites.js";
+import { Sprite, Sound, Vector2, Rectangle, IItem } from "../../Utilites.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 
-export class Weapon extends Item {
+export class Weapon implements IItem {
 	public declare readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite; readonly Clip: Sprite };
+	public declare readonly Id: string;
+	public readonly IsBig = true;
+	public readonly MaxStack = 1;
+	public readonly AmmoId: string;
 	private readonly _sounds: { readonly Fire: Sound; readonly Shell?: Sound; readonly EmptyFire: Sound; readonly Reload: Sound; readonly Impact: Sound; readonly Hit: Sound };
-	public readonly Id: string;
 
 	private readonly _fireCooldown: number;
 	private readonly _reloadTime: number;
@@ -43,49 +45,6 @@ export class Weapon extends Item {
 
 	private static readonly _weapons: Weapon[] = [];
 
-	constructor(
-		id: string,
-		images: { Icon: Sprite; Image: Sprite; Clip: Sprite },
-		sounds: { Fire: Sound; Shell?: Sound; Reload: Sound },
-		fireCooldown: number,
-		damage: number,
-		spread: number,
-		heavy: boolean,
-		auto: boolean,
-		reloadTime: number,
-		clip: number,
-		recoil: number,
-		handOffset: Vector2,
-		muzzleOffset: Vector2,
-		clipOffset: Vector2
-	) {
-		super(1);
-
-		this.Id = id;
-		this.Icon = images.Icon;
-		this.Sprites = images;
-		this._sounds = {
-			...sounds,
-			EmptyFire: GetSound("Shoot_Empty"),
-			Impact: GetSound("Projectile_Impact"),
-			Hit: GetSound("Hit"),
-		};
-		this._fireCooldown = fireCooldown;
-		this._damage = damage;
-		this._spread = spread;
-		this._recoil = recoil;
-
-		this.GripOffset = Vector2.Mul(handOffset, this.Sprites.Image.Scale);
-		this.MuzzleOffset = Vector2.Mul(muzzleOffset, this.Sprites.Image.Scale);
-		this.ClipOffset = Vector2.Mul(clipOffset, this.Sprites.Image.Scale);
-
-		this._reloadTime = reloadTime * 1000;
-		this.MaxAmmoClip = clip;
-		this.Heavy = heavy;
-		this._automatic = auto;
-		this.Automatic = auto;
-	}
-
 	public static GetById(id: string) {
 		const w = Weapon._weapons.find((x) => x.Id === id);
 
@@ -95,22 +54,7 @@ export class Weapon extends Item {
 			return undefined;
 		}
 
-		return new Weapon(
-			w.Id,
-			{ Icon: w.Icon, ...w.Sprites },
-			w._sounds,
-			w._fireCooldown,
-			w._damage,
-			w._spread,
-			w.Heavy,
-			w.Automatic,
-			w._reloadTime / 1000,
-			w.MaxAmmoClip,
-			w._recoil,
-			Vector2.Div(w.GripOffset, w.Sprites.Image.Scale),
-			Vector2.Div(w.MuzzleOffset, w.Sprites.Image.Scale),
-			Vector2.Div(w.ClipOffset, w.Sprites.Image.Scale)
-		);
+		return w.Clone();
 	}
 
 	public static Register(rawJson: {
@@ -125,6 +69,7 @@ export class Weapon extends Item {
 			Reload: string;
 		};
 		Id: string;
+		AmmoId: string;
 		Damage: number;
 		IsHeavy: boolean;
 		IsAutomatic: boolean;
@@ -149,6 +94,7 @@ export class Weapon extends Item {
 					Reload: GetSound(rawJson.Sounds.Reload),
 				},
 				1000 / rawJson.ShootsPerSecond,
+				rawJson.AmmoId,
 				rawJson.Damage,
 				rawJson.Spread,
 				rawJson.IsHeavy,
@@ -163,9 +109,86 @@ export class Weapon extends Item {
 		);
 	}
 
-	public Update(dt: number, position: Vector2, angle: number) {
+	constructor(
+		id: string,
+		images: { Icon: Sprite; Image: Sprite; Clip: Sprite },
+		sounds: { Fire: Sound; Shell?: Sound; Reload: Sound },
+		fireCooldown: number,
+		ammoId: string,
+		damage: number,
+		spread: number,
+		heavy: boolean,
+		auto: boolean,
+		reloadTime: number,
+		clip: number,
+		recoil: number,
+		handOffset: Vector2,
+		muzzleOffset: Vector2,
+		clipOffset: Vector2
+	) {
+		this.Id = id;
+		this.Icon = images.Icon;
+		this.Sprites = images;
+		this.AmmoId = ammoId;
+		this._sounds = {
+			...sounds,
+			EmptyFire: GetSound("Shoot_Empty"),
+			Impact: GetSound("Projectile_Impact"),
+			Hit: GetSound("Hit"),
+		};
+		this._fireCooldown = fireCooldown;
+		this._damage = damage;
+		this._spread = spread;
+		this._recoil = recoil;
+
+		this.GripOffset = Vector2.Mul(handOffset, this.Sprites.Image.Scale);
+		this.MuzzleOffset = Vector2.Mul(muzzleOffset, this.Sprites.Image.Scale);
+		this.ClipOffset = Vector2.Mul(clipOffset, this.Sprites.Image.Scale);
+
+		this._reloadTime = reloadTime * 1000;
+		this.MaxAmmoClip = clip;
+		this.Heavy = heavy;
+		this._automatic = auto;
+		this.Automatic = auto;
+	}
+
+	GetCount(): number {
+		return 1;
+	}
+	Take(count: number): void {
+		throw new Error("Method not implemented.");
+	}
+	Add(count: number): number {
+		throw new Error("Method not implemented.");
+	}
+
+	public Clone(): Weapon {
+		return new Weapon(
+			this.Id,
+			{ Icon: this.Icon, ...this.Sprites },
+			this._sounds,
+			this._fireCooldown,
+			this.AmmoId,
+			this._damage,
+			this._spread,
+			this.Heavy,
+			this.Automatic,
+			this._reloadTime / 1000,
+			this.MaxAmmoClip,
+			this._recoil,
+			Vector2.Div(this.GripOffset, this.Sprites.Image.Scale),
+			Vector2.Div(this.MuzzleOffset, this.Sprites.Image.Scale),
+			Vector2.Div(this.ClipOffset, this.Sprites.Image.Scale)
+		);
+	}
+
+	public Is(other: Weapon): other is Weapon {
+		return this.Id == other.Id;
+	}
+
+	public Update(dt: number, position: Vector2, angle: number, direction: Direction) {
 		this._position = new Vector2(position.X - (this._recoilCompensationAcceleration < dt ? 2 : 0), position.Y);
-		this._direction = angle < Math.PI * -0.5 || angle > Math.PI * 0.5 ? Direction.Left : Direction.Right;
+		this._direction = direction;
 
 		angle -= this.GetRecoilOffset() * this._direction;
 		const dir = angle >= 0 ? angle : 2 * Math.PI + angle;

@@ -1,54 +1,55 @@
+import { Canvas } from "../../Context.js";
+import { Direction } from "../../Enums.js";
+import { Scene } from "../../Scene.js";
+import { Rectangle, Vector2 } from "../../Utilites.js";
 export class Item {
-    _usingSound;
+    Id;
     Icon;
-    UseTime;
-    Big;
-    _isUsing;
-    _usingTime = -1;
-    _usingCallback;
-    _count;
-    constructor(count) {
-        this._count = this.GetStack() > 1 ? Math.clamp(count ?? Math.round(Math.random() * this.GetStack()), 0, this.GetStack()) : 1;
+    IsBig;
+    MaxStack;
+    _count = 0;
+    _x;
+    _y;
+    _angle;
+    _direction;
+    constructor(id, icon, stack, isBig = false) {
+        this.Id = id;
+        this.Icon = icon;
+        this.MaxStack = stack;
+        this.IsBig = isBig;
     }
-    Update(dt, position, angle) {
-        if (this._usingTime >= 0) {
-            this._usingTime += dt;
-            if (this._usingTime >= this.UseTime) {
-                this._usingTime = -1;
-                this._usingCallback();
-                this.OnUsed();
-            }
+    Is(other) {
+        return this.Id === other.Id;
+    }
+    Clone() {
+        return new Item(this.Id, this.Icon, this.MaxStack);
+    }
+    Update(dt, position, angle, direction) {
+        this._x = position.X;
+        this._y = position.Y;
+        this._angle = angle;
+        this._direction = direction;
+    }
+    Render() {
+        const gripOffset = new Vector2(this.Icon.ScaledSize.X * -0.5, this.Icon.ScaledSize.Y * 0.5);
+        if (this._direction === Direction.Left) {
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }
-    }
-    Use(callback) {
-        if (this.UseTime === undefined)
-            return;
-        if (this._isUsing)
-            return;
-        this._isUsing = true;
-        this._usingSound?.Play();
-        this._usingCallback = callback;
-        this._usingTime = 0;
-    }
-    Render(at, angle) { }
-    IsUsing() {
-        return this._isUsing;
+        else {
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
+        }
     }
     GetCount() {
         return this._count;
     }
     Take(count) {
-        this._count = Math.clamp(this._count - count, 0, this.GetStack());
+        this._count = Math.clamp(this._count - count, 0, this.MaxStack);
     }
     Add(count) {
         count = Math.abs(count);
-        const toAdd = Math.min(count, this.GetStack() - this._count);
+        const toAdd = Math.min(count, this.MaxStack - this._count);
         this._count += toAdd;
         return toAdd;
     }
-    GetStack() {
-        return 1;
-    }
-    OnUsed() { }
 }
 //# sourceMappingURL=Item.js.map

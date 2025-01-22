@@ -5,13 +5,13 @@ import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
 import { Enemy } from "./Enemy.js";
 import { Corpse } from "../Corpse.js";
-import { AidKit } from "../../Assets/Items/Items.js";
 import { Weapon } from "../../Assets/Weapons/Weapon.js";
 import { GuardFake } from "../QuestGivers/GuardFake.js";
 import { FakeEndGuard } from "../QuestGivers/FakeEndGuard.js";
 import { Character } from "../QuestGivers/Character.js";
 import { Elder } from "../QuestGivers/Elder.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
+import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 
 export class Human extends Enemy {
 	private readonly _deathSound = GetSound("Human_Death_2");
@@ -107,7 +107,7 @@ export class Human extends Enemy {
 				  )
 				: new Vector2(this._x + this.Width * dir + 22 * scale * c, this._y + this.Height * this._armHeight - 22 * scale * s);
 
-			this._weapon.Update(dt, handPosition, this._angle);
+			this._weapon.Update(dt, handPosition, this._angle, this.Direction);
 
 			if (this._aggresive) {
 				if (this._timeFromSaw > this._timeToShoot) {
@@ -180,7 +180,7 @@ export class Human extends Enemy {
 					  )
 					: new Vector2(this._x + this.Width * dir + 22 * scale * c, this._y + this.Height * this._armHeight - 22 * scale * s);
 
-				this._weapon.Update(dt, handPosition, this._angle);
+				this._weapon.Update(dt, handPosition, this._angle, this.Direction);
 			}
 
 			this._frameIndex = 0;
@@ -304,7 +304,7 @@ export class Human extends Enemy {
 			this.Destroy();
 
 			Scene.Current.Player.OnKilled(this._type);
-			Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, new AidKit()));
+			Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, ItemRegistry.GetById("AidKit"), ItemRegistry.GetById("DogTag")));
 
 			this._deathSound.Play();
 		}

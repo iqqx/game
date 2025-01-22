@@ -3,7 +3,7 @@ import { EnemyType } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Character } from "./GameObjects/QuestGivers/Character.js";
 import { Scene } from "./Scene.js";
-import { GetEnemyTypeName } from "./Utilites.js";
+import { GetEnemyTypeName, IItem } from "./Utilites.js";
 
 export class Quest {
 	public readonly Title: string;
@@ -107,7 +107,7 @@ export class Quest {
 		return this;
 	}
 
-	public AddHasItemsTask(mask: string, ...items: [typeof Item, number][]) {
+	public AddHasItemsTask(mask: string, ...items: { Id: string; Count: number }[]) {
 		const nextStage = this.Tasks.length + 1;
 
 		const task = new HasItemTask(
@@ -267,11 +267,11 @@ class FakeMoveTask extends Task {
 }
 
 class HasItemTask extends Task {
-	public readonly NeededItems: readonly [typeof Item, number][];
+	public readonly NeededItems: readonly { Id: string; Count: number }[];
 	private _mask: string;
 	protected readonly _onFail: () => void;
 
-	constructor(quest: Quest, onComplete: () => void, onFail: () => void, mask: string, items: [typeof Item, number][]) {
+	constructor(readonly quest: Quest, readonly onComplete: () => void, readonly onFail: () => void, readonly mask: string, items: { readonly Id: string; readonly Count: number }[]) {
 		super(quest, onComplete);
 
 		this.NeededItems = items;
@@ -283,11 +283,11 @@ class HasItemTask extends Task {
 		const m = new Map<string, number>();
 
 		for (const pitem of Scene.Current.Player.GetItems())
-			if (m.has(pitem.constructor.name)) m.set(pitem.constructor.name, m.get(pitem.constructor.name) + pitem.GetCount());
-			else m.set(pitem.constructor.name, pitem.GetCount());
+			if (m.has(pitem.Id)) m.set(pitem.Id, m.get(pitem.Id) + pitem.GetCount());
+			else m.set(pitem.Id, pitem.GetCount());
 
 		for (const item of this.NeededItems)
-			if (m.get(item[0].name) === undefined || m.get(item[0].name) < item[1]) {
+			if (m.get(item.Id) === undefined || m.get(item.Id) < item.Count) {
 				if (this._completed === true) this._onFail();
 				this._completed = false;
 

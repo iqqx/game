@@ -1,10 +1,9 @@
 import { Interactable } from "../../GameObjects/GameObject.js";
 import { Scene } from "../../Scene.js";
-import { Vector2 } from "../../Utilites.js";
-import { Item } from "../Items/Item.js";
+import { IItem, Vector2 } from "../../Utilites.js";
 
 export class Container extends Interactable {
-	protected readonly _items: (Item | null)[][];
+	protected readonly _items: (IItem | null)[][];
 	public readonly SlotsSize: Vector2;
 
 	constructor(width: number, height: number, slotsWidth: number, slotsHeight: number) {
@@ -29,11 +28,11 @@ export class Container extends Interactable {
 		Scene.Player.OpenContainer(this);
 	}
 
-	public GetItemAt(x: number, y: number): Item | null {
+	public GetItemAt(x: number, y: number): IItem | null {
 		return this._items[y][x];
 	}
 
-	public TakeItemFrom(x: number, y: number): Item | null {
+	public TakeItemFrom(x: number, y: number): IItem | null {
 		if (this._items[y][x] === null) return null;
 
 		const item = this._items[y][x];
@@ -42,7 +41,7 @@ export class Container extends Interactable {
 		return item;
 	}
 
-	public SwapItem(x: number, y: number, item: Item): Item | null {
+	public SwapItem(x: number, y: number, item: IItem): IItem | null {
 		const existItem = this._items[y][x];
 
 		this._items[y][x] = item;
@@ -50,7 +49,7 @@ export class Container extends Interactable {
 		return existItem;
 	}
 
-	public TryPushItem(item: Item): boolean {
+	public TryPushItem(item: IItem): boolean {
 		for (let y = 0; y < this.SlotsSize.Y; y++) {
 			for (let x = 0; x < this.SlotsSize.X; x++) {
 				if (this._items[y][x] === null) {

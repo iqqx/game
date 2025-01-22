@@ -1,7 +1,7 @@
 import { EnemyType, Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas, GUI } from "./Context.js";
-import { Vector2, RaycastHit, Line, GetIntersectPoint, Lerp, Sprite, Color, Rectangle } from "./Utilites.js";
+import { Vector2, RaycastHit, Line, GetIntersectPoint, Sprite, Color, Rectangle } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
@@ -35,8 +35,8 @@ import { FPSCounter } from "./GameObjects/GUI/FPSCounter.js";
 import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { Throwable } from "./Assets/Throwable.js";
 import { GetSprite } from "./AssetsLoader.js";
-import { Bread, Vodka, Sausage, AidKit, Radio, DogTag, RatTail, Adrenalin, PistolBullet, RifleBullet } from "./Assets/Items/Items.js";
 import { Monster } from "./GameObjects/Enemies/Monster.js";
+import { ItemRegistry } from "./Assets/Items/ItemRegistry.js";
 
 export class Scene {
 	public static Current: Scene;
@@ -254,9 +254,13 @@ export class Scene {
 
 		return new Scene(null, [
 			new GUIRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height), Color.Black),
-			new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2 - (textSize.Y + 100), textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-			new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", GUI.Width / 2, GUI.Height / 2 - (textSize.Y + 100), GUI.Width, GUI.Height, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
-			new Label(error, GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height, 24, Color.Red),
+			new BlinkingRectangle(new Rectangle(GUI.Width / 2, 50, textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingRectangle(new Rectangle(GUI.Width / 2, 5, GUI.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height - 5, GUI.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingRectangle(new Rectangle(5, GUI.Height / 2, 10, GUI.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingRectangle(new Rectangle(GUI.Width - 5, GUI.Height / 2, 10, GUI.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+			new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", GUI.Width / 2, 50, GUI.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
+			new Label(error, GUI.Width / 2, 100, GUI.Width, GUI.Height, 24, Color.Red),
 		]);
 	}
 
@@ -461,34 +465,13 @@ export class Scene {
 	}
 
 	private static ParseItem(raw: string) {
-		switch (raw) {
-			case "Bread":
-				return new Bread();
-			case "Vodka":
-				return new Vodka();
-			case "Sausage":
-				return new Sausage();
-			case "AidKit":
-				return new AidKit();
-			case "Radio":
-				return new Radio();
-			case "DogTag":
-				return new DogTag();
-			case "RatTail":
-				return new RatTail();
-			case "Adrenalin":
-				return new Adrenalin();
-			case "PistolBullet":
-				return new PistolBullet();
-			case "RifleBullet":
-				return new RifleBullet();
-			default:
-				const weapon = Weapon.GetById(raw);
-				if (weapon !== undefined) return weapon;
-				const throwable = Throwable.GetById(raw);
-				if (throwable !== undefined) return throwable;
+		const item = ItemRegistry.GetById(raw);
+		if (item !== undefined) return item;
+		const weapon = Weapon.GetById(raw);
+		if (weapon !== undefined) return weapon;
+		const throwable = Throwable.GetById(raw);
+		if (throwable !== undefined) return throwable;
 
-				throw new Error("Предмет не удалось распарсить: " + raw);
-		}
+		throw new Error("Объект не определен: " + raw);
 	}
 }

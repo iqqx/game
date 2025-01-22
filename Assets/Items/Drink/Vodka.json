@@ -1,0 +1,13 @@
+{
+	"Icon": "Vodka",
+	"AfterUse": {
+		"Sound": "Drink",
+		"Time": 3,
+		"Animation": "Eat",
+		"Action": {
+			"Type": "Heal",
+			"By": 5
+		}
+	},
+	"Stack": 1
+}

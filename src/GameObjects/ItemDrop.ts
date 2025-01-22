@@ -1,13 +1,12 @@
-import { Item } from "../Assets/Items/Item.js";
 import { Canvas } from "../Context.js";
 import { Scene } from "../Scene.js";
-import { Rectangle } from "../Utilites.js";
+import { IItem, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
 
 export class ItemDrop extends Interactable {
-	public readonly ContentItem: Item;
+	public readonly ContentItem: IItem;
 
-	constructor(x: number, y: number, item: Item) {
+	constructor(x: number, y: number, item: IItem) {
 		super(item.Icon.BoundingBox.Width, item.Icon.BoundingBox.Height);
 
 		this.ContentItem = item;

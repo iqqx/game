@@ -3,14 +3,13 @@ import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
 import { IPickapable } from "../../GameObjects/GameObject.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle } from "../../Utilites.js";
-import { Item } from "../Items/Item.js";
+import { IItem, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 
 export class Backpack extends Container implements IPickapable {
 	public readonly OnPickup?: () => void;
 
-	constructor(x: number, y: number, ...content: Item[]) {
+	constructor(x: number, y: number, ...content: IItem[]) {
 		super(50, 35, 4, 1);
 
 		for (let i = 0; i < content.length; i++) this._items[0][i] = content[i];

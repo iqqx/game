@@ -1,0 +1,13 @@
+{
+	"Icon": "Bread",
+	"AfterUse": {
+		"Sound": "Eat",
+		"Time": 1.5,
+		"Animation": "Eat",
+		"Action": {
+			"Type": "Heal",
+			"By": 15
+		}
+	},
+	"Stack": 1
+}

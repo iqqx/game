@@ -1,0 +1,13 @@
+{
+	"Icon": "Syringe",
+	"AfterUse": {
+		"Sound": "Syringe",
+		"Time": 1,
+		"Animation": "Syringe",
+		"Action": {
+			"Type": "Heal",
+			"By": 50
+		}
+	},
+	"Stack": 1
+}

@@ -1,4 +1,3 @@
-import { DogTag } from "../../Assets/Items/Items.js";
 import { GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
@@ -13,8 +12,7 @@ export class Elder extends Character {
         if (active.length > 0) {
             if (active[0].IsCompleted()) {
                 this._completedQuests++;
-                Scene.Player.RemoveItem(DogTag);
-                Scene.Player.RemoveItem(DogTag);
+                Scene.Player.RemoveItem("DogTag", 2);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
                     Messages: [
@@ -55,7 +53,7 @@ export class Elder extends Character {
                     AfterAction: () => {
                         Scene.Player.PushQuest(new Quest("Соседи", this)
                             .AddFakeMoveTask(27500, "Станция", 30500)
-                            .AddHasItemsTask("Собрать жетоны с трупов", [DogTag, 2])
+                            .AddHasItemsTask("Собрать жетоны с трупов", { Id: "DogTag", Count: 2 })
                             .AddTalkTask("Вернуться к Старосте", this));
                     },
                     Owner: this,

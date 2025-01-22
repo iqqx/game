@@ -9,6 +9,7 @@
 		"ShellImpact": "Shell",
 		"Reload": "PistolReload"
 	},
+	"AmmoId": "PistolBullet",
 	"Damage": 20,
 	"IsHeavy": false,
 	"IsAutomatic": false,

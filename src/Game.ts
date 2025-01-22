@@ -5,14 +5,15 @@ import { Scene } from "./Scene.js";
 import { SceneEditor } from "./SceneEditor.js";
 import { SceneWeaponEditor } from "./SceneWeaponEditor.js";
 import { Color } from "./Utilites.js";
-import { GetImageLoadingProgress, GetLoadingImage, GetLoadings, IsParsed, Parse } from "./AssetsLoader.js";
+import { GetImageLoadingProgress, GetLoadings, IsParsed, Parse } from "./AssetsLoader.js";
+import { ItemRegistry } from "./Assets/Items/ItemRegistry.js";
 
 let parsedRouters: any;
 
 Parse()
 	.then((x) => (parsedRouters = x))
 	.catch((res) => {
-		scene = Scene.GetErrorScene(`${res.stack}\nat [Assets/Routers.json]`);
+		scene = Scene.GetErrorScene(`${res ?? res.stack}\nat [Assets/Routers.json]`);
 		gameLoop(0);
 	});
 
@@ -68,8 +69,8 @@ function loadLoop() {
 	window.cancelAnimationFrame(n);
 
 	Promise.all(
-		Object.keys(parsedRouters.Weapons).map((weaponKey) => {
-			const object = parsedRouters.Weapons[weaponKey];
+		Object.keys(parsedRouters.Items).map((itemKey) => {
+			const object = parsedRouters.Items[itemKey];
 
 			if (typeof object === "string") {
 				return fetch("Assets/" + object)
@@ -82,14 +83,39 @@ function loadLoop() {
 						return x.json();
 					})
 					.then((x) => {
-						x.Id = weaponKey;
-						Weapon.Register(x);
+						x.Id = itemKey;
+						ItemRegistry.Register(x);
 					});
 			} else {
-				return Promise.reject(`Недопустимый тип пути оружия: ${weaponKey}\nat [Routers.json/Weapons]`);
+				return Promise.reject(`Недопустимый тип пути предмета: ${itemKey}\nat [Routers.json/Items]`);
 			}
 		})
 	)
+		.then(() =>
+			Promise.all(
+				Object.keys(parsedRouters.Weapons).map((weaponKey) => {
+					const object = parsedRouters.Weapons[weaponKey];
+
+					if (typeof object === "string") {
+						return fetch("Assets/" + object)
+							.then((x) => {
+								if (!x.ok) {
+									if (x.status === 404) return Promise.reject(`Не найдено.\nat [${object}]`);
+									else return Promise.reject(`Неизвестная ошибка. Код: ${x.status}`);
+								}
+
+								return x.json();
+							})
+							.then((x) => {
+								x.Id = weaponKey;
+								Weapon.Register(x);
+							});
+					} else {
+						return Promise.reject(`Недопустимый тип пути оружия: ${weaponKey}\nat [Routers.json/Weapons]`);
+					}
+				})
+			)
+		)
 		.then(() =>
 			Promise.all(
 				Object.keys(parsedRouters.Throwables).map((throwableKey) => {
@@ -121,7 +147,7 @@ function loadLoop() {
 		)
 		.then((x) => (scene = x))
 		.catch((err) => {
-			scene = Scene.GetErrorScene(`|${err}|\n ${err.stack}`);
+			scene = Scene.GetErrorScene(err.stack ?? err);
 		})
 		.finally(() => gameLoop(0));
 }

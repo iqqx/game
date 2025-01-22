@@ -4,30 +4,46 @@ import { Direction } from "../Enums.js";
 import { FlyingThrowable } from "../GameObjects/FlyingThrowable.js";
 import { Scene } from "../Scene.js";
 import { Vector2, Rectangle } from "../Utilites.js";
-import { Item } from "./Items/Item.js";
-export class Throwable extends Item {
-    Sprite;
+export class Throwable {
     Id;
+    Icon;
+    IsBig = false;
+    MaxStack = 1;
+    Sprite;
     _position = Vector2.Zero;
     _angle = 0;
     _direction;
     static _throwables = [];
     static GetById(id) {
-        const w = Throwable._throwables.find((x) => x.Id === id);
-        if (w === undefined) {
+        const t = Throwable._throwables.find((x) => x.Id === id);
+        if (t === undefined) {
             // console.error(`Кидательное с идентификатором '${id}' не зарегистрировано.`);
             return undefined;
         }
-        return new Throwable(w.Id, { View: w.Sprite, Icon: w.Icon });
+        return t.Clone();
     }
     static Register(rawJson) {
         Throwable._throwables.push(new Throwable(rawJson.Id, { Icon: GetSprite(rawJson.Sprites.Icon), View: GetSprite(rawJson.Sprites.Main) }));
     }
     constructor(id, images) {
-        super(1);
         this.Id = id;
         this.Icon = images.Icon;
         this.Sprite = images.View;
+    }
+    GetCount() {
+        return 1;
+    }
+    Take(count) {
+        throw new Error("Method not implemented.");
+    }
+    Add(count) {
+        throw new Error("Method not implemented.");
+    }
+    Is(item) {
+        return item.Id === this.Id;
+    }
+    Clone() {
+        return new Throwable(this.Id, { View: this.Sprite, Icon: this.Icon });
     }
     Update(dt, position, angle, direction) {
         this._position = position;

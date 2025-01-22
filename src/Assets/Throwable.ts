@@ -3,13 +3,14 @@ import { Canvas } from "../Context.js";
 import { Direction } from "../Enums.js";
 import { FlyingThrowable } from "../GameObjects/FlyingThrowable.js";
 import { Scene } from "../Scene.js";
-import { Sprite, Vector2, Rectangle } from "../Utilites.js";
-import { Item } from "./Items/Item.js";
+import { Sprite, Vector2, Rectangle, IItem } from "../Utilites.js";
 
-export class Throwable extends Item {
-	public declare readonly Icon: Sprite;
-	public readonly Sprite: Sprite;
+export class Throwable implements IItem {
 	public readonly Id: string;
+	public readonly Icon: Sprite;
+	public readonly IsBig = false;
+	public readonly MaxStack = 1;
+	public readonly Sprite: Sprite;
 
 	private _position: Vector2 = Vector2.Zero;
 	private _angle: number = 0;
@@ -18,15 +19,15 @@ export class Throwable extends Item {
 	private static readonly _throwables: Throwable[] = [];
 
 	public static GetById(id: string) {
-		const w = Throwable._throwables.find((x) => x.Id === id);
+		const t = Throwable._throwables.find((x) => x.Id === id);
 
-		if (w === undefined) {
+		if (t === undefined) {
 			// console.error(`Кидательное с идентификатором '${id}' не зарегистрировано.`);
 
 			return undefined;
 		}
 
-		return new Throwable(w.Id, { View: w.Sprite, Icon: w.Icon });
+		return t.Clone();
 	}
 
 	public static Register(rawJson: {
@@ -40,11 +41,26 @@ export class Throwable extends Item {
 	}
 
 	constructor(id: string, images: { Icon: Sprite; View: Sprite }) {
-		super(1);
-
 		this.Id = id;
 		this.Icon = images.Icon;
 		this.Sprite = images.View;
+	}
+
+	GetCount(): number {
+		return 1;
+	}
+	Take(count: number): void {
+		throw new Error("Method not implemented.");
+	}
+	Add(count: number): number {
+		throw new Error("Method not implemented.");
+	}
+	Is(item: IItem): item is IItem {
+		return item.Id === this.Id;
+	}
+
+	public Clone(): Throwable {
+		return new Throwable(this.Id, { View: this.Sprite, Icon: this.Icon });
 	}
 
 	public Update(dt: number, position: Vector2, angle: number, direction?: Direction) {

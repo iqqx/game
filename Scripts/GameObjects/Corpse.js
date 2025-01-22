@@ -1,5 +1,4 @@
 import { Container } from "../Assets/Containers/Containers.js";
-import { DogTag } from "../Assets/Items/Items.js";
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
@@ -11,7 +10,7 @@ export class Corpse extends Container {
         this._y = y;
         for (const item of items)
             this.TryPushItem(item);
-        this.TryPushItem(new DogTag());
+        // this.TryPushItem(new DogTag());
     }
     Render() {
         Canvas.DrawImage(GetSprite("Corpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));

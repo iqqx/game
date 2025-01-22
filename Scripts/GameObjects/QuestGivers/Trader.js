@@ -1,10 +1,10 @@
-import { RatTail, RifleBullet } from "../../Assets/Items/Items.js";
 import { Canvas } from "../../Context.js";
 import { GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
+import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 export class Trader extends Character {
     constructor(x, y) {
         super(x, y, GetSprite("Trader"));
@@ -18,9 +18,7 @@ export class Trader extends Character {
         if (active.length > 0) {
             if (active[0].IsCompleted()) {
                 this._completedQuests++;
-                Scene.Player.RemoveItem(RatTail);
-                Scene.Player.RemoveItem(RatTail);
-                Scene.Player.RemoveItem(RatTail);
+                Scene.Player.RemoveItem("RatTail", 3);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
                     Messages: [
@@ -32,8 +30,7 @@ export class Trader extends Character {
                     Owner: this,
                     OwnerFirst: false,
                     AfterAction: () => {
-                        Scene.Player.GiveQuestItem(new RifleBullet(30));
-                        Scene.Player.GiveQuestItem(new RifleBullet(30));
+                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 60));
                     },
                 };
             }
@@ -53,7 +50,7 @@ export class Trader extends Character {
                         "Хорошо договорились.",
                     ],
                     AfterAction: () => {
-                        Scene.Player.PushQuest(new Quest("Шкурки", this).AddHasItemsTask("Добыть 6 хвостов крыс", [RatTail, 6]).AddTalkTask("Вернуться к Торгашу", this));
+                        Scene.Player.PushQuest(new Quest("Шкурки", this).AddHasItemsTask("Добыть 6 хвостов крыс", { Id: "RatTail", Count: 6 }).AddTalkTask("Вернуться к Торгашу", this));
                     },
                     Owner: this,
                     OwnerFirst: true,

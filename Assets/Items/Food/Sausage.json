@@ -1,0 +1,13 @@
+{
+	"Icon": "Sausage",
+	"AfterUse": {
+		"Sound": "Eat",
+		"Time": 2,
+		"Animation": "Eat",
+		"Action": {
+			"Type": "Heal",
+			"By": 15
+		}
+	},
+	"Stack": 1
+}

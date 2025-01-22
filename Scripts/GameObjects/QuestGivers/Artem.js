@@ -1,4 +1,4 @@
-import { Radio } from "../../Assets/Items/Items.js";
+import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 import { Throwable } from "../../Assets/Throwable.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
@@ -43,7 +43,7 @@ export class Artem extends Character {
                         "Хорошо договорились.",
                     ],
                     AfterAction: () => {
-                        Scene.Player.GiveQuestItem(new Radio());
+                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
                         Scene.Player.GiveQuestItem(Throwable.GetById("RGN"));
                         Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(21700, "Лагерь"));
                     },

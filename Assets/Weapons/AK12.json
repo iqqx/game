@@ -9,6 +9,7 @@
 		"ShellImpact": "Shell",
 		"Reload": "Reload"
 	},
+	"AmmoId": "RifleBullet",
 	"Damage": 60,
 	"IsHeavy": true,
 	"IsAutomatic": true,

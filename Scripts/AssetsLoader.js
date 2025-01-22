@@ -108,6 +108,8 @@ export async function Parse() {
             return Promise.reject(`Оружия не найдены.\nМаксимально похожий ключ на 'Weapons': '${GetMaxIdentityString("Weapons", Object.keys(ps))}'`);
         if (ps.Throwables === undefined)
             return Promise.reject(`Метательное не найдено.\nМаксимально похожий ключ на 'Throwables': '${GetMaxIdentityString("Throwables", Object.keys(ps))}'`);
+        if (ps.Items === undefined)
+            return Promise.reject(`Предметы не найдены.\nМаксимально похожий ключ на 'Items': '${GetMaxIdentityString("Items", Object.keys(ps))}'`);
         for (const imageKey in ps.Images) {
             const object = ps.Images[imageKey];
             if (typeof object === "string") {
@@ -145,7 +147,7 @@ export async function Parse() {
                 return Promise.reject(`Недопустимый тип звука: ${soundKey}.`);
         }
         parsed = true;
-        return Promise.resolve({ Weapons: ps.Weapons, Throwables: ps.Throwables });
+        return Promise.resolve({ Weapons: ps.Weapons, Throwables: ps.Throwables, Items: ps.Items });
     });
 }
 //# sourceMappingURL=AssetsLoader.js.map

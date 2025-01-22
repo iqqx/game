@@ -203,11 +203,19 @@ class FakeMoveTask extends Task {
     }
 }
 class HasItemTask extends Task {
+    quest;
+    onComplete;
+    onFail;
+    mask;
     NeededItems;
     _mask;
     _onFail;
     constructor(quest, onComplete, onFail, mask, items) {
         super(quest, onComplete);
+        this.quest = quest;
+        this.onComplete = onComplete;
+        this.onFail = onFail;
+        this.mask = mask;
         this.NeededItems = items;
         this._mask = mask;
         this._onFail = onFail;
@@ -215,12 +223,12 @@ class HasItemTask extends Task {
     Check() {
         const m = new Map();
         for (const pitem of Scene.Current.Player.GetItems())
-            if (m.has(pitem.constructor.name))
-                m.set(pitem.constructor.name, m.get(pitem.constructor.name) + pitem.GetCount());
+            if (m.has(pitem.Id))
+                m.set(pitem.Id, m.get(pitem.Id) + pitem.GetCount());
             else
-                m.set(pitem.constructor.name, pitem.GetCount());
+                m.set(pitem.Id, pitem.GetCount());
         for (const item of this.NeededItems)
-            if (m.get(item[0].name) === undefined || m.get(item[0].name) < item[1]) {
+            if (m.get(item.Id) === undefined || m.get(item.Id) < item.Count) {
                 if (this._completed === true)
                     this._onFail();
                 this._completed = false;

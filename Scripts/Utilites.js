@@ -141,7 +141,7 @@ export function CompareStrings(a, b) {
 }
 export function GetMaxIdentityString(text, variants) {
     let result = variants[0];
-    let last = 0;
+    let last = Number.MIN_SAFE_INTEGER;
     for (const variant of variants) {
         const c = CompareStrings(text, variant);
         if (c > last) {

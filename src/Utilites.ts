@@ -1,4 +1,4 @@
-import { EnemyType } from "./Enums.js";
+import { Direction, EnemyType } from "./Enums.js";
 import { GameObject } from "./GameObjects/GameObject.js";
 
 declare global {
@@ -10,6 +10,22 @@ declare global {
 	interface Math {
 		clamp(n: number, min: number, max: number): number;
 	}
+}
+
+export interface IItem {
+	readonly Id: string;
+	readonly Icon: Sprite;
+	readonly IsBig: boolean;
+	readonly MaxStack: number;
+	Update(dt: number, position: Vector2, angle: number, direction: Direction): void;
+	// Use(callback: () => void): void;
+	Render(): void;
+	// IsUsing(): boolean;
+	GetCount(): number;
+	Take(count: number): void;
+	Add(count: number): number;
+	Is(item: IItem): item is IItem;
+	Clone(): IItem;
 }
 
 Array.prototype.minBy = function <T>(this: T[], by: (element: T) => number): T {
@@ -214,7 +230,7 @@ export function CompareStrings(a: string, b: string): number {
 
 export function GetMaxIdentityString(text: string, variants: string[]) {
 	let result = variants[0];
-	let last = 0;
+	let last = Number.MIN_SAFE_INTEGER;
 
 	for (const variant of variants) {
 		const c = CompareStrings(text, variant);

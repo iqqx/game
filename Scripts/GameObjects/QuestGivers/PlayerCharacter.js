@@ -19,7 +19,7 @@ export class PlayerCharacter extends Character {
                         Scene.Player.PushQuest(new Quest("Свет в конце тоннеля", this, () => {
                             this._completedQuests++;
                         })
-                            .AddTalkTask("Найти выход", Scene.Current.GetByType(Artem)[0])
+                            .AddTalkTask("Узнать где выход", Scene.Current.GetByType(Artem)[0])
                             .AddMoveTask(4000, "Выход")
                             .AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0], 1)
                             .AddMoveTask(34200, "Выход"));
