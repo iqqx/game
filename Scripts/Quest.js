@@ -222,8 +222,10 @@ class HasItemTask extends Task {
     }
     Check() {
         const m = new Map();
-        for (const pitem of Scene.Current.Player.GetItems())
-            if (m.has(pitem.Id))
+        for (const pitem of Scene.Current.Player.GetSlots())
+            if (pitem === null)
+                continue;
+            else if (m.has(pitem.Id))
                 m.set(pitem.Id, m.get(pitem.Id) + pitem.GetCount());
             else
                 m.set(pitem.Id, pitem.GetCount());

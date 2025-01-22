@@ -12,6 +12,28 @@
     <canvas id="main-canvas" style="cursor: none; width: 100%; aspect-ratio: 2 / 1;" width="1500" height="750"></canvas>
 
     <script type="module" src="Scripts/Game.js"></script>
+
+    <script>
+        function ToggleLL() {
+            const db = indexedDB.open("game_options", 4);
+            db.onupgradeneeded = () => {
+                db.result.createObjectStore("table");
+            };
+            db.onsuccess = () => {
+                const tx = db.result.transaction("table", "readwrite");
+                const table = tx.objectStore("table");
+                let res = table.get("long_load");
+
+                res.onsuccess = (e) => {
+                    res = table.put(!res.result, "long_load");
+
+                    res.onsuccess = (e) => {
+                        console.log("OK");
+                    }
+                };
+            };
+        }
+    </script>
 </body>
 
 </html>

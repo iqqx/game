@@ -2,7 +2,7 @@ import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Scene } from "../../Scene.js";
 import { GetMaxIdentityString, Sound } from "../../Utilites.js";
 import { Item } from "./Item.js";
-import { UseableItem } from "./UsableItem.js";
+import { UseableItem } from "./UseableItem.js";
 
 export class ItemRegistry {
 	private static readonly _items: Item[] = [];

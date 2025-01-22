@@ -12,7 +12,7 @@ export class Elder extends Character {
         if (active.length > 0) {
             if (active[0].IsCompleted()) {
                 this._completedQuests++;
-                Scene.Player.RemoveItem("DogTag", 2);
+                Scene.Player.TakeItem("DogTag", 2);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
                     Messages: [

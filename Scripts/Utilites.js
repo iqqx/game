@@ -151,4 +151,10 @@ export function GetMaxIdentityString(text, variants) {
     }
     return result;
 }
+export function IsString(obj) {
+    return typeof obj === "string";
+}
+export function IsNumber(obj) {
+    return typeof obj === "number";
+}
 //# sourceMappingURL=Utilites.js.map

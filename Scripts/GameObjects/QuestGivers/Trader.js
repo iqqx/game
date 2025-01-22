@@ -18,7 +18,7 @@ export class Trader extends Character {
         if (active.length > 0) {
             if (active[0].IsCompleted()) {
                 this._completedQuests++;
-                Scene.Player.RemoveItem("RatTail", 3);
+                Scene.Player.TakeItem("RatTail", 6);
                 Scene.Player.RemoveQuest(active[0]);
                 return {
                     Messages: [
@@ -30,7 +30,8 @@ export class Trader extends Character {
                     Owner: this,
                     OwnerFirst: false,
                     AfterAction: () => {
-                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 60));
+                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
+                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
                     },
                 };
             }

@@ -1,7 +1,7 @@
 import { EnemyType } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas, GUI } from "./Context.js";
-import { Vector2, Line, GetIntersectPoint, Color, Rectangle } from "./Utilites.js";
+import { Vector2, Line, GetIntersectPoint, Color, Rectangle, IsString, IsNumber } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
@@ -154,7 +154,7 @@ export class Scene {
             case "Platform":
                 return new Platform(...x.Arguments);
             case "Player":
-                return new Player(...x.Arguments);
+                return new Player(x.Arguments[0], x.Arguments[1], x.Arguments[2], x.Arguments[3]);
             case "Boombox":
                 return new AudioSource(...x.Arguments);
             case "Box":
@@ -175,7 +175,7 @@ export class Scene {
                 return new Trader(...x.Arguments);
             case "Backpack":
                 x.Arguments.splice(2, x.Arguments.length - 2, ...x.Arguments.slice(2).map((x) => {
-                    return Scene.ParseItem(x);
+                    return Scene.ParseItem2(x);
                 }));
                 return new Backpack(...x.Arguments);
             case "HumanCorpse":
@@ -344,7 +344,7 @@ export class Scene {
             const plrPos = Scene.Current.Player.GetPosition();
             const plrTargetRaw = Scene.Current.Player.GetTarget();
             const offset = Math.clamp(plrTargetRaw.X + 50 / 2 - 1500, 300 - 1500, -300) + plrPos.X - Scene.Current._levelPosition;
-            Scene.Current._levelPosition += dt * 0.005 * offset;
+            Scene.Current._levelPosition = Math.round(Scene.Current._levelPosition + dt * 0.005 * offset);
         }
         for (const object of Scene.Current._gameObjects)
             object.Update(dt);
@@ -384,6 +384,7 @@ export class Scene {
         if (object instanceof Player) {
             Scene.Current.Player = object;
             Scene.Player = object;
+            Scene.Current._levelPosition = object.GetTarget().X + 50 / 2 - 1500 + object.GetPosition().X;
         }
         if (object instanceof Interactable) {
             Scene.Current._interactableGameObjects.push(object);
@@ -416,6 +417,26 @@ export class Scene {
         const throwable = Throwable.GetById(raw);
         if (throwable !== undefined)
             return throwable;
+        throw new Error("Объект не определен: " + raw);
+    }
+    static ParseItem2(raw) {
+        let item;
+        if (IsString(raw)) {
+            item = ItemRegistry.GetById(raw);
+        }
+        else {
+            if (raw.Count === undefined) {
+                item = ItemRegistry.GetById(raw.Id);
+            }
+            else if (IsNumber(raw.Count)) {
+                item = ItemRegistry.GetById(raw.Id, raw.Count);
+            }
+            else {
+                item = ItemRegistry.GetById(raw.Id, raw.Count.Min + Math.round(Math.random() * (raw.Count.Max - raw.Count.Min)));
+            }
+        }
+        if (item !== undefined)
+            return item;
         throw new Error("Объект не определен: " + raw);
     }
 }

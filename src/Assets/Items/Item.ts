@@ -64,7 +64,11 @@ export class Item implements IItem {
 	}
 
 	public Take(count: number) {
+		const was = this._count;
+
 		this._count = Math.clamp(this._count - count, 0, this.MaxStack);
+
+		return was - this._count;
 	}
 
 	public Add(count: number) {

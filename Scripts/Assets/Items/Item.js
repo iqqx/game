@@ -43,7 +43,9 @@ export class Item {
         return this._count;
     }
     Take(count) {
+        const was = this._count;
         this._count = Math.clamp(this._count - count, 0, this.MaxStack);
+        return was - this._count;
     }
     Add(count) {
         count = Math.abs(count);

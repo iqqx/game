@@ -5,6 +5,7 @@ const sounds = new Map<string, Sound>();
 const assetsToLoad: string[] = [];
 let assetsParsedCount = 0;
 let parsed = false;
+let longLoad = false;
 
 export function LoadImage(source: string, boundingBox?: Rectangle, scale?: number): Sprite {
 	assetsToLoad.push(source);
@@ -22,12 +23,18 @@ export function LoadImage(source: string, boundingBox?: Rectangle, scale?: numbe
 		cte.BoundingBox = boundingBox ?? new Rectangle(0, 0, img.naturalWidth, img.naturalHeight);
 		cte.ScaledSize = new Vector2(cte.BoundingBox.Width * cte.Scale, cte.BoundingBox.Height * cte.Scale);
 
-		// setTimeout(() => {
-		assetsToLoad.splice(
-			assetsToLoad.findIndex((x) => x === source),
-			1
-		);
-		// }, Math.random() * 20000);
+		if (longLoad)
+			setTimeout(() => {
+				assetsToLoad.splice(
+					assetsToLoad.findIndex((x) => x === source),
+					1
+				);
+			}, Math.random() * 20000);
+		else
+			assetsToLoad.splice(
+				assetsToLoad.findIndex((x) => x === source),
+				1
+			);
 	};
 	img.src = source;
 
@@ -71,12 +78,18 @@ export function LoadSound(source: string): Sound {
 	s.onloadedmetadata = () => {
 		newSound.Length = s.duration;
 
-		// setTimeout(() => {
-		assetsToLoad.splice(
-			assetsToLoad.findIndex((x) => x === source),
-			1
-		);
-		// }, Math.random() * 20000);
+		if (longLoad)
+			setTimeout(() => {
+				assetsToLoad.splice(
+					assetsToLoad.findIndex((x) => x === source),
+					1
+				);
+			}, Math.random() * 20000);
+		else
+			assetsToLoad.splice(
+				assetsToLoad.findIndex((x) => x === source),
+				1
+			);
 	};
 
 	s.preload = "auto";
@@ -121,6 +134,35 @@ export async function Parse() {
 			}
 
 			return routers.json();
+		})
+		.then((ps) => {
+			const db = indexedDB.open("game_options", 4);
+
+			return new Promise(function (res, rej) {
+				db.onupgradeneeded = res;
+				db.onsuccess = res;
+				db.onerror = rej;
+			})
+				.then(() => {
+					if (db.readyState !== "done") db.result.createObjectStore("table");
+
+					return Promise.resolve(db.result);
+				})
+				.then((db) => {
+					const tx = db.transaction("table", "readonly");
+					const table = tx.objectStore("table");
+					const get = table.get("long_load");
+
+					return new Promise(function (res, rej) {
+						get.onsuccess = res;
+						get.onerror = rej;
+					}).then(() => {
+						longLoad = get.result;
+					});
+				})
+				.then(() => {
+					return ps;
+				});
 		})
 		.then((ps) => {
 			if (ps.Images === undefined) return Promise.reject(`Изображения не найдены.\nМаксимально похожий ключ на 'Images': '${GetMaxIdentityString("Images", Object.keys(ps))}'`);

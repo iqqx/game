@@ -41,6 +41,20 @@ export class Container extends Interactable {
 		return item;
 	}
 
+	public RemoveItem(itemId: string, count: number) {
+		for (let y = 0; y < this.SlotsSize.Y; y++) {
+			for (let x = 0; x < this.SlotsSize.X; x++) {
+				if (this._items[y][x] !== null && this._items[y][x].Id === itemId) {
+					count -= this._items[y][x].Take(count);
+
+					if (this._items[y][x].GetCount() <= 0) this._items[y][x] = null;
+
+					if (count <= 0) break;
+				}
+			}
+		}
+	}
+
 	public SwapItem(x: number, y: number, item: IItem): IItem | null {
 		const existItem = this._items[y][x];
 

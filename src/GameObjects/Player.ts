@@ -20,7 +20,7 @@ import { Elder } from "./QuestGivers/Elder.js";
 import { GuardFake } from "./QuestGivers/GuardFake.js";
 import { PlayerCharacter } from "./QuestGivers/PlayerCharacter.js";
 import { Item } from "../Assets/Items/Item.js";
-import { UseableItem } from "../Assets/Items/UsableItem.js";
+import { UseableItem } from "../Assets/Items/UseableItem.js";
 import { ItemRegistry } from "../Assets/Items/ItemRegistry.js";
 
 export class Player extends Entity {
@@ -51,8 +51,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4990; /// DEBUG
+	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 4990; /// DEBUG
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -121,7 +121,7 @@ export class Player extends Entity {
 		Backpack: GetSprite("Player_Backpack") as Sprite,
 	};
 
-	constructor(x: number, y: number) {
+	constructor(x: number, y: number, hasBackpack: boolean, items: { Id: string; Count: number }[]) {
 		super(40, 100, Player._speed, 100);
 
 		this._x = x;
@@ -131,6 +131,8 @@ export class Player extends Entity {
 		this.Tag = Tag.Player;
 		this._collider = new Rectangle(0, 0, this.Width, this.Height);
 		this._quests = [];
+		if (hasBackpack) this._backpack = new Backpack(0, 0);
+		for (const item of items) this.GiveQuestItem(ItemRegistry.GetById(item.Id, item.Count));
 
 		// FOR DEBUG
 		// this.GiveQuestItem(Weapon.GetById("AK12"));
@@ -252,11 +254,11 @@ export class Player extends Entity {
 						const neededAmmo = "AK12" === this._weapon.Id ? "RifleBullet" : "PistolBullet";
 						let findedAmmo = 0;
 
-						const items = this.GetItems();
+						const items = this.GetSlots();
 						for (let i = 0; i < items.length; i++) {
 							const item = items[i];
 
-							if (item.Id === neededAmmo) {
+							if (item !== null && item.Id === neededAmmo) {
 								const toTake = Math.min(this._weapon.MaxAmmoClip - this._weapon.GetLoadedAmmo() + Math.sign(this._weapon.GetLoadedAmmo()) - findedAmmo, item.GetCount());
 								findedAmmo += toTake;
 
@@ -316,7 +318,7 @@ export class Player extends Entity {
 					this._movingUp = false;
 					break;
 				case "KeyA":
-					if (this._grounded) {
+					if (this._grounded || this._onLadder !== null) {
 						this._movingLeft = false;
 						if (!this._keysPressed["KeyD"]) this._currentAnimation = null;
 					}
@@ -326,7 +328,7 @@ export class Player extends Entity {
 					this._movingDown = false;
 					break;
 				case "KeyD":
-					if (this._grounded) {
+					if (this._grounded || this._onLadder !== null) {
 						this._movingRight = false;
 						if (!this._keysPressed["KeyA"]) this._currentAnimation = null;
 					}
@@ -661,7 +663,7 @@ export class Player extends Entity {
 			if (lastHover === null && this._hoveredObject !== null) this._selectedInteraction = 0;
 
 			const itemInHands = this._inventory[this._selectedHand];
-			if (itemInHands !== null && !this._running) {
+			if (itemInHands !== null) {
 				if (itemInHands instanceof Item) {
 					if (itemInHands.IsBig) {
 						const angleWithAnimation = (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0) + (this.Direction === Direction.Left ? Math.PI : 0);
@@ -701,7 +703,7 @@ export class Player extends Entity {
 					);
 
 					itemInHands.Update(dt, handPosition, angleWithAnimation, this.Direction);
-				} else if (itemInHands instanceof Weapon) {
+				} else if (itemInHands instanceof Weapon && !this._running) {
 					const angleWithAnimation = this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
 					const c = Math.cos(angleWithAnimation);
 					const s = Math.sin(angleWithAnimation);
@@ -850,7 +852,22 @@ export class Player extends Entity {
 
 			if (this._weapon === null) {
 				if (itemInHand !== null /* && !(itemInHand instanceof Weapon)  Зачем если  this._weapon === null ? */) {
-					if (itemInHand instanceof Throwable) {
+					if (itemInHand instanceof Item) {
+						itemInHand.Render();
+
+						Canvas.DrawImageWithAngle(
+							this._frames.Hands.Bend,
+							new Rectangle(
+								this._x + this.Width / 2 - Scene.Current.GetLevelPosition(),
+								this._y + this.Height * this._armHeight,
+								this._frames.Hands.Bend.BoundingBox.Width * scale,
+								this._frames.Hands.Bend.BoundingBox.Height * scale
+							),
+							(this._inventory[this._selectedHand].IsBig ? Math.PI / 2 : this._angle) + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+							-2 * scale,
+							(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
+						);
+					} else if (itemInHand instanceof Throwable) {
 						const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2);
 
 						itemInHand.Render();
@@ -868,25 +885,6 @@ export class Player extends Entity {
 							(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 						);
 					} else {
-						if (itemInHand.IsBig)
-							itemInHand
-								.Render
-								// new Vector2(
-								// 	this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(Math.PI / 2),
-								// 	this._y + this.Height * this._armHeight - 23 * Math.sin(Math.PI / 2 + 0.2)
-								// ),
-								// 0
-								();
-						else
-							itemInHand
-								.Render
-								// new Vector2(
-								// 	this._x - Scene.Current.GetLevelPosition() + this.Width / 2 + 23 * Math.cos(this._angle),
-								// 	this._y + this.Height * this._armHeight - 23 * Math.sin(this._angle + 0.2)
-								// ),
-								// this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0)
-								();
-
 						Canvas.DrawImageWithAngle(
 							this._frames.Hands.Bend,
 							new Rectangle(
@@ -895,7 +893,7 @@ export class Player extends Entity {
 								this._frames.Hands.Bend.BoundingBox.Width * scale,
 								this._frames.Hands.Bend.BoundingBox.Height * scale
 							),
-							(this._inventory[this._selectedHand].IsBig ? Math.PI / 2 : this._angle) + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+							this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 							-2 * scale,
 							(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 						);
@@ -1587,23 +1585,14 @@ export class Player extends Entity {
 		return this._backpack !== null;
 	}
 
-	public GetItems() {
+	public GetSlots() {
 		const copy: IItem[] = [];
 
-		for (const item of this._inventory) if (item !== null) copy.push(item);
-		if (this._backpack !== null) for (let i = 0; i < this._backpack.SlotsSize.X; i++) if (this._backpack.GetItemAt(i, 0) !== null) copy.push(this._backpack.GetItemAt(i, 0));
+		for (const item of this._inventory) copy.push(item);
+		if (this._backpack !== null) for (let i = 0; i < this._backpack.SlotsSize.X; i++) copy.push(this._backpack.GetItemAt(i, 0));
 
 		return copy;
 	}
-
-	// public GetItemsState() {
-	// 	const copy: (IItem | null)[] = [];
-
-	// 	for (const item of this._inventory) copy.push(item);
-	// 	if (this._backpack !== null) for (let i = 0; i < this._backpack.SlotsSize.X; i++) copy.push(this._backpack.GetItemAt(i, 0));
-
-	// 	return copy;
-	// }
 
 	public OpenContainer(container: Container) {
 		this._openedContainer = container;
@@ -1617,9 +1606,16 @@ export class Player extends Entity {
 		return new Vector2(this._x, this._y);
 	}
 
-	public RemoveItem(itemId: string, count: number) {
-		for (let i = 0; i < this._inventory.length; i++) if (this._inventory[i].Id === itemId) this._inventory[i] = null;
-		if (this._backpack !== null) for (let i = 0; i < this._backpack.SlotsSize.X; i++) if (this._backpack.GetItemAt(i, 0).Id === itemId) this._backpack.TakeItemFrom(i, 0);
+	public TakeItem(itemId: string, count: number) {
+		for (let i = 0; i < this._inventory.length; i++)
+			if (this._inventory[i] !== null && this._inventory[i].Id === itemId) {
+				count -= this._inventory[i].Take(count);
+
+				if (this._inventory[i].GetCount() <= 0) this._inventory[i] = null;
+
+				if (count === 0) break;
+			}
+		if (this._backpack !== null) this._backpack.RemoveItem(itemId, count);
 
 		this._quests.forEach((quest) => {
 			quest.InventoryChanged();
@@ -1654,25 +1650,16 @@ export class Player extends Entity {
 		if (this._weapon === null) {
 			const inHand = this._inventory[this._selectedHand];
 
-			if (inHand instanceof Throwable) {
-				// if (this._throwableTime > 1000) {
-				// 	inHand.Throw();
-				// 	GetSound("Swing").Play(0.5);
-				// 	this._inventory[this._selectedHand] = null;
-				// }
-			} else if (inHand instanceof UseableItem) {
+			if (inHand instanceof UseableItem) {
 				inHand.Use(() => {
 					this._inventory[this._selectedHand] = null;
 				});
-				// } else if (inHand instanceof Item) {
-				// if (inHand.Id === "Radio") {
-				// 	this.SpeakWith(this._artem);
+			} else if (inHand instanceof Item) {
+				if (inHand.Id === "Radio") {
+					this.SpeakWith(this._artem);
 
-				// 	if (this._artem.GetCompletedQuestsCount() > 2) this._inventory[this._selectedHand] = null;
-				// } else
-				// 	inHand.Use(() => {
-				// 		this._inventory[this._selectedHand] = null;
-				// 	});
+					if (this._artem.GetCompletedQuestsCount() > 2) this._inventory[this._selectedHand] = null;
+				}
 			} else if (inHand === null && this._timeToNextPunch <= 0) {
 				this._timeToPunch = 100;
 				this._timeToNextPunch = 250;

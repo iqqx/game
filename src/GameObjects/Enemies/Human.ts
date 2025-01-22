@@ -137,7 +137,7 @@ export class Human extends Enemy {
 					if ((Scene.Current.GetByType(Elder)[0] as Character).GetCompletedQuestsCount() === 1) {
 						if (!this._warned) {
 							Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
-								if (x instanceof Human) x.MakeWarned();
+								if (x instanceof Human && x._type === EnemyType.Red) x.MakeWarned();
 							});
 
 							Scene.Player.SpeakWith(this._fakeEndCharacter);
@@ -147,13 +147,17 @@ export class Human extends Enemy {
 						Scene.Player.SpeakWith(this._fakeEndCharacter);
 					} else if (this.GetDistanceToPlayer() < 500 && this._warned) {
 						this._aggresive = true;
+
+						Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
+							if (x instanceof Human && x._type === EnemyType.Red) x.MakeAgressive();
+						});
 					} else if (this.GetDistanceToPlayer() > 1000)
 						Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
-							if (x instanceof Human) x.MakeUnwarned();
+							if (x instanceof Human && x._type === EnemyType.Red) x.MakeUnwarned();
 						});
 				} else if (!this._friendly && this.GetDistanceToPlayer() < 500 && this._fakeCharacter.GetCompletedQuestsCount() === 0) {
 					Scene.Current.GetByTag(Tag.Enemy).forEach((x) => {
-						if (x instanceof Human) x.MakeFriendly();
+						if (x instanceof Human && x._type === EnemyType.Green) x.MakeFriendly();
 					});
 
 					Scene.Player.SpeakWith(this._fakeCharacter);
@@ -162,7 +166,7 @@ export class Human extends Enemy {
 			}
 		} else {
 			if (this._timeToRotate <= 0) {
-				this.Direction = -this.Direction as -1 | 1;
+				if (this._type !== EnemyType.Red) this.Direction = -this.Direction as -1 | 1;
 				this._angle = this.Direction === 1 ? 0 : Math.PI;
 				this._timeFromNotice = -1;
 				this._timeFromSaw = -1;

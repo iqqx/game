@@ -48,7 +48,6 @@ function loadLoop() {
         GUI.DrawTextCenter("PARSING", GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
         return;
     }
-    // return;
     window.cancelAnimationFrame(n);
     Promise.all(Object.keys(parsedRouters.Items).map((itemKey) => {
         const object = parsedRouters.Items[itemKey];
@@ -118,7 +117,7 @@ function loadLoop() {
     })))
         .then(() => 
     /// DEBUG
-    Scene.LoadFromFile("Assets/Scenes/Main.json"))
+    Scene.LoadFromFile("Assets/Scenes/Menu.json"))
         .then((x) => (scene = x))
         .catch((err) => {
         scene = Scene.GetErrorScene(err.stack ?? err);

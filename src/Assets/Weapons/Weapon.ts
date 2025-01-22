@@ -155,7 +155,7 @@ export class Weapon implements IItem {
 	GetCount(): number {
 		return 1;
 	}
-	Take(count: number): void {
+	Take(count: number): number {
 		throw new Error("Method not implemented.");
 	}
 	Add(count: number): number {

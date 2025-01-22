@@ -22,7 +22,11 @@ export interface IItem {
 	Render(): void;
 	// IsUsing(): boolean;
 	GetCount(): number;
-	Take(count: number): void;
+	/**
+	 * @returns Изьятое количество, может быть меньше изымаемого
+	 * @param count
+	 */
+	Take(count: number): number;
 	Add(count: number): number;
 	Is(item: IItem): item is IItem;
 	Clone(): IItem;
@@ -242,4 +246,12 @@ export function GetMaxIdentityString(text: string, variants: string[]) {
 	}
 
 	return result;
+}
+
+export function IsString(obj: any): obj is string {
+	return typeof obj === "string";
+}
+
+export function IsNumber(obj: any): obj is number {
+	return typeof obj === "number";
 }
