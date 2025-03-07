@@ -51,8 +51,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 4990; /// DEBUG
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4990; /// DEBUG
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -98,6 +98,7 @@ export class Player extends Entity {
 		},
 	];
 	private _tpActivated = false;
+	private _timeToHideItemName = 0;
 
 	private _avatar: Sprite | null = null;
 	private static _name = "Макс";
@@ -135,9 +136,9 @@ export class Player extends Entity {
 		for (const item of items) this.GiveQuestItem(ItemRegistry.GetById(item.Id, item.Count));
 
 		// FOR DEBUG
-		// this.GiveQuestItem(Weapon.GetById("AK12"));
+		this.GiveQuestItem(Weapon.GetById("AK12"));
 		// this.GiveQuestItem(Weapon.GetById("Glock"));
-		// this.GiveQuestItem(Throwable.GetById("RGN"));
+		this.GiveQuestItem(Throwable.GetById("RGN"));
 		// this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
 		// this.GiveQuestItem(ItemRegistry.GetById("Adrenalin", 2));
 
@@ -502,7 +503,7 @@ export class Player extends Entity {
 
 			if (this._timeFromSpawn >= 5000) {
 				//// FOR DEBUG
-				this.SpeakWith(new PlayerCharacter());
+				// this.SpeakWith(new PlayerCharacter());
 			}
 
 			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
@@ -518,6 +519,8 @@ export class Player extends Entity {
 		// this._yTarget = this._y + this._collider.Height * this._armHeight;
 
 		this._currentAnimation?.Update(dt);
+
+		if (this._timeToHideItemName > 0) this._timeToHideItemName -= dt;
 
 		if (this._timeFromGoodEnd > 0) {
 			this._timeFromGoodEnd += dt;
@@ -1203,7 +1206,6 @@ export class Player extends Entity {
 				for (let i = 0; i < 6; i++) {
 					if (i == this._selectedHand) GUI.SetFillColor(new Color(50, 50, 50));
 					else GUI.SetFillColor(new Color(30, 30, 30));
-
 					if (yCell === 0 && xCell == i) GUI.SetStroke(new Color(200, 200, 200), 2);
 					else GUI.SetStroke(new Color(155, 155, 155), 1);
 
@@ -1251,16 +1253,16 @@ export class Player extends Entity {
 				}
 			} else {
 				const firstXOffset = GUI.Width / 2 - 52.5;
+				const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+				const yCell = Math.floor((750 - this._yTarget - y) / 55);
 
 				GUI.SetFillColor(new Color(70, 70, 70));
 				GUI.SetStroke(new Color(155, 155, 155), 1);
 				GUI.DrawRectangle(firstXOffset - 5, y - 5, 2 * 55 + 5, 55 + 5);
 
 				GUI.SetFillColor(new Color(30, 30, 30));
-				for (let i = 0; i < 2; i++) {
-					const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-					const yCell = Math.floor((750 - this._yTarget - y) / 55);
 
+				for (let i = 0; i < 2; i++) {
 					if (yCell === 0 && xCell == i) GUI.SetStroke(new Color(200, 200, 200), 2);
 					else GUI.SetStroke(new Color(155, 155, 155), 1);
 
@@ -1393,6 +1395,17 @@ export class Player extends Entity {
 
 				GUI.DrawTextCenter(items[i], this._xTarget - 75, 750 - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
 			}
+		}
+
+		if (this._timeToHideItemName > 0 && this._inventory[this._selectedHand] !== null) {
+			GUI.SetFont(16);
+
+			if (this._timeToHideItemName > 1000) GUI.SetFillColor(Color.White);
+			else {
+				GUI.SetFillColor(new Color(255, 255, 255, 255 * (this._timeToHideItemName / 1000)));
+			}
+
+			GUI.DrawText2CenterLineBreaked(GUI.Width / 2, 750 - 100, this._inventory[this._selectedHand].Name);
 		}
 
 		GUI.ClearStroke();
@@ -1636,6 +1649,8 @@ export class Player extends Entity {
 
 		if (this._inventory[this._selectedHand] instanceof Weapon && !this._running) this._weapon = this._inventory[this._selectedHand] as Weapon;
 		else this._weapon = null;
+
+		this._timeToHideItemName = 2000;
 	}
 
 	public IsMoving(): 0 | 1 | 2 {

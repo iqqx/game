@@ -3,9 +3,10 @@ import { Canvas } from "../Context.js";
 import { Direction } from "../Enums.js";
 import { FlyingThrowable } from "../GameObjects/FlyingThrowable.js";
 import { Scene } from "../Scene.js";
-import { Sprite, Vector2, Rectangle, IItem } from "../Utilites.js";
+import { Sprite, Vector2, Rectangle, IItem, GetMaxIdentityString } from "../Utilites.js";
 
 export class Throwable implements IItem {
+	public readonly Name: string;
 	public readonly Id: string;
 	public readonly Icon: Sprite;
 	public readonly IsBig = false;
@@ -32,16 +33,23 @@ export class Throwable implements IItem {
 
 	public static Register(rawJson: {
 		Id: string;
+		Name: string;
 		Sprites: {
 			Icon: string;
 			Main: string;
 		};
 	}) {
-		Throwable._throwables.push(new Throwable(rawJson.Id, { Icon: GetSprite(rawJson.Sprites.Icon), View: GetSprite(rawJson.Sprites.Main) }));
+		if (rawJson.Name === undefined)
+			throw new Error(
+				`Название [Name] не определено (Ближайший ключ: [${GetMaxIdentityString("Name", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`
+			);
+
+		Throwable._throwables.push(new Throwable(rawJson.Id, rawJson.Name, { Icon: GetSprite(rawJson.Sprites.Icon), View: GetSprite(rawJson.Sprites.Main) }));
 	}
 
-	constructor(id: string, images: { Icon: Sprite; View: Sprite }) {
+	constructor(id: string, name: string, images: { Icon: Sprite; View: Sprite }) {
 		this.Id = id;
+		this.Name = name;
 		this.Icon = images.Icon;
 		this.Sprite = images.View;
 	}
@@ -60,7 +68,7 @@ export class Throwable implements IItem {
 	}
 
 	public Clone(): Throwable {
-		return new Throwable(this.Id, { View: this.Sprite, Icon: this.Icon });
+		return new Throwable(this.Id, this.Name, { View: this.Sprite, Icon: this.Icon });
 	}
 
 	public Update(dt: number, position: Vector2, angle: number, direction?: Direction) {

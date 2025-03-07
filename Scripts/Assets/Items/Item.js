@@ -3,6 +3,7 @@ import { Direction } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle, Vector2 } from "../../Utilites.js";
 export class Item {
+    Name;
     Id;
     Icon;
     IsBig;
@@ -12,17 +13,18 @@ export class Item {
     _y;
     _angle;
     _direction;
-    constructor(id, icon, stack, isBig = false) {
+    constructor(id, name, icon, stack, isBig = false) {
         this.Id = id;
         this.Icon = icon;
         this.MaxStack = stack;
         this.IsBig = isBig;
+        this.Name = name;
     }
     Is(other) {
         return this.Id === other.Id;
     }
     Clone() {
-        return new Item(this.Id, this.Icon, this.MaxStack);
+        return new Item(this.Id, this.Name, this.Icon, this.MaxStack);
     }
     Update(dt, position, angle, direction) {
         this._x = position.X;

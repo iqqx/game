@@ -1,6 +1,7 @@
 {
-    "Sprites": {
-        "Icon": "RGN_Icon",
+	"Sprites": {
+		"Icon": "RGN_Icon",
 		"Main": "RGN"
-    }
+	},
+	"Name": "Ручная граната"
 }

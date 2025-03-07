@@ -6,8 +6,8 @@ export class UseableItem extends Item {
     _usingTime = -1;
     _usingCallback;
     _afterUse;
-    constructor(id, icon, stack, isBig, useSound, afterUse, time) {
-        super(id, icon, stack, isBig);
+    constructor(id, name, icon, stack, isBig, useSound, afterUse, time) {
+        super(id, name, icon, stack, isBig);
         this.UseTime = time;
         this._afterUse = afterUse;
         this._usingSound = useSound;
@@ -16,7 +16,7 @@ export class UseableItem extends Item {
         return this.Id === other.Id;
     }
     Clone() {
-        return new UseableItem(this.Id, this.Icon, this.MaxStack, this.IsBig, this._usingSound, this._afterUse, this.UseTime);
+        return new UseableItem(this.Id, this.Name, this.Icon, this.MaxStack, this.IsBig, this._usingSound, this._afterUse, this.UseTime);
     }
     Update(dt, position, angle, direction) {
         super.Update(dt, position, angle, direction);

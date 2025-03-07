@@ -6,12 +6,13 @@ import { DroppedClip } from "../../GameObjects/DroppedClip.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Sprite, Sound, Vector2, Rectangle, IItem } from "../../Utilites.js";
+import { Sprite, Sound, Vector2, Rectangle, IItem, GetMaxIdentityString } from "../../Utilites.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 
 export class Weapon implements IItem {
 	public declare readonly Icon: Sprite;
 	public readonly Sprites: { readonly Image: Sprite; readonly Clip: Sprite };
+	public declare readonly Name: string;
 	public declare readonly Id: string;
 	public readonly IsBig = true;
 	public readonly MaxStack = 1;
@@ -69,6 +70,7 @@ export class Weapon implements IItem {
 			Reload: string;
 		};
 		Id: string;
+		Name: string;
 		AmmoId: string;
 		Damage: number;
 		IsHeavy: boolean;
@@ -84,9 +86,15 @@ export class Weapon implements IItem {
 			Clip: { X: number; Y: number };
 		};
 	}) {
+		if (rawJson.Name === undefined)
+			throw new Error(
+				`Название [Name] не определено (Ближайший ключ: [${GetMaxIdentityString("Name", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`
+			);
+
 		Weapon._weapons.push(
 			new Weapon(
 				rawJson.Id,
+				rawJson.Name,
 				{ Icon: GetSprite(rawJson.Sprites.Icon), Image: GetSprite(rawJson.Sprites.Main), Clip: GetSprite(rawJson.Sprites.Clip) },
 				{
 					Fire: GetSound(rawJson.Sounds.Shoot),
@@ -111,6 +119,7 @@ export class Weapon implements IItem {
 
 	constructor(
 		id: string,
+		name: string,
 		images: { Icon: Sprite; Image: Sprite; Clip: Sprite },
 		sounds: { Fire: Sound; Shell?: Sound; Reload: Sound },
 		fireCooldown: number,
@@ -127,6 +136,7 @@ export class Weapon implements IItem {
 		clipOffset: Vector2
 	) {
 		this.Id = id;
+		this.Name = name;
 		this.Icon = images.Icon;
 		this.Sprites = images;
 		this.AmmoId = ammoId;
@@ -165,6 +175,7 @@ export class Weapon implements IItem {
 	public Clone(): Weapon {
 		return new Weapon(
 			this.Id,
+			this.Name,
 			{ Icon: this.Icon, ...this.Sprites },
 			this._sounds,
 			this._fireCooldown,

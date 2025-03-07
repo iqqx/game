@@ -4,6 +4,7 @@ import { Scene } from "../../Scene.js";
 import { IItem, Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 
 export class Item implements IItem {
+	public readonly Name: string;
 	public readonly Id: string;
 	public readonly Icon: Sprite;
 	public readonly IsBig: boolean;
@@ -15,11 +16,12 @@ export class Item implements IItem {
 	protected _angle: number;
 	protected _direction: Direction;
 
-	constructor(id: string, icon: Sprite, stack: number, isBig = false) {
+	constructor(id: string, name: string, icon: Sprite, stack: number, isBig = false) {
 		this.Id = id;
 		this.Icon = icon;
 		this.MaxStack = stack;
 		this.IsBig = isBig;
+        this.Name = name;
 	}
 
 	public Is(other: IItem): other is Item {
@@ -27,7 +29,7 @@ export class Item implements IItem {
 	}
 
 	public Clone(): Item {
-		return new Item(this.Id, this.Icon, this.MaxStack);
+		return new Item(this.Id, this.Name, this.Icon, this.MaxStack);
 	}
 
 	public Update(dt: number, position: Vector2, angle: number, direction: Direction) {

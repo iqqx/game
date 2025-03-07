@@ -10,8 +10,8 @@ export class UseableItem extends Item {
 	private _usingCallback: () => void;
 	private readonly _afterUse: () => void;
 
-	constructor(id: string, icon: Sprite, stack: number, isBig: boolean, useSound: Sound, afterUse: () => void, time: number) {
-		super(id, icon, stack, isBig);
+	constructor(id: string,name: string, icon: Sprite, stack: number, isBig: boolean, useSound: Sound, afterUse: () => void, time: number) {
+		super(id, name, icon, stack, isBig);
 
 		this.UseTime = time;
 		this._afterUse = afterUse;
@@ -23,7 +23,7 @@ export class UseableItem extends Item {
 	}
 
 	public Clone(): UseableItem {
-		return new UseableItem(this.Id, this.Icon, this.MaxStack, this.IsBig, this._usingSound, this._afterUse, this.UseTime);
+		return new UseableItem(this.Id, this.Name, this.Icon, this.MaxStack, this.IsBig, this._usingSound, this._afterUse, this.UseTime);
 	}
 
 	public Update(dt: number, position: Vector2, angle: number, direction: Direction) {

@@ -10,6 +10,7 @@
 		"Reload": "PistolReload"
 	},
 	"AmmoId": "PistolBullet",
+    "Name": "Glock 17",
 	"Damage": 20,
 	"IsHeavy": false,
 	"IsAutomatic": false,

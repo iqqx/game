@@ -16,31 +16,12 @@ export class ItemRegistry {
         return ni;
     }
     static Register(rawJson) {
-        // export class Bread extends Item {
-        // 	public readonly UseTime = 1500;
-        // 	public readonly Icon: Sprite = GetSprite("Bread");
-        // 	protected readonly _usingSound = GetSound("Eat");
-        // 	static toString(): string {
-        // 		return "Хлеб";
-        // 	}
-        // 	public Render(at: Vector2, angle: number): void {
-        // 		const ratio = this.Icon.BoundingBox.Width / this.Icon.BoundingBox.Height;
-        // 		if ((angle > Math.PI / 2 && angle <= Math.PI) || (angle < Math.PI / -2 && angle >= -Math.PI))
-        // 			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 20);
-        // 		else Canvas.DrawImageWithAngle(this.Icon, new Rectangle(at.X, at.Y, 25 * ratio, 25), angle, -10, 10);
-        // 	}
-        // 	protected OnUsed() {
-        // 		Scene.Player.Heal(15);
-        // 	}
-        // }
         if (rawJson.Icon === undefined)
             throw new Error(`Иконка [Icon] не определена (Ближайший ключ: [${GetMaxIdentityString("Icon", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`);
-        // if (rawJson.Stack === undefined)
-        // 	throw new Error(
-        // 		`Размер стака [Stack] не определен (Ближайший ключ: [${GetMaxIdentityString("Stack", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`
-        // 	);
+        if (rawJson.Name === undefined)
+            throw new Error(`Название [Name] не определено (Ближайший ключ: [${GetMaxIdentityString("Name", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`);
         if (rawJson.AfterUse === undefined) {
-            ItemRegistry._items.push(new Item(rawJson.Id, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig));
+            ItemRegistry._items.push(new Item(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig));
         }
         else {
             if (rawJson.AfterUse.Action === undefined)
@@ -63,7 +44,7 @@ export class ItemRegistry {
                     throw new Error(`Неизвестный тип действия ${rawJson.AfterUse.Action.Type} [Предмет: ${rawJson.Id}]`);
                 }
             }
-            ItemRegistry._items.push(new UseableItem(rawJson.Id, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig, use.Sound, use.afterUse, use.time));
+            ItemRegistry._items.push(new UseableItem(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig, use.Sound, use.afterUse, use.time));
         }
     }
 }

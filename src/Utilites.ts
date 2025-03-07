@@ -14,6 +14,7 @@ declare global {
 
 export interface IItem {
 	readonly Id: string;
+	readonly Name: string;
 	readonly Icon: Sprite;
 	readonly IsBig: boolean;
 	readonly MaxStack: number;

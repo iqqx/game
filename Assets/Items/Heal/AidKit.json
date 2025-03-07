@@ -1,5 +1,6 @@
 {
 	"Icon": "AidKit",
+    "Name": "Большая аптечка",
 	"Stack": 1,
 	"IsBig": true,
 	"AfterUse": {

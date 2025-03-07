@@ -6,7 +6,7 @@ import { DroppedClip } from "../../GameObjects/DroppedClip.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
 import { Scene } from "../../Scene.js";
-import { Vector2, Rectangle } from "../../Utilites.js";
+import { Vector2, Rectangle, GetMaxIdentityString } from "../../Utilites.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 export class Weapon {
     Sprites;
@@ -46,14 +46,17 @@ export class Weapon {
         return w.Clone();
     }
     static Register(rawJson) {
-        Weapon._weapons.push(new Weapon(rawJson.Id, { Icon: GetSprite(rawJson.Sprites.Icon), Image: GetSprite(rawJson.Sprites.Main), Clip: GetSprite(rawJson.Sprites.Clip) }, {
+        if (rawJson.Name === undefined)
+            throw new Error(`Название [Name] не определено (Ближайший ключ: [${GetMaxIdentityString("Name", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`);
+        Weapon._weapons.push(new Weapon(rawJson.Id, rawJson.Name, { Icon: GetSprite(rawJson.Sprites.Icon), Image: GetSprite(rawJson.Sprites.Main), Clip: GetSprite(rawJson.Sprites.Clip) }, {
             Fire: GetSound(rawJson.Sounds.Shoot),
             Shell: rawJson.Sounds.ShellImpact === undefined ? undefined : GetSound(rawJson.Sounds.ShellImpact),
             Reload: GetSound(rawJson.Sounds.Reload),
         }, 1000 / rawJson.ShootsPerSecond, rawJson.AmmoId, rawJson.Damage, rawJson.Spread, rawJson.IsHeavy, rawJson.IsAutomatic, rawJson.ReloadTime, rawJson.ClipCapacity, rawJson.Recoil, new Vector2(rawJson.PixelsOffsets.Grip.X, rawJson.PixelsOffsets.Grip.Y), new Vector2(rawJson.PixelsOffsets.Muzzle.X, rawJson.PixelsOffsets.Muzzle.Y), new Vector2(rawJson.PixelsOffsets.Clip.X, rawJson.PixelsOffsets.Clip.Y)));
     }
-    constructor(id, images, sounds, fireCooldown, ammoId, damage, spread, heavy, auto, reloadTime, clip, recoil, handOffset, muzzleOffset, clipOffset) {
+    constructor(id, name, images, sounds, fireCooldown, ammoId, damage, spread, heavy, auto, reloadTime, clip, recoil, handOffset, muzzleOffset, clipOffset) {
         this.Id = id;
+        this.Name = name;
         this.Icon = images.Icon;
         this.Sprites = images;
         this.AmmoId = ammoId;
@@ -86,7 +89,7 @@ export class Weapon {
         throw new Error("Method not implemented.");
     }
     Clone() {
-        return new Weapon(this.Id, { Icon: this.Icon, ...this.Sprites }, this._sounds, this._fireCooldown, this.AmmoId, this._damage, this._spread, this.Heavy, this.Automatic, this._reloadTime / 1000, this.MaxAmmoClip, this._recoil, Vector2.Div(this.GripOffset, this.Sprites.Image.Scale), Vector2.Div(this.MuzzleOffset, this.Sprites.Image.Scale), Vector2.Div(this.ClipOffset, this.Sprites.Image.Scale));
+        return new Weapon(this.Id, this.Name, { Icon: this.Icon, ...this.Sprites }, this._sounds, this._fireCooldown, this.AmmoId, this._damage, this._spread, this.Heavy, this.Automatic, this._reloadTime / 1000, this.MaxAmmoClip, this._recoil, Vector2.Div(this.GripOffset, this.Sprites.Image.Scale), Vector2.Div(this.MuzzleOffset, this.Sprites.Image.Scale), Vector2.Div(this.ClipOffset, this.Sprites.Image.Scale));
     }
     Is(other) {
         return this.Id == other.Id;

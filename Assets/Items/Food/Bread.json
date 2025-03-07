@@ -1,6 +1,7 @@
 {
 	"Icon": "Bread",
-	"AfterUse": {
+"Name": "Хлеб",
+    "AfterUse": {
 		"Sound": "Eat",
 		"Time": 1.5,
 		"Animation": "Eat",
