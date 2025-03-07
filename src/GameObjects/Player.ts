@@ -99,6 +99,8 @@ export class Player extends Entity {
 	];
 	private _tpActivated = false;
 	private _timeToHideItemName = 0;
+	private _timeToAmbientSound = 10000;
+	private _lastAmbientNumber = -1;
 
 	private _avatar: Sprite | null = null;
 	private static _name = "Макс";
@@ -138,7 +140,7 @@ export class Player extends Entity {
 		// FOR DEBUG
 		// this.GiveQuestItem(Weapon.GetById("AK12"));
 		// this.GiveQuestItem(Weapon.GetById("Glock"));
-		this.GiveQuestItem(Throwable.GetById("RGN"));
+		// this.GiveQuestItem(Throwable.GetById("RGN"));
 		// this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
 		// this.GiveQuestItem(ItemRegistry.GetById("Adrenalin", 2));
 
@@ -507,6 +509,8 @@ export class Player extends Entity {
 			this.ApplyVForce(dt);
 
 			if (this._timeFromSpawn >= 5000) {
+				GetSound("Background_1").Play(0.2, 1, true);
+
 				//// FOR DEBUG
 				// this.SpeakWith(new PlayerCharacter());
 			}
@@ -555,6 +559,20 @@ export class Player extends Entity {
 				this._speaked2 = true;
 				this.SpeakWith(this._artem);
 			}
+		}
+
+		this._timeToAmbientSound -= dt;
+		if (this._timeToAmbientSound <= 0) {
+			const ambientSoundsCount = 2;
+
+			this._timeToAmbientSound = 30_000 + Math.random() * 20_000;
+
+			let nextAmbient = 0;
+			do nextAmbient = Math.clamp(Math.ceil(Math.random() * ambientSoundsCount), 1, ambientSoundsCount);
+			while (this._lastAmbientNumber === nextAmbient);
+
+			this._lastAmbientNumber = nextAmbient;
+			GetSound(`Ambient_${nextAmbient}`).Play(0.25);
 		}
 
 		if (this._x > 33500 && this._y > 800 && this._onLadder !== null) this._timeFromGoodEnd = dt;

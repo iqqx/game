@@ -77,14 +77,14 @@ export function LoadSound(source: string): Sound {
 		Speed: 1,
 		Volume: 1,
 		Length: 1,
-		Play: function (volume?: number, speed?: number) {
-			if (volume === undefined && speed === undefined) (s.cloneNode() as HTMLAudioElement).play();
-			else {
+		Play: function (volume?: number, speed?: number, looped = false) {
+			if (volume !== undefined || speed !== undefined || looped !== false) {
 				const c = s.cloneNode() as HTMLAudioElement;
 				c.volume = volume ?? this.Volume;
 				c.playbackRate = speed ?? this.Speed;
+				c.loop = looped;
 				c.play();
-			}
+			} else (s.cloneNode() as HTMLAudioElement).play();
 		},
 		Apply: function () {
 			s.volume = this.Volume;

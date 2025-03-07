@@ -198,7 +198,7 @@ declare global {
 
 export type Sound = {
 	PlayOriginal: () => void;
-	Play: (volume?: number, speed?: number) => void;
+	Play: (volume?: number, speed?: number, looped?: boolean) => void;
 	Apply: () => void;
 	IsPlayingOriginal: () => boolean;
 	StopOriginal: () => void;

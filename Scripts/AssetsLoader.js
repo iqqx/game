@@ -58,15 +58,16 @@ export function LoadSound(source) {
         Speed: 1,
         Volume: 1,
         Length: 1,
-        Play: function (volume, speed) {
-            if (volume === undefined && speed === undefined)
-                s.cloneNode().play();
-            else {
+        Play: function (volume, speed, looped = false) {
+            if (volume !== undefined || speed !== undefined || looped !== false) {
                 const c = s.cloneNode();
                 c.volume = volume ?? this.Volume;
                 c.playbackRate = speed ?? this.Speed;
+                c.loop = looped;
                 c.play();
             }
+            else
+                s.cloneNode().play();
         },
         Apply: function () {
             s.volume = this.Volume;
