@@ -92,6 +92,8 @@
 		"Music_1": "Sounds/music-arsen.mp3",
 		"Music_2": "Sounds/music-2.mp3",
 		"Music_3": "Sounds/music-3.mp3",
+        "Music_4": "https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3",
+		"Music_5": "https://pool.anison.fm/AniSonFM(320)",
 		"PunchHit": "Sounds/punch.wav",
 		"Punch": "Sounds/punch.mp3",
 		"Rat_Attack": "Sounds/rat_attack.mp3",

@@ -5,6 +5,21 @@ const assetsToLoad = [];
 let assetsParsedCount = 0;
 let parsed = false;
 let longLoad = false;
+const errorImage = (() => {
+    const c = document.createElement("canvas");
+    const co = c.getContext("2d");
+    c.width = 64;
+    c.height = 64;
+    for (let y = 0; y < 4; ++y)
+        for (let x = 0; x < 4; ++x) {
+            if ((x + y) % 2 === 0)
+                co.fillStyle = "#FF00FF";
+            else
+                co.fillStyle = "#000000";
+            co.fillRect(x * 16, y * 16, 16, 16);
+        }
+    return c.toDataURL();
+})();
 export function LoadImage(source, boundingBox, scale) {
     assetsToLoad.push(source);
     const img = new Image();
@@ -24,6 +39,13 @@ export function LoadImage(source, boundingBox, scale) {
             }, Math.random() * 20000);
         else
             assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+    };
+    img.onerror = () => {
+        img.src = errorImage;
+        cte.Scale = 1;
+        cte.BoundingBox = new Rectangle(0, 0, 64, 64);
+        cte.ScaledSize = new Vector2(cte.BoundingBox.Width * cte.Scale, cte.BoundingBox.Height * cte.Scale);
+        assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
     };
     img.src = source;
     return cte;
@@ -69,6 +91,9 @@ export function LoadSound(source) {
             }, Math.random() * 20000);
         else
             assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+    };
+    s.onerror = () => {
+        assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
     };
     s.preload = "auto";
     s.src = source;
