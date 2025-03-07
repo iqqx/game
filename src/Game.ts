@@ -141,7 +141,7 @@ function loadLoop() {
 		)
 		.then(() =>
 			/// DEBUG
-			Scene.LoadFromFile("Assets/Scenes/Main.json")
+			Scene.LoadFromFile("Assets/Scenes/Menu.json")
 		)
 		.then((x) => (scene = x))
 		.catch((err) => {
