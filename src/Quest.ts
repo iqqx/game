@@ -1,14 +1,14 @@
-import { Item } from "./Assets/Items/Item.js";
 import { EnemyType } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Character } from "./GameObjects/QuestGivers/Character.js";
 import { Scene } from "./Scene.js";
-import { GetEnemyTypeName, IItem } from "./Utilites.js";
+import { GetEnemyTypeName } from "./Utilites.js";
 
 export class Quest {
 	public readonly Title: string;
 	public readonly Giver: Character | Player;
 	public readonly Tasks: Task[] = [];
+	public NoSound = false;
 	private readonly _afterComplete?: () => void;
 	private _completed = false;
 	private _stage = 1;
@@ -17,6 +17,12 @@ export class Quest {
 		this.Title = Title;
 		this.Giver = Giver;
 		this._afterComplete = afterComplete;
+	}
+
+	public WithoutCompletionSound() {
+		this.NoSound = true;
+
+		return this;
 	}
 
 	public Update() {

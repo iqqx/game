@@ -62,27 +62,39 @@ export class Artem extends Character {
 
 				return {
 					Messages: [
-						"Стой ты кто, что произошло?",
-						"Я Артем, искал выход из этого чертового\nметро.",
+						"Стой!\nТы кто?\nЧто произошло?",
+						"Я - Артём, искал выход из этого чертового\nметро.",
 						"Ну и как успехи?",
-						"Все завалено не пройти.",
-						"Эх жаль, я тоже ищу выход, но с другой\nстороны живет монстр. Не знаешь что с\nдругими станциями?",
-						"Cлышал, что на соседней станции люди\nпостроили себе убежище, а про другие знать\nне знаю. Слушай давай ты поможешь мне, а я\nтебе. Если вдруг найдешь выход, то свяжись\nсо мной, а я тебе, если вдруг найду, тоже\nтебе сообщу.\nВот возьми рацию, частота 102,75.",
+						"Все завалено, нельзя пройти.",
+						"Эх... жаль. Я тоже ищу выход, но с другой\nстороны живет монстр. Не знаешь, что с\nдругими станциями?",
+						"Cлышал, что на соседней станции люди\nпостроили себе убежище, а про другие знать\nне знаю. Слушай, давай ты поможешь мне, а я -\nтебе. Если вдруг найдешь выход, то свяжись\nсо мной, а я тебе, если вдруг найду, тоже\nтебе сообщу.\nВот, возьми рацию, частота 102,75.",
 						"А как я пройду через монстра?",
 						"Вот это должно помочь.",
-						"Хорошо договорились.",
+						"Хорошо, договорились.",
+					],
+					Voices: [
+						GetSound("Dialog_1_0"),
+						GetSound("Dialog_1_1"),
+						GetSound("Dialog_1_2"),
+						GetSound("Dialog_1_3"),
+						GetSound("Dialog_1_4"),
+						GetSound("Dialog_1_5"),
+						GetSound("Dialog_1_6"),
+						GetSound("Dialog_1_7"),
+						GetSound("Dialog_1_8"),
 					],
 					AfterAction: () => {
 						Scene.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
 						Scene.Player.GiveQuestItem(Throwable.GetById("RGN"));
-						Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(21700, "Лагерь"));
+						Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(20850, "Лагерь"));
 					},
 					Owner: this,
 					OwnerFirst: false,
 				};
 			case 1:
 				return {
-					Messages: ["Ну что там с выходом?", "Ещё не нашел.", "Ну так ищи быстрее."],
+					Messages: ["Ну, что там с выходом?", "Ещё не нашёл.", "Ну так ищи быстрее."],
+					Voices: [GetSound("Dialog_2_0"), GetSound("Dialog_2_1"), GetSound("Dialog_2_2")],
 					Owner: this,
 					OwnerFirst: true,
 				};
@@ -90,7 +102,8 @@ export class Artem extends Character {
 				this._completedQuests++;
 
 				return {
-					Messages: ["Артем, прием, я его нашел, нашел выход,\nон находится, не доходя до центральной\nветки.", "Принял, не мог бы ты подождать меня у него?", "Хорошо."],
+					Messages: ["Артём, приём! Я его нашёл, нашёл выход,\nон находится, не доходя до центральной\nветки.", "Принял. Не мог бы ты подождать меня у него?", "Хорошо."],
+					Voices: [GetSound("Dialog_13_0"), GetSound("Dialog_13_1"), GetSound("Dialog_13_2")],
 					Owner: this,
 					AfterAction: () => {
 						(Scene.Current.GetByType(Artem)[0] as Artem).StartEnd();
@@ -102,6 +115,7 @@ export class Artem extends Character {
 
 				return {
 					Messages: ["Вот спасибо тебе большое, услужил."],
+					Voices: [GetSound("Dialog_14")],
 					Owner: this,
 					AfterAction: () => {
 						(Scene.Current.GetByType(Artem)[0] as Artem).Shoot();
@@ -110,13 +124,15 @@ export class Artem extends Character {
 				};
 			case 4:
 				return {
-					Messages: ["Эх, Максим, Максим, как так то, ведь это я\nтот выход завалил. Что бы никто не поки..."],
+					Messages: ["Эх, Максим, Максим, как так то? Ведь это я\nтот выход завалил. Чтобы никто не поки..."],
+					Voices: [GetSound("Dialog_16")],
 					Owner: this,
 					OwnerFirst: true,
 				};
 			default:
 				return {
 					Messages: ["Cпасибо."],
+					Voices: [GetSound("Dialog_15")],
 					Owner: this,
 					OwnerFirst: true,
 				};

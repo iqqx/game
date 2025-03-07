@@ -1,4 +1,4 @@
-import { GetSprite } from "../../AssetsLoader.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Artem } from "./Artem.js";
@@ -13,7 +13,8 @@ export class PlayerCharacter extends Character {
         switch (this._completedQuests) {
             case 0:
                 return {
-                    Messages: ["Где это я? Как же болит голова.", "Нужно побыстрее выбираться.\nКажется в левой части тоннеля был выход."],
+                    Messages: ["Где это я?\nКак же болит голова...", "Нужно побыстрее выбираться.\nКажется в левой части тоннеля был выход."],
+                    Voices: [GetSound("Dialog_0_0"), GetSound("Dialog_0_1")],
                     Owner: this,
                     AfterAction: () => {
                         Scene.Player.PushQuest(new Quest("Свет в конце тоннеля", this, () => {
@@ -28,7 +29,8 @@ export class PlayerCharacter extends Character {
                 };
             case 1:
                 return {
-                    Messages: ["Ну вот и все я его нашел, осталось только\nподняться.", "А точно, Артем хотел чтобы я сообщил по\nрации, что нашел выход."],
+                    Messages: ["Ну вот и всё, я его нашёл, осталось только\nподняться.", "А точно! Артём хотел, чтобы я сообщил по\nрации, что нашёл выход."],
+                    Voices: [GetSound("Dialog_17_0"), GetSound("Dialog_17_1")],
                     Owner: this,
                     OwnerFirst: false,
                 };

@@ -1,4 +1,4 @@
-import { GetSprite } from "../../AssetsLoader.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Character } from "./Character.js";
@@ -10,9 +10,10 @@ export class GuardFake extends Character {
     GetDialog() {
         super.GetDialog();
         return {
-            Messages: ["Стой кто идет? Покажи руки, оружие есть?", "Тихо, тихо, убираю.", "Пойдем к нашему старосте он задаст тебе пару\nвопросов."],
+            Messages: ["Стой!\nКто идёт?\nПокажи руки!\nОружие есть?", "Тихо, тихо, убираю.", "Пойдём к нашему Старосте, он задаст тебе пару\nвопросов."],
+            Voices: [GetSound("Dialog_3_0"), GetSound("Dialog_3_1"), GetSound("Dialog_3_2")],
             AfterAction: () => {
-                Scene.Player.PushQuest(new Quest("Разговор", this).AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0]));
+                Scene.Player.PushQuest(new Quest("Разговор", this).WithoutCompletionSound().AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0]));
                 this._completedQuests++;
             },
             Owner: this,

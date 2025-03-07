@@ -1,7 +1,7 @@
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
-import { Rectangle, Sprite } from "../../Utilites.js";
+import { Rectangle, Sound, Sprite } from "../../Utilites.js";
 import { Interactable } from "../GameObject.js";
 
 export class Character extends Interactable {
@@ -61,6 +61,7 @@ export class Character extends Interactable {
 
 export type Dialog = {
 	Messages: string[];
+	Voices: Sound[];
 	AfterAction?: () => void;
 	Owner: Character;
 	OwnerFirst: boolean;

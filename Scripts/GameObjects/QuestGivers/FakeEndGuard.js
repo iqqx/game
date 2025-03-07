@@ -1,4 +1,4 @@
-import { GetSprite } from "../../AssetsLoader.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Scene } from "../../Scene.js";
 import { Character } from "./Character.js";
 import { Elder } from "./Elder.js";
@@ -11,17 +11,19 @@ export class FakeEndGuard extends Character {
         switch (Scene.Current.GetByType(Elder)[0].GetCompletedQuestsCount()) {
             case 0:
                 return {
-                    Messages: ["Стой, кто идет? Проход закрыт.\nПриблизишься на шаг - стреляем."],
+                    Messages: ["Стой!\nКто идёт?\nПроход закрыт!\nПриблизишься на шаг - стреляем!"],
+                    Voices: [GetSound("Dialog_11_0")],
                     Owner: this,
                     OwnerFirst: true,
                 };
             case 1:
                 return {
                     Messages: [
-                        "Стой, кто идет? Проход закрыт.\nПриблизишься на шаг - стреляем.",
-                        "Я от Старосты, он должен был передать.",
-                        "А ну проходи, только быстро, чтобы никто не\nвидел.",
+                        "Стой!\nКто идёт?\nПроход закрыт!\nПриблизишься на шаг - стреляем!",
+                        "Я от Старосты!\nОн должен был передать.",
+                        "А, ну проходи, только быстро!\nЧтобы никто не увидел.",
                     ],
+                    Voices: [GetSound("Dialog_11_0"), GetSound("Dialog_11_1"), GetSound("Dialog_11_2")],
                     Owner: this,
                     OwnerFirst: true,
                 };

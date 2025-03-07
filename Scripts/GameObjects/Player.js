@@ -34,7 +34,7 @@ export class Player extends Entity {
     _armHeight = 0.65;
     _dialog = null;
     _dialogState = 0;
-    _chars = 0;
+    _charIndex = 0;
     _timeToNextChar = 0;
     _timeFromDeath = 0;
     _openedContainer = null;
@@ -92,7 +92,7 @@ export class Player extends Entity {
     ];
     _tpActivated = false;
     _timeToHideItemName = 0;
-    _timeToAmbientSound = 10000;
+    _timeToAmbientSound = 20000;
     _lastAmbientNumber = -1;
     _avatar = null;
     static _name = "Макс";
@@ -469,7 +469,7 @@ export class Player extends Entity {
             if (this._timeFromSpawn >= 5000) {
                 GetSound("Background_1").Play(0.2, 1, true);
                 //// FOR DEBUG
-                // this.SpeakWith(new PlayerCharacter());
+                this.SpeakWith(new PlayerCharacter());
             }
             this._artem = Scene.Current.GetByType(Artem)[0];
             return;
@@ -522,10 +522,15 @@ export class Player extends Entity {
         if (this._dialog !== null && this._timeToNextChar > 0) {
             this._timeToNextChar -= dt;
             if (this._timeToNextChar <= 0) {
-                this._chars++;
+                this._charIndex++;
                 GetSound("Dialog").Play(0.05);
-                if (this._chars < this._dialog.Messages[this._dialogState].length)
-                    this._timeToNextChar = 50;
+                if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
+                    const prevChar = this._dialog.Messages[this._dialogState][this._charIndex - 1];
+                    if (",.-:?!".includes(prevChar))
+                        this._timeToNextChar = 500;
+                    else
+                        this._timeToNextChar = 60;
+                }
             }
         }
         this._quests.forEach((quest, i) => {
@@ -536,7 +541,7 @@ export class Player extends Entity {
                     this._artem.End();
                     this.SpeakWith(quest.Giver);
                 }
-                this._quests.splice(i, 1);
+                this.RemoveQuest(quest);
             }
             else if (i === 0 &&
                 quest.Giver.constructor.name === PlayerCharacter.name &&
@@ -1018,7 +1023,7 @@ export class Player extends Entity {
                 GUI.DrawText(GUI.Width / 2 - 500 / 2 + 10, GUI.Height - 200 - 75, this._dialogState % 2 === (this._dialog.OwnerFirst ? 1 : 0) ? Player._name : this._dialog.Owner.GetName());
             }
             GUI.SetFont(16);
-            GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
+            GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._charIndex), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
         }
         if (this._draggedItem !== null)
             GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
@@ -1165,9 +1170,6 @@ export class Player extends Entity {
     GetQuestsBy(by) {
         return this._quests.filter((x) => x.Giver === by || (by === GuardFake && x.Giver instanceof by));
     }
-    RemoveQuest(quest) {
-        return this._quests.splice(this._quests.indexOf(quest), 1);
-    }
     SwapItemAt(x) {
         if (this._backpack !== null && x >= 2) {
             if (this._draggedItem !== null &&
@@ -1226,29 +1228,39 @@ export class Player extends Entity {
             quest.OnTalked(character);
         });
         this._dialogState = 0;
-        this._chars = 0;
-        this._timeToNextChar = 75;
+        this._charIndex = 0;
+        this._timeToNextChar = 60;
         this._dialog = character.GetDialog();
+        this._dialog.Voices[0].PlayOriginal();
+    }
+    RemoveQuest(quest) {
+        if (!quest.NoSound)
+            GetSound("Quest_Completed").PlayOriginal();
+        return this._quests.splice(this._quests.indexOf(quest), 1);
     }
     PushQuest(quest) {
+        GetSound("Quest_Recieved").PlayOriginal();
         this._quests.push(quest);
     }
     ContinueDialog() {
         if (this._dialog === null)
             return;
-        if (this._chars < this._dialog.Messages[this._dialogState].length) {
-            this._chars = this._dialog.Messages[this._dialogState].length;
+        if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
+            this._charIndex = this._dialog.Messages[this._dialogState].length;
         }
         else {
-            this._dialogState++;
+            ++this._dialogState;
             if (this._dialog.Messages.length == this._dialogState) {
                 if (this._dialog.AfterAction !== undefined)
                     this._dialog.AfterAction();
+                this._dialog.Voices[this._dialog.Voices.length - 1].StopOriginal();
                 this._dialog = null;
             }
             else {
-                this._chars = 0;
+                this._charIndex = 0;
                 this._timeToNextChar = 75;
+                this._dialog.Voices[this._dialogState - 1].StopOriginal();
+                this._dialog.Voices[this._dialogState].PlayOriginal();
             }
         }
     }

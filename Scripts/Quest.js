@@ -4,6 +4,7 @@ export class Quest {
     Title;
     Giver;
     Tasks = [];
+    NoSound = false;
     _afterComplete;
     _completed = false;
     _stage = 1;
@@ -11,6 +12,10 @@ export class Quest {
         this.Title = Title;
         this.Giver = Giver;
         this._afterComplete = afterComplete;
+    }
+    WithoutCompletionSound() {
+        this.NoSound = true;
+        return this;
     }
     Update() {
         for (const task of this.Tasks.slice(0, this._stage))

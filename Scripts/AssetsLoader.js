@@ -50,10 +50,10 @@ export function LoadImage(source, boundingBox, scale) {
     img.src = source;
     return cte;
 }
-export function LoadSound(source) {
+export function LoadSound(source, volume = 1) {
     assetsToLoad.push(source);
     const s = new Audio();
-    s.volume = 1;
+    s.volume = volume;
     const newSound = {
         Speed: 1,
         Volume: 1,
@@ -197,6 +197,12 @@ export async function Parse() {
             if (typeof object === "string") {
                 assetsParsedCount++;
                 sounds.set(soundKey, LoadSound(object));
+            }
+            else if (typeof object === "object") {
+                if (object.Path === undefined)
+                    return Promise.reject(`Путь к звуку (Path) не определен.\nМаксимально похожий ключ на 'Path': '${GetMaxIdentityString("Path", Object.keys(object))}'`);
+                assetsParsedCount++;
+                sounds.set(soundKey, LoadSound(object.Path, object.Volume));
             }
             else
                 return Promise.reject(`Недопустимый тип звука: ${soundKey}.`);

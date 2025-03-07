@@ -40,7 +40,7 @@ export class Player extends Entity {
 	private _armHeight: 0.5 | 0.65 = 0.65;
 	private _dialog: Dialog | null = null;
 	private _dialogState = 0;
-	private _chars = 0;
+	private _charIndex = 0;
 	private _timeToNextChar = 0;
 	private _timeFromDeath: number = 0;
 	private _openedContainer: Container | null = null;
@@ -99,7 +99,7 @@ export class Player extends Entity {
 	];
 	private _tpActivated = false;
 	private _timeToHideItemName = 0;
-	private _timeToAmbientSound = 10000;
+	private _timeToAmbientSound = 20000;
 	private _lastAmbientNumber = -1;
 
 	private _avatar: Sprite | null = null;
@@ -512,7 +512,7 @@ export class Player extends Entity {
 				GetSound("Background_1").Play(0.2, 1, true);
 
 				//// FOR DEBUG
-				// this.SpeakWith(new PlayerCharacter());
+				this.SpeakWith(new PlayerCharacter());
 			}
 
 			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
@@ -581,11 +581,16 @@ export class Player extends Entity {
 			this._timeToNextChar -= dt;
 
 			if (this._timeToNextChar <= 0) {
-				this._chars++;
+				this._charIndex++;
 
 				GetSound("Dialog").Play(0.05);
 
-				if (this._chars < this._dialog.Messages[this._dialogState].length) this._timeToNextChar = 50;
+				if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
+					const prevChar = this._dialog.Messages[this._dialogState][this._charIndex - 1];
+
+					if (",.-:?!".includes(prevChar)) this._timeToNextChar = 500;
+					else this._timeToNextChar = 60;
+				}
 			}
 		}
 
@@ -599,7 +604,7 @@ export class Player extends Entity {
 					this.SpeakWith(quest.Giver as Character);
 				}
 
-				this._quests.splice(i, 1);
+				this.RemoveQuest(quest);
 			} else if (
 				i === 0 &&
 				quest.Giver.constructor.name === PlayerCharacter.name &&
@@ -1378,7 +1383,7 @@ export class Player extends Entity {
 			}
 
 			GUI.SetFont(16);
-			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._chars), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
+			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._charIndex), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 		}
 
 		if (this._draggedItem !== null) GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
@@ -1554,10 +1559,6 @@ export class Player extends Entity {
 		return this._quests.filter((x) => x.Giver === by || (by === GuardFake && x.Giver instanceof (by as typeof GuardFake)));
 	}
 
-	public RemoveQuest(quest: Quest) {
-		return this._quests.splice(this._quests.indexOf(quest), 1);
-	}
-
 	private SwapItemAt(x: number) {
 		if (this._backpack !== null && x >= 2) {
 			if (
@@ -1612,30 +1613,44 @@ export class Player extends Entity {
 		});
 
 		this._dialogState = 0;
-		this._chars = 0;
-		this._timeToNextChar = 75;
+		this._charIndex = 0;
+		this._timeToNextChar = 60;
 		this._dialog = character.GetDialog();
+
+		this._dialog.Voices[0].PlayOriginal();
+	}
+
+	public RemoveQuest(quest: Quest) {
+		if (!quest.NoSound) GetSound("Quest_Completed").PlayOriginal();
+
+		return this._quests.splice(this._quests.indexOf(quest), 1);
 	}
 
 	public PushQuest(quest: Quest) {
+		GetSound("Quest_Recieved").PlayOriginal();
+
 		this._quests.push(quest);
 	}
 
 	private ContinueDialog() {
 		if (this._dialog === null) return;
 
-		if (this._chars < this._dialog.Messages[this._dialogState].length) {
-			this._chars = this._dialog.Messages[this._dialogState].length;
+		if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
+			this._charIndex = this._dialog.Messages[this._dialogState].length;
 		} else {
-			this._dialogState++;
+			++this._dialogState;
 
 			if (this._dialog.Messages.length == this._dialogState) {
 				if (this._dialog.AfterAction !== undefined) this._dialog.AfterAction();
 
+				this._dialog.Voices[this._dialog.Voices.length - 1].StopOriginal();
 				this._dialog = null;
 			} else {
-				this._chars = 0;
+				this._charIndex = 0;
 				this._timeToNextChar = 75;
+
+				this._dialog.Voices[this._dialogState - 1].StopOriginal();
+				this._dialog.Voices[this._dialogState].PlayOriginal();
 			}
 		}
 	}
