@@ -127,7 +127,7 @@ export class Player extends Entity {
         for (const item of items)
             this.GiveQuestItem(ItemRegistry.GetById(item.Id, item.Count));
         // FOR DEBUG
-        this.GiveQuestItem(Weapon.GetById("AK12"));
+        // this.GiveQuestItem(Weapon.GetById("AK12"));
         // this.GiveQuestItem(Weapon.GetById("Glock"));
         this.GiveQuestItem(Throwable.GetById("RGN"));
         // this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
@@ -422,14 +422,20 @@ export class Player extends Entity {
                 const itemInHand = this._inventory[this._selectedHand];
                 if (itemInHand instanceof Throwable) {
                     if (this._throwableTime > 50) {
-                        const angleWithAnimation = this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
+                        const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2) * this.Direction;
+                        const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
                         const c = Math.cos(angleWithAnimation);
                         const s = Math.sin(angleWithAnimation);
                         const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
-                        const handPosition = this._weapon === null || this._weapon.Heavy
-                            ? new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s)
-                            : new Vector2(this._x + this.Width / 2 + 16 * scale * c, this._y + this.Height * this._armHeight - 16 * scale * s);
-                        itemInHand.Update(0, handPosition, angleWithAnimation);
+                        const handPosition = 
+                        // this._weapon === null || this._weapon.Heavy
+                        // 	? new Vector2(
+                        // 			this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c),
+                        // 			this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s
+                        // 	  )
+                        // 	: new Vector2(this._x + this.Width / 2 + 16 * scale * c, this._y + this.Height * this._armHeight - 16 * scale * s);
+                        new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s);
+                        itemInHand.Update(0, handPosition, this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
                         itemInHand.Throw();
                         GetSound("Swing").Play(0.5);
                         this._inventory[this._selectedHand] = null;
@@ -1040,6 +1046,29 @@ export class Player extends Entity {
                 GUI.SetFillColor(new Color(255, 255, 255, 255 * (this._timeToHideItemName / 1000)));
             }
             GUI.DrawText2CenterLineBreaked(GUI.Width / 2, 750 - 100, this._inventory[this._selectedHand].Name);
+        }
+        if (this._throwableTime > 0) {
+            const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2) * this.Direction;
+            const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
+            const c = Math.cos(angleWithAnimation);
+            const s = Math.sin(angleWithAnimation);
+            const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
+            const handPosition = new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s);
+            const physDT = 1.113;
+            const physDT2 = physDT / 20;
+            let accelerationX = 35 * Math.cos(this._angle);
+            let accelerationY = -25 * Math.sin(this._angle);
+            let xx = handPosition.X - Scene.Current.GetLevelPosition();
+            let yy = handPosition.Y;
+            Canvas.SetFillColor(Color.Black);
+            for (let i = 0; i < 15; i++) {
+                if (i > 3 && i % 2 === 0)
+                    Canvas.DrawRectangleWithAngle(xx, yy, 20 - i, 2, Math.atan2(yy - (yy + accelerationY * physDT), xx + accelerationX * physDT - xx), 0, 1);
+                xx += accelerationX * physDT;
+                yy += accelerationY * physDT;
+                accelerationX -= physDT2;
+                accelerationY -= physDT;
+            }
         }
         GUI.ClearStroke();
         GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
