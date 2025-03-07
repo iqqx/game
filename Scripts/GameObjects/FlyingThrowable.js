@@ -126,8 +126,8 @@ export class FlyingThrowable extends GameObject {
             }
         }
         else {
-            const explosiveDamage = 250;
-            const explosiveRange = 200;
+            const explosiveDamage = 350;
+            const explosiveRange = 300;
             GetSound("Explosive").PlayOriginal();
             for (const entity of Scene.Current.GetByTag(Tag.Enemy | Tag.Player)) {
                 const distance = Vector2.Length(entity.GetCenter(), new Vector2(this._x, this._y));

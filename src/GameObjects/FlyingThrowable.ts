@@ -159,8 +159,8 @@ export class FlyingThrowable extends GameObject {
 				this.Destroy();
 			}
 		} else {
-			const explosiveDamage = 250;
-			const explosiveRange = 200;
+			const explosiveDamage = 350;
+			const explosiveRange = 300;
 
 			GetSound("Explosive").PlayOriginal();
 
