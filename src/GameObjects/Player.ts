@@ -104,6 +104,14 @@ export class Player extends Entity {
 			},
 			SingleUse: false,
 		},
+		{
+			Code: 3687428165,
+			Action: () => {
+				GetSound("CheatCode").PlayOriginal();
+				this.GiveQuestItem(Throwable.GetById("RGN"));
+			},
+			SingleUse: false,
+		},
 	];
 	private _tpActivated = false;
 	private _timeToHideItemName = 0;
@@ -149,7 +157,7 @@ export class Player extends Entity {
 		// this.GiveQuestItem(Weapon.GetById("AK12"));
 		// this.GiveQuestItem(Weapon.GetById("Glock"));
 		// this.GiveQuestItem(Throwable.GetById("RGN"));
-		// this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
+		this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
 		// this.GiveQuestItem(ItemRegistry.GetById("Adrenalin", 2));
 
 		GetSound("Walk_2").Speed = 1.6;
@@ -299,11 +307,10 @@ export class Player extends Entity {
 
 					break;
 				case "KeyQ":
-					if (this._inventory[this._selectedHand] !== null && this._grounded) {
-						Scene.Current.Instantiate(new ItemDrop(this._x + this.Width / 2, this._y, this._inventory[this._selectedHand]));
+					if (this._inventory[this._selectedHand] !== null) {
+						Scene.Current.Instantiate(new ItemDrop(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._inventory[this._selectedHand]));
 
-						if (this._inventory[this._selectedHand] === this._weapon) this._weapon = null;
-
+						this._weapon = null;
 						this._inventory[this._selectedHand] = null;
 
 						this._quests.forEach((quest) => quest.InventoryChanged());
@@ -522,7 +529,7 @@ export class Player extends Entity {
 				GetSound("Background_1").Play(0.2, 1, true);
 
 				//// FOR DEBUG
-				this.SpeakWith(new PlayerCharacter());
+				// this.SpeakWith(new PlayerCharacter());
 			}
 
 			this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
@@ -1011,7 +1018,7 @@ export class Player extends Entity {
 							this._frames.Hands.Bend.BoundingBox.Width * scale,
 							this._frames.Hands.Bend.BoundingBox.Height * scale
 						),
-						this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
+						(this._inventory[this._selectedHand].IsBig ? Math.PI / 2 : this._angle) + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0),
 						-2 * scale,
 						(this._frames.Hands.Bend.BoundingBox.Height - 2) * scale
 					);
@@ -1227,6 +1234,48 @@ export class Player extends Entity {
 
 			const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
 
+			if (this._openedContainer !== null) {
+				const firstXOffset =
+					GUI.Width / 2 -
+					(this._openedContainer.SlotsSize.X % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
+				const firstYOffset =
+					GUI.Height / 2 -
+					(this._openedContainer.SlotsSize.Y % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.Y / 2) * 52.5);
+
+				GUI.SetStroke(new Color(155, 155, 155), 1);
+				GUI.SetFillColor(new Color(70, 70, 70, 200));
+				GUI.DrawRectangle(firstXOffset - 5, firstYOffset - 5, this._openedContainer.SlotsSize.X * 55 + 5, this._openedContainer.SlotsSize.Y * 55 + 5);
+
+				const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
+				const yCell = Math.floor((750 - this._yTarget - firstYOffset) / 55);
+
+				for (let y = 0; y < this._openedContainer.SlotsSize.Y; y++)
+					for (let x = 0; x < this._openedContainer.SlotsSize.X; x++) {
+						if (xCell == x && yCell == y) GUI.SetStroke(new Color(200, 200, 200), 2);
+						else GUI.SetStroke(new Color(100, 100, 100), 1);
+						GUI.SetFillColor(new Color(30, 30, 30));
+
+						GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
+
+						const item = this._openedContainer.GetItemAt(x as 0 | 1 | 2, y as 0 | 1 | 2);
+						if (item !== null) {
+							GUI.DrawImageScaled(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
+
+							if (item.GetCount() > 1) {
+								GUI.SetFillColor(Color.White);
+								GUI.SetFont(12);
+								GUI.DrawText(firstXOffset + x * 55 + 42 + 4 - item.GetCount().toString().length * 7, firstYOffset + 55 * y + 2 + 46, item.GetCount().toString());
+							}
+
+							if (xCell == x && yCell == y) {
+								GUI.SetFont(16);
+								GUI.SetFillColor(Color.White);
+								GUI.DrawText2CenterLineBreaked(firstXOffset + 55 * x + 2 + 25, firstYOffset + 55 * y + 2 - 20, item.Name);
+							}
+						}
+					}
+			}
+
 			if (this._backpack !== null) {
 				const firstXOffset = GUI.Width / 2 - 55 * 3;
 
@@ -1274,17 +1323,29 @@ export class Player extends Entity {
 							GUI.SetFont(12);
 							GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
 						}
+
+						if (xCell == i && yCell == 0) {
+							GUI.SetFont(16);
+							GUI.SetFillColor(Color.White);
+							GUI.DrawText2CenterLineBreaked(firstXOffset + i * 55 + 2 + 25, y - 20, this._inventory[i].Name);
+						}
 					} else if (i >= 2) {
 						const item = this._backpack.GetItemAt(i - 2, 0);
 
 						if (item !== null) {
-							GUI.DrawImageScaled(item.Icon, firstXOffset + i * 55 + (i > 1 ? 5 : 0) + 2, y + 2, 50 - 4, 50 - 4);
+							GUI.DrawImageScaled(item.Icon, firstXOffset + i * 55 + 5 + 2, y + 2, 50 - 4, 50 - 4);
 
 							const count = item.GetCount();
 							if (count > 1) {
 								GUI.SetFillColor(Color.White);
 								GUI.SetFont(12);
 								GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - count.toString().length * 7, y + 46 + 2, count.toString());
+							}
+
+							if (xCell == i && yCell == 0) {
+								GUI.SetFont(16);
+								GUI.SetFillColor(Color.White);
+								GUI.DrawText2CenterLineBreaked(firstXOffset + i * 55 + 5 + 2 + 25, y - 20, item.Name);
 							}
 						}
 					}
@@ -1334,44 +1395,14 @@ export class Player extends Entity {
 							GUI.SetFont(12);
 							GUI.DrawText(firstXOffset + i * 55 + 42 + 4 - this._inventory[i].GetCount().toString().length * 7, y + 46 + 2, this._inventory[i].GetCount().toString());
 						}
-					}
-				}
-			}
 
-			if (this._openedContainer !== null) {
-				const firstXOffset =
-					GUI.Width / 2 -
-					(this._openedContainer.SlotsSize.X % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
-				const firstYOffset =
-					GUI.Height / 2 -
-					(this._openedContainer.SlotsSize.Y % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.Y / 2) * 52.5);
-
-				GUI.SetStroke(new Color(155, 155, 155), 1);
-				GUI.SetFillColor(new Color(70, 70, 70, 200));
-				GUI.DrawRectangle(firstXOffset - 5, firstYOffset - 5, this._openedContainer.SlotsSize.X * 55 + 5, this._openedContainer.SlotsSize.Y * 55 + 5);
-
-				const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-				const yCell = Math.floor((750 - this._yTarget - firstYOffset) / 55);
-
-				for (let y = 0; y < this._openedContainer.SlotsSize.Y; y++)
-					for (let x = 0; x < this._openedContainer.SlotsSize.X; x++) {
-						if (xCell == x && yCell == y) GUI.SetStroke(new Color(200, 200, 200), 2);
-						else GUI.SetStroke(new Color(100, 100, 100), 1);
-						GUI.SetFillColor(new Color(30, 30, 30));
-
-						GUI.DrawRectangle(firstXOffset + 55 * x, firstYOffset + 55 * y, 50, 50);
-
-						const item = this._openedContainer.GetItemAt(x as 0 | 1 | 2, y as 0 | 1 | 2);
-						if (item !== null) {
-							GUI.DrawImageScaled(item.Icon, firstXOffset + 55 * x + 2, firstYOffset + 55 * y + 2, 50 - 4, 50 - 4);
-
-							if (item.GetCount() > 1) {
-								GUI.SetFillColor(Color.White);
-								GUI.SetFont(12);
-								GUI.DrawText(firstXOffset + x * 55 + 42 + 4 - item.GetCount().toString().length * 7, firstYOffset + 55 * y + 2 + 46, item.GetCount().toString());
-							}
+						if (xCell == i && yCell == 0) {
+							GUI.SetFont(16);
+							GUI.SetFillColor(Color.White);
+							GUI.DrawText2CenterLineBreaked(firstXOffset + i * 55 + 2 + 25, y - 20, this._inventory[i].Name);
 						}
 					}
+				}
 			}
 		} else {
 			GUI.SetStroke(new Color(100, 100, 100), 2);
@@ -1396,7 +1427,21 @@ export class Player extends Entity {
 			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._charIndex), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 		}
 
-		if (this._draggedItem !== null) GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
+		if (this._draggedItem !== null) {
+			GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, 750 - this._yTarget - 25, 50, 50);
+		}
+
+		const itemInHand = this._inventory[this._selectedHand];
+		if (this._timeToHideItemName > 0 && itemInHand !== null) {
+			GUI.SetFont(16);
+
+			if (this._timeToHideItemName > 1000) GUI.SetFillColor(Color.White);
+			else {
+				GUI.SetFillColor(new Color(255, 255, 255, 255 * (this._timeToHideItemName / 1000)));
+			}
+
+			GUI.DrawText2CenterLineBreaked(GUI.Width / 2, 750 - 100, itemInHand.Name);
+		}
 
 		if (this._timeFromEnd > -1) {
 			Canvas.SetFillColor(Color.White);
@@ -1435,18 +1480,7 @@ export class Player extends Entity {
 			}
 		}
 
-		if (this._timeToHideItemName > 0 && this._inventory[this._selectedHand] !== null) {
-			GUI.SetFont(16);
-
-			if (this._timeToHideItemName > 1000) GUI.SetFillColor(Color.White);
-			else {
-				GUI.SetFillColor(new Color(255, 255, 255, 255 * (this._timeToHideItemName / 1000)));
-			}
-
-			GUI.DrawText2CenterLineBreaked(GUI.Width / 2, 750 - 100, this._inventory[this._selectedHand].Name);
-		}
-
-		if (this._throwableTime > 0) {
+		if (this._throwableTime > 0 && itemInHand !== null && itemInHand instanceof Throwable) {
 			const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2) * this.Direction;
 			const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
 			const c = Math.cos(angleWithAnimation);
@@ -1457,7 +1491,7 @@ export class Player extends Entity {
 				this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s
 			);
 
-			const physDT = 1.113;
+			const physDT = 1.113 / itemInHand.Weight;
 			const physDT2 = physDT / 20;
 			let accelerationX = 35 * Math.cos(this._angle);
 			let accelerationY = -25 * Math.sin(this._angle);
@@ -1731,6 +1765,7 @@ export class Player extends Entity {
 		if (this._inventory[this._selectedHand] instanceof Weapon && !this._running) this._weapon = this._inventory[this._selectedHand] as Weapon;
 		else this._weapon = null;
 
+		this._throwableTime = 0;
 		this._timeToHideItemName = 2000;
 	}
 

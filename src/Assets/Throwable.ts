@@ -12,6 +12,7 @@ export class Throwable implements IItem {
 	public readonly IsBig = false;
 	public readonly MaxStack = 1;
 	public readonly Sprite: Sprite;
+	public readonly Weight = 1.5;
 
 	private _position: Vector2 = Vector2.Zero;
 	private _angle: number = 0;

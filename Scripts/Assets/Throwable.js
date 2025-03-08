@@ -11,6 +11,7 @@ export class Throwable {
     IsBig = false;
     MaxStack = 1;
     Sprite;
+    Weight = 1.5;
     _position = Vector2.Zero;
     _angle = 0;
     _direction;

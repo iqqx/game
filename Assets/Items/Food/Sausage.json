@@ -1,6 +1,6 @@
 {
 	"Icon": "Sausage",
-    "Name": "Сосиска",
+    "Name": "Колбаса",
 	"AfterUse": {
 		"Sound": "Eat",
 		"Time": 2,

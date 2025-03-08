@@ -51,11 +51,13 @@ export class FlyingThrowable extends GameObject {
             const frame = this._explosive[Math.floor(this._timeFromExplosive / 50)];
             Canvas.DrawImage(frame, new Rectangle(this._x - Scene.Current.GetLevelPosition() - frame.ScaledSize.X / 2, this._y - frame.ScaledSize.Y / 2, frame.ScaledSize.X, frame.ScaledSize.Y));
         }
-        else
-            Canvas.DrawImage(this._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y));
+        else {
+            // Canvas.DrawImage(this._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y));
+            Canvas.DrawImageWithAngle(this._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y), -2 * Math.atan2(this._accelerationY, this._accelerationX), 0, 0);
+        }
     }
     ApplyForce(dt) {
-        const physDt = dt / 15;
+        const physDt = dt / 15 / this._spawnedBy.Weight;
         const physDt2 = physDt / 20;
         if (this._accelerationY <= 0) {
             // падаем
