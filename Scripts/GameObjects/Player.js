@@ -6,7 +6,7 @@ import { Canvas, GUI } from "../Context.js";
 import { Tag, Direction } from "../Enums.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
-import { Rectangle, Vector2, Color } from "../Utilites.js";
+import { Rectangle, Vector2, Color, CRC32 } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
@@ -45,8 +45,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
-    // private _timeFromSpawn = 4990; /// DEBUG
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4990; /// DEBUG
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -62,7 +62,7 @@ export class Player extends Entity {
     _lastPressedKeys = "";
     _cheatCodes = [
         {
-            Code: "hesoyam",
+            Code: 2615105258,
             Action: () => {
                 GetSound("Easter").PlayOriginal();
                 this._tpActivated = true;
@@ -73,7 +73,7 @@ export class Player extends Entity {
             SingleUse: true,
         },
         {
-            Code: "dota",
+            Code: 1622685316,
             Action: () => {
                 GetSound("DotaCheat").PlayOriginal();
                 Player._name = "Рома";
@@ -82,10 +82,18 @@ export class Player extends Entity {
             SingleUse: true,
         },
         {
-            Code: "extramag",
+            Code: 1571452298,
             Action: () => {
                 GetSound("CheatCode").PlayOriginal();
                 this.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
+            },
+            SingleUse: false,
+        },
+        {
+            Code: 1098628727,
+            Action: () => {
+                GetSound("CheatCode").PlayOriginal();
+                this.GiveQuestItem(ItemRegistry.GetById("DogTag", 2));
             },
             SingleUse: false,
         },
@@ -140,10 +148,10 @@ export class Player extends Entity {
             if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
                 return;
             this._keysPressed[e.code] = true;
-            if (e.code.startsWith("Key")) {
-                if (this._lastPressedKeys.length >= 100)
-                    this._lastPressedKeys = "";
-                this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
+            if (e.code.startsWith("Key") || e.code.startsWith("Digit")) {
+                this._lastPressedKeys = this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
+                if (this._lastPressedKeys.length >= 8)
+                    this._lastPressedKeys.substring(1);
                 this.CheckForEaster();
             }
             switch (e.code) {
@@ -272,7 +280,7 @@ export class Player extends Entity {
                     break;
                 case "KeyQ":
                     if (this._inventory[this._selectedHand] !== null && this._grounded) {
-                        Scene.Current.Instantiate(new ItemDrop(this._x, this._y, this._inventory[this._selectedHand]));
+                        Scene.Current.Instantiate(new ItemDrop(this._x + this.Width / 2, this._y, this._inventory[this._selectedHand]));
                         if (this._inventory[this._selectedHand] === this._weapon)
                             this._weapon = null;
                         this._inventory[this._selectedHand] = null;
@@ -1123,8 +1131,10 @@ export class Player extends Entity {
         Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
     }
     CheckForEaster() {
+        if (this._lastPressedKeys.length < 8)
+            return;
         for (let i = 0; i < this._cheatCodes.length; i++)
-            if (this._lastPressedKeys.endsWith(this._cheatCodes[i].Code)) {
+            if (CRC32(this._lastPressedKeys.substring(this._lastPressedKeys.length - 8)) === this._cheatCodes[i].Code) {
                 this._cheatCodes[i].Action();
                 if (this._cheatCodes[i].SingleUse)
                     this._cheatCodes.splice(i, 1);

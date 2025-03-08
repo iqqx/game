@@ -127,7 +127,7 @@
 		{ "Type": "Wall", "Arguments": [31851, 277, 33, 24] },
 		{ "Type": "Platform", "Arguments": [27458, 181, 56] },
 		{ "Type": "Backpack", "Arguments": [15648, 298, "Bread", "Vodka", { "Id": "PistolBullet", "Count": { "Min": 10, "Max": 50 } }] },
-		{ "Type": "Boombox", "Arguments": [22545, 300, 3000, "Music_1", "Music_2", "Music_3", "Music_4", "Music_5"] },
+		{ "Type": "Boombox", "Arguments": [22545, 300, 3000, "Music_2", "Music_1", "Music_3", "Music_4", "Music_5"] },
 		{ "Type": "HumanCorpse", "Arguments": [28181, 153, "RatTail", "DogTag"] },
 		{ "Type": "HumanCorpse", "Arguments": [27419, 151, "AK12", "DogTag"] },
 		{ "Type": "Artem", "Arguments": [4000, 264] },

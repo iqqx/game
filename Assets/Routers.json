@@ -199,10 +199,10 @@
 		"Vodka": "Items/Drink/Vodka.json",
 		"AidKit": "Items/Heal/AidKit.json",
 		"Adrenalin": "Items/Heal/Adrenalin.json",
-		"DogTag": "Items/Junk/DogTag.json",
 		"RatTail": "Items/Junk/RatTail.json",
 		"PistolBullet": "Items/Junk/PistolBullet.json",
 		"RifleBullet": "Items/Junk/RifleBullet.json",
+		"DogTag": "Items/Quest/DogTag.json",
 		"Radio": "Items/Quest/Radio.json"
 	}
 }
