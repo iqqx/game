@@ -21,7 +21,7 @@ export class Character extends Interactable {
 	override Render(): void {
 		const ratio = this.Height / this._sprite.BoundingBox.Height;
 
-		Canvas.DrawImage(this._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.BoundingBox.Width * ratio, this.Height));
+		Canvas.DrawImage(this._sprite, new Rectangle(this._x  , this._y, this._sprite.BoundingBox.Width * ratio, this.Height));
 	}
 
 	public GetDialog(): Dialog {

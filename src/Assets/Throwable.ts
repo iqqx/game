@@ -84,7 +84,7 @@ export class Throwable implements IItem {
 		if (this._direction === Direction.Left) {
 			Canvas.DrawImageWithAngleVFlipped(
 				this.Sprite,
-				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
+				new Rectangle(this._position.X  , this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y
@@ -92,7 +92,7 @@ export class Throwable implements IItem {
 		} else {
 			Canvas.DrawImageWithAngle(
 				this.Sprite,
-				new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
+				new Rectangle(this._position.X  , this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y

@@ -317,9 +317,9 @@ export class SceneEditor {
 	public Render() {
 		Canvas.ClearStroke();
 		Canvas.SetFillColor(new Color(200, 250, 100));
-		Canvas.DrawRectangle(0, 0, Canvas.GetSize().X, Canvas.GetSize().Y);
+		Canvas.DrawRectangle(0, 0, Canvas.Width, Canvas.Height);
 
-		if (this._background !== undefined && this._background !== null) Canvas.DrawBackground(this._background, this._levelPosition);
+		if (this._background !== undefined && this._background !== null) Canvas.DrawBackground(this._background);
 
 		for (let i = 0; i < this._gameObjects.length; i++) {
 			const obj = this._gameObjects[i];

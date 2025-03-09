@@ -12,7 +12,7 @@ export class Trader extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 
 	public override GetDialog(): Dialog {

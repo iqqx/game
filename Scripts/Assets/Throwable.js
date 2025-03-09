@@ -58,10 +58,10 @@ export class Throwable {
     Render() {
         const gripOffset = new Vector2(this.Sprite.ScaledSize.X * -0.5, this.Sprite.ScaledSize.Y * 0.5);
         if (this._direction === Direction.Left) {
-            Canvas.DrawImageWithAngleVFlipped(this.Sprite, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
+            Canvas.DrawImageWithAngleVFlipped(this.Sprite, new Rectangle(this._position.X, this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }
         else {
-            Canvas.DrawImageWithAngle(this.Sprite, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
+            Canvas.DrawImageWithAngle(this.Sprite, new Rectangle(this._position.X, this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }
     }
     Throw() {

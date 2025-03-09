@@ -42,7 +42,7 @@ export class Entity extends GameObject {
             else if (this._movingRight)
                 this.MoveRight(dt);
         }
-        this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+        this.Direction = this._xTarget > this._x + this.Width / 2 ? 1 : -1;
     }
     IsAlive() {
         return this._health > 0;
@@ -117,7 +117,7 @@ export class Entity extends GameObject {
         }
         else if (this._verticalAcceleration < 0) {
             // падаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)), Tag.Wall | Tag.Platform);
             offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
             if (offsets.length > 0 && offsets[0].start.Y >= 0) {
                 if (offsets[0].instance instanceof Spikes)
@@ -138,7 +138,7 @@ export class Entity extends GameObject {
         }
         else if (this._verticalAcceleration > 0) {
             // взлетаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall);
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)), Tag.Wall);
             if (offsets.length > 0) {
                 this._verticalAcceleration = 0;
                 const r = offsets.minBy((x) => x.instance.GetPosition().Y);

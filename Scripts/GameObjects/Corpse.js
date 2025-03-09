@@ -1,7 +1,6 @@
 import { Container } from "../Assets/Containers/Containers.js";
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
-import { Scene } from "../Scene.js";
 import { Rectangle } from "../Utilites.js";
 export class Corpse extends Container {
     constructor(x, y, ...items) {
@@ -13,7 +12,7 @@ export class Corpse extends Container {
         // this.TryPushItem(new DogTag());
     }
     Render() {
-        Canvas.DrawImage(GetSprite("Corpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("Corpse"), new Rectangle(this._x, this._y, this.Width, this.Height));
     }
 }
 //# sourceMappingURL=Corpse.js.map

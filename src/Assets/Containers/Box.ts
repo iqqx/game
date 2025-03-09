@@ -33,6 +33,6 @@ export class Box extends Container {
 
 	override Render(): void {
 		Canvas.SetFillColor(new Color(0, 255, 0));
-		Canvas.DrawImage(GetSprite("Container"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("Container"), new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 }

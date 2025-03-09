@@ -24,7 +24,7 @@ export class ItemDrop extends Interactable {
 	}
 
 	public Render(): void {
-		Canvas.DrawImage(this.ContentItem.Icon, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(this.ContentItem.Icon, new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 
 	GetInteractives(): string[] {

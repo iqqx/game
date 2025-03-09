@@ -18,13 +18,13 @@ export class Artem extends Character {
 	}
 
 	override Render(): void {
-		if (this._timeFromStartEnd == -1) Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		if (this._timeFromStartEnd == -1) Canvas.DrawImage(GetSprite("Artem"), new Rectangle(this._x  , this._y, this.Width, this.Height));
 		else {
 			if (this._timeFromShoot > 0 && Scene.Time - this._timeFromShoot < 500)
 				Canvas.DrawImage(
 					GetSprite("Artem_Shoot"),
 					new Rectangle(
-						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0)  ,
 						149,
 						this.Width,
 						this.Height
@@ -34,7 +34,7 @@ export class Artem extends Character {
 				Canvas.DrawImage(
 					GetSprite("Artem_Walk")[0],
 					new Rectangle(
-						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0)  ,
 						149,
 						this.Width,
 						this.Height
@@ -44,7 +44,7 @@ export class Artem extends Character {
 				Canvas.DrawImage(
 					GetSprite("Artem_Walk")[Math.floor(((Scene.Time - this._timeFromStartEnd) / 100) % 4)],
 					new Rectangle(
-						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0) - Scene.Current.GetLevelPosition(),
+						this._x + (this._timeFromStartEnd >= 0 ? 800 * Math.min(1, (Scene.Time - this._timeFromStartEnd) / 7000) : 0)  ,
 						149,
 						this.Width,
 						this.Height

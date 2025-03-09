@@ -126,55 +126,17 @@ export class Weapon {
     Render() {
         if (this._direction === Direction.Left) {
             if (this._hasClip)
-                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y), this._angle, -this.GripOffset.X + this.ClipOffset.X, this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y);
-            Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y), this._angle, -this.GripOffset.X, this.GripOffset.Y);
+                Canvas.DrawImageWithAngleVFlipped(this.Sprites.Clip, new Rectangle(this._position.X, this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y), this._angle, -this.GripOffset.X + this.ClipOffset.X, this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y);
+            Canvas.DrawImageWithAngleVFlipped(this.Sprites.Image, new Rectangle(this._position.X, this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y), this._angle, -this.GripOffset.X, this.GripOffset.Y);
             // Canvas.SetFillColor(Color.Red);
-            // Canvas.DrawCircle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, 5);
+            // Canvas.DrawCircle(this._position.X  , this._position.Y, 5);
         }
         else {
             if (this._hasClip)
-                Canvas.DrawImageWithAngle(this.Sprites.Clip, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y), this._angle, -this.GripOffset.X + this.ClipOffset.X, this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y);
+                Canvas.DrawImageWithAngle(this.Sprites.Clip, new Rectangle(this._position.X, this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y), this._angle, -this.GripOffset.X + this.ClipOffset.X, this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y);
             // Canvas.SetFillColor(Color.Red);
-            // Canvas.DrawCircle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, 15);
-            Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y), this._angle, -this.GripOffset.X, this.GripOffset.Y);
-            // const dir = this._angle >= 0 ? this._angle : 2 * Math.PI + this._angle;
-            // const c = Math.cos(dir);
-            // const s = Math.sin(dir);
-            // const x = this.MuzzleOffset.X - this.GripOffset.X;
-            // const preMuzzlePosition = new Vector2(this._position.X + c * x, this._position.Y - s * x);
-            // const hit = Scene.Current.Raycast(preMuzzlePosition, new Vector2(c, -s), 1500, Tag.Wall)[0];
-            // if (hit !== undefined) {
-            // 	const l = Vector2.Length(this._position, hit.position);
-            // 	this._viewOffset = Math.tan((this.MuzzleOffset.Y - this.GripOffset.Y) / l);
-            // 	// this._angle += Math.tan((this.MuzzleOffset.Y - this.GripOffset.Y) / l);
-            // 	Canvas.SetFillColor(Color.Red);
-            // 	Canvas.SetStroke(Color.Red, 1);
-            // 	Canvas.DrawLine(
-            // 		new Vector2(preMuzzlePosition.X - Scene.Current.GetLevelPosition(), preMuzzlePosition.Y),
-            // 		new Vector2(hit.position.X - Scene.Current.GetLevelPosition(), hit.position.Y)
-            // 	);
-            // 	// Canvas.SetStroke(Color.Green, 1);
-            // 	// Canvas.DrawLine(
-            // 	// 	new Vector2(this._position.X - Scene.Current.GetLevelPosition(), this._position.Y),
-            // 	// 	new Vector2(hit.position.X - Scene.Current.GetLevelPosition(), hit.position.Y)
-            // 	// );
-            // 	Canvas.SetFillColor(Color.Red);
-            // 	Canvas.DrawCircle(hit.position.X - Scene.Current.GetLevelPosition(), hit.position.Y, 2);
-            // }
-            // const c = Math.cos(this._angle);
-            // const s = Math.sin(this._angle);
-            // Canvas.SetFillColor(Color.Red);
-            // Canvas.DrawCircle(
-            // 	this._position.X - Scene.Current.GetLevelPosition() - this.GripOffset.X + this.ClipOffset.X,
-            // 	this._position.Y + this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y,
-            // 	2
-            // );
-            // Canvas.SetFillColor(Color.White);
-            // Canvas.DrawCircle(
-            // 	this._position.X - Scene.Current.GetLevelPosition() + c * (this.MuzzleOffset.X - this.GripOffset.X) + s * (this.MuzzleOffset.Y - this.GripOffset.Y),
-            // 	this._position.Y + c * (this.MuzzleOffset.Y - this.GripOffset.Y) - s * (this.MuzzleOffset.X - this.GripOffset.X),
-            // 	2
-            // );
+            // Canvas.DrawCircle(this._position.X  , this._position.Y, 15);
+            Canvas.DrawImageWithAngle(this.Sprites.Image, new Rectangle(this._position.X, this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y), this._angle, -this.GripOffset.X, this.GripOffset.Y);
         }
     }
     Reload(toReload = this.MaxAmmoClip) {

@@ -1,6 +1,5 @@
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
-import { Scene } from "../Scene.js";
 import { Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
@@ -22,7 +21,7 @@ export class Fireball extends GameObject {
     }
     Render() {
         const frame = this._frames[this._frameNumber];
-        Canvas.DrawImageWithAngle(frame, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, frame.ScaledSize.X, frame.ScaledSize.Y), this._angle, 0, frame.ScaledSize.Y * 0.5);
+        Canvas.DrawImageWithAngle(frame, new Rectangle(this._x, this._y, frame.ScaledSize.X, frame.ScaledSize.Y), this._angle, 0, frame.ScaledSize.Y * 0.5);
     }
 }
 //# sourceMappingURL=Fireball.js.map

@@ -29,7 +29,7 @@ export class Bullet extends GameObject {
 
 	override Render(): void {
 		Canvas.DrawRectangleWithGradientAndAngle(
-			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._length, 2),
+			new Rectangle(this._x  , this._y, this._length, 2),
 			[this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0],
 			[1, Bullet._bulletColor1],
 			this._angle,

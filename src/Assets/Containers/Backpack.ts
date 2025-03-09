@@ -20,7 +20,7 @@ export class Backpack extends Container implements IPickapable {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(GetSprite("Drop_Backpack"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("Drop_Backpack"), new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 
 	public Pickup() {

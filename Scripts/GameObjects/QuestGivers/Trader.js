@@ -10,7 +10,7 @@ export class Trader extends Character {
         super(x, y, GetSprite("Trader"));
     }
     Render() {
-        Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x, this._y, this.Width, this.Height));
     }
     GetDialog() {
         super.GetDialog();

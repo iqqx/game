@@ -1,6 +1,5 @@
 import { Canvas } from "../../Context.js";
 import { Direction } from "../../Enums.js";
-import { Scene } from "../../Scene.js";
 import { Rectangle, Vector2 } from "../../Utilites.js";
 export class Item {
     Name;
@@ -35,10 +34,10 @@ export class Item {
     Render() {
         const gripOffset = new Vector2(this.Icon.ScaledSize.X * -0.5, this.Icon.ScaledSize.Y * 0.5);
         if (this._direction === Direction.Left) {
-            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
+            Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(this._x, this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }
         else {
-            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
+            Canvas.DrawImageWithAngle(this.Icon, new Rectangle(this._x, this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
         }
     }
     GetCount() {

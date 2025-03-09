@@ -39,9 +39,9 @@ export class Rat extends Enemy {
     }
     Render() {
         if (this.Direction === 1)
-            Canvas.DrawImage(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+            Canvas.DrawImage(this._image, new Rectangle(this._x, this._y, this.Width, this.Height));
         else
-            Canvas.DrawImageFlipped(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+            Canvas.DrawImageFlipped(this._image, new Rectangle(this._x, this._y, this.Width, this.Height));
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);

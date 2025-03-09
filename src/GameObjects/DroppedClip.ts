@@ -27,7 +27,7 @@ export class DroppedClip extends GameObject {
 	}
 
 	public override Render(): void {
-		Canvas.DrawImage(this._clipSprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._clipSprite.ScaledSize.X, this._clipSprite.ScaledSize.Y));
+		Canvas.DrawImage(this._clipSprite, new Rectangle(this._x  , this._y, this._clipSprite.ScaledSize.X, this._clipSprite.ScaledSize.Y));
 	}
 
 	private ApplyVForce(dt: number) {

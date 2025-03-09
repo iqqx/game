@@ -59,13 +59,13 @@ export class FlyingThrowable extends GameObject {
 
 			Canvas.DrawImage(
 				frame,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition() - frame.ScaledSize.X / 2, this._y - frame.ScaledSize.Y / 2, frame.ScaledSize.X, frame.ScaledSize.Y)
+				new Rectangle(this._x   - frame.ScaledSize.X / 2, this._y - frame.ScaledSize.Y / 2, frame.ScaledSize.X, frame.ScaledSize.Y)
 			);
 		} else {
-			// Canvas.DrawImage(this._sprite, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y));
+			// Canvas.DrawImage(this._sprite, new Rectangle(this._x  , this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y));
 			Canvas.DrawImageWithAngle(
 				this._sprite,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y),
+				new Rectangle(this._x  , this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y),
 				-2 * Math.atan2(this._accelerationY, this._accelerationX),
 				0,
 				0

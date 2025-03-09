@@ -44,7 +44,6 @@ export class Scene {
     _background;
     _keyDownEvents = [];
     _touch = null;
-    _levelPosition = 3899;
     _mouseX = 0;
     _mouseY = 0;
     _lmb = false;
@@ -57,6 +56,8 @@ export class Scene {
         if (Scene.Current !== undefined)
             Scene.Current.Unload();
         Scene.Current = this;
+        this._mouseX = Canvas.Width / 2;
+        this._mouseY = Canvas.Height / 2;
         for (const object of objects)
             if (object instanceof GameObject)
                 this.Instantiate(object);
@@ -65,14 +66,14 @@ export class Scene {
         addEventListener("mousemove", (e) => {
             if (e.target.tagName !== "CANVAS")
                 return;
-            Scene.Current._mouseX = Math.round(e.offsetX * Canvas.GetAspectRatio());
-            Scene.Current._mouseY = Math.round(Canvas.GetSize().Y - e.offsetY * Canvas.GetAspectRatio());
+            Scene.Current._mouseX = Math.round(e.offsetX);
+            Scene.Current._mouseY = Math.round(Canvas.Height - e.offsetY);
         });
         addEventListener("mousedown", (e) => {
             if (e.target.tagName !== "CANVAS")
                 return;
-            Scene.Current._mouseX = Math.round(e.offsetX * Canvas.GetAspectRatio());
-            Scene.Current._mouseY = Math.round(Canvas.GetSize().Y - e.offsetY * Canvas.GetAspectRatio());
+            Scene.Current._mouseX = Math.round(e.offsetX);
+            Scene.Current._mouseY = Math.round(Canvas.Height - e.offsetY);
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent)) {
                 this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
             }
@@ -223,18 +224,15 @@ export class Scene {
         GUI.SetFont(32); // for blinking text
         const textSize = GUI.GetTextSize("КРИТИЧЕСКАЯ ОШИБКА", true);
         return new Scene(null, [
-            new GUIRectangle(new Rectangle(GUI.Width / 2, GUI.Height / 2, GUI.Width, GUI.Height), Color.Black),
-            new BlinkingRectangle(new Rectangle(GUI.Width / 2, 50, textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(GUI.Width / 2, 5, GUI.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(GUI.Width / 2, GUI.Height - 5, GUI.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(5, GUI.Height / 2, 10, GUI.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(GUI.Width - 5, GUI.Height / 2, 10, GUI.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", GUI.Width / 2, 50, GUI.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
-            new Label(error, GUI.Width / 2, 100, GUI.Width, GUI.Height, 24, Color.Red),
+            new GUIRectangle(new Rectangle(Canvas.Width / 2, Canvas.Height / 2, Canvas.Width, Canvas.Height), Color.Black),
+            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, 50, textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, 5, Canvas.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, Canvas.Height - 5, Canvas.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingRectangle(new Rectangle(5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingRectangle(new Rectangle(Canvas.Width - 5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
+            new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", Canvas.Width / 2, 50, Canvas.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
+            new Label(error, Canvas.Width / 2, 100, Canvas.Width, Canvas.Height, 24, Color.Red),
         ]);
-    }
-    GetLevelPosition() {
-        return Math.round(Scene.Current._levelPosition);
     }
     GetMousePosition() {
         return new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
@@ -327,13 +325,16 @@ export class Scene {
         }
         return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
     }
-    GetInteractiveAt(x, y) {
+    GetInteractive() {
         for (let i = Scene.Current._interactableGameObjects.length - 1; i >= 0; i--) {
             const playerCenter = Scene.Current.Player.GetCenter();
             const position = Scene.Current._interactableGameObjects[i].GetRectangle();
-            if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 * 100)
+            if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 ** 2)
                 continue;
-            if (x > position.X && x < position.X + position.Width && y > position.Y && y < position.Y + position.Height)
+            if (this._mouseX + Canvas.CameraX >= position.X &&
+                this._mouseX + Canvas.CameraX < position.X + position.Width &&
+                this._mouseY + Canvas.CameraY >= position.Y &&
+                this._mouseY + Canvas.CameraY < position.Y + position.Height)
                 return Scene.Current._interactableGameObjects[i];
         }
         return null;
@@ -342,9 +343,13 @@ export class Scene {
         const dt = Math.min(200, time - Scene.Time);
         if (Scene.Current.Player !== null && Scene.Current.Player.CanTarget()) {
             const plrPos = Scene.Current.Player.GetPosition();
-            const plrTargetRaw = Scene.Current.Player.GetTarget();
-            const offset = Math.clamp(plrTargetRaw.X + 50 / 2 - 1500, 300 - 1500, -300) + plrPos.X - Scene.Current._levelPosition;
-            Scene.Current._levelPosition = Math.round(Scene.Current._levelPosition + dt * 0.005 * offset);
+            Canvas.CameraX = Math.round(Canvas.CameraX - dt * 0.0025 * (Canvas.CameraX - (plrPos.X + Math.clamp(this._mouseX, 0.2 * Canvas.Width, 0.8 * Canvas.Width) - Canvas.Width)));
+            if (Canvas.GetCameraScale() < 1) {
+                Canvas.CameraY = Math.round(Canvas.CameraY -
+                    dt * 0.0025 * (Canvas.CameraY - Math.clamp(this._mouseY - Canvas.Height * 0.25, plrPos.Y - Canvas.Height * 0.5, Math.min(plrPos.Y * 0.75, Canvas.Height * 0.5))));
+            }
+            else
+                Canvas.CameraY = Math.round(0.5 * (750 - Canvas.Height));
         }
         for (const object of Scene.Current._gameObjects)
             object.Update(dt);
@@ -354,13 +359,10 @@ export class Scene {
         this._touch = null;
     }
     Render() {
-        if (Scene.Current._background == null) {
-            Canvas.ClearStroke();
-            Canvas.SetFillColor(Color.Black);
-            Canvas.DrawRectangle(0, 0, GUI.Width, GUI.Height);
-        }
-        else
-            Canvas.DrawBackground(Scene.Current._background, Scene.Current._levelPosition);
+        GUI.ClearStroke();
+        GUI.SetFillColor(Color.Black);
+        GUI.DrawRectangle(0, 0, Canvas.Width, Canvas.Height);
+        Canvas.DrawBackground(Scene.Current._background);
         for (const object of Scene.Current._gameObjects)
             object.Render();
     }
@@ -384,7 +386,8 @@ export class Scene {
         if (object instanceof Player) {
             Scene.Current.Player = object;
             Scene.Player = object;
-            Scene.Current._levelPosition = object.GetTarget().X + 50 / 2 - 1500 + object.GetPosition().X;
+            Canvas.CameraX = 20 - Canvas.Width / 2 + object.GetPosition().X;
+            Canvas.CameraY = 50 - Canvas.Height / 2 + object.GetPosition().Y;
         }
         if (object instanceof Interactable) {
             Scene.Current._interactableGameObjects.push(object);

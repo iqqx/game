@@ -49,7 +49,7 @@ export class Entity extends GameObject {
 			else if (this._movingRight) this.MoveRight(dt);
 		}
 
-		this.Direction = this._xTarget > this._x + this.Width / 2 - Scene.Current.GetLevelPosition() ? 1 : -1;
+		this.Direction = this._xTarget > this._x + this.Width / 2 ? 1 : -1;
 	}
 
 	public IsAlive() {
@@ -140,7 +140,7 @@ export class Entity extends GameObject {
 			// падаем
 
 			const offsets = Scene.Current.GetCollidesByRect(
-				new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height),
+				new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)),
 				Tag.Wall | Tag.Platform
 			);
 
@@ -166,7 +166,10 @@ export class Entity extends GameObject {
 		} else if (this._verticalAcceleration > 0) {
 			// взлетаем
 
-			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall);
+			const offsets = Scene.Current.GetCollidesByRect(
+				new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)),
+				Tag.Wall
+			);
 
 			if (offsets.length > 0) {
 				this._verticalAcceleration = 0;

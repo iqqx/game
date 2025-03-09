@@ -53,7 +53,7 @@ export class AudioSource extends Interactable {
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawImageWithAngle(
 			this._frames[this._frameIndex],
-			new Rectangle(this._x - Scene.Current.GetLevelPosition() + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height),
+			new Rectangle(this._x   + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height),
 			this._enabled ? Math.cos(this._life / 50) / 10 : 0,
 			-this.Width / 2,
 			this.Height / 2

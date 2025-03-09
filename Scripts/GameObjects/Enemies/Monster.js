@@ -43,9 +43,9 @@ export class Monster extends Enemy {
     Render() {
         const frame = this._sprites[this._grounded ? 0 : 1];
         if (this.Direction === Direction.Right)
-            Canvas.DrawImage(frame, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+            Canvas.DrawImage(frame, new Rectangle(this._x, this._y, this.Width, this.Height));
         else
-            Canvas.DrawImageFlipped(frame, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+            Canvas.DrawImageFlipped(frame, new Rectangle(this._x, this._y, this.Width, this.Height));
     }
     TakeDamage(damage) {
         super.TakeDamage(damage);

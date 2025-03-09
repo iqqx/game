@@ -63,7 +63,7 @@ export class Blood extends GameObject {
     Render() {
         Canvas.SetFillColor(Color.Red);
         Canvas.ClearStroke();
-        Canvas.DrawRectangleEx(new Rectangle(this._x - Scene.Current.GetLevelPosition() - this._onFloorOffset, this._y, this.Width, this.Height));
+        Canvas.DrawRectangleEx(new Rectangle(this._x - this._onFloorOffset, this._y, this.Width, this.Height));
     }
 }
 //# sourceMappingURL=Blood.js.map

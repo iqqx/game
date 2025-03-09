@@ -14,7 +14,7 @@ export class RatCorpse extends Container {
             this.TryPushItem(item);
     }
     Render() {
-        Canvas.DrawImage(GetSprite("RatCorpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+        Canvas.DrawImage(GetSprite("RatCorpse"), new Rectangle(this._x, this._y, this.Width, this.Height));
     }
 }
 //# sourceMappingURL=RatCorpse.js.map

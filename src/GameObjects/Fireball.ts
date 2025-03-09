@@ -31,7 +31,7 @@ export class Fireball extends GameObject {
 
 		Canvas.DrawImageWithAngle(
 			frame,
-			new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, frame.ScaledSize.X, frame.ScaledSize.Y),
+			new Rectangle(this._x  , this._y, frame.ScaledSize.X, frame.ScaledSize.Y),
 			this._angle,
 			0,
 			frame.ScaledSize.Y * 0.5

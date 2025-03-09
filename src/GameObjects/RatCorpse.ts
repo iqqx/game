@@ -19,6 +19,6 @@ export class RatCorpse extends Container {
 	}
 
 	public override Render(): void {
-		Canvas.DrawImage(GetSprite("RatCorpse"), new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("RatCorpse"), new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 }

@@ -45,7 +45,7 @@ export class Item implements IItem {
 		if (this._direction === Direction.Left) {
 			Canvas.DrawImageWithAngleVFlipped(
 				this.Icon,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
+				new Rectangle(this._x  , this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y
@@ -53,7 +53,7 @@ export class Item implements IItem {
 		} else {
 			Canvas.DrawImageWithAngle(
 				this.Icon,
-				new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
+				new Rectangle(this._x  , this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y

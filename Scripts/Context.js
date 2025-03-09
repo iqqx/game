@@ -1,415 +1,344 @@
-/* eslint-disable @typescript-eslint/no-namespace */
 import { Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
-// ctxMain.canvas.width = ctxMain.canvas.clientWidth;
-// ctxMain.canvas.height = ctxMain.canvas.clientHeight;
+ctxMain.canvas.width = window.innerWidth;
+// ctxMain.canvas.height = window.innerHeight;
+ctxMain.canvas.height = 500;
 ctxMain.imageSmoothingEnabled = false;
-const ctxOverlay = document.createElement("canvas").getContext("2d");
-ctxOverlay.canvas.className = "123";
-// ctxOverlay.canvas.width = ctxMain.canvas.clientWidth;
-// ctxOverlay.canvas.height = ctxMain.canvas.clientHeight;
-ctxOverlay.canvas.width = ctxMain.canvas.width;
-ctxOverlay.canvas.height = ctxMain.canvas.height;
-ctxOverlay.imageSmoothingEnabled = false;
-let ctx = ctxMain;
+window.addEventListener("resize", () => {
+    ctxMain.canvas.width = window.innerWidth;
+    ctxMain.canvas.height = window.innerHeight;
+    ctxMain.imageSmoothingEnabled = false;
+});
 let fillStyle;
 let strokeStyle;
-export var Canvas;
-(function (Canvas) {
-    function GetAspectRatio() {
-        return ctxMain.canvas.width / ctxMain.canvas.clientWidth;
+export class Canvas {
+    static get Width() {
+        return ctxMain.canvas.width;
     }
-    Canvas.GetAspectRatio = GetAspectRatio;
-    function SwitchOn() {
-        ctxMain.drawImage(ctx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
-        ctx = ctxMain;
+    static get Height() {
+        return ctxMain.canvas.height;
     }
-    Canvas.SwitchOn = SwitchOn;
-    function EraseRectangle(x, y, width, height) {
-        ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+    static CameraX = 0;
+    static CameraY = 0;
+    static ToFullscreen() {
+        ctxMain.canvas.requestFullscreen();
     }
-    Canvas.EraseRectangle = EraseRectangle;
-    function SetFillColor(color) {
-        ctx.fillStyle = color.toString();
+    static LockMouse() {
+        ctxMain.canvas.requestPointerLock();
+    }
+    static SetFillColor(color) {
+        ctxMain.fillStyle = color.toString();
         fillStyle = color.toString();
     }
-    Canvas.SetFillColor = SetFillColor;
-    function ClearFillColor() {
+    static ClearFillColor() {
         fillStyle = null;
     }
-    Canvas.ClearFillColor = ClearFillColor;
-    function ClearStroke() {
+    static ClearStroke() {
         strokeStyle = null;
     }
-    Canvas.ClearStroke = ClearStroke;
-    function SetStroke(color, width) {
-        ctx.strokeStyle = color.toString();
-        ctx.lineWidth = width;
+    static SetStroke(color, width) {
+        ctxMain.strokeStyle = color.toString();
+        ctxMain.lineWidth = width;
         strokeStyle = [color.toString(), width];
     }
-    Canvas.SetStroke = SetStroke;
-    function SetFillRadialGradient(rect, start, end) {
-        const grd = ctx.createRadialGradient(rect.X + rect.Width / 2, ctx.canvas.height - rect.Height * 0.5 - rect.Y, 0, rect.X + rect.Width / 2, ctx.canvas.height - rect.Height * 0.5 - rect.Y, Math.max(rect.Width, rect.Height) * 2);
+    static SetFillRadialGradient(rect, start, end) {
+        const grd = ctxMain.createRadialGradient(rect.X + rect.Width / 2, ctxMain.canvas.height - rect.Height * 0.5 - rect.Y, 0, rect.X + rect.Width / 2, ctxMain.canvas.height - rect.Height * 0.5 - rect.Y, Math.max(rect.Width, rect.Height) * 2);
         grd.addColorStop(0, start.toString());
         grd.addColorStop(1, end.toString());
-        ctx.fillStyle = grd;
+        ctxMain.fillStyle = grd;
     }
-    Canvas.SetFillRadialGradient = SetFillRadialGradient;
-    function ResetTransform() {
-        ctx.resetTransform();
+    static ResetTransform() {
+        ctxMain.resetTransform();
     }
-    Canvas.ResetTransform = ResetTransform;
-    function Translate(x, y) {
-        ctx.translate(x, y);
+    static Translate(x, y) {
+        ctxMain.translate(x, y);
     }
-    Canvas.Translate = Translate;
-    function ClearRectangle(x, y, width, height) {
-        ctx.clearRect(x, ctx.canvas.height - y - height, width, height);
+    static DrawRectangle(x, y, width, height) {
+        ctxMain.fillRect(x - this.CameraX, ctxMain.canvas.height - height - (y - this.CameraY), width, height);
     }
-    Canvas.ClearRectangle = ClearRectangle;
-    function DrawRectangle(x, y, width, height) {
-        ctx.fillRect(x, ctx.canvas.height - y - height, width, height);
-    }
-    Canvas.DrawRectangle = DrawRectangle;
-    function DrawRectangleEx(rect) {
-        ctx.beginPath();
-        ctx.rect(rect.X, ctx.canvas.height - rect.Y, rect.Width, -rect.Height);
+    static DrawRectangleEx(rect) {
+        ctxMain.beginPath();
+        ctxMain.rect(rect.X - this.CameraX, ctxMain.canvas.height - (rect.Y - this.CameraY), rect.Width, -rect.Height);
         if (fillStyle !== null)
-            ctx.fill();
+            ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    Canvas.DrawRectangleEx = DrawRectangleEx;
-    function DrawRectangleRounded(rect, round) {
-        ctx.beginPath();
-        ctx.roundRect(rect.X, ctx.canvas.height - rect.Y, rect.Width, -rect.Height, round);
-        ctx.fill();
+    static DrawImage(image, rect) {
+        if (rect.X < this.CameraX - this.Width || rect.X + rect.Width > this.CameraX + this.Width)
+            return;
+        ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, rect.X - this.CameraX, ctxMain.canvas.height - rect.Height - (rect.Y - this.CameraY), rect.Width, rect.Height);
     }
-    Canvas.DrawRectangleRounded = DrawRectangleRounded;
-    function DrawImage(image, rect) {
-        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, rect.X, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
+    static GetCameraScale() {
+        return ctxMain.canvas.height / 750;
     }
-    Canvas.DrawImage = DrawImage;
-    function DrawBackground(image, offset) {
-        const ratio = image.Image.naturalHeight / ctx.canvas.height;
-        ctx.drawImage(image.Image, Math.round(offset * ratio), 0, Math.round(ctx.canvas.width * ratio), image.Image.naturalHeight, 0, 0, ctx.canvas.width, ctx.canvas.height);
+    static DrawBackground(image) {
+        // тут Y снизу
+        // работает только для горизонтального разрешения
+        const viewportScale = image.Image.naturalHeight / ctxMain.canvas.height;
+        const standartScale = ctxMain.canvas.height / 750; // вся игра сделана для разрешения 750
+        if (standartScale > 1)
+            ctxMain.drawImage(image.Image, this.CameraX * viewportScale * standartScale, 0, ctxMain.canvas.width * standartScale * viewportScale, image.Image.naturalHeight, 0, (ctxMain.canvas.height - 750) / 2, ctxMain.canvas.width, 750);
+        else
+            ctxMain.drawImage(image.Image, this.CameraX * viewportScale * standartScale, image.Image.naturalHeight * (1 - standartScale) - this.CameraY * (viewportScale * standartScale), ctxMain.canvas.width * standartScale * viewportScale, image.Image.naturalHeight * standartScale, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
     }
-    Canvas.DrawBackground = DrawBackground;
-    function GetSize() {
-        return new Vector2(ctx.canvas.width, ctx.canvas.height);
+    static DrawImageFlipped(image, rect) {
+        ctxMain.save();
+        ctxMain.scale(-1, 1);
+        ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, -(rect.X - this.CameraX) - rect.Width, ctxMain.canvas.height - rect.Height - (rect.Y - this.CameraY), rect.Width, rect.Height);
+        ctxMain.restore();
     }
-    Canvas.GetSize = GetSize;
-    function DrawImageFlipped(image, rect) {
-        ctx.save();
-        ctx.scale(-1, 1);
-        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, -rect.X - rect.Width, ctx.canvas.height - rect.Height - rect.Y, rect.Width, rect.Height);
-        ctx.restore();
+    static DrawCircle(x, y, radius) {
+        ctxMain.beginPath();
+        ctxMain.ellipse(x - this.CameraX, ctxMain.canvas.height - (y - this.CameraY), radius, radius, 0, 0, Math.PI * 2);
+        ctxMain.fill();
     }
-    Canvas.DrawImageFlipped = DrawImageFlipped;
-    function DrawCircle(x, y, radius) {
-        ctx.beginPath();
-        ctx.ellipse(x, ctx.canvas.height - y, radius, radius, 0, 0, Math.PI * 2);
-        ctx.fill();
+    static DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
+        const prev = ctxMain.getTransform();
+        ctxMain.resetTransform();
+        ctxMain.translate(x - this.CameraX, ctxMain.canvas.height - (y - this.CameraY));
+        ctxMain.rotate(angle);
+        ctxMain.fillRect(xPivot, yPivot - height, width, height);
+        ctxMain.setTransform(prev);
     }
-    Canvas.DrawCircle = DrawCircle;
-    function DrawLine(from, to) {
-        ctx.beginPath();
-        ctx.moveTo(from.X, ctx.canvas.height - from.Y);
-        ctx.lineTo(to.X, ctx.canvas.height - to.Y);
-        ctx.stroke();
+    static DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
+        ctxMain.save();
+        ctxMain.resetTransform();
+        ctxMain.translate(rect.X - this.CameraX, ctxMain.canvas.height - (rect.Y - this.CameraY));
+        ctxMain.rotate(angle);
+        ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+        ctxMain.restore();
     }
-    Canvas.DrawLine = DrawLine;
-    function DrawEllipse(x, y, radiusX, radiusY) {
-        ctx.beginPath();
-        ctx.ellipse(x, ctx.canvas.height - radiusY / 2 - y, radiusX, radiusY, 0, 0, Math.PI * 2);
-        if (fillStyle !== null)
-            ctx.fill();
-        if (strokeStyle !== null)
-            ctx.stroke();
+    static DrawImageWithAngleVFlipped(image, rect, angle, xPivot, yPivot) {
+        ctxMain.save();
+        ctxMain.resetTransform();
+        ctxMain.translate(rect.X - this.CameraX, ctxMain.canvas.height - (rect.Y - this.CameraY));
+        ctxMain.rotate(angle);
+        ctxMain.scale(1, -1);
+        ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+        ctxMain.restore();
     }
-    Canvas.DrawEllipse = DrawEllipse;
-    function DrawRectangleWithAngle(x, y, width, height, angle, xPivot, yPivot) {
-        const prev = ctx.getTransform();
-        ctx.resetTransform();
-        ctx.translate(x, ctx.canvas.height - y);
-        ctx.rotate(angle);
-        ctx.fillRect(xPivot, yPivot - height, width, height);
-        ctx.setTransform(prev);
-    }
-    Canvas.DrawRectangleWithAngle = DrawRectangleWithAngle;
-    function DrawRectangleWithAngleAndStroke(x, y, width, height, angle, xPivot, yPivot) {
-        const prev = ctx.getTransform();
-        ctx.resetTransform();
-        ctx.translate(x, ctx.canvas.height - y);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.rect(xPivot, yPivot - height, width, height);
-        ctx.fill();
-        ctx.stroke();
-        ctx.setTransform(prev);
-    }
-    Canvas.DrawRectangleWithAngleAndStroke = DrawRectangleWithAngleAndStroke;
-    function DrawImageWithAngle(image, rect, angle, xPivot, yPivot) {
-        ctx.save();
-        ctx.resetTransform();
-        // ctx.translate(rect.X - levelPosition, ctx.canvas.height - rect.Y);
-        ctx.translate(rect.X, ctx.canvas.height - rect.Y);
-        ctx.rotate(angle);
-        // ctx.drawImage(image.Image, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
-        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
-        ctx.restore();
-    }
-    Canvas.DrawImageWithAngle = DrawImageWithAngle;
-    function DrawImageWithAngleVFlipped(image, rect, angle, xPivot, yPivot) {
-        ctx.save();
-        ctx.resetTransform();
-        ctx.translate(rect.X, ctx.canvas.height - rect.Y);
-        ctx.rotate(angle);
-        ctx.scale(1, -1);
-        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, xPivot, yPivot - rect.Height, rect.Width, rect.Height);
-        ctx.restore();
-    }
-    Canvas.DrawImageWithAngleVFlipped = DrawImageWithAngleVFlipped;
-    function DrawVignette(color, startAlpha, endAlpha) {
-        const outerRadius = ctx.canvas.width * 1;
-        const innerRadius = ctx.canvas.width * 0.1;
-        const grd = ctx.createRadialGradient(ctx.canvas.width / 2, ctx.canvas.height / 2, innerRadius, ctx.canvas.width / 2, ctx.canvas.height / 2, outerRadius);
+    static DrawVignette(color, startAlpha, endAlpha) {
+        const outerRadius = ctxMain.canvas.width * 1;
+        const innerRadius = ctxMain.canvas.width * 0.1;
+        const grd = ctxMain.createRadialGradient(ctxMain.canvas.width / 2, ctxMain.canvas.height / 2, innerRadius, ctxMain.canvas.width / 2, ctxMain.canvas.height / 2, outerRadius);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha ?? 0.1})`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha ?? 0.6})`);
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctxMain.fillStyle = grd;
+        ctxMain.fillRect(0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
     }
-    Canvas.DrawVignette = DrawVignette;
-    function DrawRectangleWithGradient(rect, start, end) {
-        const grd = ctx.createLinearGradient(
+    static DrawRectangleWithGradient(rect, start, end) {
+        const grd = ctxMain.createLinearGradient(
         // rect.X - levelPosition,
-        rect.X, ctx.canvas.height - rect.Height - rect.Y, 
+        rect.X, ctxMain.canvas.height - rect.Height - rect.Y, 
         // rect.X - levelPosition + rect.Width,
-        rect.X + rect.Width, ctx.canvas.height - rect.Height - rect.Y + rect.Height);
+        rect.X + rect.Width, ctxMain.canvas.height - rect.Height - rect.Y + rect.Height);
         grd.addColorStop(0, start.toString());
         grd.addColorStop(1, end.toString());
-        ctx.fillStyle = grd;
-        DrawRectangle(rect.X, rect.Y, rect.Width, rect.Height);
+        ctxMain.fillStyle = grd;
+        Canvas.DrawRectangle(rect.X - this.CameraX, rect.Y - this.CameraY, rect.Width, rect.Height);
     }
-    Canvas.DrawRectangleWithGradient = DrawRectangleWithGradient;
-    function DrawRectangleWithGradientAndAngle(rect, start, end, angle, xPivot, yPivot) {
-        const grd = ctx.createLinearGradient(xPivot, yPivot - rect.Height, rect.Width, rect.Height);
+    static DrawRectangleWithGradientAndAngle(rect, start, end, angle, xPivot, yPivot) {
+        const grd = ctxMain.createLinearGradient(xPivot, yPivot - rect.Height, rect.Width, rect.Height);
         grd.addColorStop(start[0], start[1].toString());
         grd.addColorStop(end[0], end[1].toString());
-        ctx.fillStyle = grd;
-        DrawRectangleWithAngle(rect.X, rect.Y, rect.Width, rect.Height, angle, xPivot, yPivot);
+        ctxMain.fillStyle = grd;
+        Canvas.DrawRectangleWithAngle(rect.X - this.CameraX, rect.Y - this.CameraY, rect.Width, rect.Height, angle, xPivot, yPivot);
     }
-    Canvas.DrawRectangleWithGradientAndAngle = DrawRectangleWithGradientAndAngle;
-    function GetClientRectangle() {
-        return ctx.canvas.getBoundingClientRect();
+    static GetClientRectangle() {
+        return ctxMain.canvas.getBoundingClientRect();
     }
-    Canvas.GetClientRectangle = GetClientRectangle;
-})(Canvas || (Canvas = {}));
-export var GUI;
-(function (GUI) {
-    GUI.Width = ctxOverlay.canvas.width;
-    GUI.Height = ctxOverlay.canvas.height;
-    function SwitchOn() {
-        ctx = ctxOverlay;
+}
+export class GUI {
+    static get Width() {
+        return ctxMain.canvas.width;
     }
-    GUI.SwitchOn = SwitchOn;
-    function SetFillColor(color) {
-        ctx.fillStyle = color.toString();
+    static get Height() {
+        return ctxMain.canvas.height;
+    }
+    static SetFillColor(color) {
+        ctxMain.fillStyle = color.toString();
         fillStyle = color.toString();
     }
-    GUI.SetFillColor = SetFillColor;
-    function SetStroke(color, width) {
-        ctx.strokeStyle = color.toString();
-        ctx.lineWidth = width;
+    static SetStroke(color, width) {
+        ctxMain.strokeStyle = color.toString();
+        ctxMain.lineWidth = width;
         strokeStyle = [color.toString(), width];
     }
-    GUI.SetStroke = SetStroke;
-    function ClearFillColor() {
+    static ClearFillColor() {
         fillStyle = null;
     }
-    GUI.ClearFillColor = ClearFillColor;
-    function ClearStroke() {
+    static ClearStroke() {
         strokeStyle = null;
     }
-    GUI.ClearStroke = ClearStroke;
-    function SetBaselineTop() {
-        ctx.textBaseline = "top";
+    static SetBaselineTop() {
+        ctxMain.textBaseline = "top";
     }
-    GUI.SetBaselineTop = SetBaselineTop;
-    function SetBaselineDefault() {
-        ctx.textBaseline = "alphabetic";
+    static SetBaselineDefault() {
+        ctxMain.textBaseline = "alphabetic";
     }
-    GUI.SetBaselineDefault = SetBaselineDefault;
-    function Clear() {
-        ctx.clearRect(0, 0, GUI.Width, GUI.Height);
+    static Clear() {
+        ctxMain.clearRect(0, 0, this.Width, GUI.Height);
     }
-    GUI.Clear = Clear;
-    function SetFont(size) {
-        ctx.font = `${size}px Consolas`; // Monospace
-        ctx.letterSpacing = "2px";
+    static SetFont(size) {
+        ctxMain.font = `${size}px Consolas`; // Monospace
+        ctxMain.letterSpacing = "2px";
     }
-    GUI.SetFont = SetFont;
-    function DrawRectangle(x, y, width, height) {
-        ctx.beginPath();
-        ctx.rect(x, y, width, height);
+    static DrawRectangleWithAngleAndStroke(x, y, width, height, angle, xPivot, yPivot) {
+        const prev = ctxMain.getTransform();
+        ctxMain.resetTransform();
+        ctxMain.translate(x, y);
+        ctxMain.rotate(angle);
+        ctxMain.beginPath();
+        ctxMain.rect(xPivot, yPivot - height, width, height);
+        ctxMain.fill();
+        ctxMain.stroke();
+        ctxMain.setTransform(prev);
+    }
+    static DrawRectangle(x, y, width, height) {
+        ctxMain.beginPath();
+        ctxMain.rect(x, y, width, height);
         if (fillStyle !== null)
-            ctx.fill();
+            ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    GUI.DrawRectangle = DrawRectangle;
-    function DrawRoundedRectangle(x, y, width, height, round) {
-        ctx.beginPath();
-        ctx.roundRect(x, y, width, height, round);
+    static DrawRoundedRectangle(x, y, width, height, round) {
+        ctxMain.beginPath();
+        ctxMain.roundRect(x, y, width, height, round);
         if (fillStyle !== null)
-            ctx.fill();
+            ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    GUI.DrawRoundedRectangle = DrawRoundedRectangle;
-    function DrawCircle(x, y, radius) {
-        ctx.beginPath();
-        ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
+    static DrawCircle(x, y, radius) {
+        ctxMain.beginPath();
+        ctxMain.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
         if (fillStyle !== null)
-            ctx.fill();
+            ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    GUI.DrawCircle = DrawCircle;
-    function DrawSector(x, y, radius, angle) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.arc(x, y, radius, 0, angle);
+    static DrawSector(x, y, radius, angle) {
+        ctxMain.beginPath();
+        ctxMain.moveTo(x, y);
+        ctxMain.arc(x, y, radius, 0, angle);
         if (fillStyle !== null)
-            ctx.fill();
+            ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    GUI.DrawSector = DrawSector;
-    function DrawText(x, y, text) {
-        ctx.fillText(text, x, y);
+    static DrawText(x, y, text) {
+        ctxMain.fillText(text, x, y);
     }
-    GUI.DrawText = DrawText;
-    function DrawTextWithBreakes(text, x, y) {
-        const height = ctx.measureText("|").actualBoundingBoxAscent + ctx.measureText("|").actualBoundingBoxDescent;
+    static DrawTextWithBreakes(text, x, y) {
+        const height = ctxMain.measureText("|").actualBoundingBoxAscent + ctxMain.measureText("|").actualBoundingBoxDescent;
         const lines = text.split("\n");
         for (let i = 0; i < lines.length; i++)
-            ctx.fillText(lines[i], x, y + i * height);
+            ctxMain.fillText(lines[i], x, y + i * height);
     }
-    GUI.DrawTextWithBreakes = DrawTextWithBreakes;
-    function DrawTextCenter(text, x, y, width, height) {
-        const textWidth = ctx.measureText(text).width;
+    static DrawTextCenter(text, x, y, width, height) {
+        const textWidth = ctxMain.measureText(text).width;
         if (height !== undefined) {
-            const textHeight = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
-            ctx.fillText(text, x + (width - textWidth) / 2, y + (height + textHeight) / 2);
+            const textHeight = ctxMain.measureText(text).actualBoundingBoxAscent + ctxMain.measureText(text).actualBoundingBoxDescent;
+            ctxMain.fillText(text, x + (width - textWidth) / 2, y + (height + textHeight) / 2);
         }
         else
-            ctx.fillText(text, x + (width - textWidth) / 2, y);
+            ctxMain.fillText(text, x + (width - textWidth) / 2, y);
     }
-    GUI.DrawTextCenter = DrawTextCenter;
-    function DrawTextClamped(x, y, text, maxWidth) {
-        const height = ctx.measureText(text).actualBoundingBoxAscent + ctx.measureText(text).actualBoundingBoxDescent;
-        const lineCount = Math.floor(maxWidth / ctx.measureText("0").width);
+    static DrawTextClamped(x, y, text, maxWidth) {
+        const height = ctxMain.measureText(text).actualBoundingBoxAscent + ctxMain.measureText(text).actualBoundingBoxDescent;
+        const lineCount = Math.floor(maxWidth / ctxMain.measureText("0").width);
         for (let i = 0; i < Math.ceil(text.length / lineCount); i++)
-            ctx.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
+            ctxMain.fillText(text.slice(lineCount * i, lineCount * (i + 1)).toString(), x, y + i * height * 2);
     }
-    GUI.DrawTextClamped = DrawTextClamped;
-    function DrawTextWrapped(x, y, text, maxWidth) {
-        const height = ctx.measureText("0").actualBoundingBoxAscent + ctx.measureText("0").actualBoundingBoxDescent;
+    static DrawTextWrapped(x, y, text, maxWidth) {
+        const height = ctxMain.measureText("0").actualBoundingBoxAscent + ctxMain.measureText("0").actualBoundingBoxDescent;
         const words = text.split(" ");
         const lines = [];
         let added = 0;
         for (let l = 0; l < 50; l++) {
             let lastSpace = maxWidth;
             for (let i = 0; i < 50; i++) {
-                lastSpace -= ctx.measureText(words[added + i] + " ").width;
+                lastSpace -= ctxMain.measureText(words[added + i] + " ").width;
                 if (lastSpace < 0 || words.length < added + i) {
                     lines.push(words.slice(added, added + i).join(" "));
                     added += i;
                     break;
                 }
             }
-            ctx.fillText(lines[l], x, y + l * height * 2);
+            ctxMain.fillText(lines[l], x, y + l * height * 2);
         }
     }
-    GUI.DrawTextWrapped = DrawTextWrapped;
-    function DrawText2CenterLineBreaked(x, y, text) {
-        const descent = ctx.measureText("").fontBoundingBoxAscent;
-        const height = ctx.measureText("").fontBoundingBoxDescent + descent;
+    static DrawText2CenterLineBreaked(x, y, text) {
+        const descent = ctxMain.measureText("").fontBoundingBoxAscent;
+        const height = ctxMain.measureText("").fontBoundingBoxDescent + descent;
         const lines = text.split("\n");
-        const lastAlign = ctx.textAlign;
-        ctx.textAlign = "center";
+        const lastAlign = ctxMain.textAlign;
+        ctxMain.textAlign = "center";
         for (let l = 0; l < lines.length; l++)
-            ctx.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
-        ctx.textAlign = lastAlign;
+            ctxMain.fillText(lines[l], x, y + height * (l - lines.length * 0.5) + descent);
+        ctxMain.textAlign = lastAlign;
     }
-    GUI.DrawText2CenterLineBreaked = DrawText2CenterLineBreaked;
-    function DrawTextCenterLineBreaked(x, y, lines) {
-        const descent = ctx.measureText("").fontBoundingBoxAscent;
-        const height = ctx.measureText("").fontBoundingBoxDescent + descent;
-        const lastAlign = ctx.textAlign;
-        ctx.textAlign = "center";
+    static DrawTextCenterLineBreaked(x, y, lines) {
+        const descent = ctxMain.measureText("").fontBoundingBoxAscent;
+        const height = ctxMain.measureText("").fontBoundingBoxDescent + descent;
+        const lastAlign = ctxMain.textAlign;
+        ctxMain.textAlign = "center";
         for (let l = 0; l < lines.length; l++)
-            ctx.fillText(lines[l], x, y + height * l + descent);
-        ctx.textAlign = lastAlign;
+            ctxMain.fillText(lines[l], x, y + height * l + descent);
+        ctxMain.textAlign = lastAlign;
     }
-    GUI.DrawTextCenterLineBreaked = DrawTextCenterLineBreaked;
-    function DrawImage(image, x, y, width, height) {
-        ctx.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
+    static DrawImage(image, x, y, width, height) {
+        ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, x, y, width, height);
     }
-    GUI.DrawImage = DrawImage;
-    function DrawImageScaled(image, x, y, width, height) {
+    static DrawImageScaled(image, x, y, width, height) {
         if (image.BoundingBox.Width > image.BoundingBox.Height) {
             const scaledHeight = image.BoundingBox.Height * (width / image.BoundingBox.Width);
-            ctx.drawImage(image.Image, x, y + (height - scaledHeight) / 2, width, scaledHeight);
+            ctxMain.drawImage(image.Image, x, y + (height - scaledHeight) / 2, width, scaledHeight);
         }
         else {
             const scaledWidth = image.BoundingBox.Width * (height / image.BoundingBox.Height);
-            ctx.drawImage(image.Image, x + (width - scaledWidth) / 2, y, scaledWidth, height);
+            ctxMain.drawImage(image.Image, x + (width - scaledWidth) / 2, y, scaledWidth, height);
         }
     }
-    GUI.DrawImageScaled = DrawImageScaled;
-    function DrawImageWithAngle(image, x, y, width, height, angle) {
-        ctx.save();
-        ctx.resetTransform();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-        ctx.drawImage(image.Image, -width / 2, -height / 2, width, height);
-        ctx.restore();
+    static DrawImageWithAngle(image, x, y, width, height, angle) {
+        ctxMain.save();
+        ctxMain.resetTransform();
+        ctxMain.translate(x, y);
+        ctxMain.rotate(angle);
+        ctxMain.drawImage(image.Image, -width / 2, -height / 2, width, height);
+        ctxMain.restore();
     }
-    GUI.DrawImageWithAngle = DrawImageWithAngle;
-    function DrawCircleWithGradient(x, y, radius, startColor, endColor) {
-        const grd = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    static DrawCircleWithGradient(x, y, radius, startColor, endColor) {
+        const grd = ctxMain.createRadialGradient(x, y, 0, x, y, radius);
         grd.addColorStop(0, startColor.toString());
         grd.addColorStop(1, endColor.toString());
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctxMain.fillStyle = grd;
+        ctxMain.beginPath();
+        ctxMain.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
+        ctxMain.fill();
         if (strokeStyle !== null)
-            ctx.stroke();
+            ctxMain.stroke();
     }
-    GUI.DrawCircleWithGradient = DrawCircleWithGradient;
-    function DrawVignette(color, startRadius, startAlpha, endAlpha) {
-        const grd = ctx.createRadialGradient(GUI.Width / 2, GUI.Height / 2, GUI.Width * startRadius, GUI.Width / 2, GUI.Height / 2, GUI.Width);
+    static DrawVignette(color, startRadius, startAlpha, endAlpha) {
+        const grd = ctxMain.createRadialGradient(GUI.Width / 2, GUI.Height / 2, GUI.Width * startRadius, GUI.Width / 2, GUI.Height / 2, GUI.Width);
         grd.addColorStop(0, `rgba(${color.R}, ${color.G}, ${color.B}, ${startAlpha})`);
         grd.addColorStop(0.2, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
         grd.addColorStop(1, `rgba(${color.R}, ${color.G}, ${color.B}, ${endAlpha})`);
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, GUI.Width, GUI.Height);
+        ctxMain.fillStyle = grd;
+        ctxMain.fillRect(0, 0, GUI.Width, GUI.Height);
     }
-    GUI.DrawVignette = DrawVignette;
-    function GetTextSize(text, includeLineBrakes = true) {
+    static GetTextSize(text, includeLineBrakes = true) {
         if (includeLineBrakes) {
-            const height = ctx.measureText("").fontBoundingBoxDescent + ctx.measureText("").fontBoundingBoxAscent;
-            const measures = text.split("\n").map((x) => ctx.measureText(x).width);
+            const height = ctxMain.measureText("").fontBoundingBoxDescent + ctxMain.measureText("").fontBoundingBoxAscent;
+            const measures = text.split("\n").map((x) => ctxMain.measureText(x).width);
             return new Vector2(Math.max(...measures), height * measures.length);
         }
         else {
-            const measure = ctx.measureText(text);
+            const measure = ctxMain.measureText(text);
             return new Vector2(measure.width, measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
         }
     }
-    GUI.GetTextSize = GetTextSize;
-})(GUI || (GUI = {}));
+}
 //# sourceMappingURL=Context.js.map

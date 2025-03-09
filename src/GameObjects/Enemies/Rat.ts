@@ -48,8 +48,8 @@ export class Rat extends Enemy {
 	}
 
 	override Render(): void {
-		if (this.Direction === 1) Canvas.DrawImage(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
-		else Canvas.DrawImageFlipped(this._image, new Rectangle(this._x - Scene.Current.GetLevelPosition(), this._y, this.Width, this.Height));
+		if (this.Direction === 1) Canvas.DrawImage(this._image, new Rectangle(this._x  , this._y, this.Width, this.Height));
+		else Canvas.DrawImageFlipped(this._image, new Rectangle(this._x  , this._y, this.Width, this.Height));
 	}
 
 	override TakeDamage(damage: number): void {
