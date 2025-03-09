@@ -6,8 +6,8 @@ export class TextButton extends Button {
 	private _text: string;
 	private _size: number;
 
-	constructor(x: number, y: number, width: number, height: number, text: string, size: number) {
-		super(x, y, width, height);
+	constructor(width: number, height: number, text: string, size: number) {
+		super(width, height);
 
 		this._text = text;
 		this._size = size;
@@ -16,8 +16,8 @@ export class TextButton extends Button {
 	public override Render() {
 		super.Render();
 
-		GUI.SetFillColor(Color.White);
+		GUI.SetFillColor(this.Enabled ? Color.White : new Color(100, 100, 100));
 		GUI.SetFont(this._size);
-		GUI.DrawTextCenter(this._text, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+		GUI.DrawTextCenter(this._text, this.X, this.Y, this.Width, this.Height);
 	}
 }

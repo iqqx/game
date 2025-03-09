@@ -1,56 +1,109 @@
 {
 	"GameObjects": [
 		{
-			"Type": "SpotLightSpawner",
-			"Arguments": []
-		},
-		{
-			"Type": "TextButton",
-			"Arguments": [750, 375, 200, 50, "НАЧАТЬ", 32],
-			"Action": {
-				"Type": "LoadScene",
-				"Source": "Assets/Scenes/Loading.json"
-			}
-		},
-		{
-			"Type": "TextButton",
-			"Arguments": [750, 435, 150, 40, "ТИТРЫ", 24],
-			"Action": {
-				"Type": "LoadScene",
-				"Source": "Assets/Scenes/Prolog.json"
-			}
-		},
-		{
-			"Type": "TextButton",
-			"Arguments": [750, 480, 150, 40, "ВЫХОД", 24],
-			"Action": {
-				"Type": "GotoUrl",
-				"Source": "https://mi1nor.github.io/new-v/index.html"
-			}
-		},
-		{
-			"Type": "HintLabel",
-			"Arguments": ["1.6", 750, 730]
-		},
-		{
-			"Type": "Image",
-			"Arguments": [50, 700, 50, 50, "TSLogo"]
-		},
-		{
-			"Type": "Image",
-			"Arguments": [125, 700, 50, 50, "EngineLogo"]
-		},
-		{
-			"Type": "Label",
-			"Arguments": ["© 2025 PENTAGON. Все права защищены.", 1330, 730, 50, 50]
-		},
-		{
-			"Type": "FPSCounter",
-			"Arguments": []
-		},
-		{
-			"Type": "Cursor",
-			"Arguments": []
+			"Type": "Layout",
+			"Arguments": ["GRID"],
+			"Childs": [
+				{ "Type": "SpotLightSpawner" },
+				{
+					"Type": "Layout",
+					"Arguments": ["FLEX", "CENTER", "CENTER", 10],
+					"Childs": [
+						{
+							"Type": "TextButton",
+							"Arguments": [200, 50, "НАЧАТЬ", 32],
+							"Action": {
+								"Type": "LoadScene",
+								"Source": "Assets/Scenes/Loading.json"
+							}
+						},
+						{
+							"Type": "TextButton",
+							"Arguments": [120, 40, "ТИТРЫ", 24],
+							"Action": {
+								"Type": "LoadScene",
+								"Source": "Assets/Scenes/Prolog.json"
+							}
+						},
+						{
+							"Type": "TextButton",
+							"Arguments": [250, 40, "В ПОЛНЫЙ ЭКРАН", 24],
+							"Action": {
+								"Type": "GotoFullscreen"
+							},
+							"EnabledOn": {
+								"Type": "Straight",
+								"Name": "IsFullscreen"
+							}
+						},
+						{
+							"Type": "TextButton",
+							"Arguments": [100, 40, "ВЫХОД", 24],
+							"Action": {
+								"Type": "GotoUrl",
+								"Source": "https://mi1nor.github.io/P3NTaG0N/"
+							}
+						}
+					]
+				},
+				{
+					"Type": "Layout",
+					"Arguments": ["HORIZONTAL FLEX", "SPACED", "END", 0],
+					"Childs": [
+						{
+							"Type": "Layout",
+							"Arguments": ["HORIZONTAL FLEX", "START", "END", 10, [0, 0, 20, 20]],
+							"Childs": [
+								{
+									"Type": "Image",
+									"Arguments": [50, 50, "TSLogo"]
+								},
+								{
+									"Type": "Image",
+									"Arguments": [50, 50, "EngineLogo"]
+								},
+								{
+									"Type": "Image",
+									"Arguments": [50, 50, "Logo"]
+								}
+							]
+						},
+						{
+							"Type": "Layout",
+							"Arguments": ["FLEX", "CENTER", "END", 0, [0, 0, 20, 0]],
+							"Childs": [
+								{
+									"Type": "HintLabel",
+									"Arguments": ["2.0"]
+								}
+							]
+						},
+						{
+							"Type": "Layout",
+							"Arguments": ["FLEX", "END", "END", 0, [0, 20, 20, 0]],
+							"Childs": [
+								{
+									"Type": "Label",
+									"Arguments": ["© 2025 PENTAGON. Все права защищены."]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "Layout",
+					"Arguments": ["FLEX", "END", "START", 0],
+					"Childs": [
+						{
+							"Type": "FPSCounter"
+						}
+					]
+				},
+				{
+					"Type": "Cursor",
+					"Arguments": []
+				}
+			]
 		}
 	]
 }

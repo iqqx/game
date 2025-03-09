@@ -1,7 +1,7 @@
-import { EnemyType, Tag } from "./Enums.js";
+import { Direction, EnemyType, Tag } from "./Enums.js";
 import { Player } from "./GameObjects/Player.js";
 import { Canvas, GUI } from "./Context.js";
-import { Vector2, RaycastHit, Line, GetIntersectPoint, Sprite, Color, Rectangle, IsString, IsNumber } from "./Utilites.js";
+import { Vector2, RaycastHit, Line, GetIntersectPoint, Sprite, Color, Rectangle, IsString, IsNumber, PointerState, IsMobile } from "./Utilites.js";
 import { GameObject, Interactable } from "./GameObjects/GameObject.js";
 import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
 import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
@@ -21,7 +21,7 @@ import { Wall } from "./GameObjects/Wall.js";
 import { Image } from "./GameObjects/GUI/Image.js";
 import { LoadingIcon } from "./GameObjects/GUI/LoadingIcon.js";
 import { Label } from "./GameObjects/GUI/Label.js";
-import { IntroCutscene } from "./GameObjects/IntroCutscene.js";
+import { IntroCutscene } from "./GameObjects/GUI/IntroCutscene.js";
 import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
 import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
 import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
@@ -38,6 +38,11 @@ import { GetSprite } from "./AssetsLoader.js";
 import { Monster } from "./GameObjects/Enemies/Monster.js";
 import { ItemRegistry } from "./Assets/Items/ItemRegistry.js";
 import { Item } from "./Assets/Items/Item.js";
+import { Button } from "./GameObjects/GUI/Button.js";
+import { FlexLayout } from "./GameObjects/GUI/FlexLayout.js";
+import { GridLayout } from "./GameObjects/GUI/GridLayout.js";
+import { FreeLayout } from "./GameObjects/GUI/FreeLayout.js";
+import { Layout } from "./GameObjects/GUI/Layout.js";
 
 export class Scene {
 	public static Current: Scene;
@@ -46,17 +51,11 @@ export class Scene {
 	private readonly _interactableGameObjects: Interactable[] = [];
 	private readonly _GUIElements: GUIBase[] = [];
 	private readonly _background: Sprite | null;
-	private readonly _keyDownEvents: [string, () => void][] = [];
+	private static readonly _registeredEvents: { Target: object; Name: string; Callback: (e: Event) => void }[] = [];
 
-	private _touch: Vector2 | null = null;
-	private _mouseX = 0;
-	private _mouseY = 0;
-	private _lmb = false;
-	private _rmb = false;
-
-	public static Player: Player | null = null;
 	public Player: Player | null = null;
 	public static Time = 0;
+	public static OnPointerStateChanged: ((event: PointerState) => void) | undefined = undefined;
 
 	constructor(background: Sprite | null, objects: (GameObject | GUIBase)[]) {
 		this._background = background;
@@ -64,54 +63,25 @@ export class Scene {
 		if (Scene.Current !== undefined) Scene.Current.Unload();
 		Scene.Current = this;
 
-		this._mouseX = Canvas.Width / 2;
-		this._mouseY = Canvas.Height / 2;
-
 		for (const object of objects)
 			if (object instanceof GameObject) this.Instantiate(object);
 			else this.AddGUI(object);
 
-		addEventListener("mousemove", (e) => {
-			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-
-			Scene.Current._mouseX = Math.round(e.offsetX);
-			Scene.Current._mouseY = Math.round(Canvas.Height - e.offsetY);
-		});
-
-		addEventListener("mousedown", (e) => {
-			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-
-			Scene.Current._mouseX = Math.round(e.offsetX);
-			Scene.Current._mouseY = Math.round(Canvas.Height - e.offsetY);
-
-			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent)) {
-				this._touch = new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
-			} else {
-				if (e.button === 0) this._lmb = true;
-				if (e.button === 2) this._rmb = true;
-			}
-
-			for (const event of this._keyDownEvents) if (event[0] === "any") event[1]();
-		});
-
-		addEventListener("mouseup", (e) => {
-			if ((e.target as HTMLElement).tagName !== "CANVAS") return;
-
-			if (e.button === 0) this._lmb = false;
-			if (e.button === 2) this._rmb = false;
-		});
-
-		addEventListener("keydown", (e) => {
-			for (const event of this._keyDownEvents) if (event[0] === "any" || event[0] === e.code) event[1]();
+		window.addEventListener("resize", () => {
+			if (this._GUIElements.length > 0) (this._GUIElements[0] as Layout).Repack();
 		});
 	}
 
 	public Unload() {
 		this._gameObjects.clear();
 		this._interactableGameObjects.clear();
+		this._GUIElements[0]?.OnDestroy();
 		this._GUIElements.clear();
-		this._keyDownEvents.clear();
+		if (this.Player && this.Player.OnDestroy) this.Player.OnDestroy.call(this.Player);
 		this.Player = undefined;
+
+		for (const event of Scene._registeredEvents) Canvas.HTML.removeEventListener(event.Name, event.Callback);
+		Scene._registeredEvents.clear();
 	}
 
 	public static async LoadFromFile(src: string) {
@@ -129,40 +99,11 @@ export class Scene {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private static ParseObject(x: any) {
 		switch (x.Type) {
-			case "PressedIndicator":
-				return new PressedIndicator(...(x.Arguments as [number, number, string, number]));
-			case "Titles":
-				return new Titles();
-			case "SpotLightSpawner":
-				return new GUISpotLight();
-			case "HintLabel":
-				return new HintLabel(...(x.Arguments as [string, number, number]));
-			case "IntroCutscene":
-				return new IntroCutscene(x.Arguments[0]);
-			case "Label":
-				return new Label(...(x.Arguments as [string, number, number, number, number]));
-			case "Image":
-				x.Arguments[4] = GetSprite(x.Arguments[4] as string) as Sprite;
-				return new Image(...(x.Arguments as [number, number, number, number, Sprite]));
-			case "LoadingIcon": {
-				const actions: (() => void)[] = x.Actions.map((x) => this.ParseAction(x));
-
-				return new LoadingIcon(...(x.Arguments as [number, number, number]), () => {
-					for (const action of actions) action();
-				});
-			}
-			case "Cursor":
-				return new Cursor();
-			case "TextButton": {
-				const button = new TextButton(...(x.Arguments as [number, number, number, number, string, number]));
-				if (x.Action !== undefined) button.SetOnClicked(this.ParseAction(x.Action));
-
-				return button;
+			case "Layout": {
+				return this.ParseGUIObject(x);
 			}
 			case "Wall":
 				return new Wall(...(x.Arguments as [number, number, number, number]));
-			case "FPSCounter":
-				return new FPSCounter();
 			case "Platform":
 				return new Platform(...(x.Arguments as [number, number, number]));
 			case "Player":
@@ -215,7 +156,7 @@ export class Scene {
 				x.Arguments[2] = x.Arguments[2] === "Green" ? EnemyType.Green : EnemyType.Red;
 				x.Arguments[4] = x.Arguments[4] === undefined ? undefined : this.ParseItem(x.Arguments[4]);
 
-				return new Human(...(x.Arguments as [number, number, EnemyType.Red | EnemyType.Green]));
+				return new Human(...(x.Arguments as [number, number, EnemyType.Red | EnemyType.Green, Direction, Weapon, boolean]));
 			case "Rat":
 				return new Rat(...(x.Arguments as [number, number]));
 			case "Monster":
@@ -226,7 +167,87 @@ export class Scene {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private static ParseAction(x: any) {
+	private static ParseGUIObject(x: any): GUIBase {
+		switch (x.Type) {
+			case "Layout": {
+				switch (x.Arguments[0].toLowerCase()) {
+					case "flex": {
+						const l = new FlexLayout(x.Arguments[1], x.Arguments[2], x.Arguments[3], x.Arguments[4]);
+
+						for (const object of x.Childs) l.AddChild(this.ParseGUIObject(object));
+
+						l.Repack();
+
+						return l;
+					}
+					case "horizontal flex": {
+						const l = new FlexLayout(x.Arguments[1], x.Arguments[2], x.Arguments[3], x.Arguments[4], true);
+
+						for (const object of x.Childs) l.AddChild(this.ParseGUIObject(object));
+
+						l.Repack();
+
+						return l;
+					}
+					case "grid": {
+						const l = new GridLayout();
+
+						for (const object of x.Childs) l.AddChild(this.ParseGUIObject(object));
+
+						l.Repack();
+
+						return l;
+					}
+					case "free": {
+						const l = new FreeLayout();
+
+						for (const object of x.Childs) l.AddChild(this.ParseGUIObject(object));
+
+						return l;
+					}
+					default: {
+						throw new Error("Неизвестный тип разметки: " + x.Arguments[0]);
+					}
+				}
+			}
+			case "LoadingIcon": {
+				return new LoadingIcon(...(x.Arguments as [number]), x.Actions.map(this.ParseAction));
+			}
+			case "Image":
+				x.Arguments[2] = GetSprite(x.Arguments[2] as string) as Sprite;
+
+				return new Image(...(x.Arguments as [number, number, Sprite]));
+			case "HintLabel":
+				return new HintLabel(...(x.Arguments as [string, number]));
+			case "Titles":
+				return new Titles();
+			case "FPSCounter":
+				return new FPSCounter();
+			case "Label":
+				return new Label(...(x.Arguments as [string]));
+			case "Cursor":
+				return new Cursor();
+			case "IntroCutscene":
+				return new IntroCutscene();
+			case "TextButton": {
+				const button = new TextButton(...(x.Arguments as [number, number, string, number]));
+
+				if (x.Action !== undefined) button.SetOnClicked(this.ParseAction(x.Action));
+				if (x.EnabledOn !== undefined) this.ParseCondition(button, x.EnabledOn);
+
+				return button;
+			}
+			case "PressedIndicator":
+				return new PressedIndicator(...(x.Arguments as [string, number, number]), x.Actions.map(this.ParseAction));
+			case "SpotLightSpawner":
+				return new GUISpotLight();
+			default:
+				throw new Error("Не удалось распарсить: " + x.Type);
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private static ParseAction(x: any): () => void {
 		switch (x.Type) {
 			case "LoadScene":
 				return () => Scene.LoadFromFile(x.Source);
@@ -235,20 +256,31 @@ export class Scene {
 			case "LoadSceneEditor":
 				return () => SceneEditor.LoadFromFile(x.Source);
 			case "Replace":
-				return function () {
-					Scene.Current.Destroy(this);
-					Scene.Current.AddGUI(Scene.ParseObject(x.With) as GUIBase);
+				return function (this: GUIBase) {
+					this.Parent.ReplaceChild(this, Scene.ParseGUIObject(x.With));
 				};
+			case "GotoFullscreen":
+				return Canvas.ToFullscreen;
 			case "RegisterEvent":
 				switch (x.On) {
 					case "AnyKeyDown":
-						return () => Scene.Current.RegisterKeyDown(this.ParseAction(x.Action));
+						return () => {
+							if (IsMobile()) {
+								const call = Scene.ParseAction(x.Action);
+
+								Scene._registeredEvents.push({ Target: Canvas.HTML, Name: "touchend", Callback: call });
+
+								Canvas.HTML.addEventListener("touchend", call);
+							} else {
+								const call = Scene.ParseAction(x.Action);
+
+								Scene._registeredEvents.push({ Target: Canvas.HTML, Name: "keydown", Callback: call });
+
+								Canvas.HTML.addEventListener("keydown", call);
+							}
+						};
 				}
 		}
-	}
-
-	public RegisterKeyDown(action: () => void, key = "any") {
-		this._keyDownEvents.push([key, action]);
 	}
 
 	public static GetErrorScene(error: string) {
@@ -262,20 +294,8 @@ export class Scene {
 			new BlinkingRectangle(new Rectangle(Canvas.Width / 2, Canvas.Height - 5, Canvas.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
 			new BlinkingRectangle(new Rectangle(5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
 			new BlinkingRectangle(new Rectangle(Canvas.Width - 5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-			new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", Canvas.Width / 2, 50, Canvas.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
-			new Label(error, Canvas.Width / 2, 100, Canvas.Width, Canvas.Height, 24, Color.Red),
+			new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", error, Canvas.Width / 2, 50, Canvas.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
 		]);
-	}
-
-	public GetMousePosition() {
-		return new Vector2(Scene.Current._mouseX, Scene.Current._mouseY);
-	}
-
-	public GetMouseButtons() {
-		return {
-			Left: this._lmb,
-			Right: this._rmb,
-		};
 	}
 
 	public GetCollide(who: GameObject, tag?: Tag) {
@@ -372,18 +392,13 @@ export class Scene {
 		return result.sort((a, b) => (a.position.X - from.X) ** 2 + (a.position.Y - from.Y) ** 2 - ((b.position.X - from.X) ** 2 + (b.position.Y - from.Y) ** 2));
 	}
 
-	public GetInteractive(): Interactable | null {
-		for (let i = Scene.Current._interactableGameObjects.length - 1; i >= 0; i--) {
+	public TryGetInteractive(x: number, y: number): Interactable | null {
+		for (let i = Scene.Current._interactableGameObjects.length - 1; i >= 0; --i) {
 			const playerCenter = Scene.Current.Player.GetCenter();
 			const position = Scene.Current._interactableGameObjects[i].GetRectangle();
 
 			if ((position.X + position.Width / 2 - playerCenter.X) ** 2 + (position.Y + position.Height / 2 - playerCenter.Y) ** 2 > 100 ** 2) continue;
-			if (
-				this._mouseX + Canvas.CameraX >= position.X &&
-				this._mouseX + Canvas.CameraX < position.X + position.Width &&
-				this._mouseY + Canvas.CameraY >= position.Y &&
-				this._mouseY + Canvas.CameraY < position.Y + position.Height
-			)
+			if (x + Canvas.CameraX >= position.X && x + Canvas.CameraX < position.X + position.Width && y + Canvas.CameraY >= position.Y && y + Canvas.CameraY < position.Y + position.Height)
 				return Scene.Current._interactableGameObjects[i];
 		}
 
@@ -393,24 +408,10 @@ export class Scene {
 	public Update(time: number) {
 		const dt = Math.min(200, time - Scene.Time);
 
-		if (Scene.Current.Player !== null && Scene.Current.Player.CanTarget()) {
-			const plrPos = Scene.Current.Player.GetPosition();
-
-			Canvas.CameraX = Math.round(Canvas.CameraX - dt * 0.0025 * (Canvas.CameraX - (plrPos.X + Math.clamp(this._mouseX, 0.2 * Canvas.Width, 0.8 * Canvas.Width) - Canvas.Width)));
-
-			if (Canvas.GetCameraScale() < 1) {
-				Canvas.CameraY = Math.round(
-					Canvas.CameraY -
-						dt * 0.0025 * (Canvas.CameraY - Math.clamp(this._mouseY - Canvas.Height * 0.25, plrPos.Y - Canvas.Height * 0.5, Math.min(plrPos.Y * 0.75, Canvas.Height * 0.5)))
-				);
-			} else Canvas.CameraY = Math.round(0.5 * (750 - Canvas.Height));
-		}
-
 		for (const object of Scene.Current._gameObjects) object.Update(dt);
-		for (const element of Scene.Current._GUIElements) element.Update(dt, time);
+		for (const element of Scene.Current._GUIElements) element.Update(dt);
 
 		Scene.Time = time;
-		this._touch = null;
 	}
 
 	public Render() {
@@ -418,7 +419,7 @@ export class Scene {
 		GUI.SetFillColor(Color.Black);
 		GUI.DrawRectangle(0, 0, Canvas.Width, Canvas.Height);
 
-		Canvas.DrawBackground(Scene.Current._background);
+		if (Scene.Current._background !== null) Canvas.DrawBackground(Scene.Current._background);
 
 		for (const object of Scene.Current._gameObjects) object.Render();
 	}
@@ -427,10 +428,6 @@ export class Scene {
 		if (Scene.Current.Player !== null) Scene.Current.Player.RenderOverlay();
 
 		for (const element of Scene.Current._GUIElements) element.Render();
-	}
-
-	public GetTouch() {
-		return this._touch;
 	}
 
 	public GetByTag(tag: Tag) {
@@ -446,7 +443,6 @@ export class Scene {
 
 		if (object instanceof Player) {
 			Scene.Current.Player = object;
-			Scene.Player = object;
 
 			Canvas.CameraX = 20 - Canvas.Width / 2 + object.GetPosition().X;
 			Canvas.CameraY = 50 - Canvas.Height / 2 + object.GetPosition().Y;
@@ -474,6 +470,34 @@ export class Scene {
 		Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(element), 1);
 
 		if (element instanceof Interactable) Scene.Current._interactableGameObjects.splice(Scene.Current._interactableGameObjects.indexOf(element), 1);
+	}
+
+	private static ParseCondition(object: Button, raw: any) {
+		switch (raw.Type) {
+			case "Straight": {
+				switch (raw.Name) {
+					case "IsFullscreen": {
+						const c = () => {
+							object.Enabled = !Canvas.IsFullscreen();
+						};
+
+						object.Enabled = !Canvas.IsFullscreen();
+						window.addEventListener("resize", c);
+						Scene._registeredEvents.push({ Target: window, Name: "resize", Callback: c });
+
+						break;
+					}
+					default: {
+						throw new Error("Переменная условия не распознана: " + raw.Name);
+					}
+				}
+
+				break;
+			}
+			default: {
+				throw new Error("Тип условия не распознан: " + raw.Type);
+			}
+		}
 	}
 
 	private static ParseItem(raw: string) {

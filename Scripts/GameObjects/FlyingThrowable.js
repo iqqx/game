@@ -5,6 +5,7 @@ import { Scene } from "../Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
+import { Player } from "./Player.js";
 export class FlyingThrowable extends GameObject {
     _explosive = GetSprite("Explosive");
     _sprite;
@@ -135,6 +136,8 @@ export class FlyingThrowable extends GameObject {
                 const distance = Vector2.Length(entity.GetCenter(), new Vector2(this._x, this._y));
                 if (distance < explosiveRange) {
                     entity.TakeDamage(explosiveDamage * (1 - distance / explosiveRange));
+                    if (entity instanceof Player)
+                        GetSound("ExplosiveDamage").PlayOriginal(0.25);
                 }
             }
         }

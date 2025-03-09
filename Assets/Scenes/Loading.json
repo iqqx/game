@@ -1,27 +1,45 @@
 {
 	"GameObjects": [
 		{
-			"Type": "Image",
-			"Arguments": [750, 375, 600, 232, "Controls"]
-		},
-		{
-			"Type": "LoadingIcon",
-			"Arguments": [750, 700, 5000],
-			"Actions": [
+			"Type": "Layout",
+			"Arguments": ["GRID"],
+			"Childs": [
 				{
-					"Type": "Replace",
-					"With": {
-						"Type": "HintLabel",
-						"Arguments": ["Нажмите любую клавишу для продолжения", 750, 700, 200, 50, 32]
-					}
+					"Type": "Layout",
+					"Arguments": ["FLEX", "CENTER", "CENTER", 0],
+					"Childs": [
+						{
+							"Type": "Image",
+							"Arguments": [600, 232, "Controls"]
+						}
+					]
 				},
 				{
-					"Type": "RegisterEvent",
-					"On": "AnyKeyDown",
-					"Action": {
-						"Type": "LoadScene",
-						"Source": "Assets/Scenes/Intro.json"
-					}
+					"Type": "Layout",
+					"Arguments": ["FLEX", "CENTER", "END", 0, [0, 0, 100, 0]],
+					"Childs": [
+						{
+							"Type": "LoadingIcon",
+							"Arguments": [5000],
+							"Actions": [
+								{
+									"Type": "Replace",
+									"With": {
+										"Type": "HintLabel",
+										"Arguments": ["Нажмите любую клавишу для продолжения", 24]
+									}
+								},
+								{
+									"Type": "RegisterEvent",
+									"On": "AnyKeyDown",
+									"Action": {
+										"Type": "LoadScene",
+										"Source": "Assets/Scenes/Intro.json"
+									}
+								}
+							]
+						}
+					]
 				}
 			]
 		}

@@ -12,19 +12,16 @@ export class Trader extends Character {
 	}
 
 	override Render(): void {
-		Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x  , this._y, this.Width, this.Height));
+		Canvas.DrawImage(GetSprite("Trader"), new Rectangle(this._x, this._y, this.Width, this.Height));
 	}
 
 	public override GetDialog(): Dialog {
 		super.GetDialog();
 
-		const active = Scene.Player.GetQuestsBy(this);
+		const active = Scene.Current.Player.GetQuestsBy(this);
 		if (active.length > 0) {
-			if (active[0].IsCompleted()) {
+			if (active[0].GetTasks().length >= 2) {
 				this._completedQuests++;
-
-				Scene.Player.TakeItem("RatTail", 6);
-				Scene.Player.RemoveQuest(active[0]);
 
 				return {
 					Messages: [
@@ -37,8 +34,11 @@ export class Trader extends Character {
 					Owner: this,
 					OwnerFirst: false,
 					AfterAction: () => {
-						Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
-						Scene.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
+						Scene.Current.Player.RemoveQuest(active[0]);
+
+						Scene.Current.Player.TakeItem("RatTail", 6);
+						Scene.Current.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
+						Scene.Current.Player.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 30));
 					},
 				};
 			}
@@ -62,7 +62,9 @@ export class Trader extends Character {
 					],
 					Voices: [GetSound("Dialog_5_0"), GetSound("Dialog_5_1"), GetSound("Dialog_5_2"), GetSound("Dialog_5_3")],
 					AfterAction: () => {
-						Scene.Player.PushQuest(new Quest("Шкурки", this).AddHasItemsTask("Добыть 6 хвостов крыс", { Id: "RatTail", Count: 6 }).AddTalkTask("Вернуться к Торгашу", this));
+						Scene.Current.Player.PushQuest(
+							new Quest("Шкурки", this).AddHasItemsTask("Добыть 6 хвостов крыс", { Id: "RatTail", Count: 6 }).AddTalkTask("Вернуться к Торгашу", this)
+						);
 					},
 					Owner: this,
 					OwnerFirst: true,

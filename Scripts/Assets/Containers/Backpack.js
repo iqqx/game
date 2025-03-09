@@ -20,7 +20,7 @@ export class Backpack extends Container {
     Pickup() {
         if (this.OnPickup !== undefined)
             this.OnPickup();
-        Scene.Player.PutBackpack(this);
+        Scene.Current.Player.PutBackpack(this);
         GetSound("Backpack_Pickup").Play(0.5);
         this.Destroy();
         return this._items;
@@ -34,7 +34,7 @@ export class Backpack extends Container {
                 this.Pickup();
                 break;
             case 1:
-                Scene.Player.OpenContainer(this);
+                Scene.Current.Player.OpenContainer(this);
                 break;
         }
     }

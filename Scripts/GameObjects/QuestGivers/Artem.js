@@ -2,7 +2,6 @@ import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 import { Throwable } from "../../Assets/Throwable.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
-import { Quest } from "../../Quest.js";
 import { Scene } from "../../Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
@@ -54,9 +53,9 @@ export class Artem extends Character {
                         GetSound("Dialog_1_8"),
                     ],
                     AfterAction: () => {
-                        Scene.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
-                        Scene.Player.GiveQuestItem(Throwable.GetById("RGN"));
-                        Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(20850, "Лагерь"));
+                        Scene.Current.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
+                        Scene.Current.Player.GiveQuestItem(Throwable.GetById("RGN"));
+                        // Scene.Current.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(20850, "Лагерь"));
                     },
                     Owner: this,
                     OwnerFirst: false,
@@ -119,7 +118,7 @@ export class Artem extends Character {
     Shoot() {
         this._timeFromShoot = Scene.Time;
         GetSound("Shoot_3").Play(0.5);
-        Scene.Player.TakeDamage(500);
+        Scene.Current.Player.TakeDamage(500);
     }
     GetAvatar() {
         return GetSprite("Artem_Avatar");

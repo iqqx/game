@@ -20,6 +20,8 @@ export class Rat extends Enemy {
     }
     Update(dt) {
         super.Update(dt);
+        if (!Scene.Current.Player.IsAlive())
+            return;
         const plrPos = Scene.Current.Player.GetPosition();
         const distance = this.GetDistanceToPlayer();
         if (this._attackCooldown <= 0) {

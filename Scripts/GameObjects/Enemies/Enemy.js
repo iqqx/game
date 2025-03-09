@@ -23,11 +23,11 @@ export class Enemy extends Entity {
         const plrPos = Scene.Current.Player.GetCenter();
         this.Direction = Math.sign(plrPos.X - (this._x + this.Width / 2));
         if (this.GetDistanceToPlayer() < 50) {
-            if (Scene.Player.GetPosition().Y > this._y) {
+            if (Scene.Current.Player.GetPosition().Y > this._y) {
                 this._movingDown = false;
                 this.Jump();
             }
-            else if (Scene.Player.GetPosition().Y < this._y)
+            else if (Scene.Current.Player.GetPosition().Y < this._y)
                 this._movingDown = true;
             return;
         }
@@ -37,11 +37,11 @@ export class Enemy extends Entity {
             this.MoveLeft(dt);
     }
     GetDistanceToPlayer() {
-        const plr = Scene.Player.GetCenter();
+        const plr = Scene.Current.Player.GetCenter();
         return Math.abs(plr.X - (this._x + this.Width / 2));
     }
     GetDirectionToPlayer() {
-        return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2));
+        return Math.sign(Scene.Current.Player.GetCenter().X - (this._x + this.Width / 2));
     }
 }
 //# sourceMappingURL=Enemy.js.map

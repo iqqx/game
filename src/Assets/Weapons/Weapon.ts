@@ -171,6 +171,9 @@ export class Weapon implements IItem {
 	Add(count: number): number {
 		throw new Error("Method not implemented.");
 	}
+	AddItem(item: IItem): boolean {
+		throw new Error("Method not implemented.");
+	}
 
 	public Clone(): Weapon {
 		return new Weapon(
@@ -239,7 +242,7 @@ export class Weapon implements IItem {
 			if (this._hasClip)
 				Canvas.DrawImageWithAngleVFlipped(
 					this.Sprites.Clip,
-					new Rectangle(this._position.X  , this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y),
+					new Rectangle(this._position.X, this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y),
 					this._angle,
 					-this.GripOffset.X + this.ClipOffset.X,
 					this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y
@@ -247,7 +250,7 @@ export class Weapon implements IItem {
 
 			Canvas.DrawImageWithAngleVFlipped(
 				this.Sprites.Image,
-				new Rectangle(this._position.X  , this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y),
+				new Rectangle(this._position.X, this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y),
 				this._angle,
 				-this.GripOffset.X,
 				this.GripOffset.Y
@@ -259,7 +262,7 @@ export class Weapon implements IItem {
 			if (this._hasClip)
 				Canvas.DrawImageWithAngle(
 					this.Sprites.Clip,
-					new Rectangle(this._position.X  , this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y),
+					new Rectangle(this._position.X, this._position.Y, this.Sprites.Clip.ScaledSize.X, this.Sprites.Clip.ScaledSize.Y),
 					this._angle,
 					-this.GripOffset.X + this.ClipOffset.X,
 					this.GripOffset.Y - this.ClipOffset.Y + this.Sprites.Clip.ScaledSize.Y
@@ -270,7 +273,7 @@ export class Weapon implements IItem {
 
 			Canvas.DrawImageWithAngle(
 				this.Sprites.Image,
-				new Rectangle(this._position.X  , this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y),
+				new Rectangle(this._position.X, this._position.Y, this.Sprites.Image.ScaledSize.X, this.Sprites.Image.ScaledSize.Y),
 				this._angle,
 				-this.GripOffset.X,
 				this.GripOffset.Y

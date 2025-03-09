@@ -1,6 +1,5 @@
 import { Canvas } from "../../Context.js";
 import { Direction } from "../../Enums.js";
-import { Scene } from "../../Scene.js";
 import { IItem, Rectangle, Sprite, Vector2 } from "../../Utilites.js";
 
 export class Item implements IItem {
@@ -21,7 +20,7 @@ export class Item implements IItem {
 		this.Icon = icon;
 		this.MaxStack = stack;
 		this.IsBig = isBig;
-        this.Name = name;
+		this.Name = name;
 	}
 
 	public Is(other: IItem): other is Item {
@@ -43,21 +42,9 @@ export class Item implements IItem {
 		const gripOffset = new Vector2(this.Icon.ScaledSize.X * -0.5, this.Icon.ScaledSize.Y * 0.5);
 
 		if (this._direction === Direction.Left) {
-			Canvas.DrawImageWithAngleVFlipped(
-				this.Icon,
-				new Rectangle(this._x  , this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
-				this._angle,
-				gripOffset.X,
-				gripOffset.Y
-			);
+			Canvas.DrawImageWithAngleVFlipped(this.Icon, new Rectangle(this._x, this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
 		} else {
-			Canvas.DrawImageWithAngle(
-				this.Icon,
-				new Rectangle(this._x  , this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y),
-				this._angle,
-				gripOffset.X,
-				gripOffset.Y
-			);
+			Canvas.DrawImageWithAngle(this.Icon, new Rectangle(this._x, this._y, this.Icon.ScaledSize.X, this.Icon.ScaledSize.Y), this._angle, gripOffset.X, gripOffset.Y);
 		}
 	}
 
@@ -81,5 +68,16 @@ export class Item implements IItem {
 		this._count += toAdd;
 
 		return toAdd;
+	}
+
+	public AddItem(item: IItem) {
+		if (this._count >= this.MaxStack) return false;
+
+		const toAdd = Math.min(item.GetCount(), this.MaxStack - this._count);
+
+		this._count += toAdd;
+		item.Take(toAdd);
+
+		return item.GetCount() === 0;
 	}
 }

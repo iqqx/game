@@ -18,8 +18,24 @@ Parse()
 	});
 
 let scene: SceneEditor | Scene | SceneWeaponEditor = undefined;
+// let unfocusTime: number | null = null;
+
+// document.getElementById("main-canvas").addEventListener("focusin", () => {
+// 	if (scene !== undefined && unfocusTime !== null) gameLoop(unfocusTime);
+
+// 	unfocusTime = null;
+// });
 
 function gameLoop(timeStamp: number) {
+	// if (document.activeElement.tagName !== "CANVAS") {
+	//     GUI.DrawUnfocusScreen();
+
+	// 	unfocusTime = timeStamp;
+
+	// 	return;
+	// }
+	// слишком много проблем, фиксить их сложнее чем несколько редких багов со звуком...
+
 	window.requestAnimationFrame(gameLoop);
 
 	scene.Update(timeStamp);
@@ -59,7 +75,7 @@ function loadLoop() {
 	} else {
 		GUI.SetFillColor(Color.White);
 		GUI.SetFont(48);
-		GUI.DrawTextCenter("PARSING", GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
+		GUI.DrawTextCenter("ПРЕД ЗАГРУЗКА", GUI.Width / 2 - 200, GUI.Height / 2 - 25 - 2, 400, 50);
 
 		return;
 	}
@@ -141,7 +157,7 @@ function loadLoop() {
 		)
 		.then(() =>
 			/// DEBUG
-			Scene.LoadFromFile("Assets/Scenes/Main.json")
+			Scene.LoadFromFile("Assets/Scenes/Menu.json")
 		)
 		.then((x) => (scene = x))
 		.catch((err) => {

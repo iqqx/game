@@ -1,7 +1,6 @@
 import { GetSound } from "../../AssetsLoader.js";
-import { GUI } from "../../Context.js";
-import { Scene } from "../../Scene.js";
-import { Color } from "../../Utilites.js";
+import { Canvas, GUI } from "../../Context.js";
+import { Color, IsMobile } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 
 export class Button extends GUIBase {
@@ -10,61 +9,79 @@ export class Button extends GUIBase {
 	protected _onClicked: () => void;
 	private readonly _hoverSound = GetSound("GUI_Hover");
 	private readonly _clickSound = GetSound("Play");
+	public Enabled = true;
 
-	constructor(x: number, y: number, width: number, height: number) {
-		super(width, height);
+	private readonly _onMouseMove: (e: MouseEvent) => void;
+	private readonly _onMouseUp: (e: MouseEvent) => void;
+	private readonly _onTouchUp: (e: TouchEvent) => void;
 
-		this._x = x;
-		this._y = y;
-	}
+	constructor(width: number, height: number) {
+		super();
 
-	public override Update(): void {
-		const mouse = Scene.Current.GetMousePosition();
-		const buttons = Scene.Current.GetMouseButtons();
+		this.Width = width;
+		this.Height = height;
 
-		const lastHovered = this._hovered;
-		this._hovered =
-			mouse.X > this._x - this.Width / 2 &&
-			mouse.X <= this._x + this.Width / 2 &&
-			GUI.Height - mouse.Y > this._y - this.Height / 2 &&
-			GUI.Height - mouse.Y <= this._y + this.Height / 2;
+		if (IsMobile()) {
+			this._onTouchUp = (e) => {
+				if (!this.Enabled) return;
 
-		if (this._hovered) {
-			if (lastHovered === false) this._hoverSound.Play(0.1);
+				const touch = e.changedTouches[0];
 
-			const touch = Scene.Current.GetTouch();
-			if (touch !== null) {
-				if (
-					touch.X > this._x - this.Width / 2 &&
-					touch.X <= this._x + this.Width / 2 &&
-					GUI.Height - touch.Y > this._y - this.Height / 2 &&
-					GUI.Height - touch.Y <= this._y + this.Height / 2
-				) {
+				if (touch.clientX >= this.X && touch.clientX < this.X + this.Width && touch.clientY >= this.Y && touch.clientY < this.Y + this.Height) {
 					this._onClicked();
 					this._clickSound.PlayOriginal();
 				}
-			} else {
-				if (!this._pressed) {
-					if (buttons.Left) {
-						if (this._onClicked !== undefined) {
-							this._onClicked();
-							this._clickSound.PlayOriginal();
-						}
-						this._pressed = true;
-					}
-				} else if (!buttons.Left) this._pressed = false;
-			}
+			};
+
+			Canvas.HTML.addEventListener("touchend", this._onTouchUp);
+		} else {
+			this._onMouseMove = (e) => {
+				if (!this.Enabled) return;
+
+				const isHovered = e.x >= this.X && e.x < this.X + this.Width && e.y >= this.Y && e.y < this.Y + this.Height;
+
+				if (isHovered) {
+					if (this._hovered === false) this._hoverSound.Play(0.1);
+
+					this._hovered = true;
+				} else this._hovered = false;
+			};
+
+			this._onMouseUp = (e) => {
+				if (!this.Enabled) return;
+
+				if (e.x >= this.X && e.x < this.X + this.Width && e.y >= this.Y && e.y < this.Y + this.Height) {
+					this._onClicked();
+					this._clickSound.PlayOriginal();
+				}
+			};
+
+			Canvas.HTML.addEventListener("mousemove", this._onMouseMove);
+			Canvas.HTML.addEventListener("mouseup", this._onMouseUp);
 		}
 	}
 
+	public Update(dt: number): void {}
+
 	public override Render() {
-		GUI.SetFillColor(this._hovered ? new Color(50, 50, 50) : new Color(70, 70, 70));
-		GUI.SetStroke(new Color(155, 155, 155), 1);
-		GUI.DrawRectangle(this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+		GUI.SetFillColor(!this.Enabled ? new Color(40, 40, 40) : this._hovered ? new Color(50, 50, 50) : new Color(70, 70, 70));
+		GUI.SetStroke(this.Enabled ? new Color(155, 155, 155) : new Color(115, 115, 115), 1);
+
+		GUI.DrawRectangle(this.X, this.Y, this.Width, this.Height);
 	}
 
 	public SetOnClicked(callback: () => void) {
 		this._onClicked = callback;
+
 		return this;
+	}
+
+	public override OnDestroy(): void {
+		if (IsMobile()) {
+			Canvas.HTML.removeEventListener("touchend", this._onTouchUp);
+		} else {
+			Canvas.HTML.removeEventListener("mousemove", this._onMouseMove);
+			Canvas.HTML.removeEventListener("mouseup", this._onMouseUp);
+		}
 	}
 }

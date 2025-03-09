@@ -1,15 +1,22 @@
 {
 	"GameObjects": [
 		{
-			"Type": "SpotLightSpawner",
-			"Arguments": []
-		},
-		{
-			"Type": "HintLabel",
-			"Arguments": ["Удерживайте ПРОБЕЛ чтобы ускорить", 1300, 700]
-		},
-		{
-			"Type": "Titles"
+			"Type": "Layout",
+			"Arguments": ["GRID"],
+			"Childs": [
+				{ "Type": "SpotLightSpawner" },
+				{ "Type": "Titles" },
+				{
+					"Type": "Layout",
+					"Arguments": ["FLEX", "END", "END", 0, [0, 50, 50, 0]],
+					"Childs": [
+						{
+							"Type": "HintLabel",
+							"Arguments": ["Удерживайте ПРОБЕЛ чтобы ускорить", 12]
+						}
+					]
+				}
+			]
 		}
 	]
 }

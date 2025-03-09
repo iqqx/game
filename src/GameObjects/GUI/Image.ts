@@ -5,15 +5,17 @@ import { GUIBase } from "./GUIBase.js";
 export class Image extends GUIBase {
 	private readonly _image: Sprite;
 
-	constructor(x: number, y: number, width: number, height: number, image: Sprite) {
-		super(width, height);
+	constructor(width: number, height: number, image: Sprite) {
+		super();
 
-		this._x = x;
-		this._y = y;
+		this.Width = width;
+		this.Height = height;
 		this._image = image;
 	}
 
+	public override Update(dt: number) {}
+
 	public override Render() {
-		GUI.DrawImage(this._image, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+		GUI.DrawImage(this._image, this.X, this.Y, this.Width, this.Height);
 	}
 }

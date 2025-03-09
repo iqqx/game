@@ -1,22 +1,30 @@
-import { GUI } from "../../Context.js";
-import { Scene } from "../../Scene.js";
-import { Color } from "../../Utilites.js";
+import { Canvas, GUI } from "../../Context.js";
+import { Color, IsMobile } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 export class Cursor extends GUIBase {
     _radius;
+    _onMouseMove;
     constructor(radius = 2) {
-        super(radius, radius);
-        this._radius = radius;
+        super();
+        if (IsMobile())
+            this._radius = 0;
+        else {
+            this._radius = radius;
+            this._onMouseMove = (e) => {
+                this.X = e.x;
+                this.Y = e.y;
+            };
+            Canvas.HTML.addEventListener("mousemove", this._onMouseMove);
+        }
     }
-    Update() {
-        const mouse = Scene.Current.GetMousePosition();
-        this._x = mouse.X;
-        this._y = GUI.Height - mouse.Y;
-    }
+    Update(dt) { }
     Render() {
         GUI.SetFillColor(Color.White);
         GUI.ClearStroke();
-        GUI.DrawCircle(this._x, this._y, this._radius);
+        GUI.DrawCircle(this.X, this.Y, this._radius);
+    }
+    OnDestroy() {
+        Canvas.HTML.removeEventListener("mousemove", this._onMouseMove);
     }
 }
 //# sourceMappingURL=Cursor.js.map

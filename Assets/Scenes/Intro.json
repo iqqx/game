@@ -1,16 +1,33 @@
 {
 	"GameObjects": [
 		{
-			"Type": "IntroCutscene",
-			"Arguments": ["Assets/Scenes/Main.json"]
-		},
-		{
-			"Type": "HintLabel",
-			"Arguments": ["Удерживайте ПРОБЕЛ чтобы пропустить", 1300, 700]
-		},
-		{
-			"Type": "PressedIndicator",
-			"Arguments": [1120, 700, "Space", 1000]
+			"Type": "Layout",
+			"Arguments": ["GRID"],
+			"Childs": [
+				{
+					"Type": "IntroCutscene"
+				},
+				{
+					"Type": "Layout",
+					"Arguments": ["FLEX", "END", "END", 10, [0, 50, 50, 0], true],
+					"Childs": [
+						{
+							"Type": "HintLabel",
+							"Arguments": ["Удерживайте ПРОБЕЛ чтобы пропустить", 16]
+						},
+						{
+							"Type": "PressedIndicator",
+							"Arguments": ["Space", 3000, 19000],
+							"Actions": [
+								{
+									"Type": "LoadScene",
+									"Source": "Assets/Scenes/Main.json"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

@@ -21,7 +21,7 @@ export class ItemRegistry {
         if (rawJson.Name === undefined)
             throw new Error(`Название [Name] не определено (Ближайший ключ: [${GetMaxIdentityString("Name", Object.keys(rawJson)).replaceAll(" ", "_")}])\nat Parser: [Предмет: <${rawJson.Id}>]`);
         if (rawJson.AfterUse === undefined) {
-            ItemRegistry._items.push(new Item(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig));
+            ItemRegistry._items.push(new Item(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), parseInt(rawJson.Stack), rawJson.IsBig));
         }
         else {
             if (rawJson.AfterUse.Action === undefined)
@@ -33,9 +33,9 @@ export class ItemRegistry {
                 case "Heal": {
                     use = {
                         afterUse: () => {
-                            Scene.Player.Heal(rawJson.AfterUse.Action.By);
+                            Scene.Current.Player.Heal(parseInt(rawJson.AfterUse.Action.By));
                         },
-                        time: rawJson.AfterUse.Time * 1000,
+                        time: parseInt(rawJson.AfterUse.Time) * 1000,
                         Sound: GetSound(rawJson.AfterUse.Sound),
                     };
                     break;
@@ -44,7 +44,7 @@ export class ItemRegistry {
                     throw new Error(`Неизвестный тип действия ${rawJson.AfterUse.Action.Type} [Предмет: ${rawJson.Id}]`);
                 }
             }
-            ItemRegistry._items.push(new UseableItem(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig, use.Sound, use.afterUse, use.time));
+            ItemRegistry._items.push(new UseableItem(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), parseInt(rawJson.Stack), rawJson.IsBig, use.Sound, use.afterUse, use.time));
         }
     }
 }

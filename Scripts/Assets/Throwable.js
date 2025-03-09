@@ -47,6 +47,9 @@ export class Throwable {
     Is(item) {
         return item.Id === this.Id;
     }
+    AddItem(item) {
+        throw new Error("Method not implemented.");
+    }
     Clone() {
         return new Throwable(this.Id, this.Name, { View: this.Sprite, Icon: this.Icon });
     }

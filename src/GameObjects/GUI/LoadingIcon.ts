@@ -7,14 +7,14 @@ export class LoadingIcon extends GUIBase {
 	private readonly _icon: Sprite;
 	private _angle = 0;
 	private _timeToAction: number;
-	private readonly _action: () => void;
+	private readonly _actions: (() => void)[];
 
-	constructor(x: number, y: number, timeToAction: number, action: () => void) {
-		super(50, 50);
+	constructor(timeToAction: number, actions: (() => void)[]) {
+		super();
 
-		this._x = x;
-		this._y = y;
-		this._action = action;
+		this.Width = 50;
+		this.Height = 50;
+		this._actions = actions;
 		this._timeToAction = timeToAction;
 
 		this._icon = GetSprite("Loading_Icon") as Sprite;
@@ -28,12 +28,15 @@ export class LoadingIcon extends GUIBase {
 
 			if (this._timeToAction <= 0) {
 				this._timeToAction = undefined;
-				this._action();
+
+				for (const action of this._actions) {
+					action.call(this);
+				}
 			}
 		}
 	}
 
 	public override Render() {
-		GUI.DrawImageWithAngle(this._icon, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height, this._angle);
+		GUI.DrawImageWithAngle(this._icon, this.X, this.Y, this.Width, this.Height, this._angle);
 	}
 }

@@ -4,16 +4,16 @@ import { Button } from "./Button.js";
 export class TextButton extends Button {
     _text;
     _size;
-    constructor(x, y, width, height, text, size) {
-        super(x, y, width, height);
+    constructor(width, height, text, size) {
+        super(width, height);
         this._text = text;
         this._size = size;
     }
     Render() {
         super.Render();
-        GUI.SetFillColor(Color.White);
+        GUI.SetFillColor(this.Enabled ? Color.White : new Color(100, 100, 100));
         GUI.SetFont(this._size);
-        GUI.DrawTextCenter(this._text, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+        GUI.DrawTextCenter(this._text, this.X, this.Y, this.Width, this.Height);
     }
 }
 //# sourceMappingURL=TextButton.js.map

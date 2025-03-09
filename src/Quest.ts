@@ -66,11 +66,18 @@ export class Quest {
 	}
 
 	public IsCompleted() {
-		return this._stage > this.Tasks.length;
+		return (
+			this._stage > this.Tasks.length
+			// ||	(this._stage === this.Tasks.length && this.Tasks[this.Tasks.length - 1] instanceof TalkTask && (this.Tasks[this.Tasks.length - 1] as TalkTask).Subject === this.Giver)
+		);
 	}
 
 	public GetTasks() {
 		return this.Tasks.slice(0, this._stage);
+	}
+
+	public GetCurrentTask() {
+		return this.Tasks[this._stage - 1];
 	}
 
 	public AddKillTask(enemyType: EnemyType, count: number, absolute = false, mask?: string) {
@@ -101,6 +108,14 @@ export class Quest {
 		const nextStage = this.Tasks.length + 2;
 
 		this.Tasks.push(new TalkTask(this, () => (this._stage = Math.max(this._stage, nextStage)), text, subject));
+
+		return this;
+	}
+
+	public AddReturnTask(text: string, subject: Character) {
+		const nextStage = this.Tasks.length + 2;
+
+		this.Tasks.push(new ReturnTask(this, () => (this._stage = Math.max(this._stage, nextStage)), text, subject));
 
 		return this;
 	}
@@ -204,6 +219,31 @@ class TalkTask extends Task {
 	}
 }
 
+class ReturnTask extends Task {
+	private readonly _text: string;
+	public readonly Subject: Character;
+
+	constructor(quest: Quest, onComplete: () => void, placeholder: string, subject: Character) {
+		super(quest, onComplete);
+
+		this._text = placeholder;
+		this.Subject = subject;
+	}
+
+	Check(): boolean {
+		return this._completed;
+	}
+
+	public Count() {
+		this._completed = true;
+		this._onComplete();
+	}
+
+	public override toString() {
+		return this._text;
+	}
+}
+
 class MoveTask extends Task {
 	private readonly _name: string;
 	private readonly _to: number;
@@ -218,7 +258,7 @@ class MoveTask extends Task {
 	Check(): boolean {
 		if (this._completed) return true;
 
-		if (Math.abs(Scene.Player.GetCenter().X - this._to) < 500) {
+		if (Math.abs(Scene.Current.Player.GetCenter().X - this._to) < 500) {
 			this._completed = true;
 			this._onComplete();
 
@@ -227,7 +267,7 @@ class MoveTask extends Task {
 	}
 
 	public override toString() {
-		const player = Scene.Player.GetCenter().X;
+		const player = Scene.Current.Player.GetCenter().X;
 		const distance = Math.abs(Math.round((player - this._to) * 0.1));
 
 		return this.Check()
@@ -252,7 +292,7 @@ class FakeMoveTask extends Task {
 	Check(): boolean {
 		if (this._completed) return true;
 
-		if (Math.abs(Scene.Player.GetCenter().X - this._to) < 500) {
+		if (Math.abs(Scene.Current.Player.GetCenter().X - this._to) < 500) {
 			this._completed = true;
 			this._onComplete();
 
@@ -263,7 +303,7 @@ class FakeMoveTask extends Task {
 	}
 
 	public override toString() {
-		const player = Scene.Player.GetCenter().X;
+		const player = Scene.Current.Player.GetCenter().X;
 		const distance = Math.abs(Math.round((player - this._fakeTo) * 0.1));
 
 		return this._completed

@@ -1,17 +1,14 @@
-export class GUIBase {
-	protected _x = 0;
-	protected _y = 0;
+import { Layout } from "./Layout.js";
+
+export abstract class GUIBase {
 	public Width: number;
 	public Height: number;
-	public IsDirt: boolean;
+	public Padding: [number, number, number, number];
+	public X: number;
+	public Y: number;
+	public Parent: Layout;
 
-	constructor(width: number, height: number) {
-		this.Width = width;
-		this.Height = height;
-
-		this.IsDirt = true;
-	}
-
-	public Update(dt: number, time: number) {}
-	public Render() {}
+	public abstract Update(dt: number): void;
+	public abstract Render(): void;
+	public OnDestroy(): void {}
 }

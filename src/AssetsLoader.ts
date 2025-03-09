@@ -71,7 +71,6 @@ export function LoadImage(source: string, boundingBox?: Rectangle, scale?: numbe
 export function LoadSound(source: string, volume = 1): Sound {
 	assetsToLoad.push(source);
 	const s = new Audio();
-	s.volume = volume;
 
 	const newSound = {
 		Speed: 1,
@@ -90,8 +89,11 @@ export function LoadSound(source: string, volume = 1): Sound {
 			s.volume = this.Volume;
 			s.playbackRate = this.Speed;
 		},
-		PlayOriginal: function () {
+		PlayOriginal: function (volume?: number, speed?: number, looped = false) {
 			s.currentTime = 0;
+			s.volume = volume ?? this.Volume;
+			s.playbackRate = speed ?? this.Speed;
+			s.loop = looped;
 			s.play();
 		},
 		IsPlayingOriginal: function () {
@@ -119,12 +121,17 @@ export function LoadSound(source: string, volume = 1): Sound {
 			);
 	};
 	s.onerror = () => {
-		assetsToLoad.splice(
-			assetsToLoad.findIndex((x) => x === source),
-			1
-		);
+		s.onerror = () => {
+			assetsToLoad.splice(
+				assetsToLoad.findIndex((x) => x === source),
+				1
+			);
+		};
+
+		s.src = source.substring(0, source.length - 4) + ".mp3";
 	};
 
+	s.volume = volume;
 	s.preload = "auto";
 	s.src = source;
 	s.load();

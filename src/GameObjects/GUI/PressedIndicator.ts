@@ -1,41 +1,70 @@
-import { GUI } from "../../Context.js";
-import { Color } from "../../Utilites.js";
+import { Canvas, GUI } from "../../Context.js";
+import { Color, IsMobile } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 
 export class PressedIndicator extends GUIBase {
-	private readonly _key: string;
 	private readonly _delay: number;
-	private _spaceDowned = false;
-	private _spaceDownedTime = 0;
+	private _pressed = false;
+	private _pressedTime = 0;
+	private _deadlineTime;
+	private readonly _actions: (() => void)[];
+	private readonly _onkeyDown: (e: KeyboardEvent) => void;
+	private readonly _onkeyUp: (e: KeyboardEvent) => void;
 
-	constructor(x: number, y: number, key: string, delay: number) {
-		super(20, 20);
+	constructor(key: string, delay: number, deadline: number, actions: (() => void)[]) {
+		super();
 
-		this._x = x;
-		this._y = y;
-
-		this._key = key;
+		this._actions = actions;
 		this._delay = delay;
+		this._deadlineTime = deadline;
+		this.Width = this.Height = 20;
 
-		addEventListener("keydown", (e) => {
-			if (e.code === key && this._spaceDowned === false) {
-				this._spaceDowned = true;
-				this._spaceDownedTime = 0;
-			}
-		});
+		if (IsMobile()) {
+		} else {
+			this._onkeyDown = (e) => {
+				if (e.code === key && this._pressed === false) {
+					this._pressed = true;
+					this._pressedTime = 0;
+				}
+			};
 
-		addEventListener("keyup", () => {
-			this._spaceDowned = false;
-			this._spaceDownedTime = 0;
-		});
+			this._onkeyUp = (e) => {
+				if (e.code === key) {
+					this._pressed = false;
+					this._pressedTime = 0;
+				}
+			};
+
+			Canvas.HTML.addEventListener("keydown", this._onkeyDown);
+			Canvas.HTML.addEventListener("keyup", this._onkeyUp);
+		}
 	}
 
 	public Update(dt: number): void {
-		if (this._spaceDowned) this._spaceDownedTime += dt;
+		this._deadlineTime -= dt;
+
+		if (this._deadlineTime <= 0)
+			for (const action of this._actions) {
+				action.call(this);
+			}
+		else if (this._pressed) {
+			this._pressedTime += dt;
+
+			if (this._pressedTime >= this._delay) {
+				for (const action of this._actions) {
+					action.call(this);
+				}
+			}
+		}
 	}
 
 	public Render(): void {
 		GUI.SetFillColor(Color.White);
-		GUI.DrawSector(this._x + this.Width / 2, this._y + 3, 10, Math.PI * 2 * (this._spaceDownedTime / this._delay));
+		GUI.DrawSector(this.X - this.Width, this.Y - this.Height * 0.25, this.Width * 0.5, Math.PI * 2 * (this._pressedTime / this._delay));
+	}
+
+	public override OnDestroy(): void {
+		Canvas.HTML.removeEventListener("keydown", this._onkeyDown);
+		Canvas.HTML.removeEventListener("keyup", this._onkeyUp);
 	}
 }

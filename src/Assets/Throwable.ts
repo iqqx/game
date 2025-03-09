@@ -67,6 +67,9 @@ export class Throwable implements IItem {
 	Is(item: IItem): item is IItem {
 		return item.Id === this.Id;
 	}
+	AddItem(item: IItem): boolean {
+		throw new Error("Method not implemented.");
+	}
 
 	public Clone(): Throwable {
 		return new Throwable(this.Id, this.Name, { View: this.Sprite, Icon: this.Icon });
@@ -84,7 +87,7 @@ export class Throwable implements IItem {
 		if (this._direction === Direction.Left) {
 			Canvas.DrawImageWithAngleVFlipped(
 				this.Sprite,
-				new Rectangle(this._position.X  , this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
+				new Rectangle(this._position.X, this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y
@@ -92,7 +95,7 @@ export class Throwable implements IItem {
 		} else {
 			Canvas.DrawImageWithAngle(
 				this.Sprite,
-				new Rectangle(this._position.X  , this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
+				new Rectangle(this._position.X, this._position.Y, this.Sprite.ScaledSize.X, this.Sprite.ScaledSize.Y),
 				this._angle,
 				gripOffset.X,
 				gripOffset.Y

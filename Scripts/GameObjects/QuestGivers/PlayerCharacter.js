@@ -17,13 +17,15 @@ export class PlayerCharacter extends Character {
                     Voices: [GetSound("Dialog_0_0"), GetSound("Dialog_0_1")],
                     Owner: this,
                     AfterAction: () => {
-                        Scene.Player.PushQuest(new Quest("Свет в конце тоннеля", this, () => {
+                        Scene.Current.Player.PushQuest(new Quest("Свет в конце тоннеля", this, () => {
                             this._completedQuests++;
                         })
-                            .AddTalkTask("Узнать где выход", Scene.Current.GetByType(Artem)[0])
-                            .AddMoveTask(4000, "Выход")
-                            .AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0], 1)
-                            .AddMoveTask(34200, "Выход"));
+                            .AddTalkTask("Исследовать левую часть метро", Scene.Current.GetByType(Artem)[0])
+                            .AddMoveTask(19500, "Найти станцию")
+                            .AddTalkTask("Узнать о выходе", Scene.Current.GetByType(Elder)[0])
+                            .AddCompletedQuestsTask("Помочь Старосте", Scene.Current.GetByType(Elder)[0], 1)
+                            .AddMoveTask(34200, "Выход")
+                            .WithoutCompletionSound());
                     },
                     OwnerFirst: true,
                 };

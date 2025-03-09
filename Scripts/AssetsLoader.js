@@ -53,7 +53,6 @@ export function LoadImage(source, boundingBox, scale) {
 export function LoadSound(source, volume = 1) {
     assetsToLoad.push(source);
     const s = new Audio();
-    s.volume = volume;
     const newSound = {
         Speed: 1,
         Volume: 1,
@@ -73,8 +72,11 @@ export function LoadSound(source, volume = 1) {
             s.volume = this.Volume;
             s.playbackRate = this.Speed;
         },
-        PlayOriginal: function () {
+        PlayOriginal: function (volume, speed, looped = false) {
             s.currentTime = 0;
+            s.volume = volume ?? this.Volume;
+            s.playbackRate = speed ?? this.Speed;
+            s.loop = looped;
             s.play();
         },
         IsPlayingOriginal: function () {
@@ -94,8 +96,12 @@ export function LoadSound(source, volume = 1) {
             assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
     };
     s.onerror = () => {
-        assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+        s.onerror = () => {
+            assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+        };
+        s.src = source.substring(0, source.length - 4) + ".mp3";
     };
+    s.volume = volume;
     s.preload = "auto";
     s.src = source;
     s.load();

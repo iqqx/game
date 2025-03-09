@@ -88,6 +88,9 @@ export class Weapon {
     Add(count) {
         throw new Error("Method not implemented.");
     }
+    AddItem(item) {
+        throw new Error("Method not implemented.");
+    }
     Clone() {
         return new Weapon(this.Id, this.Name, { Icon: this.Icon, ...this.Sprites }, this._sounds, this._fireCooldown, this.AmmoId, this._damage, this._spread, this.Heavy, this.Automatic, this._reloadTime / 1000, this.MaxAmmoClip, this._recoil, Vector2.Div(this.GripOffset, this.Sprites.Image.Scale), Vector2.Div(this.MuzzleOffset, this.Sprites.Image.Scale), Vector2.Div(this.ClipOffset, this.Sprites.Image.Scale));
     }

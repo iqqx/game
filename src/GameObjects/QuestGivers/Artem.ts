@@ -84,9 +84,9 @@ export class Artem extends Character {
 						GetSound("Dialog_1_8"),
 					],
 					AfterAction: () => {
-						Scene.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
-						Scene.Player.GiveQuestItem(Throwable.GetById("RGN"));
-						Scene.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(20850, "Лагерь"));
+						Scene.Current.Player.GiveQuestItem(ItemRegistry.GetById("Radio"));
+						Scene.Current.Player.GiveQuestItem(Throwable.GetById("RGN"));
+						// Scene.Current.Player.PushQuest(new Quest("Поиск людей", this).AddMoveTask(20850, "Лагерь"));
 					},
 					Owner: this,
 					OwnerFirst: false,
@@ -156,7 +156,7 @@ export class Artem extends Character {
 		this._timeFromShoot = Scene.Time;
 
 		GetSound("Shoot_3").Play(0.5);
-		Scene.Player.TakeDamage(500);
+		Scene.Current.Player.TakeDamage(500);
 	}
 
 	public GetAvatar() {

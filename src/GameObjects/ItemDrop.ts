@@ -1,20 +1,27 @@
+import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
 import { Scene } from "../Scene.js";
-import { IItem, Rectangle } from "../Utilites.js";
+import { IItem, Rectangle, Sprite } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
 
 export class ItemDrop extends Interactable {
 	public readonly ContentItem: IItem;
+	public readonly Image: Sprite;
 	private _verticalAcceleration = 0;
 	private _grounded = false;
 	private readonly _weight = 1;
 
 	constructor(x: number, y: number, item: IItem) {
-		super(item.Icon.BoundingBox.Width, item.Icon.BoundingBox.Height);
+		super(
+			item instanceof Weapon ? item.Sprites.Image.ScaledSize.X : item.Icon.ScaledSize.X,
+			item instanceof Weapon ? item.Sprites.Image.ScaledSize.Y : item.Icon.ScaledSize.Y
+		);
+
+		this.Image = item instanceof Weapon ? item.Sprites.Image : item.Icon;
 
 		this.ContentItem = item;
-		this._collider = new Rectangle(0, 0, item.Icon.ScaledSize.X, item.Icon.ScaledSize.Y);
+		this._collider = new Rectangle(0, 0, this.Width, this.Height);
 		this._x = x;
 		this._y = y;
 	}
@@ -24,7 +31,7 @@ export class ItemDrop extends Interactable {
 	}
 
 	public Render(): void {
-		Canvas.DrawImage(this.ContentItem.Icon, new Rectangle(this._x  , this._y, this.Width, this.Height));
+		Canvas.DrawImage(this.Image, new Rectangle(this._x, this._y, this.Width, this.Height));
 	}
 
 	GetInteractives(): string[] {
@@ -32,7 +39,7 @@ export class ItemDrop extends Interactable {
 	}
 
 	OnInteractSelected(id: number): void {
-		if (id === 0 && Scene.Player.TryPushItem(this.ContentItem)) Scene.Current.DestroyGameObject(this);
+		if (id === 0 && Scene.Current.Player.TryPushItem(this.ContentItem)) Scene.Current.DestroyGameObject(this);
 	}
 
 	private ApplyVForce(dt: number) {

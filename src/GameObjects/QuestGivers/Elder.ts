@@ -12,14 +12,9 @@ export class Elder extends Character {
 	public override GetDialog(): Dialog {
 		super.GetDialog();
 
-		const active = Scene.Player.GetQuestsBy(this);
+		const active = Scene.Current.Player.GetQuestsBy(this);
 		if (active.length > 0) {
-			if (active[0].IsCompleted()) {
-				this._completedQuests++;
-
-				Scene.Player.TakeItem("DogTag", 2);
-				Scene.Player.RemoveQuest(active[0]);
-
+			if (active[0].GetTasks().length >= 3) {
 				return {
 					Messages: [
 						"Ну, я нашёл ваших пропавших людей, но они не\nмного мёртвые.",
@@ -47,11 +42,17 @@ export class Elder extends Character {
 					],
 					Owner: this,
 					OwnerFirst: false,
+					AfterAction: () => {
+						this._completedQuests++;
+
+						Scene.Current.Player.TakeItem("DogTag", 2);
+						Scene.Current.Player.RemoveQuest(active[0]);
+					},
 				};
 			}
 
 			return {
-				Messages: ["Ну что?\nТы ещё здесь?", "Да, вот станцию осматриваю.", "Давай, уже иди за моими людьми, надо их найти.", "Сейчас, сейчас."],
+				Messages: ["Ну что?\nТы ещё здесь?", "Да, вот станцию осматриваю.", "Давай, уже иди за моими людьми, надо их\nнайти.", "Сейчас, сейчас."],
 				Voices: [GetSound("Dialog_9_0"), GetSound("Dialog_9_1"), GetSound("Dialog_9_2"), GetSound("Dialog_9_3")],
 				Owner: this,
 				OwnerFirst: true,
@@ -82,7 +83,7 @@ export class Elder extends Character {
 						GetSound("Dialog_4_7"),
 					],
 					AfterAction: () => {
-						Scene.Player.PushQuest(
+						Scene.Current.Player.PushQuest(
 							new Quest("Соседи", this)
 								.AddFakeMoveTask(27500, "Станция", 30500)
 								.AddHasItemsTask("Собрать жетоны с трупов", { Id: "DogTag", Count: 2 })

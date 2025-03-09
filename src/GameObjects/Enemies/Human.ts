@@ -1,4 +1,4 @@
-import { EnemyType, Tag } from "../../Enums.js";
+import { Direction, EnemyType, Tag } from "../../Enums.js";
 import { Scene } from "../../Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Sprite, Vector2 } from "../../Utilites.js";
@@ -38,8 +38,9 @@ export class Human extends Enemy {
 	private readonly _fakeCharacter = new GuardFake();
 	private readonly _fakeEndCharacter = new FakeEndGuard();
 	private _warned = false;
+	private readonly _canRotate;
 
-	constructor(x: number, y: number, type: EnemyType.Green | EnemyType.Red, direction: -1 | 1 = 1, weapon?: Weapon) {
+	constructor(x: number, y: number, type: EnemyType.Green | EnemyType.Red, direction: -1 | 1 = 1, weapon?: Weapon, canRotate = true) {
 		super(0, 0, 1, 100, type);
 
 		this._x = x;
@@ -68,7 +69,7 @@ export class Human extends Enemy {
 		this.Height = this._frames.Walk[0].ScaledSize.Y;
 		this._collider = new Rectangle(this._x, this._y, this.Width, this.Height);
 
-		this._angle = this.Direction === -1 ? Math.PI : 0;
+		this._angle = this.Direction === Direction.Left ? Math.PI : 0;
 
 		this._weapon.Load();
 	}
@@ -76,9 +77,9 @@ export class Human extends Enemy {
 	override Update(dt: number): void {
 		if (this._timeFromNotice >= 0) this._timeFromNotice += dt;
 		if (this._timeFromSaw >= 0) this._timeFromSaw += dt;
-		this._timeToRotate -= dt;
+		if (this._canRotate) this._timeToRotate -= dt;
 
-		this.ApplyVForce(dt);
+		this.ApplyVForce(200); // DEBUG
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();
@@ -96,19 +97,6 @@ export class Human extends Enemy {
 
 			this._angle = -Math.atan2(plrPos.Y + plrSize.Height * 0.5 - (this._y + this.Height * this._armHeight), plrPos.X + plrSize.Width / 2 - (this._x + this.Width / 2));
 
-			const c = Math.cos(this._angle);
-			const s = Math.sin(this._angle);
-			const scale = this._frames.Walk[0].Scale;
-			const dir = this.Direction === 1 ? 1 / 3 : 2 / 3;
-			const handPosition = this._weapon.Heavy
-				? new Vector2(
-						this._x + this.Width * dir + 14 * scale * c - 3 * scale * s * Math.sign(c),
-						this._y + this.Height * this._armHeight - 3 * scale * c * Math.sign(c) - 14 * scale * s
-				  )
-				: new Vector2(this._x + this.Width * dir + 22 * scale * c, this._y + this.Height * this._armHeight - 22 * scale * s);
-
-			this._weapon.Update(dt, handPosition, this._angle, this.Direction);
-
 			if (this._aggresive) {
 				if (this._timeFromSaw > this._timeToShoot) {
 					const prevX = this._x;
@@ -124,8 +112,8 @@ export class Human extends Enemy {
 								this._frameIndex = (this._frameIndex + 1) % this._frames.Walk.length;
 								this._timeToNextFrame = 150;
 							}
-						} else this._frameIndex = 0;
-					}
+						}
+					} else this._frameIndex = 0;
 
 					if (!this._weapon.IsReloading()) {
 						if (this._weapon.GetLoadedAmmo() === 0) this._weapon.Reload();
@@ -140,11 +128,11 @@ export class Human extends Enemy {
 								if (x instanceof Human && x._type === EnemyType.Red) x.MakeWarned();
 							});
 
-							Scene.Player.SpeakWith(this._fakeEndCharacter);
+							Scene.Current.Player.SpeakWith(this._fakeEndCharacter);
 						}
 					} else if (this.GetDistanceToPlayer() < 700 && !this._warned) {
 						this._warned = true;
-						Scene.Player.SpeakWith(this._fakeEndCharacter);
+						Scene.Current.Player.SpeakWith(this._fakeEndCharacter);
 					} else if (this.GetDistanceToPlayer() < 500 && this._warned) {
 						this._aggresive = true;
 
@@ -160,35 +148,30 @@ export class Human extends Enemy {
 						if (x instanceof Human && x._type === EnemyType.Green) x.MakeFriendly();
 					});
 
-					Scene.Player.SpeakWith(this._fakeCharacter);
+					Scene.Current.Player.SpeakWith(this._fakeCharacter);
 					this._friendly = true;
 				}
 			}
 		} else {
-			if (this._timeToRotate <= 0) {
-				if (this._type !== EnemyType.Red) this.Direction = -this.Direction as -1 | 1;
+			if (this._timeToRotate <= 0 && this._canRotate) {
 				this._angle = this.Direction === 1 ? 0 : Math.PI;
 				this._timeFromNotice = -1;
 				this._timeFromSaw = -1;
 
 				this._timeToRotate = 5000;
-
-				const c = Math.cos(this._angle);
-				const s = Math.sin(this._angle);
-				const scale = this._frames.Walk[0].Scale;
-				const dir = this.Direction === 1 ? 1 / 3 : 2 / 3;
-				const handPosition = this._weapon.Heavy
-					? new Vector2(
-							this._x + this.Width * dir + 14 * scale * c - 3 * scale * s * Math.sign(c),
-							this._y + this.Height * this._armHeight - 3 * scale * c * Math.sign(c) - 14 * scale * s
-					  )
-					: new Vector2(this._x + this.Width * dir + 22 * scale * c, this._y + this.Height * this._armHeight - 22 * scale * s);
-
-				this._weapon.Update(dt, handPosition, this._angle, this.Direction);
 			}
 
 			this._frameIndex = 0;
 		}
+
+		const c = Math.cos(this._angle);
+		const s = Math.sin(this._angle);
+		const scale = this._frames.Walk[0].Scale;
+		const dir = this.Direction === 1 ? 1 / 3 : 2 / 3;
+		const handPosition = this._weapon.Heavy
+			? new Vector2(this._x + this.Width * dir + 14 * scale * c - 3 * scale * s * Math.sign(c), this._y + this.Height * this._armHeight - 3 * scale * c * Math.sign(c) - 14 * scale * s)
+			: new Vector2(this._x + this.Width * dir + 22 * scale * c, this._y + this.Height * this._armHeight - 22 * scale * s);
+		this._weapon.Update(dt, handPosition, this._angle, this.Direction);
 	}
 
 	override Render(): void {
@@ -196,36 +179,26 @@ export class Human extends Enemy {
 		const dir = this.Direction === 1 ? 1 / 3 : 2 / 3;
 
 		if (this._timeFromNotice >= 0 && this._timeFromSaw < this._timeToShoot)
-			Canvas.DrawImage(GetSprite("Notice") as Sprite, new Rectangle(this._x   + this.Width / 2, this._y + this.Height + 15, 20, 20));
+			Canvas.DrawImage(GetSprite("Notice") as Sprite, new Rectangle(this._x + this.Width / 2, this._y + this.Height + 15, 20, 20));
 
 		if (this.Direction == 1) {
 			if (this._weapon.Heavy)
 				Canvas.DrawImageWithAngle(
 					this._frames.Hands.Straight,
-					new Rectangle(
-						this._x   + this.Width * dir,
-						this._y + this.Height * this._armHeight,
-						this._frames.Hands.Straight.ScaledSize.X,
-						this._frames.Hands.Straight.ScaledSize.Y
-					),
+					new Rectangle(this._x + this.Width * dir, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.ScaledSize.X, this._frames.Hands.Straight.ScaledSize.Y),
 					this._angle + 0.075,
 					-4 * this._frames.Hands.Straight.Scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 3) * this._frames.Hands.Straight.Scale
 				);
 
-			Canvas.DrawImage(this._frames.Walk[this._frameIndex], new Rectangle(this._x  , this._y, this.Width, this.Height));
+			Canvas.DrawImage(this._frames.Walk[this._frameIndex], new Rectangle(this._x, this._y, this.Width, this.Height));
 
 			this._weapon.Render();
 
 			if (this._weapon.Heavy)
 				Canvas.DrawImageWithAngle(
 					this._frames.Hands.Bend,
-					new Rectangle(
-						this._x + this.Width * dir  ,
-						this._y + this.Height * this._armHeight,
-						this._frames.Hands.Bend.ScaledSize.X,
-						this._frames.Hands.Bend.ScaledSize.Y
-					),
+					new Rectangle(this._x + this.Width * dir, this._y + this.Height * this._armHeight, this._frames.Hands.Bend.ScaledSize.X, this._frames.Hands.Bend.ScaledSize.Y),
 					this._angle,
 					-4 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height + 3) * scale
@@ -233,12 +206,7 @@ export class Human extends Enemy {
 			else
 				Canvas.DrawImageWithAngle(
 					this._frames.Hands.Straight,
-					new Rectangle(
-						this._x + this.Width * dir  ,
-						this._y + this.Height * this._armHeight,
-						this._frames.Hands.Straight.ScaledSize.X,
-						this._frames.Hands.Straight.ScaledSize.Y
-					),
+					new Rectangle(this._x + this.Width * dir, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.ScaledSize.X, this._frames.Hands.Straight.ScaledSize.Y),
 					this._angle - 0.05,
 					-4 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height - 3) * scale
@@ -247,29 +215,19 @@ export class Human extends Enemy {
 			if (this._weapon.Heavy)
 				Canvas.DrawImageWithAngleVFlipped(
 					this._frames.Hands.Bend,
-					new Rectangle(
-						this._x + this.Width * dir  ,
-						this._y + this.Height * this._armHeight,
-						this._frames.Hands.Bend.ScaledSize.X,
-						this._frames.Hands.Bend.ScaledSize.Y
-					),
+					new Rectangle(this._x + this.Width * dir, this._y + this.Height * this._armHeight, this._frames.Hands.Bend.ScaledSize.X, this._frames.Hands.Bend.ScaledSize.Y),
 					this._angle,
 					-4 * scale,
 					(this._frames.Hands.Straight.BoundingBox.Height + 3) * scale
 				);
 
-			Canvas.DrawImageFlipped(this._frames.Walk[this._frameIndex], new Rectangle(this._x  , this._y, this.Width, this.Height));
+			Canvas.DrawImageFlipped(this._frames.Walk[this._frameIndex], new Rectangle(this._x, this._y, this.Width, this.Height));
 
 			this._weapon.Render();
 
 			Canvas.DrawImageWithAngleVFlipped(
 				this._frames.Hands.Straight,
-				new Rectangle(
-					this._x + this.Width * dir  ,
-					this._y + this.Height * this._armHeight,
-					this._frames.Hands.Straight.ScaledSize.X,
-					this._frames.Hands.Straight.ScaledSize.Y
-				),
+				new Rectangle(this._x + this.Width * dir, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.ScaledSize.X, this._frames.Hands.Straight.ScaledSize.Y),
 				this._angle - (this._weapon.Heavy ? 0.075 : -0.05),
 				-4 * scale,
 				(this._frames.Hands.Straight.BoundingBox.Height - 3) * scale
@@ -278,7 +236,7 @@ export class Human extends Enemy {
 	}
 
 	override IsSpotPlayer(): boolean {
-		if (!Scene.Player.IsAlive()) return false;
+		if (!Scene.Current.Player.IsAlive()) return false;
 
 		const plrPos = Scene.Current.Player.GetPosition();
 		const plrSize = Scene.Current.Player.GetCollider();

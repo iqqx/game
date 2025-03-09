@@ -13,7 +13,7 @@ export class GuardFake extends Character {
             Messages: ["Стой!\nКто идёт?\nПокажи руки!\nОружие есть?", "Тихо, тихо, убираю.", "Пойдём к нашему Старосте, он задаст тебе пару\nвопросов."],
             Voices: [GetSound("Dialog_3_0"), GetSound("Dialog_3_1"), GetSound("Dialog_3_2")],
             AfterAction: () => {
-                Scene.Player.PushQuest(new Quest("Разговор", this).WithoutCompletionSound().AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0]));
+                Scene.Current.Player.PushQuest(new Quest("Разговор", this).WithoutCompletionSound().AddTalkTask("Поговорить со старостой", Scene.Current.GetByType(Elder)[0]));
                 this._completedQuests++;
             },
             Owner: this,

@@ -45,7 +45,7 @@ export class Character extends Interactable {
 	OnInteractSelected(id: number): void {
 		switch (id) {
 			case 0:
-				Scene.Player.SpeakWith(this);
+				Scene.Current.Player.SpeakWith(this);
 				break;
 		}
 	}

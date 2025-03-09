@@ -2,14 +2,15 @@ import { GUI } from "../../Context.js";
 import { GUIBase } from "./GUIBase.js";
 export class Image extends GUIBase {
     _image;
-    constructor(x, y, width, height, image) {
-        super(width, height);
-        this._x = x;
-        this._y = y;
+    constructor(width, height, image) {
+        super();
+        this.Width = width;
+        this.Height = height;
         this._image = image;
     }
+    Update(dt) { }
     Render() {
-        GUI.DrawImage(this._image, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+        GUI.DrawImage(this._image, this.X, this.Y, this.Width, this.Height);
     }
 }
 //# sourceMappingURL=Image.js.map

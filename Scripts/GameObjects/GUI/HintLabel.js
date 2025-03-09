@@ -1,19 +1,23 @@
 import { GUI } from "../../Context.js";
 import { Scene } from "../../Scene.js";
 import { Color } from "../../Utilites.js";
-import { GameObject } from "../GameObject.js";
-export class HintLabel extends GameObject {
+import { GUIBase } from "./GUIBase.js";
+export class HintLabel extends GUIBase {
     _text;
-    constructor(text, x, y) {
-        super(500, 0);
+    _size;
+    constructor(text, fontSize) {
+        super();
         this._text = text;
-        this._x = x;
-        this._y = y;
+        this._size = fontSize;
+        GUI.SetFont(fontSize);
+        this.Width = GUI.GetTextSize(text, true).X;
+        this.Height = GUI.GetTextSize(text, true).Y;
     }
+    Update(dt) { }
     Render() {
         GUI.SetFillColor(new Color(255, 255, 255, 100 + (Math.sin(Scene.Time / 500) + 1) * 20));
-        GUI.SetFont(12);
-        GUI.DrawTextCenter(this._text, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height);
+        GUI.SetFont(this._size);
+        GUI.DrawText(this.X, this.Y, this._text);
     }
 }
 //# sourceMappingURL=HintLabel.js.map

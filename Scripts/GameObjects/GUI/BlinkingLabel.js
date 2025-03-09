@@ -1,13 +1,15 @@
 import { GUI } from "../../Context.js";
+import { Color } from "../../Utilites.js";
 import { GameObject } from "../GameObject.js";
 export class BlinkingLabel extends GameObject {
     _text;
+    _errorText;
     _colorOff;
     _colorOn;
     _cooldown;
     _timeToBlink = 0;
     _on = false;
-    constructor(text, x, y, width, height, colorOff, colorOn, cooldown) {
+    constructor(text, errorText, x, y, width, height, colorOff, colorOn, cooldown) {
         super(width, height);
         this._text = text;
         this._x = x;
@@ -15,6 +17,7 @@ export class BlinkingLabel extends GameObject {
         this._colorOff = colorOff;
         this._colorOn = colorOn;
         this._cooldown = cooldown;
+        this._errorText = errorText;
     }
     Update(dt) {
         this._timeToBlink -= dt;
@@ -28,6 +31,9 @@ export class BlinkingLabel extends GameObject {
         GUI.ClearStroke();
         GUI.SetFont(32);
         GUI.DrawText2CenterLineBreaked(this._x, this._y, this._text);
+        GUI.SetFillColor(Color.Red);
+        GUI.SetFont(24);
+        GUI.DrawText2CenterLineBreaked(this._x, this._y + 200, this._errorText);
     }
 }
 //# sourceMappingURL=BlinkingLabel.js.map

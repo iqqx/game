@@ -3,7 +3,7 @@ import { Canvas } from "../../Context.js";
 import { Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { Direction, EnemyType, Tag } from "../../Enums.js";
-import { GetSprite } from "../../AssetsLoader.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Platform } from "../Platform.js";
 import { Spikes } from "../Spikes.js";
 
@@ -15,6 +15,8 @@ export class Monster extends Enemy {
 
 	private _accelerationX: number;
 	private _attackCooldown = 0;
+	private _timeFromAmbient = 11111;
+	private readonly _idleSound = GetSound("MonsterIdle");
 
 	constructor(x: number, y: number) {
 		super(0, 0, 4, 150, EnemyType.Rat);
@@ -30,6 +32,11 @@ export class Monster extends Enemy {
 		this.ApplyVForce(dt);
 		this._attackCooldown -= dt;
 
+		if (this._timeFromAmbient > this._idleSound.Length * 1000) {
+			this._timeFromAmbient = 0;
+			if (this.GetDistanceToPlayer() < 1500) this._idleSound.PlayOriginal();
+		} else this._timeFromAmbient += dt;
+
 		if (!this.IsSpotPlayer()) return;
 
 		const plrPos = Scene.Current.Player.GetCenter();
@@ -43,6 +50,8 @@ export class Monster extends Enemy {
 			this._verticalAcceleration = 15;
 			this._attackCooldown = Monster.AttackCooldown;
 			this._grounded = false;
+			GetSound("MonsterAttack").PlayOriginal();
+			this._idleSound.StopOriginal();
 
 			return;
 		}
@@ -51,14 +60,17 @@ export class Monster extends Enemy {
 	override Render(): void {
 		const frame = this._sprites[this._grounded ? 0 : 1];
 
-		if (this.Direction === Direction.Right) Canvas.DrawImage(frame, new Rectangle(this._x  , this._y, this.Width, this.Height));
-		else Canvas.DrawImageFlipped(frame, new Rectangle(this._x  , this._y, this.Width, this.Height));
+		if (this.Direction === Direction.Right) Canvas.DrawImage(frame, new Rectangle(this._x, this._y, this.Width, this.Height));
+		else Canvas.DrawImageFlipped(frame, new Rectangle(this._x, this._y, this.Width, this.Height));
 	}
 
 	override TakeDamage(damage: number): void {
 		super.TakeDamage(damage);
 
 		if (this._health <= 0) {
+			GetSound("MonsterDie").PlayOriginal();
+			this._idleSound.StopOriginal();
+
 			this.Destroy();
 		}
 	}
@@ -85,7 +97,7 @@ export class Monster extends Enemy {
 			// падаем
 
 			const offsets = Scene.Current.GetCollidesByRect(
-				new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height),
+				new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height - this._verticalAcceleration * physDt),
 				Tag.Wall | Tag.Platform
 			);
 
@@ -110,7 +122,10 @@ export class Monster extends Enemy {
 		} else if (this._verticalAcceleration > 0) {
 			// взлетаем
 
-			const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall);
+			const offsets = Scene.Current.GetCollidesByRect(
+				new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height + this._verticalAcceleration * physDt),
+				Tag.Wall
+			);
 
 			if (offsets.length > 0) {
 				this._verticalAcceleration = 0;

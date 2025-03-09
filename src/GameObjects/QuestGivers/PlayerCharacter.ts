@@ -20,14 +20,16 @@ export class PlayerCharacter extends Character {
 					Voices: [GetSound("Dialog_0_0"), GetSound("Dialog_0_1")],
 					Owner: this,
 					AfterAction: () => {
-						Scene.Player.PushQuest(
+						Scene.Current.Player.PushQuest(
 							new Quest("Свет в конце тоннеля", this, () => {
 								this._completedQuests++;
 							})
-								.AddTalkTask("Узнать где выход", Scene.Current.GetByType(Artem)[0] as Character)
-								.AddMoveTask(4000, "Выход")
-								.AddCompletedQuestsTask("Узнать где выход", Scene.Current.GetByType(Elder)[0] as Character, 1)
+								.AddTalkTask("Исследовать левую часть метро", Scene.Current.GetByType(Artem)[0] as Character)
+								.AddMoveTask(19500, "Найти станцию")
+								.AddTalkTask("Узнать о выходе", Scene.Current.GetByType(Elder)[0] as Character)
+								.AddCompletedQuestsTask("Помочь Старосте", Scene.Current.GetByType(Elder)[0] as Character, 1)
 								.AddMoveTask(34200, "Выход")
+								.WithoutCompletionSound()
 						);
 					},
 					OwnerFirst: true,

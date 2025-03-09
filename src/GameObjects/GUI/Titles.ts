@@ -1,10 +1,10 @@
 import { GetSound } from "../../AssetsLoader.js";
-import { GUI } from "../../Context.js";
+import { Canvas, GUI } from "../../Context.js";
 import { Scene } from "../../Scene.js";
-import { Color } from "../../Utilites.js";
-import { GameObject } from "../GameObject.js";
+import { Color, IsMobile } from "../../Utilites.js";
+import { GUIBase } from "./GUIBase.js";
 
-export class Titles extends GameObject {
+export class Titles extends GUIBase {
 	private static readonly _texts = [
 		"РУКОВОДИТЕЛИ ПРОЕКТА",
 		"Лебедев Арсений",
@@ -93,36 +93,56 @@ export class Titles extends GameObject {
 		"© 2025 PENTAGON. Все права защищены.",
 	];
 
+	private _progress = 0;
 	private _pressed = false;
+	private readonly _onkeyDown: (e: KeyboardEvent) => void;
+	private readonly _onkeyUp: (e: KeyboardEvent) => void;
+	private readonly _sound = GetSound("Titles_Background");
 
 	constructor() {
-		super(GUI.Width, GUI.Height);
+		super();
 
-		this._y = 450;
-		GetSound("Titles_Background").Volume = 0.1;
-		GetSound("Titles_Background").Apply();
-		GetSound("Titles_Background").PlayOriginal();
+		this.Width = GUI.Width;
+		this.Height = GUI.Height;
+		this._progress = this.Height + 100;
+		// this._progress = Titles._texts.length * -50 - 300;
+		// this._progress = Titles._texts.length * -50 - 300 + 1000;
 
-		addEventListener("keydown", (e) => {
-			if (e.code === "Space") {
-				this._pressed = true;
-			}
-		});
+		this._sound.Volume = 0.1;
+		this._sound.Apply();
+		this._sound.PlayOriginal();
 
-		addEventListener("keyup", (e) => {
-			if (e.code === "Space") {
-				this._pressed = false;
-			}
-		});
+		if (IsMobile()) {
+		} else {
+			this._onkeyDown = (e) => {
+				if (e.code === "Space") {
+					this._pressed = true;
+				}
+			};
+
+			this._onkeyUp = (e) => {
+				if (e.code === "Space") {
+					this._pressed = false;
+				}
+			};
+
+			Canvas.HTML.addEventListener("keydown", this._onkeyDown);
+			Canvas.HTML.addEventListener("keyup", this._onkeyUp);
+		}
 	}
 
 	public Update(dt: number): void {
-		this._y -= dt * (this._pressed ? 0.5 : 0.05);
+		this._progress -= dt * (this._pressed ? 0.5 : 0.05);
 
-		if (this._y < Titles._texts.length * -50 - 300) {
+		if (this._progress < Titles._texts.length * -50 - 300) {
 			GetSound("Titles_Background").StopOriginal();
 
 			Scene.LoadFromFile("Assets/Scenes/Menu.json");
+		}
+
+		if (this._progress < Titles._texts.length * -50 && 1 - (Titles._texts.length * -50 - this._progress) / 300 >= 0 && 1 - (Titles._texts.length * -50 - this._progress) / 300 <= 1) {
+			this._sound.Volume = (1 - (Titles._texts.length * -50 - this._progress) / 300) * 0.1;
+			this._sound.Apply();
 		}
 	}
 
@@ -131,9 +151,29 @@ export class Titles extends GameObject {
 		GUI.ClearStroke();
 
 		GUI.SetFont(32);
-		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, Math.round(this._y) + i * 32 * 1.5, this.Width, this.Height);
+		for (let i = 0; i < Titles._texts.length; i++) GUI.DrawTextCenter(Titles._texts[i], 0, Math.round(this._progress) + i * 32 * 1.5, this.Width, 0);
 
-		GUI.SetFont(72);
-		GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(Math.round(this._y), Titles._texts.length * -50) + Titles._texts.length * 50, this.Width, this.Height);
+		if (this._progress < Titles._texts.length * -45 + 500) {
+			GUI.SetFont(72);
+
+			const startAt = Titles._texts.length * -49 - 100;
+			const endAt = Titles._texts.length * -50 - 290;
+			const length = Math.abs(endAt - startAt);
+			const text = "СПАСИБО ЗА ИГРУ";
+
+			GUI.SetFillColor(Color.White);
+			if (this._progress > endAt) {
+				GUI.DrawText2CenterLineBreaked(
+					GUI.Width * 0.5,
+					Math.max(Math.round(this._progress), Titles._texts.length * -49) + Titles._texts.length * 55,
+					text.substring(0, Math.max(0, Math.round((-(endAt - this._progress) / length) * text.length))).padEnd(text.length)
+				);
+			}
+		}
+	}
+
+	public override OnDestroy(): void {
+		Canvas.HTML.removeEventListener("keydown", this._onkeyDown);
+		Canvas.HTML.removeEventListener("keyup", this._onkeyUp);
 	}
 }

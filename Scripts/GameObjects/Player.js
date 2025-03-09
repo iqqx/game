@@ -6,7 +6,7 @@ import { Canvas, GUI } from "../Context.js";
 import { Tag, Direction } from "../Enums.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
 import { Scene } from "../Scene.js";
-import { Rectangle, Vector2, Color, CRC32 } from "../Utilites.js";
+import { Rectangle, Vector2, Color, CRC32, IsMobile } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
@@ -39,14 +39,14 @@ export class Player extends Entity {
     _timeFromDeath = 0;
     _openedContainer = null;
     _draggedItem = null;
-    _hoveredObject = null;
+    _openedInteractable = null;
     _selectedInteraction = 0;
     _timeToWalkSound = 0;
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    // private _timeFromSpawn = 0;
-    _timeFromSpawn = 4990; /// DEBUG
+    _timeFromSpawn = 0;
+    // private _timeFromSpawn = 4990; /// DEBUG
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -110,6 +110,12 @@ export class Player extends Entity {
     _timeToHideItemName = 0;
     _timeToAmbientSound = 20000;
     _lastAmbientNumber = -1;
+    _controlPadding = 32;
+    _joystickDiameter = 64;
+    _firstTouchTime = 0;
+    _firstTouchStart = null;
+    _secondTouch = null;
+    _joystickHandlerPosition = null;
     _avatar = null;
     static _name = "Макс";
     static _speed = 5;
@@ -131,6 +137,8 @@ export class Player extends Entity {
         },
         Backpack: GetSprite("Player_Backpack"),
     };
+    _dialogSound = GetSound("Dialog");
+    _registeredEvents = [];
     constructor(x, y, hasBackpack, items) {
         super(40, 100, Player._speed, 100);
         this._x = x;
@@ -142,121 +150,254 @@ export class Player extends Entity {
         for (const item of items)
             this.GiveQuestItem(ItemRegistry.GetById(item.Id, item.Count));
         // FOR DEBUG
+        // this._backpack = new Backpack(0, 0);
         // this.GiveQuestItem(Weapon.GetById("AK12"));
+        // this.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 55));
         // this.GiveQuestItem(Weapon.GetById("Glock"));
         // this.GiveQuestItem(Throwable.GetById("RGN"));
-        // this.GiveQuestItem(ItemRegistry.GetById("AidKit", 5));
+        // this.GiveQuestItem(ItemRegistry.GetById("Radio", 5));
+        // this.GiveQuestItem(ItemRegistry.GetById("RatTail", 1));
+        // this.GiveQuestItem(ItemRegistry.GetById("RatTail", 4));
+        // this.GiveQuestItem(ItemRegistry.GetById("RatTail", 2));
+        // this.GiveQuestItem(ItemRegistry.GetById("RatTail", 3));
         // this.GiveQuestItem(ItemRegistry.GetById("Adrenalin", 2));
         GetSound("Walk_2").Speed = 1.6;
         GetSound("Walk_2").Apply();
-        addEventListener("keydown", (e) => {
-            if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
-                return;
-            this._keysPressed[e.code] = true;
-            if (e.code.startsWith("Key") || e.code.startsWith("Digit")) {
-                this._lastPressedKeys = this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
-                if (this._lastPressedKeys.length >= 8)
-                    this._lastPressedKeys.substring(1);
-                this.CheckForCode();
+        this._dialogSound.Volume = 0.05;
+        this._dialogSound.Apply();
+        this.OnDestroy = () => {
+            for (const event of this._registeredEvents) {
+                Canvas.HTML.removeEventListener(event.Name, event.Callback);
             }
-            switch (e.code) {
-                case "KeyC":
-                    if (this._sit === false) {
-                        this._frameIndex = 0;
-                        this._sit = true;
-                        this._timeToWalkSound -= 200;
-                        this._armHeight = 0.5;
-                        this._animations.Walk.SetDuration(300);
-                        this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
-                        this._speed = Player._speed * Player._sitSpeedModifier;
+            this._registeredEvents.clear();
+        };
+        if (IsMobile()) {
+            this.RegisterEvent("touchstart", (e) => {
+                for (const touch of e.changedTouches) {
+                    const x = touch.clientX;
+                    const y = Canvas.Height - touch.clientY;
+                    if (this._dialog !== null) {
+                        return;
                     }
-                    else {
-                        this._collider = new Rectangle(0, 0, this.Width, this.Height);
-                        if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
-                            this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
-                        }
-                        else {
-                            this._sit = false;
-                            this._animations.Walk.SetDuration(this._running ? 100 : 200);
-                            this._armHeight = 0.65;
-                            this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
-                        }
+                    else if (this._openedInteractable !== null) {
+                        if (x > this._xTarget - 75 && x < this._xTarget + 75)
+                            if (y < this._yTarget && y > this._yTarget - 25 * this._openedInteractable.GetInteractives().length) {
+                                const cell = Math.floor((this._yTarget - y) / 25);
+                                if (cell < this._openedInteractable.GetInteractives().length) {
+                                    this._openedInteractable.OnInteractSelected(cell);
+                                    this._openedInteractable = null;
+                                    return;
+                                }
+                            }
                     }
-                    break;
-                case "Space":
-                    if (!this._sit) {
-                        this._onLadder = null;
+                    else if (this._grounded &&
+                        !this._sit &&
+                        (this._firstTouchStart === null || this._firstTouchStart.clientX < Canvas.Width * 0.5
+                            ? x >= GUI.Width - 100 - 32 && x < GUI.Width - 100 + 32
+                            : x >= 100 - 32 && x < 100 + 32) &&
+                        y >= 100 - 32 &&
+                        y < 100 + 32) {
                         this.Jump();
+                        return;
                     }
-                    else {
-                        this._collider = new Rectangle(0, 0, this.Width, this.Height);
-                        if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
-                            this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                    else if (this.CanTarget() &&
+                        this._weapon !== null &&
+                        !this._weapon.IsReloading() &&
+                        x >= GUI.Width - (this._controlPadding + 32) &&
+                        x < GUI.Width - this._controlPadding &&
+                        y >= this._controlPadding &&
+                        y < this._controlPadding + 32) {
+                        return;
+                    }
+                    else if (this._firstTouchStart === null) {
+                        this._firstTouchStart = touch;
+                        this._firstTouchTime = 200;
+                        this._joystickHandlerPosition = null;
+                        const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
+                        const firstYOffset = GUI.Height - 5 - 50;
+                        const xCell = Math.floor((x - (firstXOffset + (x > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                        const yCell = Math.floor((y - firstYOffset) / 50);
+                        if (yCell === 0 && xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5)))
+                            return;
+                        if (this._secondTouch !== null && this._weapon !== null)
+                            return;
+                    }
+                    else if ((this._inventory[this._selectedHand] instanceof Weapon || this._inventory[this._selectedHand] instanceof Throwable) && this._secondTouch === null)
+                        this._secondTouch = touch;
+                    this._xTarget = x;
+                    this._yTarget = y;
+                    this._openedInteractable = null;
+                }
+            });
+            this.RegisterEvent("touchmove", (e) => {
+                for (const touch of e.changedTouches) {
+                    let x = touch.clientX;
+                    let y = Canvas.Height - touch.clientY;
+                    if (this._firstTouchStart !== null && touch.identifier === this._firstTouchStart.identifier) {
+                        if (Math.abs(touch.clientX - this._firstTouchStart.clientX) < 1 && Math.abs(touch.clientY - this._firstTouchStart.clientY) < 1)
+                            return;
+                        else if (this._firstTouchTime > 0) {
+                            this._firstTouchStart = null;
+                            if (this._inventory[this._selectedHand] instanceof Throwable || this._inventory[this._selectedHand] instanceof Weapon) {
+                                if (this._secondTouch === null)
+                                    this._secondTouch = touch;
+                                else
+                                    return;
+                            }
                         }
                         else {
-                            this._sit = false;
-                            this._animations.Walk.SetDuration(this._running ? 100 : 200);
-                            this._armHeight = 0.65;
-                            this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
+                            const len = Math.sqrt((x - this._firstTouchStart.clientX) ** 2 + (touch.clientY - this._firstTouchStart.clientY) ** 2);
+                            if (len > 48) {
+                                x = this._firstTouchStart.clientX + (x - this._firstTouchStart.clientX) * (48 / len);
+                                y = Canvas.Height - (this._firstTouchStart.clientY + (touch.clientY - this._firstTouchStart.clientY) * (48 / len));
+                            }
+                            this._joystickHandlerPosition = new Vector2(x, Canvas.Height - y);
+                            const xOffset = this._joystickHandlerPosition.X - this._firstTouchStart.clientX;
+                            const yOffset = this._firstTouchStart.clientY - this._joystickHandlerPosition.Y;
+                            if (this._grounded) {
+                                if (yOffset < -0.7 * this._joystickDiameter) {
+                                    if (this._sit === false) {
+                                        this._frameIndex = 0;
+                                        this._sit = true;
+                                        this._timeToWalkSound -= 200;
+                                        this._armHeight = 0.5;
+                                        this._animations.Walk.SetDuration(300);
+                                        this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                                        this._speed = Player._speed * Player._sitSpeedModifier;
+                                    }
+                                }
+                                else {
+                                    if (this._sit !== false) {
+                                        this._collider = new Rectangle(0, 0, this.Width, this.Height);
+                                        if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
+                                            this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                                        }
+                                        else {
+                                            this._sit = false;
+                                            this._animations.Walk.SetDuration(this._running ? 100 : 200);
+                                            this._armHeight = 0.65;
+                                            this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
+                                        }
+                                    }
+                                    if (yOffset < -0.5 * this._joystickDiameter) {
+                                        this._movingDown = true;
+                                        if (this._onLadder === null) {
+                                            const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                                            if (offsets !== false) {
+                                                this._verticalAcceleration = 0;
+                                                this._onLadder = offsets.instance;
+                                                this._frameIndex = 0;
+                                            }
+                                        }
+                                    }
+                                    else if (yOffset > this._joystickDiameter * 0.7) {
+                                        this._movingUp = true;
+                                        if (this._onLadder === null) {
+                                            const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                                            if (offsets !== false) {
+                                                this._verticalAcceleration = 0;
+                                                this._onLadder = offsets.instance;
+                                                this._frameIndex = 0;
+                                            }
+                                        }
+                                    }
+                                    if (xOffset < -0.2 * this._joystickDiameter) {
+                                        this._movingRight = false;
+                                        this._movingLeft = true;
+                                        if (this._currentAnimation !== this._animations.Walk)
+                                            this._currentAnimation = this._animations.Walk;
+                                    }
+                                    else if (xOffset > 0.2 * this._joystickDiameter) {
+                                        this._movingLeft = false;
+                                        this._movingRight = true;
+                                        if (this._currentAnimation !== this._animations.Walk)
+                                            this._currentAnimation = this._animations.Walk;
+                                    }
+                                    else {
+                                        this._movingLeft = false;
+                                        this._movingRight = false;
+                                        this._currentAnimation = null;
+                                    }
+                                    if ((xOffset > 0.7 * this._joystickDiameter || xOffset < this._joystickDiameter * -0.7) && !this._sit) {
+                                        if (!this._running && (this._weapon === null || !this._weapon.IsReloading())) {
+                                            this._running = true;
+                                            this._weapon = null;
+                                            this._animations.Walk.SetDuration(100);
+                                            this._speed = Player._speed * Player._runningSpeedModifier;
+                                        }
+                                    }
+                                    else if (this._running) {
+                                        this._running = false;
+                                        if (this._inventory[this._selectedHand] instanceof Weapon)
+                                            this._weapon = this._inventory[this._selectedHand];
+                                        this._speed = Player._speed;
+                                        this._animations.Walk.SetDuration(200);
+                                    }
+                                }
+                            }
+                            return;
                         }
                     }
-                    break;
-                case "Digit1":
-                    this.ChangeActiveHand(0);
-                    break;
-                case "Digit2":
-                    this.ChangeActiveHand(1);
-                    break;
-                case "KeyW":
-                    this._movingUp = true;
-                    if (this._onLadder === null) {
-                        const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
-                        if (offsets !== false) {
-                            this._verticalAcceleration = 0;
-                            this._onLadder = offsets.instance;
-                            this._frameIndex = 0;
+                    else if (this._secondTouch !== null && this._weapon !== null)
+                        this._weapon.TryShoot();
+                    this._xTarget = x;
+                    this._yTarget = y;
+                }
+            });
+            this.RegisterEvent("touchend", (e) => {
+                for (const touch of e.changedTouches) {
+                    const x = touch.clientX;
+                    const y = Canvas.Height - touch.clientY;
+                    if (this._firstTouchStart !== null && touch.identifier === this._firstTouchStart.identifier) {
+                        this._firstTouchStart = null;
+                        this._joystickHandlerPosition = null;
+                        this._movingRight = false;
+                        this._movingLeft = false;
+                        this._movingDown = false;
+                        this._movingUp = false;
+                        this._currentAnimation = null;
+                        if (this._running) {
+                            this._running = false;
+                            if (this._inventory[this._selectedHand] instanceof Weapon)
+                                this._weapon = this._inventory[this._selectedHand];
+                            this._speed = Player._speed;
+                            this._animations.Walk.SetDuration(200);
                         }
+                        if (this._firstTouchTime <= 0)
+                            return;
                     }
-                    break;
-                case "KeyA":
-                    if (this._grounded) {
-                        this._movingLeft = true;
-                        if (this._currentAnimation !== this._animations.Walk)
-                            this._currentAnimation = this._animations.Walk;
+                    if (document.fullscreenElement === null &&
+                        document.fullscreenEnabled &&
+                        x >= GUI.Width - this._controlPadding - 32 &&
+                        x < GUI.Width - this._controlPadding &&
+                        GUI.Height - y >= this._controlPadding &&
+                        GUI.Height - y < this._controlPadding + 32) {
+                        Canvas.ToFullscreen();
+                        return;
                     }
-                    break;
-                case "KeyF":
-                    if (this._tpActivated) {
-                        this._x = this._xTarget + Canvas.CameraX;
-                        this._y = this._yTarget + Canvas.CameraY;
+                    else if (this._openedInteractable !== null) {
+                        return;
                     }
-                    break;
-                case "KeyS":
-                    this._movingDown = true;
-                    if (this._onLadder === null) {
-                        const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
-                        if (offsets !== false) {
-                            this._verticalAcceleration = 0;
-                            this._onLadder = offsets.instance;
-                            this._frameIndex = 0;
-                        }
+                    else if (!this._sit &&
+                        (this._firstTouchStart === null || this._firstTouchStart.clientX < Canvas.Width * 0.5
+                            ? x >= GUI.Width - 100 - 32 && x < GUI.Width - 100 + 32
+                            : x >= 100 - 32 && x < 100 + 32) &&
+                        y >= 100 - 32 &&
+                        y < 100 + 32) {
+                        return;
                     }
-                    break;
-                case "KeyD":
-                    if (this._grounded) {
-                        this._movingRight = true;
-                        if (this._currentAnimation !== this._animations.Walk)
-                            this._currentAnimation = this._animations.Walk;
-                    }
-                    break;
-                case "KeyR":
-                    if (this.CanTarget() && this._weapon !== null) {
-                        const neededAmmo = "AK12" === this._weapon.Id ? "RifleBullet" : "PistolBullet";
+                    else if (this.CanTarget() &&
+                        this._weapon !== null &&
+                        !this._weapon.IsReloading() &&
+                        x >= GUI.Width - (this._controlPadding + 32) &&
+                        x < GUI.Width - this._controlPadding &&
+                        y >= this._controlPadding &&
+                        y < this._controlPadding + 32) {
                         let findedAmmo = 0;
                         const items = this.GetSlots();
                         for (let i = 0; i < items.length; i++) {
                             const item = items[i];
-                            if (item !== null && item.Id === neededAmmo) {
+                            if (item !== null && item.Id === this._weapon.AmmoId) {
                                 const toTake = Math.min(this._weapon.MaxAmmoClip - this._weapon.GetLoadedAmmo() + Math.sign(this._weapon.GetLoadedAmmo()) - findedAmmo, item.GetCount());
                                 findedAmmo += toTake;
                                 item.Take(toTake);
@@ -267,235 +408,540 @@ export class Player extends Entity {
                             }
                         }
                         this._weapon.Reload(findedAmmo);
-                    }
-                    break;
-                case "KeyE":
-                    if (this._openedContainer !== null) {
-                        if (this._draggedItem !== null) {
-                            this._openedContainer.TryPushItem(this._draggedItem);
-                            this._draggedItem = null;
-                        }
-                        this._openedContainer = null;
-                    }
-                    else if (this._dialog !== null) {
-                        this.ContinueDialog();
-                    }
-                    else if (this._hoveredObject !== null)
-                        this._hoveredObject.OnInteractSelected(this._selectedInteraction);
-                    break;
-                case "KeyQ":
-                    if (this._inventory[this._selectedHand] !== null) {
-                        Scene.Current.Instantiate(new ItemDrop(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._inventory[this._selectedHand]));
-                        this._weapon = null;
-                        this._inventory[this._selectedHand] = null;
-                        this._quests.forEach((quest) => quest.InventoryChanged());
-                    }
-                    break;
-                case "ShiftLeft":
-                    if (this._sit)
                         return;
-                    this._running = true;
-                    this._weapon = null;
-                    this._animations.Walk.SetDuration(100);
-                    this._speed = Player._speed * Player._runningSpeedModifier;
-                    break;
-                default:
-                    break;
-            }
-        });
-        addEventListener("keyup", (e) => {
-            this._keysPressed[e.code] = false;
-            switch (e.code) {
-                case "KeyW":
-                    this._movingUp = false;
-                    break;
-                case "KeyA":
-                    if (this._grounded || this._onLadder !== null) {
-                        this._movingLeft = false;
-                        if (!this._keysPressed["KeyD"])
-                            this._currentAnimation = null;
                     }
-                    break;
-                case "KeyS":
-                    this._movingDown = false;
-                    break;
-                case "KeyD":
-                    if (this._grounded || this._onLadder !== null) {
-                        this._movingRight = false;
-                        if (!this._keysPressed["KeyA"])
-                            this._currentAnimation = null;
-                    }
-                    break;
-                case "ShiftLeft":
-                    this._running = false;
-                    if (this._inventory[this._selectedHand] instanceof Weapon)
-                        this._weapon = this._inventory[this._selectedHand];
-                    this._speed = Player._speed;
-                    this._animations.Walk.SetDuration(200);
-                    break;
-                default:
-                    break;
-            }
-        });
-        addEventListener("mousedown", (e) => {
-            if (e.target.tagName !== "CANVAS")
-                return;
-            if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
-                return;
-            if (this._hoveredObject !== null) {
-                if (e.offsetX > this._xTarget - 75 && e.offsetX < this._xTarget - 75 + 150)
-                    if (e.offsetY > GUI.Height - this._yTarget + 50 && e.offsetY < GUI.Height - this._yTarget + 50 + 25 * this._hoveredObject.GetInteractives().length) {
-                        const cell = Math.floor((e.offsetY - (GUI.Height - this._yTarget + 50)) / 25);
-                        if (cell >= 0 && cell < this._hoveredObject.GetInteractives().length) {
-                            this._hoveredObject.OnInteractSelected(cell);
-                            return;
+                    else if (this._secondTouch !== null) {
+                        if (this._weapon !== null) {
+                            this._weapon.TryShoot();
                         }
-                    }
-            }
-            if (e.button === 0) {
-                const lastHover = this._hoveredObject;
-                this._hoveredObject = Scene.Current.GetInteractive();
-                if (lastHover === null && this._hoveredObject !== null)
-                    this._selectedInteraction = 0;
-                if (this._openedContainer !== null) {
-                    const hotbarY = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
-                    if (this._yTarget < GUI.Height - hotbarY + 10) {
-                        // Тык В инвентарь
-                        if (this._backpack !== null) {
-                            const firstXOffset = GUI.Width / 2 - 55 * 3;
-                            const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
-                            const yCell = Math.floor((GUI.Height - this._yTarget - hotbarY) / 55);
-                            if (yCell === 0 && xCell >= 0) {
-                                if (e.shiftKey && this.GetItemAt(xCell) !== null) {
-                                    if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
-                                        this._draggedItem = this.GetItemAt(xCell);
-                                    else
-                                        this.TakeItemFrom(xCell);
+                        else if (this._throwableTime > 0) {
+                            const itemInHand = this._inventory[this._selectedHand];
+                            if (itemInHand instanceof Throwable) {
+                                if ((this._secondTouch.clientX > Canvas.Width * 0.5 && (Canvas.Width - 50 - x) ** 2 + (Canvas.Height * 0.5 - y) ** 2 < 32 ** 2) ||
+                                    (50 - x) ** 2 + (Canvas.Height * 0.5 - y) ** 2 < 32 ** 2) {
                                 }
-                                else if (xCell <= 5)
-                                    this.SwapItemAt(xCell);
-                                this._quests.forEach((quest) => quest.InventoryChanged());
+                                else if (this._throwableTime > 100) {
+                                    const throwAngle = 2 * this.Direction;
+                                    const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
+                                    const c = Math.cos(angleWithAnimation);
+                                    const s = Math.sin(angleWithAnimation);
+                                    const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
+                                    const handPosition = new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s);
+                                    itemInHand.Update(0, handPosition, this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
+                                    itemInHand.Throw();
+                                    GetSound("Swing").Play(0.5);
+                                    this._inventory[this._selectedHand] = null;
+                                }
+                            }
+                            this._throwableTime = 0;
+                        }
+                        this._secondTouch = null;
+                        return;
+                    }
+                    else if (this._openedContainer !== null) {
+                        const hotbarY = GUI.Height / 2 - ((this._openedContainer.SlotsSize.Y * 55) / 2 + 5);
+                        if (y < hotbarY) {
+                            // Тык В инвентарь
+                            if (this._backpack !== null) {
+                                const firstXOffset = GUI.Width / 2 - 55 * 3;
+                                const xCell = Math.floor((x - (firstXOffset + (x > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                                const yCell = Math.floor((hotbarY - y) / 55);
+                                if (yCell === 0 && xCell >= 0) {
+                                    if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                        if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                            this._draggedItem = this.GetItemAt(xCell);
+                                        else
+                                            this.TakeItemFrom(xCell);
+                                    }
+                                    else if (xCell <= 5)
+                                        this.SwapItemAt(xCell);
+                                    this._quests.forEach((quest) => quest.InventoryChanged());
+                                    return;
+                                }
+                            }
+                            else {
+                                const firstXOffset = GUI.Width / 2 - 52.5;
+                                const xCell = Math.floor((x - firstXOffset) / 55);
+                                const yCell = Math.floor((hotbarY - y) / 55);
+                                if (yCell === 0 && xCell >= 0 && xCell < 2) {
+                                    if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                        if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                            this._draggedItem = this.GetItemAt(xCell);
+                                        else
+                                            this.TakeItemFrom(xCell);
+                                    }
+                                    else
+                                        this.SwapItemAt(xCell);
+                                    this._quests.forEach((quest) => quest.InventoryChanged());
+                                    return;
+                                }
                             }
                         }
                         else {
-                            const firstXOffset = GUI.Width / 2 - 52.5;
-                            const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-                            const yCell = Math.floor((GUI.Height - this._yTarget - hotbarY) / 55);
-                            if (yCell === 0 && xCell >= 0 && xCell < 2) {
-                                if (e.shiftKey && this.GetItemAt(xCell) !== null) {
-                                    if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
-                                        this._draggedItem = this.GetItemAt(xCell);
-                                    else
-                                        this.TakeItemFrom(xCell);
-                                }
+                            // Тык В коробку
+                            const firstXOffset = GUI.Width / 2 -
+                                (this._openedContainer.SlotsSize.X % 2 === 1
+                                    ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25
+                                    : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
+                            const firstYOffset = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y / 2) * 55;
+                            const xCell = Math.floor((x - firstXOffset) / 55);
+                            const yCell = Math.floor((firstYOffset - y) / 55);
+                            if (this._openedContainer.CellInContainer(xCell, yCell)) {
+                                if (e.shiftKey && this.TryPushItem(this._openedContainer.GetItemAt(xCell, yCell)))
+                                    this._openedContainer.TakeItemFrom(xCell, yCell);
                                 else
-                                    this.SwapItemAt(xCell);
+                                    this._draggedItem = this._openedContainer.SwapItem(xCell, yCell, this._draggedItem);
                                 this._quests.forEach((quest) => quest.InventoryChanged());
+                                return;
                             }
                         }
                     }
                     else {
-                        // Тык В коробку
-                        const firstXOffset = GUI.Width / 2 -
-                            (this._openedContainer.SlotsSize.X % 2 === 1
-                                ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25
-                                : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
-                        const firstYOffset = GUI.Height / 2 - Math.floor(this._openedContainer.SlotsSize.Y / 2) * 55 - 25;
-                        const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-                        const yCell = Math.floor((GUI.Height - this._yTarget - firstYOffset) / 55);
-                        if (this._openedContainer.CellInContainer(xCell, yCell)) {
-                            if (e.shiftKey && this.TryPushItem(this._openedContainer.GetItemAt(xCell, yCell)))
-                                this._openedContainer.TakeItemFrom(xCell, yCell);
-                            else
-                                this._draggedItem = this._openedContainer.SwapItem(xCell, yCell, this._draggedItem);
-                            this._quests.forEach((quest) => quest.InventoryChanged());
+                        const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
+                        const firstYOffset = GUI.Height - 5 - 50;
+                        const xCell = Math.floor((x - (firstXOffset + (x > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                        const yCell = Math.floor((y - firstYOffset) / 50);
+                        const inHand = this._inventory[this._selectedHand];
+                        if (yCell === 0) {
+                            if (this._draggedItem === null && xCell <= 1 && xCell !== this._selectedHand) {
+                                this.ChangeActiveHand(xCell);
+                                return;
+                            }
+                            if (xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5))) {
+                                if (!(inHand instanceof UseableItem) || !inHand.IsUsing()) {
+                                    this.SwapItemAt(xCell);
+                                    return;
+                                }
+                            }
                         }
                     }
-                }
-                const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
-                const firstYOffset = 5;
-                const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
-                const yCell = Math.floor((this._yTarget - firstYOffset) / 50);
-                const inHand = this._inventory[this._selectedHand];
-                if (yCell === 0 && xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5))) {
-                    if (!(inHand instanceof UseableItem) || !inHand.IsUsing())
-                        this.SwapItemAt(xCell);
-                }
-                else if (this.CanTarget()) {
-                    this._LMBPressed = true;
-                    this.Shoot();
-                }
-            }
-        });
-        addEventListener("mouseup", (e) => {
-            if (e.target.tagName !== "CANVAS")
-                return;
-            if (e.button === 0) {
-                this._LMBPressed = false;
-                const itemInHand = this._inventory[this._selectedHand];
-                if (itemInHand instanceof Throwable) {
-                    if (this._throwableTime > 50) {
-                        const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2) * this.Direction;
-                        const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
-                        const c = Math.cos(angleWithAnimation);
-                        const s = Math.sin(angleWithAnimation);
-                        const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
-                        const handPosition = 
-                        // this._weapon === null || this._weapon.Heavy
-                        // 	? new Vector2(
-                        // 			this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c),
-                        // 			this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s
-                        // 	  )
-                        // 	: new Vector2(this._x + this.Width / 2 + 16 * scale * c, this._y + this.Height * this._armHeight - 16 * scale * s);
-                        new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s);
-                        itemInHand.Update(0, handPosition, this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
-                        itemInHand.Throw();
-                        GetSound("Swing").Play(0.5);
-                        this._inventory[this._selectedHand] = null;
+                    this._openedContainer = null;
+                    if (this._dialog !== null && this._charIndex > 1) {
+                        this.ContinueDialog();
+                        return;
+                    }
+                    if (this.CanTarget() && this._onLadder === null) {
+                        this.Shoot();
                     }
                 }
-                this._throwableTime = 0;
-            }
-        });
-        addEventListener("wheel", (e) => {
-            if (this._hoveredObject !== null) {
-                this._selectedInteraction = Math.clamp(this._selectedInteraction + Math.sign(e.deltaY), 0, this._hoveredObject.GetInteractives().length - 1);
-            }
-            else {
-                this.ChangeActiveHand(((this._selectedHand + 1) % 2));
-            }
-        });
+            });
+        }
+        else {
+            this.RegisterEvent("keydown", (e) => {
+                if (this._timeFromDeath > 0 || this._timeFromSpawn < 5000)
+                    return;
+                this._keysPressed[e.code] = true;
+                if (e.code.startsWith("Key") || e.code.startsWith("Digit")) {
+                    this._lastPressedKeys = this._lastPressedKeys += e.code[e.code.length - 1].toLowerCase();
+                    if (this._lastPressedKeys.length >= 8)
+                        this._lastPressedKeys.substring(1);
+                    this.CheckForCode();
+                }
+                switch (e.code) {
+                    case "KeyC":
+                        if (this._sit === false) {
+                            this._frameIndex = 0;
+                            this._sit = true;
+                            this._timeToWalkSound -= 200;
+                            this._armHeight = 0.5;
+                            this._animations.Walk.SetDuration(300);
+                            this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                            this._speed = Player._speed * Player._sitSpeedModifier;
+                        }
+                        else {
+                            this._collider = new Rectangle(0, 0, this.Width, this.Height);
+                            if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
+                                this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                            }
+                            else {
+                                this._sit = false;
+                                this._animations.Walk.SetDuration(this._running ? 100 : 200);
+                                this._armHeight = 0.65;
+                                this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
+                            }
+                        }
+                        break;
+                    case "Space":
+                        if (!this._sit) {
+                            this.Jump();
+                        }
+                        else {
+                            this._collider = new Rectangle(0, 0, this.Width, this.Height);
+                            if (Scene.Current.IsCollide(this, Tag.Wall) !== false) {
+                                this._collider = new Rectangle(0, 0, this.Width, this.Height * Player._sitHeightModifier);
+                            }
+                            else {
+                                this._sit = false;
+                                this._animations.Walk.SetDuration(this._running ? 100 : 200);
+                                this._armHeight = 0.65;
+                                this._speed = Player._speed * (this._running ? Player._runningSpeedModifier : 1);
+                            }
+                        }
+                        break;
+                    case "Digit1":
+                        this.ChangeActiveHand(0);
+                        break;
+                    case "Digit2":
+                        this.ChangeActiveHand(1);
+                        break;
+                    case "KeyW":
+                        if (this._dialog !== null)
+                            return;
+                        this._movingUp = true;
+                        if (this._onLadder === null) {
+                            const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                            if (offsets !== false) {
+                                this._verticalAcceleration = 0;
+                                this._onLadder = offsets.instance;
+                                this._frameIndex = 0;
+                            }
+                        }
+                        break;
+                    case "KeyA":
+                        if (this._dialog !== null)
+                            return;
+                        if (this._grounded || this._onLadder !== null) {
+                            this._movingLeft = true;
+                            if (this._currentAnimation !== this._animations.Walk)
+                                this._currentAnimation = this._animations.Walk;
+                        }
+                        break;
+                    case "KeyF":
+                        if (this._tpActivated) {
+                            this._x = this._xTarget + Canvas.CameraX;
+                            this._y = this._yTarget + Canvas.CameraY;
+                        }
+                        break;
+                    case "KeyS":
+                        if (this._dialog !== null)
+                            return;
+                        this._movingDown = true;
+                        if (this._onLadder === null) {
+                            const offsets = Scene.Current.GetCollide(this, Tag.Ladder);
+                            if (offsets !== false) {
+                                this._verticalAcceleration = 0;
+                                this._onLadder = offsets.instance;
+                                this._frameIndex = 0;
+                            }
+                        }
+                        break;
+                    case "KeyD":
+                        if (this._dialog !== null)
+                            return;
+                        if (this._grounded || this._onLadder !== null) {
+                            this._movingRight = true;
+                            if (this._currentAnimation !== this._animations.Walk)
+                                this._currentAnimation = this._animations.Walk;
+                        }
+                        break;
+                    case "KeyR":
+                        if (this.CanTarget() && this._weapon !== null) {
+                            const neededAmmo = "AK12" === this._weapon.Id ? "RifleBullet" : "PistolBullet";
+                            let findedAmmo = 0;
+                            const items = this.GetSlots();
+                            for (let i = 0; i < items.length; i++) {
+                                const item = items[i];
+                                if (item !== null && item.Id === neededAmmo) {
+                                    const toTake = Math.min(this._weapon.MaxAmmoClip - this._weapon.GetLoadedAmmo() + Math.sign(this._weapon.GetLoadedAmmo()) - findedAmmo, item.GetCount());
+                                    findedAmmo += toTake;
+                                    item.Take(toTake);
+                                    if (item.GetCount() <= 0)
+                                        this.TakeItemFrom(i);
+                                    if (findedAmmo >= this._weapon.MaxAmmoClip)
+                                        break;
+                                }
+                            }
+                            this._weapon.Reload(findedAmmo);
+                        }
+                        break;
+                    case "KeyE":
+                        if (this._openedContainer !== null) {
+                            if (this._draggedItem !== null) {
+                                this._openedContainer.TryPushItem(this._draggedItem);
+                                this._draggedItem = null;
+                            }
+                            this._openedContainer = null;
+                        }
+                        else if (this._dialog !== null) {
+                            this.ContinueDialog();
+                        }
+                        else if (this._openedInteractable !== null)
+                            this._openedInteractable.OnInteractSelected(this._selectedInteraction);
+                        break;
+                    case "KeyQ":
+                        if (this._inventory[this._selectedHand] !== null) {
+                            Scene.Current.Instantiate(new ItemDrop(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._inventory[this._selectedHand]));
+                            this._weapon = null;
+                            this._inventory[this._selectedHand] = null;
+                            this._quests.forEach((quest) => quest.InventoryChanged());
+                        }
+                        break;
+                    case "ShiftLeft":
+                        if (this._sit || (this._weapon !== null && this._weapon.IsReloading()))
+                            return;
+                        this._running = true;
+                        this._weapon = null;
+                        this._animations.Walk.SetDuration(100);
+                        this._speed = Player._speed * Player._runningSpeedModifier;
+                        break;
+                }
+            });
+            this.RegisterEvent("keyup", (e) => {
+                this._keysPressed[e.code] = false;
+                switch (e.code) {
+                    case "KeyW":
+                        this._movingUp = false;
+                        break;
+                    case "KeyA":
+                        if (this._grounded || this._onLadder !== null) {
+                            this._movingLeft = false;
+                            if (!this._keysPressed["KeyD"])
+                                this._currentAnimation = null;
+                        }
+                        break;
+                    case "KeyS":
+                        this._movingDown = false;
+                        break;
+                    case "KeyD":
+                        if (this._grounded || this._onLadder !== null) {
+                            this._movingRight = false;
+                            if (!this._keysPressed["KeyA"])
+                                this._currentAnimation = null;
+                        }
+                        break;
+                    case "ShiftLeft":
+                        this._running = false;
+                        if (this._inventory[this._selectedHand] instanceof Weapon)
+                            this._weapon = this._inventory[this._selectedHand];
+                        this._speed = Player._speed;
+                        this._animations.Walk.SetDuration(200);
+                        break;
+                    default:
+                        break;
+                }
+            });
+            this.RegisterEvent("wheel", (e) => {
+                if (this._openedInteractable !== null) {
+                    this._selectedInteraction = Math.clamp(this._selectedInteraction + Math.sign(e.deltaY), 0, this._openedInteractable.GetInteractives().length - 1);
+                }
+                else {
+                    this.ChangeActiveHand(((this._selectedHand + 1) % 2));
+                }
+            });
+            this.RegisterEvent("mousemove", (e) => {
+                this._xTarget = e.x;
+                this._yTarget = Canvas.Height - e.y;
+            });
+            this.RegisterEvent("mousedown", (e) => {
+                const eY = Canvas.Height - e.y;
+                if (e.button === 0) {
+                    if (this._openedContainer !== null) {
+                        const hotbarY = GUI.Height / 2 - ((this._openedContainer.SlotsSize.Y * 55) / 2 + 5);
+                        if (eY < hotbarY) {
+                            // Тык В инвентарь
+                            if (this._backpack !== null) {
+                                const firstXOffset = GUI.Width / 2 - 55 * 3;
+                                const xCell = Math.floor((e.x - (firstXOffset + (e.x > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                                const yCell = Math.floor((hotbarY - eY) / 55);
+                                if (yCell === 0 && xCell >= 0) {
+                                    if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                        if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                            this.SwapItemAt(xCell);
+                                        else
+                                            this.TakeItemFrom(xCell);
+                                    }
+                                    else if (xCell <= 5)
+                                        this.SwapItemAt(xCell);
+                                    this._quests.forEach((quest) => quest.InventoryChanged());
+                                    return;
+                                }
+                            }
+                            else {
+                                const firstXOffset = GUI.Width / 2 - 52.5;
+                                const xCell = Math.floor((e.x - firstXOffset) / 55);
+                                const yCell = Math.floor((hotbarY - eY) / 55);
+                                if (yCell === 0 && xCell >= 0 && xCell < 2) {
+                                    if (e.shiftKey && this.GetItemAt(xCell) !== null) {
+                                        if (!this._openedContainer.TryPushItem(this.GetItemAt(xCell)))
+                                            this.SwapItemAt(xCell);
+                                        else
+                                            this.TakeItemFrom(xCell);
+                                    }
+                                    else
+                                        this.SwapItemAt(xCell);
+                                    this._quests.forEach((quest) => quest.InventoryChanged());
+                                    return;
+                                }
+                            }
+                        }
+                        else {
+                            // Тык В коробку
+                            const firstXOffset = GUI.Width / 2 -
+                                (this._openedContainer.SlotsSize.X % 2 === 1
+                                    ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25
+                                    : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
+                            const firstYOffset = GUI.Height / 2 + (this._openedContainer.SlotsSize.Y / 2) * 55;
+                            const xCell = Math.floor((e.x - firstXOffset) / 55);
+                            const yCell = Math.floor((firstYOffset - eY) / 55);
+                            if (this._openedContainer.CellInContainer(xCell, yCell)) {
+                                if (e.shiftKey && this.TryPushItem(this._openedContainer.GetItemAt(xCell, yCell)))
+                                    this._openedContainer.TakeItemFrom(xCell, yCell);
+                                else
+                                    this._draggedItem = this._openedContainer.SwapItem(xCell, yCell, this._draggedItem);
+                                this._quests.forEach((quest) => quest.InventoryChanged());
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
+                        const firstYOffset = 5;
+                        const xCell = Math.floor((e.x - (firstXOffset + (e.x > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
+                        const yCell = Math.floor((this._yTarget - firstYOffset) / 50);
+                        const inHand = this._inventory[this._selectedHand];
+                        if (yCell === 0 && xCell >= 0 && (xCell < 2 || (this._backpack !== null && xCell <= 5))) {
+                            if (!(inHand instanceof UseableItem) || !inHand.IsUsing()) {
+                                this.SwapItemAt(xCell);
+                                return;
+                            }
+                        }
+                    }
+                    if (this.CanTarget()) {
+                        this._LMBPressed = true;
+                        this.Shoot();
+                    }
+                }
+            });
+            this.RegisterEvent("mouseup", (e) => {
+                const eY = Canvas.Height - e.y;
+                if (e.button === 0) {
+                    this._LMBPressed = false;
+                    const itemInHand = this._inventory[this._selectedHand];
+                    if (itemInHand instanceof Throwable) {
+                        if (this._throwableTime > 100) {
+                            const throwAngle = 2 * this.Direction;
+                            const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
+                            const c = Math.cos(angleWithAnimation);
+                            const s = Math.sin(angleWithAnimation);
+                            const scale = this.Height / (this._sit ? this._frames.Sit : this._frames.Walk)[0].BoundingBox.Height;
+                            const handPosition = new Vector2(this._x + this.Width / 2 + 7 * scale * c - scale * s * Math.sign(c), this._y + this.Height * this._armHeight - scale * c * Math.sign(c) - 7 * scale * s);
+                            itemInHand.Update(0, handPosition, this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0));
+                            itemInHand.Throw();
+                            GetSound("Swing").Play(0.5);
+                            this._inventory[this._selectedHand] = null;
+                        }
+                    }
+                    this._throwableTime = 0;
+                }
+            });
+        }
+    }
+    RegisterEvent(event, callback) {
+        Canvas.HTML.addEventListener(event, callback);
+        this._registeredEvents.push({ Name: event, Callback: callback });
     }
     Update(dt) {
         if (this._timeFromSpawn < 5000) {
             this._timeFromSpawn += dt;
             this.ApplyVForce(dt);
+            Canvas.CameraX = this._x - Canvas.Width * 0.5 - this.Width * 0.5;
+            if (Canvas.GetCameraScale() < 1) {
+                Canvas.CameraY = Math.round(Canvas.CameraY -
+                    dt *
+                        0.0025 *
+                        (Canvas.CameraY -
+                            Math.clamp(IsMobile() ? this._y - Canvas.Height * 0.25 : Canvas.Height * 0.25, this._y - Canvas.Height * 0.5, Math.min(this._y * 0.75, Canvas.Height * 0.5))));
+            }
+            else
+                Canvas.CameraY = Math.round(0.5 * (750 - Canvas.Height));
             if (this._timeFromSpawn >= 5000) {
-                GetSound("Background_1").Play(0.2, 1, true);
+                GetSound("Background_1").PlayOriginal(0.2, 1, true);
                 //// FOR DEBUG
-                // this.SpeakWith(new PlayerCharacter());
+                this.SpeakWith(new PlayerCharacter());
                 this._artem = Scene.Current.GetByType(Artem)[0];
             }
             else
                 return;
         }
-        this._xTarget = Scene.Current.GetMousePosition().X;
-        this._yTarget = Scene.Current.GetMousePosition().Y;
+        if (IsMobile()) {
+            if (this._firstTouchStart !== null) {
+                if (this._firstTouchTime > 0) {
+                    this._firstTouchTime -= dt;
+                    if (this._firstTouchTime <= 0) {
+                        this._openedInteractable = Scene.Current.TryGetInteractive(this._firstTouchStart.clientX, Canvas.Height - this._firstTouchStart.clientY);
+                        const firstXOffset = this._backpack === null ? GUI.Width / 2 - 52.5 : GUI.Width / 2 - 55 * 3;
+                        const firstYOffset = 5;
+                        const xCell = Math.floor((this._firstTouchStart.clientX - firstXOffset) / 55);
+                        const yCell = Math.floor((this._firstTouchStart.clientY - firstYOffset) / 50);
+                        if (yCell === 0 && xCell >= 0 && xCell < 2 && xCell === this._selectedHand) {
+                            const inHand = this._inventory[this._selectedHand];
+                            if (inHand instanceof UseableItem) {
+                                inHand.Use(() => {
+                                    this._inventory[this._selectedHand] = null;
+                                });
+                            }
+                            else if (inHand.Id === "Radio") {
+                                this.SpeakWith(this._artem);
+                                if (this._artem.GetCompletedQuestsCount() > 2)
+                                    this._inventory[this._selectedHand] = null;
+                            }
+                        }
+                        else if (this._openedInteractable === null)
+                            this._joystickHandlerPosition = new Vector2(this._firstTouchStart.clientX, this._firstTouchStart.clientY);
+                        else
+                            this._firstTouchStart = null;
+                    }
+                }
+            }
+            if (this._secondTouch !== null) {
+                Canvas.CameraX = Math.round(Canvas.CameraX -
+                    dt *
+                        0.0025 *
+                        (Canvas.CameraX -
+                            (this._x +
+                                (this._secondTouch.clientX < Canvas.Width * 0.5
+                                    ? -Canvas.Width
+                                    : this._secondTouch.clientX >= Canvas.Width * 0.5
+                                        ? 20
+                                        : Canvas.Width / 2 + 20 - Canvas.Width))));
+            }
+            else {
+                const nextX = this._x + (this._movingLeft ? -Canvas.Width : this._movingRight ? 20 : Canvas.Width / 2 + 20 - Canvas.Width);
+                const delta = Canvas.CameraX - nextX;
+                Canvas.CameraX = Math.round(Canvas.CameraX - dt * delta * 0.005);
+            }
+        }
+        else {
+            const nextX = this._x + Math.clamp(this._xTarget, 0.2 * Canvas.Width, 0.8 * Canvas.Width) - Canvas.Width;
+            const delta = Canvas.CameraX - nextX;
+            Canvas.CameraX = Math.round(Canvas.CameraX - dt * delta * 0.005);
+        }
+        if (Canvas.GetCameraScale() < 1) {
+            const nextY = this._y + Math.clamp(this._yTarget, 0, 0.6 * Canvas.Height) - Canvas.Height * 0.75;
+            const delta = Canvas.CameraY - nextY;
+            Canvas.CameraY = Math.clamp(Math.round(Canvas.CameraY - dt * delta * 0.005), 0, 750 - Canvas.Height);
+        }
+        else
+            Canvas.CameraY = Math.round(0.5 * (750 - Canvas.Height));
         this._currentAnimation?.Update(dt);
         if (this._timeToHideItemName > 0)
             this._timeToHideItemName -= dt;
         if (this._timeFromGoodEnd > 0) {
             this._timeFromGoodEnd += dt;
-            if (this._timeFromGoodEnd >= 2500)
+            if (this._timeFromGoodEnd >= 2500) {
+                GetSound("Background_1").StopOriginal();
                 Scene.LoadFromFile("Assets/Scenes/Prolog.json");
+            }
             return;
         }
         if (this._health <= 0) {
             this._timeFromDeath += dt;
-            if (this._timeFromDeath > 5000 && this._timeFromEnd === -1)
+            if (this._timeFromDeath > 5000 && this._timeFromEnd === -1) {
+                GetSound("Background_1").StopOriginal();
                 Scene.LoadFromFile("Assets/Scenes/Main.json");
+            }
         }
-        if (this._timeToPunch > 0)
+        else if (this._timeToPunch > 0)
             this._timeToPunch -= dt;
         if (this._timeFromEnd > -1) {
             this._timeFromEnd += dt;
@@ -510,7 +956,7 @@ export class Player extends Entity {
         }
         this._timeToAmbientSound -= dt;
         if (this._timeToAmbientSound <= 0) {
-            const ambientSoundsCount = 2;
+            const ambientSoundsCount = 3;
             this._timeToAmbientSound = 30_000 + Math.random() * 20_000;
             let nextAmbient = 0;
             do
@@ -521,37 +967,6 @@ export class Player extends Entity {
         }
         if (this._x > 33500 && this._y > 800 && this._onLadder !== null)
             this._timeFromGoodEnd = dt;
-        if (this._dialog !== null && this._timeToNextChar > 0) {
-            this._timeToNextChar -= dt;
-            if (this._timeToNextChar <= 0) {
-                this._charIndex++;
-                GetSound("Dialog").Play(0.05);
-                if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
-                    const prevChar = this._dialog.Messages[this._dialogState][this._charIndex - 1];
-                    if (",.-:?!".includes(prevChar))
-                        this._timeToNextChar = 500;
-                    else
-                        this._timeToNextChar = 60;
-                }
-            }
-        }
-        this._quests.forEach((quest, i) => {
-            quest.Update();
-            if (quest.IsCompleted()) {
-                if (quest.Giver.constructor.name === PlayerCharacter.name && this._artem.IsTalked()) {
-                    this._timeFromEnd = 0;
-                    this._artem.End();
-                    this.SpeakWith(quest.Giver);
-                }
-                this.RemoveQuest(quest);
-            }
-            else if (i === 0 &&
-                quest.Giver.constructor.name === PlayerCharacter.name &&
-                !this._artem.IsTalked() &&
-                Scene.Current.GetByType(Elder)[0].GetCompletedQuestsCount() > 0) {
-                quest.SetStage(3);
-            }
-        });
         if (this._onLadder !== null) {
             const pos = this._onLadder.GetPosition();
             const size = this._onLadder.GetCollider();
@@ -580,13 +995,60 @@ export class Player extends Entity {
         }
         const lastGround = this._grounded;
         this.ApplyVForce(dt);
-        if (lastGround === false && this._grounded === true) {
+        if (lastGround === false && this._grounded === true && this._dialog === null) {
             GetSound("Fall").Play(0.5);
-            this._movingLeft = this._keysPressed["KeyA"];
-            this._movingRight = this._keysPressed["KeyD"];
+            if (this._joystickHandlerPosition !== null) {
+                if (this._joystickHandlerPosition.X < this._controlPadding + 64) {
+                    this._movingRight = false;
+                    this._movingLeft = true;
+                }
+                else {
+                    this._movingLeft = false;
+                    this._movingRight = true;
+                }
+            }
+            else {
+                this._movingLeft = this._keysPressed["KeyA"];
+                this._movingRight = this._keysPressed["KeyD"];
+            }
             this._currentAnimation = (this._movingLeft || this._movingRight) && this._currentAnimation === null ? this._animations.Walk : null;
         }
-        if (this.CanTarget())
+        if (this._dialog !== null) {
+            if (this._timeToNextChar > 0 && this._charIndex < this._dialog.Messages[this._dialogState].length) {
+                this._timeToNextChar -= dt;
+                if (this._timeToNextChar <= 0) {
+                    this._charIndex++;
+                    if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
+                        const prevChar = this._dialog.Messages[this._dialogState][this._charIndex - 1];
+                        if (",.-:?!".includes(prevChar))
+                            this._timeToNextChar = 500;
+                        else
+                            this._timeToNextChar = 60;
+                    }
+                    else
+                        this._dialogSound.StopOriginal();
+                }
+            }
+            return;
+        }
+        this._quests.forEach((quest, i) => {
+            quest.Update();
+            if (quest.IsCompleted()) {
+                if (quest.Giver.constructor.name === PlayerCharacter.name && this._artem.IsTalked()) {
+                    this._timeFromEnd = 0;
+                    this._artem.End();
+                    this.SpeakWith(quest.Giver);
+                }
+                this.RemoveQuest(quest);
+            }
+            else if (i === 0 &&
+                quest.Giver.constructor.name === PlayerCharacter.name &&
+                !this._artem.IsTalked() &&
+                Scene.Current.GetByType(Elder)[0].GetCompletedQuestsCount() > 0) {
+                quest.SetStage(3);
+            }
+        });
+        if (this.CanTarget()) {
             this._angle = (() => {
                 const angle = Math.atan2(this._y + this.Height * this._armHeight - Canvas.CameraY - this._yTarget, this._xTarget - (this._x + this.Width / 2 - Canvas.CameraX));
                 if (this.Direction == 1)
@@ -594,6 +1056,7 @@ export class Player extends Entity {
                 else
                     return angle < 0 ? Math.clamp(angle, -Math.PI, -Math.PI / 2 - 0.4) : Math.clamp(angle, Math.PI / 2 + 0.4, Math.PI);
             })();
+        }
         if (this._artem.GetCompletedQuestsCount() > 2) {
             this._frameIndex = 0;
             return;
@@ -623,10 +1086,11 @@ export class Player extends Entity {
         else {
             this._frameIndex = 0;
         }
-        const lastHover = this._hoveredObject;
-        this._hoveredObject = Scene.Current.GetInteractive();
-        if (lastHover === null && this._hoveredObject !== null)
-            this._selectedInteraction = 0;
+        if (!IsMobile()) {
+            this._openedInteractable = Scene.Current.TryGetInteractive(this._xTarget, this._yTarget);
+            if (this._openedInteractable !== null && this._selectedInteraction >= this._openedInteractable.GetInteractives().length)
+                this._selectedInteraction = 0;
+        }
         const itemInHands = this._inventory[this._selectedHand];
         if (itemInHands !== null) {
             if (itemInHands instanceof Item) {
@@ -648,7 +1112,7 @@ export class Player extends Entity {
                 }
             }
             else if (itemInHands instanceof Throwable) {
-                if (this._LMBPressed)
+                if (this._LMBPressed || this._secondTouch !== null)
                     this._throwableTime += dt;
                 const throwAngle = Math.clamp(this._throwableTime / 50, 0, 2) * this.Direction;
                 const angleWithAnimation = this._angle - throwAngle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0);
@@ -699,10 +1163,8 @@ export class Player extends Entity {
         }
         else if (this.Direction == 1) {
             if (this._weapon === null) {
-                if (itemInHand instanceof Throwable) {
-                    if (this._throwableTime > 0) {
-                        Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
-                    }
+                if (itemInHand instanceof Throwable && this._throwableTime > 0) {
+                    Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
                 }
                 else if (this._timeToPunch > 0 && !this._mainHand) {
                     Canvas.DrawImageWithAngle(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
@@ -797,9 +1259,8 @@ export class Player extends Entity {
                 Canvas.DrawImageFlipped(this._frames.Backpack, new Rectangle(this._x - widthOffset, this._y - (this._sit ? 14 : 0), scaledWidth, this.Height));
             if (this._weapon === null) {
                 if (this._inventory[this._selectedHand] !== null /* && !(this._inventory[this._selectedHand] instanceof Weapon)  зочем */) {
-                    if (itemInHand instanceof Throwable) {
-                        if (this._throwableTime > 0)
-                            Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
+                    if (itemInHand instanceof Throwable && this._throwableTime > 0) {
+                        Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Straight, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Straight.BoundingBox.Width * scale, this._frames.Hands.Straight.BoundingBox.Height * scale), this._angle + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Straight.BoundingBox.Height - 2) * scale);
                     }
                     else {
                         Canvas.DrawImageWithAngleVFlipped(this._frames.Hands.Bend, new Rectangle(this._x + this.Width / 2, this._y + this.Height * this._armHeight, this._frames.Hands.Bend.BoundingBox.Width * scale, this._frames.Hands.Bend.BoundingBox.Height * scale), this._angle + Math.PI / 4 + (this._currentAnimation !== null ? this._currentAnimation.GetCurrent() : 0), -2 * scale, (this._frames.Hands.Bend.BoundingBox.Height - 2) * scale);
@@ -831,7 +1292,15 @@ export class Player extends Entity {
             GUI.DrawVignette(new Color(255 * (1 - this._health / this._maxHealth), 0, 0), 0.45, 0, 0.5);
         else {
             if (this._timeFromEnd === -1) {
-                GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
+                // GUI.DrawVignette(Color.Red, 0.45, this._timeFromDeath / 4000, 0.5 + this._timeFromDeath / 3000);
+                if (this._timeFromDeath <= 1500)
+                    GUI.DrawVignette(new Color(255, 0, 0), 0.45, 0.3, 1);
+                else {
+                    const r = 255 * Math.clamp(1 - (this._timeFromDeath - 1500) / 3000, 0, 1);
+                    const startRadius = 0.45 - Math.clamp((this._timeFromDeath - 1500) / 3000, 0, 0.45);
+                    const startAlpha = 0.3 + Math.clamp((this._timeFromDeath - 1500) / 3000, 0, 0.7);
+                    GUI.DrawVignette(new Color(r, 0, 0), startRadius, startAlpha, 1);
+                }
                 return;
             }
             else {
@@ -853,7 +1322,7 @@ export class Player extends Entity {
         if (this._dialog === null) {
             if (this._artem.GetCompletedQuestsCount() > 2)
                 return;
-            const y = this._openedContainer === null ? GUI.Height - 10 - 50 : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
+            const y = this._openedContainer === null ? (IsMobile() ? 10 : GUI.Height - 10 - 50) : GUI.Height / 2 + (this._openedContainer.SlotsSize.Y * 55 + 5) / 2 + 10;
             if (this._openedContainer !== null) {
                 const firstXOffset = GUI.Width / 2 -
                     (this._openedContainer.SlotsSize.X % 2 === 1 ? Math.floor(this._openedContainer.SlotsSize.X / 2) * 55 + 25 : Math.floor(this._openedContainer.SlotsSize.X / 2) * 52.5);
@@ -863,7 +1332,7 @@ export class Player extends Entity {
                 GUI.SetFillColor(new Color(70, 70, 70, 200));
                 GUI.DrawRectangle(firstXOffset - 5, firstYOffset - 5, this._openedContainer.SlotsSize.X * 55 + 5, this._openedContainer.SlotsSize.Y * 55 + 5);
                 const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-                const yCell = Math.floor((GUI.Height - this._yTarget - firstYOffset) / 55);
+                const yCell = IsMobile() ? -1 : Math.floor((GUI.Height - this._yTarget - firstYOffset) / 55);
                 for (let y = 0; y < this._openedContainer.SlotsSize.Y; y++)
                     for (let x = 0; x < this._openedContainer.SlotsSize.X; x++) {
                         if (xCell == x && yCell == y)
@@ -897,7 +1366,7 @@ export class Player extends Entity {
                 GUI.SetFillColor(new Color(100, 100, 100));
                 GUI.DrawRectangle(firstXOffset + 2 * 55 - 1, y - 4, 2, 58);
                 const xCell = Math.floor((this._xTarget - (firstXOffset + (this._xTarget > firstXOffset + 2 * 55 ? 5 : 0))) / 55);
-                const yCell = Math.floor((GUI.Height - this._yTarget - y) / 55);
+                const yCell = IsMobile() ? -1 : Math.floor((GUI.Height - this._yTarget - y) / 55);
                 for (let i = 0; i < 6; i++) {
                     if (i == this._selectedHand)
                         GUI.SetFillColor(new Color(50, 50, 50));
@@ -966,7 +1435,7 @@ export class Player extends Entity {
             else {
                 const firstXOffset = GUI.Width / 2 - 52.5;
                 const xCell = Math.floor((this._xTarget - firstXOffset) / 55);
-                const yCell = Math.floor((GUI.Height - this._yTarget - y) / 55);
+                const yCell = IsMobile() ? -1 : Math.floor((GUI.Height - this._yTarget - y) / 55);
                 GUI.SetFillColor(new Color(70, 70, 70));
                 GUI.SetStroke(new Color(155, 155, 155), 1);
                 GUI.DrawRectangle(firstXOffset - 5, y - 5, 2 * 55 + 5, 55 + 5);
@@ -1054,8 +1523,9 @@ export class Player extends Entity {
             GUI.DrawText2CenterLineBreaked(GUI.Width / 2, GUI.Height - 100, itemInHand.Name);
         }
         if (this._timeFromEnd > -1) {
-            Canvas.SetFillColor(Color.White);
-            Canvas.DrawCircle(this._xTarget - 1, this._yTarget - 1, 2);
+            GUI.ClearStroke();
+            GUI.SetFillColor(Color.White);
+            GUI.DrawCircle(this._xTarget, Canvas.Height - this._yTarget, 2);
             return;
         }
         if (this._needDrawRedVegnitte > 0) {
@@ -1066,21 +1536,22 @@ export class Player extends Entity {
             this._needDrawAntiVegnitte--;
             Canvas.DrawVignette(new Color(100, 100, 100));
         }
-        if (this._hoveredObject !== null && this._openedContainer === null && this.CanTarget()) {
-            const items = this._hoveredObject.GetInteractives();
+        if (this._openedInteractable !== null && this._openedContainer === null && this.CanTarget()) {
+            const items = this._openedInteractable.GetInteractives();
+            const offset = IsMobile() ? 0 : 50;
             GUI.SetFillColor(new Color(70, 70, 70));
             GUI.SetStroke(new Color(100, 100, 100), 2);
-            GUI.DrawRectangle(this._xTarget - 75, GUI.Height - this._yTarget + 50, 150, 25 * items.length);
+            GUI.DrawRectangle(this._xTarget - 75, GUI.Height - this._yTarget + offset, 150, 25 * items.length);
             GUI.ClearStroke();
             GUI.SetFillColor(Color.White);
             GUI.SetFont(20);
             for (let i = 0; i < items.length; i++) {
                 if (i == this._selectedInteraction) {
                     GUI.SetFillColor(new Color(100, 100, 100));
-                    GUI.DrawRectangle(this._xTarget - 75 + 3, GUI.Height - this._yTarget + 50 + 3 + 25 * i, 150 - 6, 25 - 6);
+                    GUI.DrawRectangle(this._xTarget - 75 + 3, GUI.Height - this._yTarget + offset + 3 + 25 * i, 150 - 6, 25 - 6);
                     GUI.SetFillColor(Color.White);
                 }
-                GUI.DrawTextCenter(items[i], this._xTarget - 75, GUI.Height - this._yTarget + 50 - 7 + 25 * (i + 1), 150);
+                GUI.DrawTextCenter(items[i], this._xTarget - 75, GUI.Height - this._yTarget + offset - 7 + 25 * (i + 1), 150);
             }
         }
         if (this._throwableTime > 0 && itemInHand !== null && itemInHand instanceof Throwable) {
@@ -1122,21 +1593,55 @@ export class Player extends Entity {
                 GUI.DrawRectangleWithAngleAndStroke(20, 25 + offset, 10, 10, Math.PI / 4, -5, 5);
             }
             else {
-                tasks.slice(0, -1).forEach((x) => {
-                    GUI.SetFillColor(Color.Yellow);
-                    GUI.DrawRectangleWithAngleAndStroke(20, 25 + offset, 10, 10, Math.PI / 4, -5, 5);
-                    GUI.SetFillColor(Color.White);
-                    GUI.DrawText(35, 30 + offset, x.toString());
-                    offset += 30;
-                });
+                const prevTask = tasks[tasks.length - 2].toString();
+                GUI.SetFillColor(Color.Yellow);
+                GUI.DrawRectangleWithAngleAndStroke(20, 25 + offset, 10, 10, Math.PI / 4, -5, 5);
+                GUI.ClearStroke();
+                GUI.DrawRectangle(35, 25 + offset, GUI.GetTextSize(prevTask).X, 2);
+                GUI.SetFillColor(Color.White);
+                GUI.DrawText(35, 30 + offset, prevTask);
+                offset += 30;
                 GUI.DrawText(35, 30 + offset, tasks[tasks.length - 1].toString());
                 GUI.SetFillColor(Color.Transparent);
+                GUI.SetStroke(Color.Yellow, 2);
                 GUI.DrawRectangleWithAngleAndStroke(20, 25 + offset, 10, 10, Math.PI / 4, -5, 5);
             }
             offset += 60;
         }
-        GUI.SetFillColor(Color.White);
-        GUI.DrawCircle(this._xTarget, Canvas.Height - this._yTarget, 2);
+        if (IsMobile()) {
+            GUI.SetStroke(Color.Green, 1);
+            if (this._throwableTime > 0) {
+                GUI.SetFillColor(new Color(255, 0, 0, 63));
+                GUI.DrawCircle(this._secondTouch.clientX > Canvas.Width * 0.5 ? Canvas.Width - 50 : 50, GUI.Height * 0.5, 32);
+            }
+            if (this._grounded && !this._sit) {
+                GUI.SetFillColor(new Color(0, 255, 0, 63));
+                GUI.SetStroke(new Color(0, 255, 0), 2);
+                GUI.DrawRectangleWithAngleAndStroke(this._firstTouchStart === null || this._firstTouchStart.clientX < Canvas.Width * 0.5 ? GUI.Width - 100 : 100, GUI.Height - 100, 64, 64, Math.PI / 4, -32, 32);
+            }
+            if (this._joystickHandlerPosition !== null) {
+                GUI.SetStroke(new Color(0, 255, 0), 1);
+                GUI.SetFillColor(Color.Transparent);
+                GUI.DrawCircle(this._firstTouchStart.clientX, this._firstTouchStart.clientY, 64);
+                GUI.SetFillColor(new Color(0, 255, 0, 127));
+                GUI.DrawCircle(this._joystickHandlerPosition.X, this._joystickHandlerPosition.Y, 16);
+            }
+            if (this._weapon !== null && !this._weapon.IsReloading()) {
+                GUI.ClearStroke();
+                GUI.SetFillColor(new Color(0, 255, 0, 63));
+                GUI.DrawRectangleWithAngleAndStroke(GUI.Width - this._controlPadding * 1.5 - 32, GUI.Height - 32 - this._controlPadding * 1.5, 32, 32, Math.PI / 4, 16, 16); // перезарядка
+            }
+            if (document.fullscreenElement === null && document.fullscreenEnabled) {
+                GUI.SetFillColor(new Color(0, 0, 255, 127));
+                GUI.SetStroke(Color.Blue, 1);
+                GUI.DrawRectangleWithAngleAndStroke(GUI.Width - this._controlPadding - 32, this._controlPadding + 32, 32, 32, 0, 0, 0); // полный экран
+            }
+        }
+        else {
+            GUI.ClearStroke();
+            GUI.SetFillColor(Color.White);
+            GUI.DrawCircle(this._xTarget, GUI.Height - this._yTarget, 2);
+        }
     }
     CheckForCode() {
         if (this._lastPressedKeys.length < 8)
@@ -1153,12 +1658,15 @@ export class Player extends Entity {
         this._quests.forEach((x) => x.OnKilled(type));
     }
     TryPushItem(item) {
-        for (let x = 0; x < this._inventory.length; x++)
-            if (this._inventory[x] === null) {
+        if (item === null)
+            return false;
+        for (let x = 0; x < this._inventory.length; x++) {
+            const slot = this._inventory[x];
+            if (slot === null) {
                 this._inventory[x] = item;
                 if (x === this._selectedHand)
-                    if (this._inventory[x] instanceof Weapon)
-                        this._weapon = this._inventory[x];
+                    if (item instanceof Weapon)
+                        this._weapon = item;
                     else
                         this._weapon = null;
                 this._quests.forEach((quest) => {
@@ -1166,6 +1674,13 @@ export class Player extends Entity {
                 });
                 return true;
             }
+            else if (slot.Id === item.Id && slot.GetCount() < slot.MaxStack) {
+                if (!slot.AddItem(item))
+                    return this.TryPushItem(item);
+                else
+                    return true;
+            }
+        }
         if (this._backpack !== null) {
             if (this._backpack.TryPushItem(item)) {
                 this._quests.forEach((quest) => {
@@ -1242,13 +1757,11 @@ export class Player extends Entity {
     SpeakWith(character) {
         if (this._dialog !== null)
             return;
-        this._quests.forEach((quest) => {
-            quest.OnTalked(character);
-        });
         this._dialogState = 0;
         this._charIndex = 0;
         this._timeToNextChar = 60;
         this._dialog = character.GetDialog();
+        this._dialogSound.PlayOriginal(undefined, undefined, true);
         this._dialog.Voices[0].PlayOriginal();
     }
     RemoveQuest(quest) {
@@ -1265,18 +1778,24 @@ export class Player extends Entity {
             return;
         if (this._charIndex < this._dialog.Messages[this._dialogState].length) {
             this._charIndex = this._dialog.Messages[this._dialogState].length;
+            this._dialogSound.StopOriginal();
         }
         else {
             ++this._dialogState;
             if (this._dialog.Messages.length == this._dialogState) {
                 if (this._dialog.AfterAction !== undefined)
                     this._dialog.AfterAction();
+                this._quests.forEach((quest) => {
+                    quest.OnTalked(this._dialog.Owner);
+                });
+                this._dialogSound.StopOriginal();
                 this._dialog.Voices[this._dialog.Voices.length - 1].StopOriginal();
                 this._dialog = null;
             }
             else {
                 this._charIndex = 0;
                 this._timeToNextChar = 75;
+                this._dialogSound.PlayOriginal(undefined, undefined, true);
                 this._dialog.Voices[this._dialogState - 1].StopOriginal();
                 this._dialog.Voices[this._dialogState].PlayOriginal();
             }
@@ -1325,10 +1844,15 @@ export class Player extends Entity {
         });
     }
     ChangeActiveHand(hand) {
+        if (hand === this._selectedHand)
+            return;
         const inHand = this._inventory[this._selectedHand];
         if (inHand instanceof UseableItem && inHand.IsUsing())
             return;
+        if (inHand instanceof Weapon && inHand.IsReloading())
+            return;
         this._selectedHand = hand;
+        GetSound("HandSwitch").Play(0.5);
         if (this._inventory[this._selectedHand] === null) {
             this._weapon = null;
             return;
@@ -1346,35 +1870,40 @@ export class Player extends Entity {
         return 0;
     }
     Shoot() {
-        if (!this.CanTarget() || this._onLadder !== null)
+        if (this._timeFromSpawn < 5000)
             return;
         if (this._weapon === null) {
             const inHand = this._inventory[this._selectedHand];
-            if (inHand instanceof UseableItem) {
-                inHand.Use(() => {
-                    this._inventory[this._selectedHand] = null;
-                });
+            if (inHand === null) {
+                if (this._timeToNextPunch <= 0) {
+                    this._timeToPunch = 100;
+                    this._timeToNextPunch = 250;
+                    this._mainHand = !this._mainHand;
+                    const enemy = Scene.Current.Raycast(new Vector2(this._x + this._collider.Width * 0.5, this._y + this._collider.Height * this._armHeight), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 75, Tag.Enemy);
+                    if (enemy.length > 0) {
+                        GetSound("PunchHit").Play(0.15);
+                        enemy[0].instance.TakeDamage(10);
+                        const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
+                        Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].instance.GetCenter().X, enemy[0].instance.GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
+                    }
+                    else
+                        GetSound("Punch").Play(0.15);
+                }
             }
-            else if (inHand instanceof Item) {
-                if (inHand.Id === "Radio") {
+            else if (!IsMobile()) {
+                if (inHand instanceof Throwable) {
+                    GetSound("GrenadeSwing").Play();
+                }
+                else if (inHand instanceof UseableItem) {
+                    inHand.Use(() => {
+                        this._inventory[this._selectedHand] = null;
+                    });
+                }
+                else if (inHand.Id === "Radio") {
                     this.SpeakWith(this._artem);
                     if (this._artem.GetCompletedQuestsCount() > 2)
                         this._inventory[this._selectedHand] = null;
                 }
-            }
-            else if (inHand === null && this._timeToNextPunch <= 0) {
-                this._timeToPunch = 100;
-                this._timeToNextPunch = 250;
-                this._mainHand = !this._mainHand;
-                const enemy = Scene.Current.Raycast(new Vector2(this._x + this._collider.Width * 0.5, this._y + this._collider.Height * this._armHeight), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 75, Tag.Enemy);
-                if (enemy.length > 0) {
-                    GetSound("PunchHit").Play(0.15);
-                    enemy[0].instance.TakeDamage(10);
-                    const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
-                    Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].instance.GetCenter().X, enemy[0].instance.GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
-                }
-                else
-                    GetSound("Punch").Play(0.15);
             }
         }
         else if (this._weapon.TryShoot())

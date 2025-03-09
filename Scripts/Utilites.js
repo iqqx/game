@@ -9,6 +9,15 @@ Array.prototype.minBy = function (by) {
 Array.prototype.clear = function () {
     this.length = 0;
 };
+Array.prototype.tryRemove = function (predicate) {
+    for (let i = 0; i < this.length; ++i) {
+        if (predicate(this[i])) {
+            this.splice(i, 1);
+            return true;
+        }
+    }
+    return false;
+};
 Math.clamp = function (n, min, max) {
     return Math.min(Math.max(n, min), max);
 };
@@ -25,6 +34,7 @@ export class Color {
     static Red = new Color(255, 0, 0);
     static Green = new Color(0, 255, 0);
     static Yellow = new Color(255, 255, 0);
+    static Blue = new Color(0, 0, 255);
     static Pink = new Color(255, 0, 255);
     static Transparent = new Color(0, 0, 0, 0);
     constructor(r, g, b, a = 255) {
@@ -167,5 +177,8 @@ export function CRC32(str) {
         crc = (crc >>> 8) ^ b_table[(crc ^ str.charCodeAt(i)) & 0xff];
     }
     return (crc ^ -1) >>> 0;
+}
+export function IsMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent);
 }
 //# sourceMappingURL=Utilites.js.map

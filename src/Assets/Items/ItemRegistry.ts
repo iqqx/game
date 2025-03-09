@@ -27,15 +27,15 @@ export class ItemRegistry {
 		Id: string;
 		Name: string;
 		Icon: string;
-		Stack?: number;
+		Stack?: string;
 		IsBig?: boolean;
 		AfterUse?: {
 			Sound: string;
-			Time: number;
+			Time: string;
 			Animation: string;
 			Action: {
 				Type: "Heal";
-				By: number;
+				By: string;
 			};
 		};
 	}) {
@@ -49,7 +49,7 @@ export class ItemRegistry {
 			);
 
 		if (rawJson.AfterUse === undefined) {
-			ItemRegistry._items.push(new Item(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig));
+			ItemRegistry._items.push(new Item(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), parseInt(rawJson.Stack), rawJson.IsBig));
 		} else {
 			if (rawJson.AfterUse.Action === undefined) throw new Error(`Действие (AfterUse.Action) не определено\nat Parser: [Предмет: <${rawJson.Id}>].AfterUse`);
 			if (rawJson.AfterUse.Time === undefined) throw new Error(`Длительность действия (AfterUse.Time) не определено\nat Parser: [Предмет: <${rawJson.Id}>].AfterUse`);
@@ -59,9 +59,9 @@ export class ItemRegistry {
 				case "Heal": {
 					use = {
 						afterUse: () => {
-							Scene.Player.Heal(rawJson.AfterUse.Action.By);
+							Scene.Current.Player.Heal(parseInt(rawJson.AfterUse.Action.By));
 						},
-						time: rawJson.AfterUse.Time * 1000,
+						time: parseInt(rawJson.AfterUse.Time) * 1000,
 						Sound: GetSound(rawJson.AfterUse.Sound),
 					};
 
@@ -72,7 +72,7 @@ export class ItemRegistry {
 				}
 			}
 
-			ItemRegistry._items.push(new UseableItem(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), rawJson.Stack, rawJson.IsBig, use.Sound, use.afterUse, use.time));
+			ItemRegistry._items.push(new UseableItem(rawJson.Id, rawJson.Name, GetSprite(rawJson.Icon), parseInt(rawJson.Stack), rawJson.IsBig, use.Sound, use.afterUse, use.time));
 		}
 	}
 }

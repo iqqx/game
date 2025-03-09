@@ -26,7 +26,7 @@ export class Backpack extends Container implements IPickapable {
 	public Pickup() {
 		if (this.OnPickup !== undefined) this.OnPickup();
 
-		Scene.Player.PutBackpack(this);
+		Scene.Current.Player.PutBackpack(this);
 		GetSound("Backpack_Pickup").Play(0.5);
 		this.Destroy();
 
@@ -44,7 +44,7 @@ export class Backpack extends Container implements IPickapable {
 
 				break;
 			case 1:
-				Scene.Player.OpenContainer(this);
+				Scene.Current.Player.OpenContainer(this);
 
 				break;
 		}

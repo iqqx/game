@@ -102,9 +102,12 @@ export class Entity extends GameObject {
             return;
         GetSound("Jump").Play();
         this._grounded = false;
+        this._onLadder = null;
         this._verticalAcceleration = this._jumpForce;
     }
     ApplyVForce(dt) {
+        const physDt = dt / 15;
+        const physDt2 = physDt / 20;
         if (this._verticalAcceleration === 0) {
             // Проверка на стойкость
             const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y - 1, this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
@@ -112,33 +115,35 @@ export class Entity extends GameObject {
             if (offsets.length === 0 ||
                 (offsets[0].instance.Tag === Tag.Platform && (this._movingDown || this._y < offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height))) {
                 this._grounded = false;
-                this._verticalAcceleration -= (dt / 15) * 3;
+                this._verticalAcceleration -= physDt * 3;
             }
         }
         else if (this._verticalAcceleration < 0) {
             // падаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)), Tag.Wall | Tag.Platform);
-            offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
-            if (offsets.length > 0 && offsets[0].start.Y >= 0) {
-                if (offsets[0].instance instanceof Spikes)
-                    this.TakeDamage(100);
-                else if (offsets[0].instance instanceof Platform && this._y <= offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height) {
-                    this._y += this._verticalAcceleration * (dt / 15);
-                    this._verticalAcceleration -= (dt / 15) * 3;
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height - this._verticalAcceleration * physDt), Tag.Wall | Tag.Platform);
+            offsets.sort((a, b) => b.start.Y - a.start.Y);
+            for (let i = 0; i < offsets.length; ++i) {
+                if (offsets[i].start.Y >= 0) {
+                    if (offsets[i].instance instanceof Spikes)
+                        this.TakeDamage(100);
+                    else if (offsets[i].instance instanceof Platform && this._y <= offsets[i].instance.GetPosition().Y + offsets[i].instance.GetCollider().Height) {
+                        // что прямо говорит о том что никаких отношений между этим и платформой быть не может (низ Entity выше вверха Platform)
+                        continue;
+                    } //else if (offsets[i].instance instanceof Wall) break;
+                    this._verticalAcceleration = 0;
+                    this._grounded = true;
+                    this._y = offsets[i].instance.GetPosition().Y + offsets[i].instance.GetCollider().Height;
                     return;
                 }
-                this._verticalAcceleration = 0;
-                this._grounded = true;
-                this._y = offsets[0].instance.GetPosition().Y + offsets[0].instance.GetCollider().Height;
             }
-            else {
-                this._y += this._verticalAcceleration * (dt / 15);
-                this._verticalAcceleration -= (dt / 15) * 3;
+            {
+                this._y += this._verticalAcceleration * physDt;
+                this._verticalAcceleration -= physDt * 3;
             }
         }
         else if (this._verticalAcceleration > 0) {
             // взлетаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height - this._verticalAcceleration * (dt / 15)), Tag.Wall);
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height + this._verticalAcceleration * physDt), Tag.Wall);
             if (offsets.length > 0) {
                 this._verticalAcceleration = 0;
                 const r = offsets.minBy((x) => x.instance.GetPosition().Y);
@@ -146,8 +151,8 @@ export class Entity extends GameObject {
             }
             else {
                 const mod = 1.65;
-                this._y += this._verticalAcceleration * (dt / 15 / mod);
-                this._verticalAcceleration -= (dt / 15) * mod;
+                this._y += this._verticalAcceleration * (physDt / mod);
+                this._verticalAcceleration -= physDt * mod;
             }
         }
     }

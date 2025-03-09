@@ -54,5 +54,13 @@ export class Item {
         this._count += toAdd;
         return toAdd;
     }
+    AddItem(item) {
+        if (this._count >= this.MaxStack)
+            return false;
+        const toAdd = Math.min(item.GetCount(), this.MaxStack - this._count);
+        this._count += toAdd;
+        item.Take(toAdd);
+        return item.GetCount() === 0;
+    }
 }
 //# sourceMappingURL=Item.js.map

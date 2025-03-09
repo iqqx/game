@@ -1,9 +1,9 @@
 import { GetSound } from "../../AssetsLoader.js";
-import { GUI } from "../../Context.js";
+import { Canvas, GUI } from "../../Context.js";
 import { Scene } from "../../Scene.js";
-import { Color } from "../../Utilites.js";
-import { GameObject } from "../GameObject.js";
-export class Titles extends GameObject {
+import { Color, IsMobile } from "../../Utilites.js";
+import { GUIBase } from "./GUIBase.js";
+export class Titles extends GUIBase {
     static _texts = [
         "РУКОВОДИТЕЛИ ПРОЕКТА",
         "Лебедев Арсений",
@@ -91,29 +91,47 @@ export class Titles extends GameObject {
         "Subway Inferno",
         "© 2025 PENTAGON. Все права защищены.",
     ];
+    _progress = 0;
     _pressed = false;
+    _onkeyDown;
+    _onkeyUp;
+    _sound = GetSound("Titles_Background");
     constructor() {
-        super(GUI.Width, GUI.Height);
-        this._y = 450;
-        GetSound("Titles_Background").Volume = 0.1;
-        GetSound("Titles_Background").Apply();
-        GetSound("Titles_Background").PlayOriginal();
-        addEventListener("keydown", (e) => {
-            if (e.code === "Space") {
-                this._pressed = true;
-            }
-        });
-        addEventListener("keyup", (e) => {
-            if (e.code === "Space") {
-                this._pressed = false;
-            }
-        });
+        super();
+        this.Width = GUI.Width;
+        this.Height = GUI.Height;
+        this._progress = this.Height + 100;
+        // this._progress = Titles._texts.length * -50 - 300;
+        // this._progress = Titles._texts.length * -50 - 300 + 1000;
+        this._sound.Volume = 0.1;
+        this._sound.Apply();
+        this._sound.PlayOriginal();
+        if (IsMobile()) {
+        }
+        else {
+            this._onkeyDown = (e) => {
+                if (e.code === "Space") {
+                    this._pressed = true;
+                }
+            };
+            this._onkeyUp = (e) => {
+                if (e.code === "Space") {
+                    this._pressed = false;
+                }
+            };
+            Canvas.HTML.addEventListener("keydown", this._onkeyDown);
+            Canvas.HTML.addEventListener("keyup", this._onkeyUp);
+        }
     }
     Update(dt) {
-        this._y -= dt * (this._pressed ? 0.5 : 0.05);
-        if (this._y < Titles._texts.length * -50 - 300) {
+        this._progress -= dt * (this._pressed ? 0.5 : 0.05);
+        if (this._progress < Titles._texts.length * -50 - 300) {
             GetSound("Titles_Background").StopOriginal();
             Scene.LoadFromFile("Assets/Scenes/Menu.json");
+        }
+        if (this._progress < Titles._texts.length * -50 && 1 - (Titles._texts.length * -50 - this._progress) / 300 >= 0 && 1 - (Titles._texts.length * -50 - this._progress) / 300 <= 1) {
+            this._sound.Volume = (1 - (Titles._texts.length * -50 - this._progress) / 300) * 0.1;
+            this._sound.Apply();
         }
     }
     Render() {
@@ -121,9 +139,22 @@ export class Titles extends GameObject {
         GUI.ClearStroke();
         GUI.SetFont(32);
         for (let i = 0; i < Titles._texts.length; i++)
-            GUI.DrawTextCenter(Titles._texts[i], 0, Math.round(this._y) + i * 32 * 1.5, this.Width, this.Height);
-        GUI.SetFont(72);
-        GUI.DrawTextCenter("СПАСИБО ЗА ИГРУ", 0, Math.max(Math.round(this._y), Titles._texts.length * -50) + Titles._texts.length * 50, this.Width, this.Height);
+            GUI.DrawTextCenter(Titles._texts[i], 0, Math.round(this._progress) + i * 32 * 1.5, this.Width, 0);
+        if (this._progress < Titles._texts.length * -45 + 500) {
+            GUI.SetFont(72);
+            const startAt = Titles._texts.length * -49 - 100;
+            const endAt = Titles._texts.length * -50 - 290;
+            const length = Math.abs(endAt - startAt);
+            const text = "СПАСИБО ЗА ИГРУ";
+            GUI.SetFillColor(Color.White);
+            if (this._progress > endAt) {
+                GUI.DrawText2CenterLineBreaked(GUI.Width * 0.5, Math.max(Math.round(this._progress), Titles._texts.length * -49) + Titles._texts.length * 55, text.substring(0, Math.max(0, Math.round((-(endAt - this._progress) / length) * text.length))).padEnd(text.length));
+            }
+        }
+    }
+    OnDestroy() {
+        Canvas.HTML.removeEventListener("keydown", this._onkeyDown);
+        Canvas.HTML.removeEventListener("keyup", this._onkeyUp);
     }
 }
 //# sourceMappingURL=Titles.js.map

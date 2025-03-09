@@ -1,22 +1,24 @@
 import { GUI } from "../../Context.js";
 import { Color } from "../../Utilites.js";
-import { GameObject } from "../GameObject.js";
-export class Label extends GameObject {
+import { GUIBase } from "./GUIBase.js";
+export class Label extends GUIBase {
     _size;
     _text;
     _color;
-    constructor(text, x, y, width, height, size = 12, color = Color.White) {
-        super(width, height);
+    constructor(text, size = 12, color = Color.White) {
+        super();
         this._text = text;
-        this._x = x;
-        this._y = y;
         this._color = color;
         this._size = size;
+        GUI.SetFont(size);
+        this.Width = GUI.GetTextSize(text, true).X;
+        this.Height = GUI.GetTextSize(text, true).Y;
     }
+    Update(dt) { }
     Render() {
         GUI.SetFillColor(this._color);
         GUI.SetFont(this._size);
-        GUI.DrawTextCenterLineBreaked(this._x, this._y, this._text.split("\n"));
+        GUI.DrawText(this.X, this.Y, this._text);
     }
 }
 //# sourceMappingURL=Label.js.map

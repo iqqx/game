@@ -1,9 +1,10 @@
-import { Direction, EnemyType } from "./Enums.js";
+import { Direction, EnemyType, PointerActionState } from "./Enums.js";
 import { GameObject } from "./GameObjects/GameObject.js";
 
 declare global {
 	interface Array<T> {
 		minBy(by: (element: T) => number): T;
+		tryRemove(predicate: (element: T) => boolean): boolean;
 		clear(): void;
 	}
 
@@ -29,6 +30,12 @@ export interface IItem {
 	 */
 	Take(count: number): number;
 	Add(count: number): number;
+	/**
+	 *
+	 * @param item
+	 * @returns Был ли опустошен добавляемый стак
+	 */
+	AddItem(item: IItem): boolean;
 	Is(item: IItem): item is IItem;
 	Clone(): IItem;
 }
@@ -45,6 +52,18 @@ Array.prototype.clear = function <T>(this: T[]): void {
 	this.length = 0;
 };
 
+Array.prototype.tryRemove = function <T>(this: T[], predicate: (element: T) => boolean): boolean {
+	for (let i = 0; i < this.length; ++i) {
+		if (predicate(this[i])) {
+			this.splice(i, 1);
+
+			return true;
+		}
+	}
+
+	return false;
+};
+
 Math.clamp = function (n: number, min: number, max: number) {
 	return Math.min(Math.max(n, min), max);
 };
@@ -52,6 +71,20 @@ Math.clamp = function (n: number, min: number, max: number) {
 export function Lerp(start: number, end: number, t: number) {
 	return start * (1 - t) + end * t;
 }
+
+export type PointerState = {
+	/**
+	 * Смартфон: индекс косания \
+	 * Мышь: индекс кнопки (Левая - 1, Средняя - 2, Правая - 3)
+	 */
+	Id: number;
+	X: number;
+	Y: number;
+	State: PointerActionState;
+	Shift: boolean;
+	Control: boolean;
+	Alt: boolean;
+};
 
 export class Color {
 	public readonly R: number;
@@ -64,6 +97,7 @@ export class Color {
 	public static readonly Red = new Color(255, 0, 0);
 	public static readonly Green = new Color(0, 255, 0);
 	public static readonly Yellow = new Color(255, 255, 0);
+	public static readonly Blue = new Color(0, 0, 255);
 	public static readonly Pink = new Color(255, 0, 255);
 	public static readonly Transparent = new Color(0, 0, 0, 0);
 
@@ -197,7 +231,7 @@ declare global {
 }
 
 export type Sound = {
-	PlayOriginal: () => void;
+	PlayOriginal: (volume?: number, speed?: number, looped?: boolean) => void;
 	Play: (volume?: number, speed?: number, looped?: boolean) => void;
 	Apply: () => void;
 	IsPlayingOriginal: () => boolean;
@@ -268,4 +302,8 @@ export function CRC32(str: string) {
 		crc = (crc >>> 8) ^ b_table[(crc ^ str.charCodeAt(i)) & 0xff];
 	}
 	return (crc ^ -1) >>> 0;
+}
+
+export function IsMobile() {
+	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent);
 }

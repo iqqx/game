@@ -9,8 +9,8 @@ export var Tag;
 (function (Tag) {
     Tag[Tag["Player"] = 1] = "Player";
     Tag[Tag["Enemy"] = 2] = "Enemy";
-    Tag[Tag["Platform"] = 4] = "Platform";
-    Tag[Tag["Wall"] = 8] = "Wall";
+    Tag[Tag["Wall"] = 4] = "Wall";
+    Tag[Tag["Platform"] = 8] = "Platform";
     Tag[Tag["NPC"] = 16] = "NPC";
     Tag[Tag["Pickable"] = 32] = "Pickable";
     Tag[Tag["Ladder"] = 64] = "Ladder";
@@ -21,4 +21,10 @@ export var Direction;
     Direction[Direction["Right"] = 1] = "Right";
     Direction[Direction["Left"] = -1] = "Left";
 })(Direction || (Direction = {}));
+export var PointerActionState;
+(function (PointerActionState) {
+    PointerActionState[PointerActionState["Down"] = 0] = "Down";
+    PointerActionState[PointerActionState["Move"] = 1] = "Move";
+    PointerActionState[PointerActionState["Up"] = 2] = "Up";
+})(PointerActionState || (PointerActionState = {}));
 //# sourceMappingURL=Enums.js.map

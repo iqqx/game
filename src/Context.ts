@@ -2,8 +2,7 @@ import { Color, Rectangle, Sprite, Vector2 } from "./Utilites.js";
 
 const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
 ctxMain.canvas.width = window.innerWidth;
-// ctxMain.canvas.height = window.innerHeight;
-ctxMain.canvas.height = 500;
+ctxMain.canvas.height = window.innerHeight;
 ctxMain.imageSmoothingEnabled = false;
 
 window.addEventListener("resize", () => {
@@ -26,9 +25,14 @@ export class Canvas {
 
 	public static CameraX = 0;
 	public static CameraY = 0;
+	public static readonly HTML = ctxMain.canvas;
 
 	public static ToFullscreen() {
 		ctxMain.canvas.requestFullscreen();
+	}
+
+	public static IsFullscreen() {
+		return document.fullscreenElement === null && Math.abs(window.outerWidth - ctxMain.canvas.width) > 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) > 20;
 	}
 
 	public static LockMouse() {
@@ -72,14 +76,6 @@ export class Canvas {
 		ctxMain.fillStyle = grd;
 	}
 
-	public static ResetTransform() {
-		ctxMain.resetTransform();
-	}
-
-	public static Translate(x: number, y: number) {
-		ctxMain.translate(x, y);
-	}
-
 	public static DrawRectangle(x: number, y: number, width: number, height: number) {
 		ctxMain.fillRect(x - this.CameraX, ctxMain.canvas.height - height - (y - this.CameraY), width, height);
 	}
@@ -92,7 +88,7 @@ export class Canvas {
 	}
 
 	public static DrawImage(image: Sprite, rect: Rectangle) {
-		if (rect.X < this.CameraX - this.Width || rect.X + rect.Width > this.CameraX + this.Width) return;
+		if (rect.X < this.CameraX - this.Width || rect.X > this.CameraX + this.Width) return;
 
 		ctxMain.drawImage(
 			image.Image,
@@ -121,22 +117,22 @@ export class Canvas {
 		if (standartScale > 1)
 			ctxMain.drawImage(
 				image.Image,
-				this.CameraX * viewportScale * standartScale,
+				Math.round(this.CameraX * viewportScale * standartScale),
 				0,
-				ctxMain.canvas.width * standartScale * viewportScale,
+				Math.round(ctxMain.canvas.width * standartScale * viewportScale),
 				image.Image.naturalHeight,
 				0,
-				(ctxMain.canvas.height - 750) / 2,
+				Math.round((ctxMain.canvas.height - 750) * 0.5),
 				ctxMain.canvas.width,
 				750
 			);
 		else
 			ctxMain.drawImage(
 				image.Image,
-				this.CameraX * viewportScale * standartScale,
-				image.Image.naturalHeight * (1 - standartScale) - this.CameraY * (viewportScale * standartScale),
-				ctxMain.canvas.width * standartScale * viewportScale,
-				image.Image.naturalHeight * standartScale,
+				Math.round(this.CameraX * viewportScale * standartScale),
+				Math.round(image.Image.naturalHeight * (1 - standartScale) - this.CameraY * (viewportScale * standartScale)),
+				Math.round(ctxMain.canvas.width * standartScale * viewportScale),
+				Math.round(image.Image.naturalHeight * standartScale),
 				0,
 				0,
 				ctxMain.canvas.width,
@@ -145,6 +141,8 @@ export class Canvas {
 	}
 
 	public static DrawImageFlipped(image: Sprite, rect: Rectangle) {
+		if (rect.X < this.CameraX - this.Width || rect.X > this.CameraX + this.Width) return;
+
 		ctxMain.save();
 		ctxMain.scale(-1, 1);
 		ctxMain.drawImage(
@@ -481,5 +479,29 @@ export class GUI {
 
 			return new Vector2(measure.width, measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
 		}
+	}
+
+	public static DrawUnfocusScreen() {
+		GUI.SetFillColor(Color.Black);
+		GUI.ClearStroke();
+		GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
+
+		GUI.SetFillColor(Color.Red);
+
+		GUI.DrawRectangle(0, 0, 100, 5);
+		GUI.DrawRectangle(0, 0, 5, 100);
+		GUI.DrawRectangle(20, 20, 10, 10);
+		GUI.DrawRectangle(GUI.Width - 100, 0, 100, 5);
+		GUI.DrawRectangle(GUI.Width - 5, 0, 5, 100);
+		GUI.DrawRectangle(GUI.Width - 20 - 10, 20, 10, 10);
+		GUI.DrawRectangle(0, GUI.Height - 5, 100, 5);
+		GUI.DrawRectangle(0, GUI.Height - 100, 5, 100);
+		GUI.DrawRectangle(20, GUI.Height - 20 - 10, 10, 10);
+		GUI.DrawRectangle(GUI.Width - 100, GUI.Height - 5, 100, 5);
+		GUI.DrawRectangle(GUI.Width - 5, GUI.Height - 100, 5, 100);
+		GUI.DrawRectangle(GUI.Width - 20 - 10, GUI.Height - 20 - 10, 10, 10);
+
+		GUI.SetFont(24);
+		GUI.DrawText2CenterLineBreaked(GUI.Width / 2, GUI.Height / 2, "НАЖМИТЕ ЧТОБЫ ПРОДОЛЖИТЬ");
 	}
 }

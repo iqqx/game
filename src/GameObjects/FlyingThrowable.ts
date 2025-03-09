@@ -7,6 +7,7 @@ import { Rectangle, Sprite, Vector2 } from "../Utilites.js";
 import { Entity } from "./Entity.js";
 import { GameObject } from "./GameObject.js";
 import { ItemDrop } from "./ItemDrop.js";
+import { Player } from "./Player.js";
 
 export class FlyingThrowable extends GameObject {
 	private readonly _explosive = GetSprite("Explosive") as Sprite[];
@@ -57,15 +58,12 @@ export class FlyingThrowable extends GameObject {
 		if (this._impacted && this._timeFromThrow >= 200) {
 			const frame = this._explosive[Math.floor(this._timeFromExplosive / 50)];
 
-			Canvas.DrawImage(
-				frame,
-				new Rectangle(this._x   - frame.ScaledSize.X / 2, this._y - frame.ScaledSize.Y / 2, frame.ScaledSize.X, frame.ScaledSize.Y)
-			);
+			Canvas.DrawImage(frame, new Rectangle(this._x - frame.ScaledSize.X / 2, this._y - frame.ScaledSize.Y / 2, frame.ScaledSize.X, frame.ScaledSize.Y));
 		} else {
 			// Canvas.DrawImage(this._sprite, new Rectangle(this._x  , this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y));
 			Canvas.DrawImageWithAngle(
 				this._sprite,
-				new Rectangle(this._x  , this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y),
+				new Rectangle(this._x, this._y, this._sprite.ScaledSize.X, this._sprite.ScaledSize.Y),
 				-2 * Math.atan2(this._accelerationY, this._accelerationX),
 				0,
 				0
@@ -178,6 +176,8 @@ export class FlyingThrowable extends GameObject {
 
 				if (distance < explosiveRange) {
 					(entity as Entity).TakeDamage(explosiveDamage * (1 - distance / explosiveRange));
+
+					if (entity instanceof Player) GetSound("ExplosiveDamage").PlayOriginal(0.25);
 				}
 			}
 		}

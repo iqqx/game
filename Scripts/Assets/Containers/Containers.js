@@ -19,7 +19,7 @@ export class Container extends Interactable {
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     OnInteractSelected(id) {
-        Scene.Player.OpenContainer(this);
+        Scene.Current.Player.OpenContainer(this);
     }
     GetItemAt(x, y) {
         return this._items[y][x];
@@ -52,9 +52,16 @@ export class Container extends Interactable {
     TryPushItem(item) {
         for (let y = 0; y < this.SlotsSize.Y; y++) {
             for (let x = 0; x < this.SlotsSize.X; x++) {
-                if (this._items[y][x] === null) {
+                const slot = this._items[y][x];
+                if (slot === null) {
                     this._items[y][x] = item;
                     return true;
+                }
+                else if (slot.Id === item.Id && slot.GetCount() < slot.MaxStack) {
+                    if (!slot.AddItem(item))
+                        return this.TryPushItem(item);
+                    else
+                        return true;
                 }
             }
         }

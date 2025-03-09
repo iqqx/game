@@ -1,8 +1,7 @@
-import { Vector2 } from "./Utilites.js";
+import { Color, Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
 ctxMain.canvas.width = window.innerWidth;
-// ctxMain.canvas.height = window.innerHeight;
-ctxMain.canvas.height = 500;
+ctxMain.canvas.height = window.innerHeight;
 ctxMain.imageSmoothingEnabled = false;
 window.addEventListener("resize", () => {
     ctxMain.canvas.width = window.innerWidth;
@@ -20,8 +19,12 @@ export class Canvas {
     }
     static CameraX = 0;
     static CameraY = 0;
+    static HTML = ctxMain.canvas;
     static ToFullscreen() {
         ctxMain.canvas.requestFullscreen();
+    }
+    static IsFullscreen() {
+        return document.fullscreenElement === null && Math.abs(window.outerWidth - ctxMain.canvas.width) > 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) > 20;
     }
     static LockMouse() {
         ctxMain.canvas.requestPointerLock();
@@ -47,12 +50,6 @@ export class Canvas {
         grd.addColorStop(1, end.toString());
         ctxMain.fillStyle = grd;
     }
-    static ResetTransform() {
-        ctxMain.resetTransform();
-    }
-    static Translate(x, y) {
-        ctxMain.translate(x, y);
-    }
     static DrawRectangle(x, y, width, height) {
         ctxMain.fillRect(x - this.CameraX, ctxMain.canvas.height - height - (y - this.CameraY), width, height);
     }
@@ -65,7 +62,7 @@ export class Canvas {
             ctxMain.stroke();
     }
     static DrawImage(image, rect) {
-        if (rect.X < this.CameraX - this.Width || rect.X + rect.Width > this.CameraX + this.Width)
+        if (rect.X < this.CameraX - this.Width || rect.X > this.CameraX + this.Width)
             return;
         ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, rect.X - this.CameraX, ctxMain.canvas.height - rect.Height - (rect.Y - this.CameraY), rect.Width, rect.Height);
     }
@@ -78,11 +75,13 @@ export class Canvas {
         const viewportScale = image.Image.naturalHeight / ctxMain.canvas.height;
         const standartScale = ctxMain.canvas.height / 750; // вся игра сделана для разрешения 750
         if (standartScale > 1)
-            ctxMain.drawImage(image.Image, this.CameraX * viewportScale * standartScale, 0, ctxMain.canvas.width * standartScale * viewportScale, image.Image.naturalHeight, 0, (ctxMain.canvas.height - 750) / 2, ctxMain.canvas.width, 750);
+            ctxMain.drawImage(image.Image, Math.round(this.CameraX * viewportScale * standartScale), 0, Math.round(ctxMain.canvas.width * standartScale * viewportScale), image.Image.naturalHeight, 0, Math.round((ctxMain.canvas.height - 750) * 0.5), ctxMain.canvas.width, 750);
         else
-            ctxMain.drawImage(image.Image, this.CameraX * viewportScale * standartScale, image.Image.naturalHeight * (1 - standartScale) - this.CameraY * (viewportScale * standartScale), ctxMain.canvas.width * standartScale * viewportScale, image.Image.naturalHeight * standartScale, 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
+            ctxMain.drawImage(image.Image, Math.round(this.CameraX * viewportScale * standartScale), Math.round(image.Image.naturalHeight * (1 - standartScale) - this.CameraY * (viewportScale * standartScale)), Math.round(ctxMain.canvas.width * standartScale * viewportScale), Math.round(image.Image.naturalHeight * standartScale), 0, 0, ctxMain.canvas.width, ctxMain.canvas.height);
     }
     static DrawImageFlipped(image, rect) {
+        if (rect.X < this.CameraX - this.Width || rect.X > this.CameraX + this.Width)
+            return;
         ctxMain.save();
         ctxMain.scale(-1, 1);
         ctxMain.drawImage(image.Image, image.BoundingBox.X, image.BoundingBox.Y, image.BoundingBox.Width, image.BoundingBox.Height, -(rect.X - this.CameraX) - rect.Width, ctxMain.canvas.height - rect.Height - (rect.Y - this.CameraY), rect.Width, rect.Height);
@@ -339,6 +338,26 @@ export class GUI {
             const measure = ctxMain.measureText(text);
             return new Vector2(measure.width, measure.actualBoundingBoxAscent + measure.actualBoundingBoxDescent);
         }
+    }
+    static DrawUnfocusScreen() {
+        GUI.SetFillColor(Color.Black);
+        GUI.ClearStroke();
+        GUI.DrawRectangle(0, 0, GUI.Width, GUI.Height);
+        GUI.SetFillColor(Color.Red);
+        GUI.DrawRectangle(0, 0, 100, 5);
+        GUI.DrawRectangle(0, 0, 5, 100);
+        GUI.DrawRectangle(20, 20, 10, 10);
+        GUI.DrawRectangle(GUI.Width - 100, 0, 100, 5);
+        GUI.DrawRectangle(GUI.Width - 5, 0, 5, 100);
+        GUI.DrawRectangle(GUI.Width - 20 - 10, 20, 10, 10);
+        GUI.DrawRectangle(0, GUI.Height - 5, 100, 5);
+        GUI.DrawRectangle(0, GUI.Height - 100, 5, 100);
+        GUI.DrawRectangle(20, GUI.Height - 20 - 10, 10, 10);
+        GUI.DrawRectangle(GUI.Width - 100, GUI.Height - 5, 100, 5);
+        GUI.DrawRectangle(GUI.Width - 5, GUI.Height - 100, 5, 100);
+        GUI.DrawRectangle(GUI.Width - 20 - 10, GUI.Height - 20 - 10, 10, 10);
+        GUI.SetFont(24);
+        GUI.DrawText2CenterLineBreaked(GUI.Width / 2, GUI.Height / 2, "НАЖМИТЕ ЧТОБЫ ПРОДОЛЖИТЬ");
     }
 }
 //# sourceMappingURL=Context.js.map

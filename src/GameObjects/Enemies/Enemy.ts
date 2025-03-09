@@ -32,10 +32,10 @@ export abstract class Enemy extends Entity {
 		this.Direction = Math.sign(plrPos.X - (this._x + this.Width / 2)) as -1 | 1;
 
 		if (this.GetDistanceToPlayer() < 50) {
-			if (Scene.Player.GetPosition().Y > this._y) {
+			if (Scene.Current.Player.GetPosition().Y > this._y) {
 				this._movingDown = false;
 				this.Jump();
-			} else if (Scene.Player.GetPosition().Y < this._y) this._movingDown = true;
+			} else if (Scene.Current.Player.GetPosition().Y < this._y) this._movingDown = true;
 
 			return;
 		}
@@ -45,12 +45,12 @@ export abstract class Enemy extends Entity {
 	}
 
 	public GetDistanceToPlayer() {
-		const plr = Scene.Player.GetCenter();
+		const plr = Scene.Current.Player.GetCenter();
 
 		return Math.abs(plr.X - (this._x + this.Width / 2));
 	}
 
 	public GetDirectionToPlayer(): -1 | 1 {
-		return Math.sign(Scene.Player.GetCenter().X - (this._x + this.Width / 2)) as -1 | 1;
+		return Math.sign(Scene.Current.Player.GetCenter().X - (this._x + this.Width / 2)) as -1 | 1;
 	}
 }

@@ -4,6 +4,7 @@ import { GameObject } from "../GameObject.js";
 
 export class BlinkingLabel extends GameObject {
 	private readonly _text: string;
+	private readonly _errorText: string;
 	private readonly _colorOff: Color;
 	private readonly _colorOn: Color;
 	private readonly _cooldown: number;
@@ -11,7 +12,7 @@ export class BlinkingLabel extends GameObject {
 	private _timeToBlink = 0;
 	private _on = false;
 
-	constructor(text: string, x: number, y: number, width: number, height: number, colorOff: Color, colorOn: Color, cooldown: number) {
+	constructor(text: string, errorText: string, x: number, y: number, width: number, height: number, colorOff: Color, colorOn: Color, cooldown: number) {
 		super(width, height);
 
 		this._text = text;
@@ -20,6 +21,7 @@ export class BlinkingLabel extends GameObject {
 		this._colorOff = colorOff;
 		this._colorOn = colorOn;
 		this._cooldown = cooldown;
+		this._errorText = errorText;
 	}
 
 	public override Update(dt: number): void {
@@ -38,5 +40,9 @@ export class BlinkingLabel extends GameObject {
 
 		GUI.SetFont(32);
 		GUI.DrawText2CenterLineBreaked(this._x, this._y, this._text);
+
+		GUI.SetFillColor(Color.Red);
+		GUI.SetFont(24);
+		GUI.DrawText2CenterLineBreaked(this._x, this._y + 200, this._errorText);
 	}
 }

@@ -3,7 +3,7 @@ import { Canvas } from "../../Context.js";
 import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
 import { Direction, EnemyType, Tag } from "../../Enums.js";
-import { GetSprite } from "../../AssetsLoader.js";
+import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Platform } from "../Platform.js";
 import { Spikes } from "../Spikes.js";
 export class Monster extends Enemy {
@@ -13,6 +13,8 @@ export class Monster extends Enemy {
     Direction = Direction.Left;
     _accelerationX;
     _attackCooldown = 0;
+    _timeFromAmbient = 11111;
+    _idleSound = GetSound("MonsterIdle");
     constructor(x, y) {
         super(0, 0, 4, 150, EnemyType.Rat);
         this._x = x;
@@ -24,6 +26,13 @@ export class Monster extends Enemy {
     Update(dt) {
         this.ApplyVForce(dt);
         this._attackCooldown -= dt;
+        if (this._timeFromAmbient > this._idleSound.Length * 1000) {
+            this._timeFromAmbient = 0;
+            if (this.GetDistanceToPlayer() < 1500)
+                this._idleSound.PlayOriginal();
+        }
+        else
+            this._timeFromAmbient += dt;
         if (!this.IsSpotPlayer())
             return;
         const plrPos = Scene.Current.Player.GetCenter();
@@ -37,6 +46,8 @@ export class Monster extends Enemy {
             this._verticalAcceleration = 15;
             this._attackCooldown = Monster.AttackCooldown;
             this._grounded = false;
+            GetSound("MonsterAttack").PlayOriginal();
+            this._idleSound.StopOriginal();
             return;
         }
     }
@@ -50,6 +61,8 @@ export class Monster extends Enemy {
     TakeDamage(damage) {
         super.TakeDamage(damage);
         if (this._health <= 0) {
+            GetSound("MonsterDie").PlayOriginal();
+            this._idleSound.StopOriginal();
             this.Destroy();
         }
     }
@@ -68,7 +81,7 @@ export class Monster extends Enemy {
         }
         else if (this._verticalAcceleration < 0) {
             // падаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * physDt, this._collider.Width, this._collider.Height - this._verticalAcceleration * physDt), Tag.Wall | Tag.Platform);
             offsets.sort((a, b) => (a.instance.Tag !== b.instance.Tag ? b.instance.Tag - a.instance.Tag : a.instance.Tag === Tag.Platform ? a.start.Y - b.start.Y : b.start.Y - a.start.Y));
             if (offsets.length > 0 && offsets[0].start.Y >= 0) {
                 if (offsets[0].instance instanceof Spikes)
@@ -91,7 +104,7 @@ export class Monster extends Enemy {
         }
         else if (this._verticalAcceleration > 0) {
             // взлетаем
-            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall);
+            const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height + this._verticalAcceleration * physDt), Tag.Wall);
             if (offsets.length > 0) {
                 this._verticalAcceleration = 0;
                 const r = offsets.minBy((x) => x.instance.GetPosition().Y);

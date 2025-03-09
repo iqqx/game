@@ -5,12 +5,12 @@ export class LoadingIcon extends GUIBase {
     _icon;
     _angle = 0;
     _timeToAction;
-    _action;
-    constructor(x, y, timeToAction, action) {
-        super(50, 50);
-        this._x = x;
-        this._y = y;
-        this._action = action;
+    _actions;
+    constructor(timeToAction, actions) {
+        super();
+        this.Width = 50;
+        this.Height = 50;
+        this._actions = actions;
         this._timeToAction = timeToAction;
         this._icon = GetSprite("Loading_Icon");
     }
@@ -20,12 +20,14 @@ export class LoadingIcon extends GUIBase {
             this._timeToAction -= dt;
             if (this._timeToAction <= 0) {
                 this._timeToAction = undefined;
-                this._action();
+                for (const action of this._actions) {
+                    action.call(this);
+                }
             }
         }
     }
     Render() {
-        GUI.DrawImageWithAngle(this._icon, this._x - this.Width / 2, this._y - this.Height / 2, this.Width, this.Height, this._angle);
+        GUI.DrawImageWithAngle(this._icon, this.X, this.Y, this.Width, this.Height, this._angle);
     }
 }
 //# sourceMappingURL=LoadingIcon.js.map
