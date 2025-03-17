@@ -126,7 +126,7 @@ export class Entity extends GameObject {
                 if (offsets[i].start.Y >= 0) {
                     if (offsets[i].instance instanceof Spikes)
                         this.TakeDamage(100);
-                    else if (offsets[i].instance instanceof Platform && this._y <= offsets[i].instance.GetPosition().Y + offsets[i].instance.GetCollider().Height) {
+                    else if (offsets[i].instance instanceof Platform && (this._movingDown || this._y <= offsets[i].instance.GetPosition().Y + offsets[i].instance.GetCollider().Height)) {
                         // что прямо говорит о том что никаких отношений между этим и платформой быть не может (низ Entity выше вверха Platform)
                         continue;
                     } //else if (offsets[i].instance instanceof Wall) break;

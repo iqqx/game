@@ -161,7 +161,7 @@ export class Player extends Entity {
 
 		// FOR DEBUG
 		// this._backpack = new Backpack(0, 0);
-		// this.GiveQuestItem(Weapon.GetById("AK12"));
+		// this.GiveQuestItem(Weapon.GetById("PSM7"));
 		// this.GiveQuestItem(ItemRegistry.GetById("RifleBullet", 55));
 		// this.GiveQuestItem(Weapon.GetById("Glock"));
 		// this.GiveQuestItem(Throwable.GetById("RGN"));
@@ -696,14 +696,13 @@ export class Player extends Entity {
 						break;
 					case "KeyR":
 						if (this.CanTarget() && this._weapon !== null) {
-							const neededAmmo = "AK12" === this._weapon.Id ? "RifleBullet" : "PistolBullet";
 							let findedAmmo = 0;
 
 							const items = this.GetSlots();
 							for (let i = 0; i < items.length; i++) {
 								const item = items[i];
 
-								if (item !== null && item.Id === neededAmmo) {
+								if (item !== null && item.Id === this._weapon.AmmoId) {
 									const toTake = Math.min(this._weapon.MaxAmmoClip - this._weapon.GetLoadedAmmo() + Math.sign(this._weapon.GetLoadedAmmo()) - findedAmmo, item.GetCount());
 									findedAmmo += toTake;
 

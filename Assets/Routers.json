@@ -57,6 +57,7 @@
 		"Rifle_Clip": { "Image": "Images/Rifle_Clip.png", "Scale": 2 },
 		"Rifle_Bullet": "Images/Rifle_Bullet.png",
 		"Controls": "Images/Controls-2.png",
+		"ControlsMobile": "Images/MControls-2.png",
 		"Loading_Icon": "Images/Loading.png",
 		"Notice": "Images/Notice.png",
 		"TSLogo": "Images/TypeScriptLogo.png",
@@ -75,6 +76,9 @@
 		"Artem_Avatar": "Images/Characters/Artem/Avatar.png",
 		"Player_Avatar": "Images/Characters/PlayerAvatar.jpeg",
 		"RGN": "Images/RGN/Main.png",
+		"PSM7_Icon": { "Image": "Images/Machinegun/Main.png", "Scale": 1 },
+		"PSM7": { "Image": "Images/Machinegun/Main.png", "Scale": 1.4 },
+		"MachineGunClip": { "Image": "Images/Machinegun/Magazine.png", "Scale": 1.4 },
 		"RGN_Icon": "Images/RGN/Icon.png",
 		"Monster_Walk": { "Scale": 3, "Images": ["Images/Monster/0.png", "Images/Monster/1.png"] }
 	},
@@ -196,7 +200,8 @@
 	},
 	"Weapons": {
 		"AK12": "Weapons/AK12.json",
-		"Glock": "Weapons/Glock.json"
+		"Glock": "Weapons/Glock.json",
+		"PSM7": "Weapons/PSM7.json"
 	},
 	"Throwables": {
 		"RGN": "Throwables/RGN.json"

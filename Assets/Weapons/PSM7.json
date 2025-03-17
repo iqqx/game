@@ -1,0 +1,27 @@
+{
+	"Sprites": {
+		"Icon": "PSM7_Icon",
+		"Main": "PSM7",
+		"Clip": "MachineGunClip"
+	},
+	"Sounds": {
+		"Shoot": "Shoot_1",
+		"ShellImpact": "Shell",
+		"Reload": "Reload"
+	},
+	"AmmoId": "RifleBullet",
+	"Name": "Пулемет",
+	"Damage": 30,
+	"IsHeavy": true,
+	"IsAutomatic": true,
+	"ClipCapacity": 100,
+	"Spread": 0.05,
+	"Recoil": 0.2,
+	"ReloadTime": 5,
+	"ShootsPerSecond": 7,
+	"PixelsOffsets": {
+		"Grip": { "X": 21, "Y": 10 },
+		"Muzzle": { "X": 85, "Y": 20 },
+		"Clip": { "X": 30, "Y": 15 }
+	}
+}

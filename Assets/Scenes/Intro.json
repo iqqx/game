@@ -17,7 +17,7 @@
 						},
 						{
 							"Type": "PressedIndicator",
-							"Arguments": ["Space", 3000, 19000],
+							"Arguments": ["Space", 1000, 19000],
 							"Actions": [
 								{
 									"Type": "LoadScene",

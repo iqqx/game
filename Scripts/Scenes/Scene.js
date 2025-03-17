@@ -216,7 +216,13 @@ export class Scene {
     static ParseAction(x) {
         switch (x.Type) {
             case "LoadScene":
-                return () => Scene.LoadFromFile(x.Source);
+                switch (x.Source) {
+                    case "{LOADING}": {
+                        return () => Scene.LoadFromFile(IsMobile() ? "Assets/Scenes/MobileLoading.json" : "Assets/Scenes/Loading.json");
+                    }
+                    default:
+                        return () => Scene.LoadFromFile(x.Source);
+                }
             case "GotoUrl":
                 return () => (window.location.href = x.Source);
             case "LoadSceneEditor":

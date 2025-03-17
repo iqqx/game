@@ -142,7 +142,7 @@ export class Canvas {
         grd.addColorStop(start[0], start[1].toString());
         grd.addColorStop(end[0], end[1].toString());
         ctxMain.fillStyle = grd;
-        Canvas.DrawRectangleWithAngle(rect.X - this.CameraX, rect.Y - this.CameraY, rect.Width, rect.Height, angle, xPivot, yPivot);
+        Canvas.DrawRectangleWithAngle(rect.X, rect.Y, rect.Width, rect.Height, angle, xPivot, yPivot);
     }
     static GetClientRectangle() {
         return ctxMain.canvas.getBoundingClientRect();

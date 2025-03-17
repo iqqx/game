@@ -14,7 +14,7 @@
 							"Arguments": [200, 50, "НАЧАТЬ", 32],
 							"Action": {
 								"Type": "LoadScene",
-								"Source": "Assets/Scenes/Loading.json"
+								"Source": "{LOADING}"
 							}
 						},
 						{
@@ -74,7 +74,7 @@
 							"Childs": [
 								{
 									"Type": "HintLabel",
-									"Arguments": ["2.0"]
+									"Arguments": ["2.1"]
 								}
 							]
 						},
