@@ -2,7 +2,7 @@ import { Container } from "../Assets/Containers/Containers.js";
 import { GetSprite } from "../AssetsLoader.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 export class RatCorpse extends Container {
     constructor(x, y, ...items) {

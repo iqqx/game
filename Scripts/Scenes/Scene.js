@@ -1,44 +1,42 @@
-import { EnemyType } from "./Enums.js";
-import { Player } from "./GameObjects/Player.js";
-import { Canvas, GUI } from "./Context.js";
-import { Vector2, Line, GetIntersectPoint, Color, Rectangle, IsString, IsNumber, IsMobile } from "./Utilites.js";
-import { GameObject, Interactable } from "./GameObjects/GameObject.js";
-import { BlinkingRectangle } from "./GameObjects/GUI/BlinkingRectangle.js";
-import { GUIRectangle } from "./GameObjects/GUI/GUIRectangle.js";
-import { BlinkingLabel } from "./GameObjects/GUI/BlinkingLabel.js";
-import { Cursor } from "./GameObjects/GUI/Cursor.js";
-import { TextButton } from "./GameObjects/GUI/TextButton.js";
-import { Backpack } from "./Assets/Containers/Backpack.js";
-import { Box } from "./Assets/Containers/Box.js";
-import { AudioSource } from "./GameObjects/BoomBox.js";
-import { Human } from "./GameObjects/Enemies/Human.js";
-import { Rat } from "./GameObjects/Enemies/Rat.js";
-import { Ladder } from "./GameObjects/Ladder.js";
-import { Platform } from "./GameObjects/Platform.js";
-import { Spikes } from "./GameObjects/Spikes.js";
-import { Wall } from "./GameObjects/Wall.js";
-import { Image } from "./GameObjects/GUI/Image.js";
-import { LoadingIcon } from "./GameObjects/GUI/LoadingIcon.js";
-import { Label } from "./GameObjects/GUI/Label.js";
-import { IntroCutscene } from "./GameObjects/GUI/IntroCutscene.js";
-import { HintLabel } from "./GameObjects/GUI/HintLabel.js";
-import { GUISpotLight } from "./GameObjects/GUI/GUISpotLight.js";
-import { PressedIndicator } from "./GameObjects/GUI/PressedIndicator.js";
-import { Titles } from "./GameObjects/GUI/Titles.js";
-import { Artem } from "./GameObjects/QuestGivers/Artem.js";
-import { Elder } from "./GameObjects/QuestGivers/Elder.js";
-import { Trader } from "./GameObjects/QuestGivers/Trader.js";
-import { Corpse } from "./GameObjects/Corpse.js";
+import { EnemyType } from "../Enums.js";
+import { Player } from "../GameObjects/Player.js";
+import { Canvas, GUI } from "../Context.js";
+import { Vector2, Line, GetIntersectPoint, Color, IsString, IsNumber, IsMobile } from "../Utilites.js";
+import { GameObject, Interactable } from "../GameObjects/GameObject.js";
+import { Cursor } from "../GameObjects/GUI/Cursor.js";
+import { TextButton } from "../GameObjects/GUI/TextButton.js";
+import { Backpack } from "../Assets/Containers/Backpack.js";
+import { Box } from "../Assets/Containers/Box.js";
+import { AudioSource } from "../GameObjects/BoomBox.js";
+import { Human } from "../GameObjects/Enemies/Human.js";
+import { Rat } from "../GameObjects/Enemies/Rat.js";
+import { Ladder } from "../GameObjects/Ladder.js";
+import { Platform } from "../GameObjects/Platform.js";
+import { Spikes } from "../GameObjects/Spikes.js";
+import { Wall } from "../GameObjects/Wall.js";
+import { Image } from "../GameObjects/GUI/Image.js";
+import { LoadingIcon } from "../GameObjects/GUI/LoadingIcon.js";
+import { Label } from "../GameObjects/GUI/Label.js";
+import { IntroCutscene } from "../GameObjects/GUI/IntroCutscene.js";
+import { HintLabel } from "../GameObjects/GUI/HintLabel.js";
+import { GUISpotLight } from "../GameObjects/GUI/GUISpotLight.js";
+import { PressedIndicator } from "../GameObjects/GUI/PressedIndicator.js";
+import { Titles } from "../GameObjects/GUI/Titles.js";
+import { Artem } from "../GameObjects/QuestGivers/Artem.js";
+import { Elder } from "../GameObjects/QuestGivers/Elder.js";
+import { Trader } from "../GameObjects/QuestGivers/Trader.js";
+import { Corpse } from "../GameObjects/Corpse.js";
 import { SceneEditor } from "./SceneEditor.js";
-import { FPSCounter } from "./GameObjects/GUI/FPSCounter.js";
-import { Weapon } from "./Assets/Weapons/Weapon.js";
-import { Throwable } from "./Assets/Throwable.js";
-import { GetSprite } from "./AssetsLoader.js";
-import { Monster } from "./GameObjects/Enemies/Monster.js";
-import { ItemRegistry } from "./Assets/Items/ItemRegistry.js";
-import { FlexLayout } from "./GameObjects/GUI/FlexLayout.js";
-import { GridLayout } from "./GameObjects/GUI/GridLayout.js";
-import { FreeLayout } from "./GameObjects/GUI/FreeLayout.js";
+import { FPSCounter } from "../GameObjects/GUI/FPSCounter.js";
+import { Weapon } from "../Assets/Weapons/Weapon.js";
+import { Throwable } from "../Assets/Throwable.js";
+import { GetSprite } from "../AssetsLoader.js";
+import { Monster } from "../GameObjects/Enemies/Monster.js";
+import { ItemRegistry } from "../Assets/Items/ItemRegistry.js";
+import { FlexLayout } from "../GameObjects/GUI/FlexLayout.js";
+import { GridLayout } from "../GameObjects/GUI/GridLayout.js";
+import { FreeLayout } from "../GameObjects/GUI/FreeLayout.js";
+import { SceneError } from "./SceneError.js";
 export class Scene {
     static Current;
     _gameObjects = [];
@@ -49,7 +47,7 @@ export class Scene {
     Player = null;
     static Time = 0;
     static OnPointerStateChanged = undefined;
-    constructor(background, objects) {
+    constructor(background, ...objects) {
         this._background = background;
         if (Scene.Current !== undefined)
             Scene.Current.Unload();
@@ -79,9 +77,17 @@ export class Scene {
     static async LoadFromFile(src) {
         const scene = await fetch(src);
         if (!scene.ok)
-            return Scene.GetErrorScene("Сцена не найдена: " + src);
+            return new SceneError("Сцена не найдена: " + src);
         const sceneData = await scene.json();
-        return new Scene(sceneData.Background === undefined ? null : GetSprite(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)));
+        const newScene = new Scene(sceneData.Background === undefined ? null : GetSprite(sceneData.Background));
+        for (const obj of sceneData.GameObjects) {
+            const parsedObj = this.ParseObject(obj);
+            if (parsedObj instanceof GameObject)
+                newScene.Instantiate(parsedObj);
+            else
+                newScene.AddGUI(parsedObj);
+        }
+        return newScene;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static ParseObject(x) {
@@ -239,19 +245,6 @@ export class Scene {
                 }
         }
     }
-    static GetErrorScene(error) {
-        GUI.SetFont(32); // for blinking text
-        const textSize = GUI.GetTextSize("КРИТИЧЕСКАЯ ОШИБКА", true);
-        return new Scene(null, [
-            new GUIRectangle(new Rectangle(Canvas.Width / 2, Canvas.Height / 2, Canvas.Width, Canvas.Height), Color.Black),
-            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, 50, textSize.X + 50, textSize.Y + 20), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, 5, Canvas.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(Canvas.Width / 2, Canvas.Height - 5, Canvas.Width, 10), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingRectangle(new Rectangle(Canvas.Width - 5, Canvas.Height / 2, 10, Canvas.Height), new Color(0, 0, 255), new Color(255, 0, 0), 1500),
-            new BlinkingLabel("КРИТИЧЕСКАЯ ОШИБКА", error, Canvas.Width / 2, 50, Canvas.Width, textSize.Y, new Color(255, 0, 0), new Color(0, 0, 255), 1500),
-        ]);
-    }
     GetCollide(who, tag) {
         for (const object of Scene.Current._gameObjects) {
             if (tag !== undefined && (object.Tag & tag) === 0)
@@ -352,12 +345,14 @@ export class Scene {
         for (const element of Scene.Current._GUIElements)
             element.Update(dt);
         Scene.Time = time;
+        this.Render();
+        this.RenderOverlay();
     }
     Render() {
         GUI.ClearStroke();
         GUI.SetFillColor(Color.Black);
         GUI.DrawRectangle(0, 0, Canvas.Width, Canvas.Height);
-        if (Scene.Current._background !== null)
+        if (Scene.Current._background)
             Canvas.DrawBackground(Scene.Current._background);
         for (const object of Scene.Current._gameObjects)
             object.Render();
@@ -383,24 +378,20 @@ export class Scene {
         }
         if (object instanceof Interactable) {
             Scene.Current._interactableGameObjects.push(object);
-            object.OnDestroy = () => {
-                Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(object), 1);
-                Scene.Current._interactableGameObjects.splice(Scene.Current._interactableGameObjects.indexOf(object), 1);
-            };
         }
-        else
-            object.OnDestroy = () => Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(object), 1);
     }
     AddGUI(element) {
         Scene.Current._GUIElements.push(element);
     }
-    Destroy(element) {
-        Scene.Current._GUIElements.splice(Scene.Current._GUIElements.indexOf(element), 1);
-    }
-    DestroyGameObject(element) {
-        Scene.Current._gameObjects.splice(Scene.Current._gameObjects.indexOf(element), 1);
-        if (element instanceof Interactable)
-            Scene.Current._interactableGameObjects.splice(Scene.Current._interactableGameObjects.indexOf(element), 1);
+    static Destroy(element) {
+        element.OnDestroy();
+        if (element instanceof GameObject) {
+            Scene.Current._gameObjects.tryRemove((x) => x === element);
+            if (element instanceof Interactable)
+                Scene.Current._interactableGameObjects.tryRemove((x) => x === element);
+        }
+        else
+            Scene.Current._GUIElements.tryRemove((x) => x === element);
     }
     static ParseCondition(object, raw) {
         switch (raw.Type) {

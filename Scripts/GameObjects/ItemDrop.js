@@ -1,7 +1,7 @@
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
 export class ItemDrop extends Interactable {
@@ -30,7 +30,7 @@ export class ItemDrop extends Interactable {
     }
     OnInteractSelected(id) {
         if (id === 0 && Scene.Current.Player.TryPushItem(this.ContentItem))
-            Scene.Current.DestroyGameObject(this);
+            Scene.Destroy(this);
     }
     ApplyVForce(dt) {
         const offsets = Scene.Current.GetCollidesByRect(new Rectangle(this._x, this._y + this._verticalAcceleration * (dt / 15), this._collider.Width, this._collider.Height), Tag.Wall | Tag.Platform);

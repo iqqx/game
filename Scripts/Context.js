@@ -1,4 +1,4 @@
-import { Color, Vector2 } from "./Utilites.js";
+import { Color, IsMobile, Vector2 } from "./Utilites.js";
 const ctxMain = document.getElementById("main-canvas").getContext("2d");
 ctxMain.canvas.width = window.innerWidth;
 ctxMain.canvas.height = window.innerHeight;
@@ -24,7 +24,7 @@ export class Canvas {
         ctxMain.canvas.requestFullscreen();
     }
     static IsFullscreen() {
-        return document.fullscreenElement === null && Math.abs(window.outerWidth - ctxMain.canvas.width) > 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) > 20;
+        return document.fullscreenElement !== null && (IsMobile() || (Math.abs(window.outerWidth - ctxMain.canvas.width) < 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) < 20));
     }
     static LockMouse() {
         ctxMain.canvas.requestPointerLock();

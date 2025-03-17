@@ -1,6 +1,6 @@
 import { GetSound } from "../../AssetsLoader.js";
 import { Canvas, GUI } from "../../Context.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Color, IsMobile } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 
@@ -137,6 +137,7 @@ export class Titles extends GUIBase {
 		if (this._progress < Titles._texts.length * -50 - 300) {
 			GetSound("Titles_Background").StopOriginal();
 
+            Scene.Destroy(this);
 			Scene.LoadFromFile("Assets/Scenes/Menu.json");
 		}
 

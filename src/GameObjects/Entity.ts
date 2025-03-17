@@ -1,6 +1,6 @@
 import { GetSound } from "../AssetsLoader.js";
 import { Direction, Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 import { Ladder } from "./Ladder.js";
@@ -90,7 +90,7 @@ export class Entity extends GameObject {
 	public MoveDown(dt: number) {
 		if (!this.IsAlive()) return;
 
-		this._y -= this._speed * (dt / 15);
+		this._y -= this._speed * (dt / 15 / 4);
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
 		if (collideOffsets !== false) {
@@ -103,7 +103,7 @@ export class Entity extends GameObject {
 	public MoveUp(dt: number) {
 		if (!this.IsAlive()) return;
 
-		this._y += this._speed * (dt / 15);
+		this._y += this._speed * (dt / 15 / 3);
 
 		const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
 		if (collideOffsets !== false) {

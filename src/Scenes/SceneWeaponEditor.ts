@@ -1,8 +1,8 @@
-import { Weapon } from "./Assets/Weapons/Weapon.js";
-import { Canvas, GUI } from "./Context.js";
-import { Vector2, Color, Rectangle } from "./Utilites.js";
+import { Weapon } from "../Assets/Weapons/Weapon.js";
+import { Canvas, GUI } from "../Context.js";
+import { Color, IScene, Rectangle, Vector2 } from "../Utilites.js";
 
-export class SceneWeaponEditor {
+export class SceneWeaponEditor implements IScene {
 	private readonly _weapon: Weapon;
 	private readonly _fillColors = [Color.Pink, Color.Black, Color.White, Color.Red];
 	private _curFillColor = 0;
@@ -93,7 +93,10 @@ export class SceneWeaponEditor {
 		return new SceneWeaponEditor(weapon);
 	}
 
-	public Update(time: number) {}
+	public Update(time: number) {
+		this.Render();
+		this.RenderOverlay();
+	}
 
 	public Render() {
 		Canvas.ClearStroke();

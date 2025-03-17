@@ -7,7 +7,7 @@ import { Canvas, GUI } from "../Context.js";
 import { Tag, EnemyType, Direction } from "../Enums.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
 import { Quest } from "../Quest.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Vector2, Color, Sprite, IItem, CRC32, IsMobile } from "../Utilites.js";
 import { Blood } from "./Blood.js";
 import { Enemy } from "./Enemies/Enemy.js";
@@ -174,17 +174,6 @@ export class Player extends Entity {
 
 		GetSound("Walk_2").Speed = 1.6;
 		GetSound("Walk_2").Apply();
-
-		this._dialogSound.Volume = 0.05;
-		this._dialogSound.Apply();
-
-		this.OnDestroy = () => {
-			for (const event of this._registeredEvents) {
-				Canvas.HTML.removeEventListener(event.Name, event.Callback);
-			}
-
-			this._registeredEvents.clear();
-		};
 
 		if (IsMobile()) {
 			this.RegisterEvent("touchstart", (e) => {
@@ -1079,7 +1068,7 @@ export class Player extends Entity {
 			while (this._lastAmbientNumber === nextAmbient);
 
 			this._lastAmbientNumber = nextAmbient;
-			GetSound(`Ambient_${nextAmbient}`).Play(0.25);
+			GetSound(`Ambient_${nextAmbient}`).PlayOriginal();
 		}
 
 		if (this._x > 33500 && this._y > 800 && this._onLadder !== null) this._timeFromGoodEnd = dt;
@@ -2214,6 +2203,7 @@ export class Player extends Entity {
 		this._charIndex = 0;
 		this._timeToNextChar = 60;
 		this._dialog = character.GetDialog();
+        this._frameIndex = 0;
 
 		this._dialogSound.PlayOriginal(undefined, undefined, true);
 		this._dialog.Voices[0].PlayOriginal();
@@ -2312,6 +2302,7 @@ export class Player extends Entity {
 	}
 
 	private ChangeActiveHand(hand: 0 | 1) {
+		if (this._timeFromSpawn < 5000) return;
 		if (hand === this._selectedHand) return;
 
 		const inHand = this._inventory[this._selectedHand];
@@ -2319,7 +2310,7 @@ export class Player extends Entity {
 		if (inHand instanceof Weapon && inHand.IsReloading()) return;
 
 		this._selectedHand = hand;
-		GetSound("HandSwitch").Play(0.5);
+		GetSound("HandSwitch").PlayOriginal();
 
 		if (this._inventory[this._selectedHand] === null) {
 			this._weapon = null;
@@ -2398,7 +2389,17 @@ export class Player extends Entity {
 		if (this._health <= 0) {
 			this._timeFromDeath = 1;
 
+			this.OnDestroy();
+
 			GetSound("Human_Death_1").Play();
 		}
+	}
+
+	public override OnDestroy(): void {
+		for (const event of this._registeredEvents) {
+			Canvas.HTML.removeEventListener(event.Name, event.Callback);
+		}
+
+		this._registeredEvents.clear();
 	}
 }

@@ -2,7 +2,7 @@ import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
 import { IPickapable } from "../../GameObjects/GameObject.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { IItem, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 
@@ -28,7 +28,7 @@ export class Backpack extends Container implements IPickapable {
 
 		Scene.Current.Player.PutBackpack(this);
 		GetSound("Backpack_Pickup").Play(0.5);
-		this.Destroy();
+		Scene.Destroy(this);
 
 		return this._items;
 	}

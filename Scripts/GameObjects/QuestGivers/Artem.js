@@ -2,7 +2,7 @@ import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";
 import { Throwable } from "../../Assets/Throwable.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
 export class Artem extends Character {

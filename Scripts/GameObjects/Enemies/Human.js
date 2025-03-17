@@ -1,5 +1,5 @@
 import { Direction, EnemyType, Tag } from "../../Enums.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Vector2 } from "../../Utilites.js";
 import { Player } from "../Player.js";
@@ -204,7 +204,7 @@ export class Human extends Enemy {
         if (this._timeFromNotice === -1)
             this._timeFromNotice = 0;
         if (this._health <= 0) {
-            this.Destroy();
+            Scene.Destroy(this);
             Scene.Current.Player.OnKilled(this._type);
             Scene.Current.Instantiate(new Corpse(this._x, this._y, this._weapon, ItemRegistry.GetById("AidKit"), ItemRegistry.GetById("DogTag")));
             this._deathSound.Play();

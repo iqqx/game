@@ -1,18 +1,18 @@
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Rectangle } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
 export class AudioSource extends Interactable {
     _volume;
+    _soundPack;
+    _frames = GetSprite("Boombox");
     _life = 0;
     _timeToNextFrame = 0;
     _frameIndex = 0;
     _enabled = false;
     _volumeModifier = 0.5;
-    _soundPack;
     _currentSound;
-    _frames = GetSprite("Boombox");
     constructor(x, y, volume, ...sounds) {
         super(100, 50);
         if (sounds.length === 0)
@@ -68,6 +68,10 @@ export class AudioSource extends Interactable {
                 this._currentSound = (this._currentSound + 1) % this._soundPack.length;
                 break;
         }
+    }
+    OnDestroy() {
+        for (const sound of this._soundPack)
+            sound.StopOriginal();
     }
 }
 //# sourceMappingURL=BoomBox.js.map

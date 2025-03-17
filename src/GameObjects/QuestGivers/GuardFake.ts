@@ -1,6 +1,6 @@
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";
 

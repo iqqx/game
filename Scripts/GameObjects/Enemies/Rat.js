@@ -1,4 +1,4 @@
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
@@ -48,7 +48,7 @@ export class Rat extends Enemy {
     TakeDamage(damage) {
         super.TakeDamage(damage);
         if (this._health <= 0) {
-            this.Destroy();
+            Scene.Destroy(this);
             Scene.Current.Instantiate(new RatCorpse(this._x, this._y, ItemRegistry.GetById("RatTail")));
             const s = Rat._deathSound.cloneNode();
             s.volume = 0.25;

@@ -1,5 +1,5 @@
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Character, Dialog } from "./Character.js";
 import { Elder } from "./Elder.js";
 

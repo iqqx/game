@@ -2,7 +2,7 @@ import { Throwable } from "../Assets/Throwable.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Sprite, Vector2 } from "../Utilites.js";
 import { Entity } from "./Entity.js";
 import { GameObject } from "./GameObject.js";
@@ -40,12 +40,12 @@ export class FlyingThrowable extends GameObject {
 				if (!this._grounded) this.ApplyForce(dt);
 				else {
 					Scene.Current.Instantiate(new ItemDrop(this._x, this._y, this._spawnedBy));
-					this.Destroy();
+					Scene.Destroy(this);
 				}
 			} else {
 				this._timeFromExplosive += dt;
 
-				if (this._timeFromExplosive >= 150) this.Destroy();
+				if (this._timeFromExplosive >= 150)Scene.Destroy(this);
 			}
 		} else {
 			this._timeFromThrow += dt;
@@ -163,7 +163,7 @@ export class FlyingThrowable extends GameObject {
 		if (this._timeFromThrow < 200) {
 			if (this._grounded) {
 				Scene.Current.Instantiate(new ItemDrop(this._x, this._y, this._spawnedBy));
-				this.Destroy();
+                Scene.Destroy(this);
 			}
 		} else {
 			const explosiveDamage = 350;

@@ -2,7 +2,7 @@ import { GetSprite } from "../AssetsLoader.js";
 import { Canvas } from "../Context.js";
 import { Direction } from "../Enums.js";
 import { FlyingThrowable } from "../GameObjects/FlyingThrowable.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Sprite, Vector2, Rectangle, IItem, GetMaxIdentityString } from "../Utilites.js";
 
 export class Throwable implements IItem {

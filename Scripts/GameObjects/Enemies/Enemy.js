@@ -1,5 +1,5 @@
 import { Tag } from "../../Enums.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Vector2 } from "../../Utilites.js";
 import { Entity } from "../Entity.js";
 import { Player } from "../Player.js";

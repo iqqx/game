@@ -1,7 +1,7 @@
-import { Canvas, GUI } from "./Context.js";
-import { Vector2, Sprite, Color, Rectangle } from "./Utilites.js";
-import { Scene } from "./Scene.js";
-import { GetSprite } from "./AssetsLoader.js";
+import { Canvas, GUI } from "../Context.js";
+import { Vector2, Sprite, Color, Rectangle, IScene } from "../Utilites.js";
+import { GetSprite } from "../AssetsLoader.js";
+import { SceneError } from "./SceneError.js";
 
 enum ObjectType {
 	Wall,
@@ -20,7 +20,7 @@ enum ObjectType {
 	Rat,
 }
 
-export class SceneEditor {
+export class SceneEditor implements IScene {
 	private readonly _gameObjects: [ObjectType, Rectangle][];
 	private readonly _background?: Sprite;
 	private readonly _backgroundName?: string;
@@ -256,7 +256,7 @@ export class SceneEditor {
 
 	public static async LoadFromFile(src: string) {
 		const scene = await fetch(src);
-		if (!scene.ok) return Scene.GetErrorScene("Сцена не найдена: " + src);
+		if (!scene.ok) return new SceneError("Сцена не найдена: " + src);
 
 		const sceneData = await scene.json();
 
@@ -312,6 +312,9 @@ export class SceneEditor {
 		if (this._movingLeft || this._movingRight) this._levelPosition += (this._movingLeft ? -this._movingSpeed : this._movingSpeed) * move;
 
 		SceneEditor.Time = time;
+
+        this.Render()
+        this.RenderOverlay();
 	}
 
 	public Render() {

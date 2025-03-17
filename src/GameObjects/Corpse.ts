@@ -1,7 +1,7 @@
 import { Container } from "../Assets/Containers/Containers.js";
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { IItem, Rectangle } from "../Utilites.js";
 
 export class Corpse extends Container {

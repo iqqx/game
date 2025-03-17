@@ -1,6 +1,6 @@
 import { Item } from "../Items/Item.js";
 import { Canvas } from "../../Context.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Color, Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 import { GetSprite } from "../../AssetsLoader.js";

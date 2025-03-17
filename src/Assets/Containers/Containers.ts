@@ -1,5 +1,5 @@
 import { Interactable } from "../../GameObjects/GameObject.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { IItem, Vector2 } from "../../Utilites.js";
 
 export class Container extends Interactable {

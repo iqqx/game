@@ -1,3 +1,4 @@
+import { Scene } from "../Scenes/Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
@@ -18,7 +19,7 @@ export class Bullet extends GameObject {
     Update(dt) {
         this._lifetime += dt;
         if (this._lifetime >= Bullet._maxLifetime)
-            this.Destroy();
+            Scene.Destroy(this);
     }
     Render() {
         Canvas.DrawRectangleWithGradientAndAngle(new Rectangle(this._x, this._y, this._length, 2), [this._lifetime / Bullet._maxLifetime, Bullet._bulletColor0], [1, Bullet._bulletColor1], this._angle, 0, 1);

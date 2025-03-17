@@ -1,4 +1,4 @@
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
@@ -24,7 +24,7 @@ export class Bullet extends GameObject {
 	override Update(dt: number) {
 		this._lifetime += dt;
 
-		if (this._lifetime >= Bullet._maxLifetime) this.Destroy();
+		if (this._lifetime >= Bullet._maxLifetime) Scene.Destroy(this);
 	}
 
 	override Render(): void {

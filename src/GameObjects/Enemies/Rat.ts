@@ -1,4 +1,4 @@
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
@@ -58,7 +58,7 @@ export class Rat extends Enemy {
 		super.TakeDamage(damage);
 
 		if (this._health <= 0) {
-			this.Destroy();
+			Scene.Destroy(this);
 
 			Scene.Current.Instantiate(new RatCorpse(this._x, this._y, ItemRegistry.GetById("RatTail")));
 

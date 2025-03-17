@@ -1,5 +1,5 @@
 import { GUI } from "../../Context.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Color } from "../../Utilites.js";
 import { GUIBase } from "./GUIBase.js";
 

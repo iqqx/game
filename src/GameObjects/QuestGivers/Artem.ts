@@ -3,7 +3,7 @@ import { Throwable } from "../../Assets/Throwable.js";
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
 import { Quest } from "../../Quest.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Rectangle, Sprite } from "../../Utilites.js";
 import { Character, Dialog } from "./Character.js";
 

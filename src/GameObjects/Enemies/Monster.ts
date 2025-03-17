@@ -1,4 +1,4 @@
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle, Sprite } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
@@ -71,7 +71,7 @@ export class Monster extends Enemy {
 			GetSound("MonsterDie").PlayOriginal();
 			this._idleSound.StopOriginal();
 
-			this.Destroy();
+            Scene.Destroy(this);
 		}
 	}
 

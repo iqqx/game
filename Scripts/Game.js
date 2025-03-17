@@ -1,34 +1,22 @@
 import { Weapon } from "./Assets/Weapons/Weapon.js";
 import { Throwable } from "./Assets/Throwable.js";
 import { GUI } from "./Context.js";
-import { Scene } from "./Scene.js";
+import { Scene } from "./Scenes/Scene.js";
 import { Color } from "./Utilites.js";
 import { GetImageLoadingProgress, GetLoadings, IsParsed, Parse } from "./AssetsLoader.js";
 import { ItemRegistry } from "./Assets/Items/ItemRegistry.js";
+import { SceneError } from "./Scenes/SceneError.js";
 let parsedRouters;
 Parse()
     .then((x) => (parsedRouters = x))
     .catch((res) => {
-    scene = Scene.GetErrorScene(`${res ?? res.stack}\nat [Assets/Routers.json]`);
+    scene = new SceneError(`${res ?? res.stack}\nat [Assets/Routers.json]`);
     gameLoop(0);
 });
 let scene = undefined;
-// let unfocusTime: number | null = null;
-// document.getElementById("main-canvas").addEventListener("focusin", () => {
-// 	if (scene !== undefined && unfocusTime !== null) gameLoop(unfocusTime);
-// 	unfocusTime = null;
-// });
 function gameLoop(timeStamp) {
-    // if (document.activeElement.tagName !== "CANVAS") {
-    //     GUI.DrawUnfocusScreen();
-    // 	unfocusTime = timeStamp;
-    // 	return;
-    // }
-    // слишком много проблем, фиксить их сложнее чем несколько редких багов со звуком...
     window.requestAnimationFrame(gameLoop);
     scene.Update(timeStamp);
-    scene.Render();
-    scene.RenderOverlay();
 }
 function loadLoop() {
     const n = window.requestAnimationFrame(loadLoop);
@@ -128,10 +116,10 @@ function loadLoop() {
     })))
         .then(() => 
     /// DEBUG
-    Scene.LoadFromFile("Assets/Scenes/Menu.json"))
+    Scene.LoadFromFile("Assets/Scenes/Main.json"))
         .then((x) => (scene = x))
         .catch((err) => {
-        scene = Scene.GetErrorScene(err.stack ?? err);
+        scene = new SceneError(err.stack ?? err);
     })
         .finally(() => gameLoop(0));
 }

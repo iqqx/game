@@ -1,6 +1,6 @@
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 export class DroppedClip extends GameObject {

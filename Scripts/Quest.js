@@ -1,4 +1,4 @@
-import { Scene } from "./Scene.js";
+import { Scene } from "./Scenes/Scene.js";
 import { GetEnemyTypeName } from "./Utilites.js";
 export class Quest {
     Title;

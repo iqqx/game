@@ -5,15 +5,10 @@ export class GameObject {
     Width;
     Height;
     _collider;
-    OnDestroy;
     Tag;
     constructor(width, height) {
         this.Width = width;
         this.Height = height;
-    }
-    Destroy() {
-        if (this.OnDestroy !== undefined)
-            this.OnDestroy();
     }
     GetRectangle() {
         return new Rectangle(this._x, this._y, this.Width, this.Height);
@@ -76,6 +71,7 @@ export class GameObject {
             end: new Vector2(xend, yend),
         };
     }
+    OnDestroy() { }
 }
 export class Interactable extends GameObject {
 }

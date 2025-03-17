@@ -1,7 +1,7 @@
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { IItem, Rectangle, Sprite } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
 
@@ -39,7 +39,7 @@ export class ItemDrop extends Interactable {
 	}
 
 	OnInteractSelected(id: number): void {
-		if (id === 0 && Scene.Current.Player.TryPushItem(this.ContentItem)) Scene.Current.DestroyGameObject(this);
+		if (id === 0 && Scene.Current.Player.TryPushItem(this.ContentItem)) Scene.Destroy(this);
 	}
 
 	private ApplyVForce(dt: number) {

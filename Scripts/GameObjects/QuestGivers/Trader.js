@@ -1,7 +1,7 @@
 import { Canvas } from "../../Context.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 import { Quest } from "../../Quest.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Character } from "./Character.js";
 import { ItemRegistry } from "../../Assets/Items/ItemRegistry.js";

@@ -7,16 +7,11 @@ export class GameObject {
 	public Width: number;
 	public Height: number;
 	protected _collider?: Rectangle;
-	public OnDestroy?: () => void;
 	public Tag?: Tag;
 
 	constructor(width: number, height: number) {
 		this.Width = width;
 		this.Height = height;
-	}
-
-	public Destroy() {
-		if (this.OnDestroy !== undefined) this.OnDestroy();
 	}
 
 	public GetRectangle() {
@@ -98,6 +93,8 @@ export class GameObject {
 			end: new Vector2(xend, yend),
 		};
 	}
+
+	public OnDestroy(): void {}
 }
 
 export abstract class Interactable extends GameObject {

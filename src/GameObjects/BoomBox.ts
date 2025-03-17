@@ -1,4 +1,4 @@
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Canvas } from "../Context.js";
 import { Color, Sound, Rectangle, Sprite } from "../Utilites.js";
 import { Interactable } from "./GameObject.js";
@@ -6,14 +6,14 @@ import { GetSound, GetSprite } from "../AssetsLoader.js";
 
 export class AudioSource extends Interactable {
 	private readonly _volume: number;
+	private readonly _soundPack: Sound[];
+	private readonly _frames: Sprite[] = GetSprite("Boombox");
 	private _life = 0;
 	private _timeToNextFrame = 0;
 	private _frameIndex = 0;
 	private _enabled = false;
 	private _volumeModifier = 0.5;
-	private readonly _soundPack: Sound[];
 	private _currentSound: number;
-	private readonly _frames: Sprite[] = GetSprite("Boombox");
 
 	constructor(x: number, y: number, volume: number, ...sounds: string[]) {
 		super(100, 50);
@@ -53,7 +53,7 @@ export class AudioSource extends Interactable {
 		Canvas.SetFillColor(Color.White);
 		Canvas.DrawImageWithAngle(
 			this._frames[this._frameIndex],
-			new Rectangle(this._x   + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height),
+			new Rectangle(this._x + this.Width / 2, this._y + Math.sin(this._life / 50) * 5 + this.Height / 2, this.Width, this.Height),
 			this._enabled ? Math.cos(this._life / 50) / 10 : 0,
 			-this.Width / 2,
 			this.Height / 2
@@ -63,6 +63,7 @@ export class AudioSource extends Interactable {
 	GetInteractives(): string[] {
 		return [this._enabled ? "выключить" : "включить", "прибавить", "убавить", "переключить"];
 	}
+
 	OnInteractSelected(id: number): void {
 		switch (id) {
 			case 0:
@@ -87,4 +88,8 @@ export class AudioSource extends Interactable {
 				break;
 		}
 	}
+
+    public override OnDestroy(): void {
+        for (const sound of this._soundPack) sound.StopOriginal();
+    }
 }

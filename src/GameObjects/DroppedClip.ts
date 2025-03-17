@@ -1,7 +1,7 @@
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas } from "../Context.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Sprite } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 

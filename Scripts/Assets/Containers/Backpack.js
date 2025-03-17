@@ -1,7 +1,7 @@
 import { GetSprite, GetSound } from "../../AssetsLoader.js";
 import { Canvas } from "../../Context.js";
 import { Tag } from "../../Enums.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Rectangle } from "../../Utilites.js";
 import { Container } from "./Containers.js";
 export class Backpack extends Container {
@@ -22,7 +22,7 @@ export class Backpack extends Container {
             this.OnPickup();
         Scene.Current.Player.PutBackpack(this);
         GetSound("Backpack_Pickup").Play(0.5);
-        this.Destroy();
+        Scene.Destroy(this);
         return this._items;
     }
     GetInteractives() {

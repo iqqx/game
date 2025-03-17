@@ -307,3 +307,7 @@ export function CRC32(str: string) {
 export function IsMobile() {
 	return /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Mobile|Silk|Opera Mini/i.test(navigator.userAgent);
 }
+
+export interface IScene {
+	Update(timeStamp: number): void;
+}

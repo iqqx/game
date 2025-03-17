@@ -1,5 +1,6 @@
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 export class Fireball extends GameObject {
@@ -17,7 +18,7 @@ export class Fireball extends GameObject {
     Update(dt) {
         this._lifetime -= dt;
         if (this._lifetime <= 0)
-            this.Destroy();
+            Scene.Destroy(this);
     }
     Render() {
         const frame = this._frames[this._frameNumber];

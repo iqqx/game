@@ -1,4 +1,4 @@
-import { Color, Rectangle, Sprite, Vector2 } from "./Utilites.js";
+import { Color, IsMobile, Rectangle, Sprite, Vector2 } from "./Utilites.js";
 
 const ctxMain = (document.getElementById("main-canvas") as HTMLCanvasElement).getContext("2d");
 ctxMain.canvas.width = window.innerWidth;
@@ -32,7 +32,7 @@ export class Canvas {
 	}
 
 	public static IsFullscreen() {
-		return document.fullscreenElement === null && Math.abs(window.outerWidth - ctxMain.canvas.width) > 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) > 20;
+		return document.fullscreenElement !== null && (IsMobile() || (Math.abs(window.outerWidth - ctxMain.canvas.width) < 20 && Math.abs(window.outerHeight - ctxMain.canvas.height) < 20));
 	}
 
 	public static LockMouse() {

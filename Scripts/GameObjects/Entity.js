@@ -1,6 +1,6 @@
 import { GetSound } from "../AssetsLoader.js";
 import { Tag } from "../Enums.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 import { Platform } from "./Platform.js";
@@ -76,7 +76,7 @@ export class Entity extends GameObject {
     MoveDown(dt) {
         if (!this.IsAlive())
             return;
-        this._y -= this._speed * (dt / 15);
+        this._y -= this._speed * (dt / 15 / 4);
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
         if (collideOffsets !== false) {
             if (collideOffsets.instance instanceof Spikes)
@@ -87,7 +87,7 @@ export class Entity extends GameObject {
     MoveUp(dt) {
         if (!this.IsAlive())
             return;
-        this._y += this._speed * (dt / 15);
+        this._y += this._speed * (dt / 15 / 3);
         const collideOffsets = Scene.Current.GetCollide(this, Tag.Wall);
         if (collideOffsets !== false) {
             if (collideOffsets.instance instanceof Spikes)

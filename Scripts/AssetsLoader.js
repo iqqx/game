@@ -55,18 +55,14 @@ export function LoadSound(source, volume = 1) {
     const s = new Audio();
     const newSound = {
         Speed: 1,
-        Volume: 1,
+        Volume: volume,
         Length: 1,
         Play: function (volume, speed, looped = false) {
-            if (volume !== undefined || speed !== undefined || looped !== false) {
-                const c = s.cloneNode();
-                c.volume = volume ?? this.Volume;
-                c.playbackRate = speed ?? this.Speed;
-                c.loop = looped;
-                c.play();
-            }
-            else
-                s.cloneNode().play();
+            const c = s.cloneNode();
+            c.volume = volume ?? this.Volume;
+            c.playbackRate = speed ?? this.Speed;
+            c.loop = looped;
+            c.play();
         },
         Apply: function () {
             s.volume = this.Volume;
@@ -90,14 +86,14 @@ export function LoadSound(source, volume = 1) {
         newSound.Length = s.duration;
         if (longLoad)
             setTimeout(() => {
-                assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+                assetsToLoad.tryRemove((x) => x === source);
             }, Math.random() * 20000);
         else
-            assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+            assetsToLoad.tryRemove((x) => x === source);
     };
     s.onerror = () => {
         s.onerror = () => {
-            assetsToLoad.splice(assetsToLoad.findIndex((x) => x === source), 1);
+            assetsToLoad.tryRemove((x) => x === source);
         };
         s.src = source.substring(0, source.length - 4) + ".mp3";
     };

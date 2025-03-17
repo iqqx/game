@@ -1,7 +1,7 @@
-import { Canvas, GUI } from "./Context.js";
-import { Vector2, Color, Rectangle } from "./Utilites.js";
-import { Scene } from "./Scenes/Scene.js";
-import { GetSprite } from "./AssetsLoader.js";
+import { Canvas, GUI } from "../Context.js";
+import { Vector2, Color, Rectangle } from "../Utilites.js";
+import { GetSprite } from "../AssetsLoader.js";
+import { SceneError } from "./SceneError.js";
 var ObjectType;
 (function (ObjectType) {
     ObjectType[ObjectType["Wall"] = 0] = "Wall";
@@ -172,7 +172,7 @@ export class SceneEditor {
     static async LoadFromFile(src) {
         const scene = await fetch(src);
         if (!scene.ok)
-            return Scene.GetErrorScene("Сцена не найдена: " + src);
+            return new SceneError("Сцена не найдена: " + src);
         const sceneData = await scene.json();
         return new SceneEditor(sceneData.Background === undefined ? null : GetSprite(sceneData.Background), sceneData.GameObjects.map((x) => this.ParseObject(x)), sceneData.Background);
     }
@@ -220,6 +220,8 @@ export class SceneEditor {
         if (this._movingLeft || this._movingRight)
             this._levelPosition += (this._movingLeft ? -this._movingSpeed : this._movingSpeed) * move;
         SceneEditor.Time = time;
+        this.Render();
+        this.RenderOverlay();
     }
     Render() {
         Canvas.ClearStroke();

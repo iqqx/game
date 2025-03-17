@@ -1,4 +1,4 @@
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Canvas } from "../../Context.js";
 import { Rectangle } from "../../Utilites.js";
 import { Enemy } from "./Enemy.js";
@@ -63,7 +63,7 @@ export class Monster extends Enemy {
         if (this._health <= 0) {
             GetSound("MonsterDie").PlayOriginal();
             this._idleSound.StopOriginal();
-            this.Destroy();
+            Scene.Destroy(this);
         }
     }
     ApplyVForce(dt) {

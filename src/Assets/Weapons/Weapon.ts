@@ -5,7 +5,7 @@ import { Bullet } from "../../GameObjects/Bullet.js";
 import { DroppedClip } from "../../GameObjects/DroppedClip.js";
 import { Entity } from "../../GameObjects/Entity.js";
 import { Fireball } from "../../GameObjects/Fireball.js";
-import { Scene } from "../../Scene.js";
+import { Scene } from "../../Scenes/Scene.js";
 import { Sprite, Sound, Vector2, Rectangle, IItem, GetMaxIdentityString } from "../../Utilites.js";
 import { GetSound, GetSprite } from "../../AssetsLoader.js";
 

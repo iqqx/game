@@ -1,6 +1,6 @@
 import { Canvas } from "../Context.js";
 import { GetSprite } from "../AssetsLoader.js";
-import { Scene } from "../Scene.js";
+import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Sprite, Vector2 } from "../Utilites.js";
 import { GameObject } from "./GameObject.js";
 
@@ -23,7 +23,7 @@ export class Fireball extends GameObject {
 	override Update(dt: number) {
 		this._lifetime -= dt;
 
-		if (this._lifetime <= 0) this.Destroy();
+		if (this._lifetime <= 0) Scene.Destroy(this);
 	}
 
 	override Render(): void {
