@@ -116,7 +116,7 @@ function loadLoop() {
     })))
         .then(() => 
     /// DEBUG
-    Scene.LoadFromFile("Assets/Scenes/Menu.json"))
+    Scene.LoadFromFile("Assets/Scenes/Main.json"))
         .then((x) => (scene = x))
         .catch((err) => {
         scene = new SceneError(err.stack ?? err);

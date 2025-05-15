@@ -51,8 +51,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	private _timeFromSpawn = 0;
-	// private _timeFromSpawn = 4990; /// DEBUG
+	// private _timeFromSpawn = 0;
+	private _timeFromSpawn = 4990; /// DEBUG
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -112,11 +112,20 @@ export class Player extends Entity {
 			},
 			SingleUse: false,
 		},
+		{
+			Code: 3940498641,
+			Action: () => {
+				GetSound("CheatCode").PlayOriginal();
+				this.PushQuest(new Quest("Читорный квест", this).AddKillTask(EnemyType.Yellow, 100));
+			},
+			SingleUse: false,
+		},
 	];
 	private _tpActivated = false;
 	private _timeToHideItemName = 0;
 	private _timeToAmbientSound = 20000;
 	private _lastAmbientNumber = -1;
+	private _timeFromNewQuest = 19000;
 
 	private readonly _controlPadding = 32;
 	private readonly _joystickDiameter = 64;
@@ -953,6 +962,8 @@ export class Player extends Entity {
 				this._artem = Scene.Current.GetByType(Artem)[0] as Artem;
 			} else return;
 		}
+
+		this._timeFromNewQuest += dt;
 
 		if (IsMobile()) {
 			if (this._firstTouchStart !== null) {
@@ -1996,7 +2007,10 @@ export class Player extends Entity {
 		}
 
 		GUI.ClearStroke();
-		GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
+
+		if (this._timeFromNewQuest < 1000) GUI.DrawCircleWithGradient(0, 0, 300, Color.Lerp(Color.Yellow, Color.Black, this._timeFromNewQuest / 1000), Color.Transparent);
+		else GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
+
 		let offset = 30;
 		for (const quest of this._quests) {
 			GUI.SetFillColor(Color.White);
@@ -2202,7 +2216,7 @@ export class Player extends Entity {
 		this._charIndex = 0;
 		this._timeToNextChar = 60;
 		this._dialog = character.GetDialog();
-        this._frameIndex = 0;
+		this._frameIndex = 0;
 
 		this._dialogSound.PlayOriginal(undefined, undefined, true);
 		this._dialog.Voices[0].PlayOriginal();
@@ -2217,6 +2231,7 @@ export class Player extends Entity {
 	public PushQuest(quest: Quest) {
 		GetSound("Quest_Recieved").PlayOriginal();
 
+		this._timeFromNewQuest = 0;
 		this._quests.push(quest);
 	}
 
@@ -2347,14 +2362,16 @@ export class Player extends Entity {
 						new Vector2(Math.cos(this._angle), -Math.sin(this._angle)),
 						75,
 						Tag.Enemy
-					);
+					)
+						.filter((x) => x.instance instanceof Enemy && x.instance.IsAlive())
+						.map((x) => x.instance) as Enemy[];
 
 					if (enemy.length > 0) {
 						GetSound("PunchHit").Play(0.15);
-						(enemy[0].instance as Enemy).TakeDamage(10);
+						enemy[0].TakeDamage(10);
 
 						const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
-						Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].instance.GetCenter().X, enemy[0].instance.GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
+						Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].GetCenter().X, enemy[0].GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
 					} else GetSound("Punch").Play(0.15);
 				}
 			} else if (!IsMobile()) {

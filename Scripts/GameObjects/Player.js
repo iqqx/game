@@ -3,11 +3,13 @@ import { Backpack } from "../Assets/Containers/Backpack.js";
 import { Throwable } from "../Assets/Throwable.js";
 import { Weapon } from "../Assets/Weapons/Weapon.js";
 import { Canvas, GUI } from "../Context.js";
-import { Tag, Direction } from "../Enums.js";
+import { Tag, EnemyType, Direction } from "../Enums.js";
 import { GetSound, GetSprite } from "../AssetsLoader.js";
+import { Quest } from "../Quest.js";
 import { Scene } from "../Scenes/Scene.js";
 import { Rectangle, Vector2, Color, CRC32, IsMobile } from "../Utilites.js";
 import { Blood } from "./Blood.js";
+import { Enemy } from "./Enemies/Enemy.js";
 import { Entity } from "./Entity.js";
 import { ItemDrop } from "./ItemDrop.js";
 import { Artem } from "./QuestGivers/Artem.js";
@@ -45,8 +47,8 @@ export class Player extends Entity {
     _timeToNextPunch = 0;
     _timeToPunch = 0;
     _mainHand = true;
-    _timeFromSpawn = 0;
-    // private _timeFromSpawn = 4990; /// DEBUG
+    // private _timeFromSpawn = 0;
+    _timeFromSpawn = 4990; /// DEBUG
     _timeFromEnd = -1;
     _running = false;
     _speaked = false;
@@ -105,11 +107,20 @@ export class Player extends Entity {
             },
             SingleUse: false,
         },
+        {
+            Code: 3940498641,
+            Action: () => {
+                GetSound("CheatCode").PlayOriginal();
+                this.PushQuest(new Quest("Читорный квест", this).AddKillTask(EnemyType.Yellow, 100));
+            },
+            SingleUse: false,
+        },
     ];
     _tpActivated = false;
     _timeToHideItemName = 0;
     _timeToAmbientSound = 20000;
     _lastAmbientNumber = -1;
+    _timeFromNewQuest = 19000;
     _controlPadding = 32;
     _joystickDiameter = 64;
     _firstTouchTime = 0;
@@ -854,6 +865,7 @@ export class Player extends Entity {
             else
                 return;
         }
+        this._timeFromNewQuest += dt;
         if (IsMobile()) {
             if (this._firstTouchStart !== null) {
                 if (this._firstTouchTime > 0) {
@@ -1569,7 +1581,10 @@ export class Player extends Entity {
             }
         }
         GUI.ClearStroke();
-        GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
+        if (this._timeFromNewQuest < 1000)
+            GUI.DrawCircleWithGradient(0, 0, 300, Color.Lerp(Color.Yellow, Color.Black, this._timeFromNewQuest / 1000), Color.Transparent);
+        else
+            GUI.DrawCircleWithGradient(0, 0, 300, Color.Black, Color.Transparent);
         let offset = 30;
         for (const quest of this._quests) {
             GUI.SetFillColor(Color.White);
@@ -1763,6 +1778,7 @@ export class Player extends Entity {
     }
     PushQuest(quest) {
         GetSound("Quest_Recieved").PlayOriginal();
+        this._timeFromNewQuest = 0;
         this._quests.push(quest);
     }
     ContinueDialog() {
@@ -1873,12 +1889,14 @@ export class Player extends Entity {
                     this._timeToPunch = 100;
                     this._timeToNextPunch = 250;
                     this._mainHand = !this._mainHand;
-                    const enemy = Scene.Current.Raycast(new Vector2(this._x + this._collider.Width * 0.5, this._y + this._collider.Height * this._armHeight), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 75, Tag.Enemy);
+                    const enemy = Scene.Current.Raycast(new Vector2(this._x + this._collider.Width * 0.5, this._y + this._collider.Height * this._armHeight), new Vector2(Math.cos(this._angle), -Math.sin(this._angle)), 75, Tag.Enemy)
+                        .filter((x) => x.instance instanceof Enemy && x.instance.IsAlive())
+                        .map((x) => x.instance);
                     if (enemy.length > 0) {
                         GetSound("PunchHit").Play(0.15);
-                        enemy[0].instance.TakeDamage(10);
+                        enemy[0].TakeDamage(10);
                         const bloodDir = new Vector2(Math.cos(this._angle), -Math.sin(this._angle));
-                        Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].instance.GetCenter().X, enemy[0].instance.GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
+                        Scene.Current.Instantiate(new Blood(new Vector2(enemy[0].GetCenter().X, enemy[0].GetCenter().Y), new Vector2(bloodDir.X * 20, bloodDir.Y * 20)));
                     }
                     else
                         GetSound("Punch").Play(0.15);

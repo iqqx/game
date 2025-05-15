@@ -1,221 +1,496 @@
 {
-	"Images": {
-		"Boombox": ["Images/Boombox/0.png", "Images/Boombox/1.png"],
-		"Bread": "Images/Items/Bread.png",
-		"AidKit": "Images/Items/FirstAid.png",
-		"Sausage": "Images/Items/MeatStick.png",
-		"Radio": "Images/Items/Radio.png",
-		"Vodka": "Images/Items/Vodka.png",
-		"Syringe": "Images/Items/Syringe.png",
-		"Container": "Images/Container.png",
-		"Corpse": "Images/HumanCorpse.png",
-		"Level_1": "Images/Level_1.png",
-		"Rat": { "Image": "Images/Rat.png", "Scale": 1.5 },
-		"Player_Crouch": ["Images/Player/Crouch/0.png", "Images/Player/Crouch/1.png", "Images/Player/Crouch/2.png", "Images/Player/Crouch/3.png"],
-		"Player_Ladder": ["Images/Player/Ladder/0.png", "Images/Player/Ladder/1.png"],
-		"Player_Walk": [
-			"Images/Player/Walk/0.png",
-			"Images/Player/Walk/1.png",
-			"Images/Player/Walk/2.png",
-			"Images/Player/Walk/3.png",
-			"Images/Player/Walk/4.png",
-			"Images/Player/Walk/5.png"
-		],
-		"Easter_Player_Walk": ["Images/Player/Easter/Walk/0.png", "Images/Player/Easter/Walk/1.png", "Images/Player/Easter/Walk/2.png", "Images/Player/Easter/Walk/3.png"],
-		"Easter_Player_Sit": ["Images/Player/Easter/Crouch/0.png", "Images/Player/Easter/Crouch/1.png", "Images/Player/Easter/Crouch/2.png", "Images/Player/Easter/Crouch/3.png"],
-		"Player_Rifle_Reload": [
-			"Images/Player/RifleReload/0.png",
-			"Images/Player/RifleReload/1.png",
-			"Images/Player/RifleReload/2.png",
-			"Images/Player/RifleReload/3.png",
-			"Images/Player/RifleReload/4.png",
-			"Images/Player/RifleReload/5.png",
-			"Images/Player/RifleReload/6.png",
-			"Images/Player/RifleReload/7.png"
-		],
-		"Player_Pistol_Reload": ["Images/Player/PistolReload/0.png", "Images/Player/PistolReload/1.png", "Images/Player/PistolReload/2.png", "Images/Player/PistolReload/1.png"],
-		"Player_Spawn": ["Images/Player/Spawn/0.png", "Images/Player/Spawn/1.png"],
-		"Player_Death": ["Images/Player/Death/0.png", "Images/Player/Death/1.png"],
-		"Player_Arm_Straight": "Images/Player/Arm_left.png",
-		"Player_Arm_Bend": "Images/Player/Arm_right.png",
-		"Player_Backpack": "Images/Player/Backpack.png",
-		"Human_Green_Walk": { "Images": ["Images/Guard/Green/Walk/0.png", "Images/Guard/Green/Walk/1.png"], "Scale": 3 },
-		"Human_Red_Walk": { "Images": ["Images/Guard/Red/Walk/0.png", "Images/Guard/Red/Walk/1.png"], "Scale": 3 },
-		"Human_Red_Arm_Straight": { "Image": "Images/Guard/Red/Arm_left.png", "Scale": 3 },
-		"Human_Red_Arm_Bend": { "Image": "Images/Guard/Red/Arm_right.png", "Scale": 3 },
-		"Human_Green_Arm_Straight": { "Image": "Images/Guard/Green/Arm_left.png", "Scale": 3 },
-		"Human_Green_Arm_Bend": { "Image": "Images/Guard/Green/Arm_right.png", "Scale": 3 },
-		"Drop_Backpack": "Images/Drop_backpack.png",
-		"Fireball": { "Images": ["Images/Fireball/0.png", "Images/Fireball/1.png", "Images/Fireball/2.png"], "Scale": 2 },
-		"Explosive": { "Images": ["Images/RGN/0.png", "Images/RGN/1.png", "Images/RGN/2.png"], "Scale": 3 },
-		"Glock_Icon": "Images/Glock-icon.png",
-		"Glock": { "Image": "Images/Pistol.png", "Scale": 0.75 },
-		"Glock_Clip": { "Image": "Images/Glock_Clip.png", "Scale": 0.75 },
-		"Pistol_Bullet": "Images/Glock_Bullet.png",
-		"AK_Icon": "Images/AK-icon.png",
-		"AK": { "Image": "Images/Rifle.png", "Scale": 2 },
-		"Rifle_Clip": { "Image": "Images/Rifle_Clip.png", "Scale": 2 },
-		"Rifle_Bullet": "Images/Rifle_Bullet.png",
-		"Controls": "Images/Controls-2.png",
-		"ControlsMobile": "Images/MControls-2.png",
-		"Loading_Icon": "Images/Loading.png",
-		"Notice": "Images/Notice.png",
-		"TSLogo": "Images/TypeScriptLogo.png",
-		"Logo": "Images/Logo.png",
-		"EngineLogo": "Images/MicEngineLogo.png",
-		"Artem_Walk": ["Images/Characters/Artem/Walk/0.png", "Images/Characters/Artem/Walk/1.png", "Images/Characters/Artem/Walk/2.png", "Images/Characters/Artem/Walk/3.png"],
-		"Artem_Shoot": "Images/Characters/Artem/Shoot.png",
-		"Artem": "Images/Characters/Artem/Stand.png",
-		"Elder": "Images/Characters/Elder.png",
-		"DogTag": "Images/DogTag.png",
-		"RatCorpse": "Images/RatCorpse.png",
-		"RatTail": "Images/RatTail.png",
-		"Trader": "Images/Characters/Trader.png",
-		"Elder_Avatar": "Images/Characters/ElderFrame.png",
-		"Trader_Avatar": "Images/Characters/TraderFrame.png",
-		"Artem_Avatar": "Images/Characters/Artem/Avatar.png",
-		"Player_Avatar": "Images/Characters/PlayerAvatar.jpeg",
-		"RGN": "Images/RGN/Main.png",
-		"PSM7_Icon": { "Image": "Images/Machinegun/Main.png", "Scale": 1 },
-		"PSM7": { "Image": "Images/Machinegun/Main.png", "Scale": 1.4 },
-		"MachineGunClip": { "Image": "Images/Machinegun/Magazine.png", "Scale": 1.4 },
-		"RGN_Icon": "Images/RGN/Icon.png",
-		"Monster_Walk": { "Scale": 3, "Images": ["Images/Monster/0.png", "Images/Monster/1.png"] }
-	},
-	"Sounds": {
-		"Titles_Background": "Sounds/Title.mp3",
-		"Easter": "Sounds/Easter.mp3",
-		"DotaCheat": "Sounds/dotaCheat.mp3",
-		"Jump": "Sounds/jump.mp3",
-		"Backpack_Pickup": "Sounds/backpack_pickup.mp3",
-		"Dialog": { "Path": "Sounds/dialog.mp3", "Volume": 0.05 },
-		"Hit": "Sounds/hitmarker.mp3",
-		"Intro": "Sounds/intro.mp3",
-		"Human_Death_1": "Sounds/death-3.mp3",
-		"Human_Death_2": "Sounds/death-3.mp3",
-		"Projectile_Impact": "Sounds/impact.mp3",
-		"Music_1": "Sounds/oxy.mp3",
-		"Music_2": "Sounds/music-2.mp3",
-		"Music_3": "Sounds/music-3.mp3",
-		"Music_4": "https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3",
-		"Music_5": "https://pool.anison.fm/AniSonFM(320)",
-		"PunchHit": "Sounds/punch.wav",
-		"Punch": "Sounds/punch.mp3",
-		"Rat_Attack": "Sounds/rat_attack.mp3",
-		"Rat_Death": "Sounds/rat_death.mp3",
-		"PistolReload": "Sounds/reload-2.mp3",
-		"Reload": "Sounds/reload.mp3",
-		"Shell": "Sounds/shell.mp3",
-		"Shoot_Empty": "Sounds/shoot_without.mp3",
-		"Shoot_1": "Sounds/shoot-1.wav",
-		"Shoot_2": "Sounds/shoot-2.wav",
-		"Shoot_3": "Sounds/shoot-3.mp3",
-		"Shoot_4": "Sounds/shoot-4.mp3",
-		"Walk_1": "Sounds/walk.mp3",
-		"Walk_2": "Sounds/walk-2.wav",
-		"GUI_Hover": "Sounds/hover.mp3",
-		"Play": "Sounds/play.mp3",
-		"Eat": "Sounds/eat.wav",
-		"AidKit": "Sounds/aid_kit.mp3",
-		"Drink": "Sounds/drink.mp3",
-		"Syringe": "Sounds/syringe.mp3",
-		"Fall": "Sounds/fall.mp3",
-		"CheatCode": "Sounds/cheat.mp3",
-		"Swing": "Sounds/swing.mp3",
-		"Explosive": "Sounds/boom.mp3",
-		"Background_1": "Sounds/back.mp3",
-		"Quest_Recieved": { "Path": "Sounds/new-quest.mp3", "Volume": 0.5 },
-		"Quest_Completed": { "Path": "Sounds/complete.mp3", "Volume": 0.5 },
-		"Ambient_1": { "Path": "Sounds/ambient-1.mp3", "Volume": 0.25 },
-		"Ambient_2": { "Path": "Sounds/ambient-2.mp3", "Volume": 0.25 },
-		"Ambient_3": { "Path": "Sounds/ambient-3.mp3", "Volume": 0.1 },
-		"HandSwitch": { "Path": "Sounds/switch-hand.mp3", "Volume": 0.1 },
-		"ExplosiveDamage": "Sounds/explosive-near.mp3",
-		"GrenadeSwing": "Sounds/grenade-swing.mp3",
-		"MonsterIdle": "Sounds/monster-idle.mp3",
-		"MonsterAttack": "Sounds/monster-attack.mp3",
-		"MonsterDie": "Sounds/monster-die.wav",
-		"Dialog_0_0": "Sounds/Voices/0/1.ogg",
-		"Dialog_0_1": "Sounds/Voices/0/2.ogg",
-		"Dialog_1_0": { "Path": "Sounds/Voices/1/1.ogg", "Volume": 1 },
-		"Dialog_1_1": { "Path": "Sounds/Voices/1/2.ogg", "Volume": 0.5 },
-		"Dialog_1_2": { "Path": "Sounds/Voices/1/3.ogg", "Volume": 1 },
-		"Dialog_1_3": { "Path": "Sounds/Voices/1/4.ogg", "Volume": 0.5 },
-		"Dialog_1_4": { "Path": "Sounds/Voices/1/5.ogg", "Volume": 1 },
-		"Dialog_1_5": { "Path": "Sounds/Voices/1/6.ogg", "Volume": 0.5 },
-		"Dialog_1_6": { "Path": "Sounds/Voices/1/7.ogg", "Volume": 1 },
-		"Dialog_1_7": { "Path": "Sounds/Voices/1/8.ogg", "Volume": 0.5 },
-		"Dialog_1_8": { "Path": "Sounds/Voices/1/9.ogg", "Volume": 1 },
-		"Dialog_2_0": { "Path": "Sounds/Voices/2/1.ogg", "Volume": 0.5 },
-		"Dialog_2_1": { "Path": "Sounds/Voices/2/2.ogg", "Volume": 1 },
-		"Dialog_2_2": { "Path": "Sounds/Voices/2/3.ogg", "Volume": 0.5 },
-		"Dialog_3_0": "Sounds/Voices/3/1.ogg",
-		"Dialog_3_1": "Sounds/Voices/3/2.ogg",
-		"Dialog_3_2": "Sounds/Voices/3/3.ogg",
-		"Dialog_4_0": { "Path": "Sounds/Voices/4/1.ogg", "Volume": 0.5 },
-		"Dialog_4_1": { "Path": "Sounds/Voices/4/2.ogg", "Volume": 1 },
-		"Dialog_4_2": { "Path": "Sounds/Voices/4/3.ogg", "Volume": 0.5 },
-		"Dialog_4_3": { "Path": "Sounds/Voices/4/4.ogg", "Volume": 1 },
-		"Dialog_4_4": { "Path": "Sounds/Voices/4/5.ogg", "Volume": 0.5 },
-		"Dialog_4_5": { "Path": "Sounds/Voices/4/6.ogg", "Volume": 1 },
-		"Dialog_4_6": { "Path": "Sounds/Voices/4/7.ogg", "Volume": 0.5 },
-		"Dialog_4_7": { "Path": "Sounds/Voices/4/8.ogg", "Volume": 1 },
-		"Dialog_5_0": { "Path": "Sounds/Voices/5/1.ogg", "Volume": 0.5 },
-		"Dialog_5_1": { "Path": "Sounds/Voices/5/2.ogg", "Volume": 1 },
-		"Dialog_5_2": { "Path": "Sounds/Voices/5/3.ogg", "Volume": 0.5 },
-		"Dialog_5_3": { "Path": "Sounds/Voices/5/4.ogg", "Volume": 1 },
-		"Dialog_6_0": { "Path": "Sounds/Voices/6/1.ogg", "Volume": 0.5 },
-		"Dialog_6_1": { "Path": "Sounds/Voices/6/2.ogg", "Volume": 1 },
-		"Dialog_7_0": { "Path": "Sounds/Voices/7/1.ogg", "Volume": 1 },
-		"Dialog_7_1": { "Path": "Sounds/Voices/7/2.ogg", "Volume": 0.5 },
-		"Dialog_7_2": { "Path": "Sounds/Voices/7/3.ogg", "Volume": 1 },
-		"Dialog_7_3": { "Path": "Sounds/Voices/7/4.ogg", "Volume": 0.5 },
-		"Dialog_8": "Sounds/Voices/8.ogg",
-		"Dialog_9_0": "Sounds/Voices/9/1.ogg",
-		"Dialog_9_1": "Sounds/Voices/9/2.ogg",
-		"Dialog_9_2": "Sounds/Voices/9/3.ogg",
-		"Dialog_9_3": "Sounds/Voices/9/4.ogg",
-		"Dialog_10_0": { "Path": "Sounds/Voices/10/1.ogg", "Volume": 1 },
-		"Dialog_10_1": { "Path": "Sounds/Voices/10/2.ogg", "Volume": 0.5 },
-		"Dialog_10_2": { "Path": "Sounds/Voices/10/3.ogg", "Volume": 1 },
-		"Dialog_10_3": { "Path": "Sounds/Voices/10/4.ogg", "Volume": 0.5 },
-		"Dialog_10_4": { "Path": "Sounds/Voices/10/5.ogg", "Volume": 1 },
-		"Dialog_10_5": { "Path": "Sounds/Voices/10/6.ogg", "Volume": 0.5 },
-		"Dialog_10_6": { "Path": "Sounds/Voices/10/7.ogg", "Volume": 1 },
-		"Dialog_10_7": { "Path": "Sounds/Voices/10/8.ogg", "Volume": 0.5 },
-		"Dialog_10_8": { "Path": "Sounds/Voices/10/9.ogg", "Volume": 1 },
-		"Dialog_10_9": { "Path": "Sounds/Voices/10/10.ogg", "Volume": 0.5 },
-		"Dialog_11_0": "Sounds/Voices/11/1.ogg",
-		"Dialog_11_1": "Sounds/Voices/11/2.ogg",
-		"Dialog_11_2": "Sounds/Voices/11/3.ogg",
-		"Dialog_12": { "Path": "Sounds/Voices/12.ogg", "Volume": 0.5 },
-		"Dialog_13_0": { "Path": "Sounds/Voices/13/1.ogg", "Volume": 1 },
-		"Dialog_13_1": { "Path": "Sounds/Voices/13/2.ogg", "Volume": 0.5 },
-		"Dialog_13_2": { "Path": "Sounds/Voices/13/3.ogg", "Volume": 1 },
-		"Dialog_14": { "Path": "Sounds/Voices/14.ogg", "Volume": 0.5 },
-		"Dialog_15": { "Path": "Sounds/Voices/15.ogg", "Volume": 0.5 },
-		"Dialog_16": { "Path": "Sounds/Voices/16.ogg", "Volume": 0.5 },
-		"Dialog_17_0": "Sounds/Voices/17/1.ogg",
-		"Dialog_17_1": "Sounds/Voices/17/2.ogg"
-	},
-	"Weapons": {
-		"AK12": "Weapons/AK12.json",
-		"Glock": "Weapons/Glock.json",
-		"PSM7": "Weapons/PSM7.json"
-	},
-	"Throwables": {
-		"RGN": "Throwables/RGN.json"
-	},
-	"Items": {
-		"Bread": "Items/Food/Bread.json",
-		"Sausage": "Items/Food/Sausage.json",
-		"Vodka": "Items/Drink/Vodka.json",
-		"AidKit": "Items/Heal/AidKit.json",
-		"Adrenalin": "Items/Heal/Adrenalin.json",
-		"RatTail": "Items/Junk/RatTail.json",
-		"PistolBullet": "Items/Junk/PistolBullet.json",
-		"RifleBullet": "Items/Junk/RifleBullet.json",
-		"DogTag": "Items/Quest/DogTag.json",
-		"Radio": "Items/Quest/Radio.json"
-	}
+    "Images": {
+        "Boombox": [
+            "Images/Boombox/0.png",
+            "Images/Boombox/1.png"
+        ],
+        "Bread": "Images/Items/Bread.png",
+        "AidKit": "Images/Items/FirstAid.png",
+        "Sausage": "Images/Items/MeatStick.png",
+        "Radio": "Images/Items/Radio.png",
+        "Vodka": "Images/Items/Vodka.png",
+        "Syringe": "Images/Items/Syringe.png",
+        "Container": "Images/Container.png",
+        "Corpse": "Images/HumanCorpse.png",
+        "Level_1": "Images/Level_1.png",
+        "Rat": {
+            "Image": "Images/Rat.png",
+            "Scale": 1.5
+        },
+        "Player_Crouch": [
+            "Images/Player/Crouch/0.png",
+            "Images/Player/Crouch/1.png",
+            "Images/Player/Crouch/2.png",
+            "Images/Player/Crouch/3.png"
+        ],
+        "Player_Ladder": [
+            "Images/Player/Ladder/0.png",
+            "Images/Player/Ladder/1.png"
+        ],
+        "Player_Walk": [
+            "Images/Player/Walk/0.png",
+            "Images/Player/Walk/1.png",
+            "Images/Player/Walk/2.png",
+            "Images/Player/Walk/3.png",
+            "Images/Player/Walk/4.png",
+            "Images/Player/Walk/5.png"
+        ],
+        "Easter_Player_Walk": [
+            "Images/Player/Easter/Walk/0.png",
+            "Images/Player/Easter/Walk/1.png",
+            "Images/Player/Easter/Walk/2.png",
+            "Images/Player/Easter/Walk/3.png"
+        ],
+        "Easter_Player_Sit": [
+            "Images/Player/Easter/Crouch/0.png",
+            "Images/Player/Easter/Crouch/1.png",
+            "Images/Player/Easter/Crouch/2.png",
+            "Images/Player/Easter/Crouch/3.png"
+        ],
+        "Player_Rifle_Reload": [
+            "Images/Player/RifleReload/0.png",
+            "Images/Player/RifleReload/1.png",
+            "Images/Player/RifleReload/2.png",
+            "Images/Player/RifleReload/3.png",
+            "Images/Player/RifleReload/4.png",
+            "Images/Player/RifleReload/5.png",
+            "Images/Player/RifleReload/6.png",
+            "Images/Player/RifleReload/7.png"
+        ],
+        "Player_Pistol_Reload": [
+            "Images/Player/PistolReload/0.png",
+            "Images/Player/PistolReload/1.png",
+            "Images/Player/PistolReload/2.png",
+            "Images/Player/PistolReload/1.png"
+        ],
+        "Player_Spawn": [
+            "Images/Player/Spawn/0.png",
+            "Images/Player/Spawn/1.png"
+        ],
+        "Player_Death": [
+            "Images/Player/Death/0.png",
+            "Images/Player/Death/1.png"
+        ],
+        "Player_Arm_Straight": "Images/Player/Arm_left.png",
+        "Player_Arm_Bend": "Images/Player/Arm_right.png",
+        "Player_Backpack": "Images/Player/Backpack.png",
+        "Human_Green_Walk": {
+            "Images": [
+                "Images/Guard/Green/Walk/0.png",
+                "Images/Guard/Green/Walk/1.png"
+            ],
+            "Scale": 3
+        },
+        "Human_Red_Walk": {
+            "Images": [
+                "Images/Guard/Red/Walk/0.png",
+                "Images/Guard/Red/Walk/1.png"
+            ],
+            "Scale": 3
+        },
+        "Human_Red_Arm_Straight": {
+            "Image": "Images/Guard/Red/Arm_left.png",
+            "Scale": 3
+        },
+        "Human_Red_Arm_Bend": {
+            "Image": "Images/Guard/Red/Arm_right.png",
+            "Scale": 3
+        },
+        "Human_Green_Arm_Straight": {
+            "Image": "Images/Guard/Green/Arm_left.png",
+            "Scale": 3
+        },
+        "Human_Green_Arm_Bend": {
+            "Image": "Images/Guard/Green/Arm_right.png",
+            "Scale": 3
+        },
+        "Drop_Backpack": "Images/Drop_backpack.png",
+        "Fireball": {
+            "Images": [
+                "Images/Fireball/0.png",
+                "Images/Fireball/1.png",
+                "Images/Fireball/2.png"
+            ],
+            "Scale": 2
+        },
+        "Explosive": {
+            "Images": [
+                "Images/RGN/0.png",
+                "Images/RGN/1.png",
+                "Images/RGN/2.png"
+            ],
+            "Scale": 3
+        },
+        "Glock_Icon": "Images/Glock-icon.png",
+        "Glock": {
+            "Image": "Images/Pistol.png",
+            "Scale": 0.75
+        },
+        "Glock_Clip": {
+            "Image": "Images/Glock_Clip.png",
+            "Scale": 0.75
+        },
+        "Pistol_Bullet": "Images/Glock_Bullet.png",
+        "AK_Icon": "Images/AK-icon.png",
+        "AK": {
+            "Image": "Images/Rifle.png",
+            "Scale": 2
+        },
+        "Rifle_Clip": {
+            "Image": "Images/Rifle_Clip.png",
+            "Scale": 2
+        },
+        "Rifle_Bullet": "Images/Rifle_Bullet.png",
+        "Controls": "Images/Controls-2.png",
+        "ControlsMobile": "Images/MControls-2.png",
+        "Loading_Icon": "Images/Loading.png",
+        "Notice": "Images/Notice.png",
+        "TSLogo": "Images/TypeScriptLogo.png",
+        "Logo": "Images/Logo.png",
+        "EngineLogo": "Images/MicEngineLogo.png",
+        "Artem_Walk": [
+            "Images/Characters/Artem/Walk/0.png",
+            "Images/Characters/Artem/Walk/1.png",
+            "Images/Characters/Artem/Walk/2.png",
+            "Images/Characters/Artem/Walk/3.png"
+        ],
+        "Artem_Shoot": "Images/Characters/Artem/Shoot.png",
+        "Artem": "Images/Characters/Artem/Stand.png",
+        "Elder": "Images/Characters/Elder.png",
+        "DogTag": "Images/DogTag.png",
+        "RatCorpse": "Images/RatCorpse.png",
+        "RatTail": "Images/RatTail.png",
+        "Trader": "Images/Characters/Trader.png",
+        "Elder_Avatar": "Images/Characters/ElderFrame.png",
+        "Trader_Avatar": "Images/Characters/TraderFrame.png",
+        "Artem_Avatar": "Images/Characters/Artem/Avatar.png",
+        "Player_Avatar": "Images/Characters/PlayerAvatar.jpeg",
+        "RGN": "Images/RGN/Main.png",
+        "PSM7_Icon": {
+            "Image": "Images/Machinegun/Main.png",
+            "Scale": 1
+        },
+        "PSM7": {
+            "Image": "Images/Machinegun/Main.png",
+            "Scale": 1.4
+        },
+        "MachineGunClip": {
+            "Image": "Images/Machinegun/Magazine.png",
+            "Scale": 1.4
+        },
+        "RGN_Icon": "Images/RGN/Icon.png",
+        "Monster_Idle": {
+            "Scale": 3,
+            "Images": [
+                "Images/Monster/Idle/0.png",
+                "Images/Monster/Idle/1.png",
+                "Images/Monster/Idle/2.png",
+                "Images/Monster/Idle/3.png"
+            ]
+        },
+        "Monster_Jump": {
+            "Scale": 3, "Image": "Images/Monster/Jump.png"
+        },
+        "Monster_Dead": {
+            "Scale": 3, "Image": "Images/Monster/Tombstone.png"
+        }
+    },
+    "Sounds": {
+        "Titles_Background": "Sounds/Title.mp3",
+        "Easter": "Sounds/Easter.mp3",
+        "DotaCheat": "Sounds/dotaCheat.mp3",
+        "Jump": "Sounds/jump.mp3",
+        "Backpack_Pickup": "Sounds/backpack_pickup.mp3",
+        "Dialog": {
+            "Path": "Sounds/dialog.mp3",
+            "Volume": 0.05
+        },
+        "Hit": "Sounds/hitmarker.mp3",
+        "Intro": "Sounds/intro.mp3",
+        "Human_Death_1": "Sounds/death-3.mp3",
+        "Human_Death_2": "Sounds/death-3.mp3",
+        "Projectile_Impact": "Sounds/impact.mp3",
+        "Music_1": "Sounds/oxy.mp3",
+        "Music_2": "Sounds/music-2.mp3",
+        "Music_3": "Sounds/music-3.mp3",
+        "Music_4": "https://emgregion.hostingradio.ru:8064/moscow.europaplus.mp3",
+        "Music_5": "https://pool.anison.fm/AniSonFM(320)",
+        "PunchHit": "Sounds/punch.wav",
+        "Punch": "Sounds/punch.mp3",
+        "Rat_Attack": "Sounds/rat_attack.mp3",
+        "Rat_Death": "Sounds/rat_death.mp3",
+        "PistolReload": "Sounds/reload-2.mp3",
+        "Reload": "Sounds/reload.mp3",
+        "Shell": "Sounds/shell.mp3",
+        "Shoot_Empty": "Sounds/shoot_without.mp3",
+        "Shoot_1": "Sounds/shoot-1.wav",
+        "Shoot_2": "Sounds/shoot-2.wav",
+        "Shoot_3": "Sounds/shoot-3.mp3",
+        "Shoot_4": "Sounds/shoot-4.mp3",
+        "Walk_1": "Sounds/walk.mp3",
+        "Walk_2": "Sounds/walk-2.wav",
+        "GUI_Hover": "Sounds/hover.mp3",
+        "Play": "Sounds/play.mp3",
+        "Eat": "Sounds/eat.wav",
+        "AidKit": "Sounds/aid_kit.mp3",
+        "Drink": "Sounds/drink.mp3",
+        "Syringe": "Sounds/syringe.mp3",
+        "Fall": "Sounds/fall.mp3",
+        "CheatCode": "Sounds/cheat.mp3",
+        "Swing": "Sounds/swing.mp3",
+        "Explosive": "Sounds/boom.mp3",
+        "Background_1": "Sounds/back.mp3",
+        "Quest_Recieved": {
+            "Path": "Sounds/new-quest.mp3",
+            "Volume": 0.5
+        },
+        "Quest_Completed": {
+            "Path": "Sounds/complete.mp3",
+            "Volume": 0.5
+        },
+        "Ambient_1": {
+            "Path": "Sounds/ambient-1.mp3",
+            "Volume": 0.25
+        },
+        "Ambient_2": {
+            "Path": "Sounds/ambient-2.mp3",
+            "Volume": 0.25
+        },
+        "Ambient_3": {
+            "Path": "Sounds/ambient-3.mp3",
+            "Volume": 0.1
+        },
+        "HandSwitch": {
+            "Path": "Sounds/switch-hand.mp3",
+            "Volume": 0.1
+        },
+        "ExplosiveDamage": "Sounds/explosive-near.mp3",
+        "GrenadeSwing": "Sounds/grenade-swing.mp3",
+        "MonsterIdle": "Sounds/monster-idle.mp3",
+        "MonsterAttack": "Sounds/monster-attack.mp3",
+        "MonsterDie": "Sounds/monster-die.wav",
+        "Dialog_0_0": "Sounds/Voices/0/1.ogg",
+        "Dialog_0_1": "Sounds/Voices/0/2.ogg",
+        "Dialog_1_0": {
+            "Path": "Sounds/Voices/1/1.ogg",
+            "Volume": 1
+        },
+        "Dialog_1_1": {
+            "Path": "Sounds/Voices/1/2.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_1_2": {
+            "Path": "Sounds/Voices/1/3.ogg",
+            "Volume": 1
+        },
+        "Dialog_1_3": {
+            "Path": "Sounds/Voices/1/4.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_1_4": {
+            "Path": "Sounds/Voices/1/5.ogg",
+            "Volume": 1
+        },
+        "Dialog_1_5": {
+            "Path": "Sounds/Voices/1/6.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_1_6": {
+            "Path": "Sounds/Voices/1/7.ogg",
+            "Volume": 1
+        },
+        "Dialog_1_7": {
+            "Path": "Sounds/Voices/1/8.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_1_8": {
+            "Path": "Sounds/Voices/1/9.ogg",
+            "Volume": 1
+        },
+        "Dialog_2_0": {
+            "Path": "Sounds/Voices/2/1.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_2_1": {
+            "Path": "Sounds/Voices/2/2.ogg",
+            "Volume": 1
+        },
+        "Dialog_2_2": {
+            "Path": "Sounds/Voices/2/3.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_3_0": "Sounds/Voices/3/1.ogg",
+        "Dialog_3_1": "Sounds/Voices/3/2.ogg",
+        "Dialog_3_2": "Sounds/Voices/3/3.ogg",
+        "Dialog_4_0": {
+            "Path": "Sounds/Voices/4/1.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_4_1": {
+            "Path": "Sounds/Voices/4/2.ogg",
+            "Volume": 1
+        },
+        "Dialog_4_2": {
+            "Path": "Sounds/Voices/4/3.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_4_3": {
+            "Path": "Sounds/Voices/4/4.ogg",
+            "Volume": 1
+        },
+        "Dialog_4_4": {
+            "Path": "Sounds/Voices/4/5.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_4_5": {
+            "Path": "Sounds/Voices/4/6.ogg",
+            "Volume": 1
+        },
+        "Dialog_4_6": {
+            "Path": "Sounds/Voices/4/7.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_4_7": {
+            "Path": "Sounds/Voices/4/8.ogg",
+            "Volume": 1
+        },
+        "Dialog_5_0": {
+            "Path": "Sounds/Voices/5/1.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_5_1": {
+            "Path": "Sounds/Voices/5/2.ogg",
+            "Volume": 1
+        },
+        "Dialog_5_2": {
+            "Path": "Sounds/Voices/5/3.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_5_3": {
+            "Path": "Sounds/Voices/5/4.ogg",
+            "Volume": 1
+        },
+        "Dialog_6_0": {
+            "Path": "Sounds/Voices/6/1.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_6_1": {
+            "Path": "Sounds/Voices/6/2.ogg",
+            "Volume": 1
+        },
+        "Dialog_7_0": {
+            "Path": "Sounds/Voices/7/1.ogg",
+            "Volume": 1
+        },
+        "Dialog_7_1": {
+            "Path": "Sounds/Voices/7/2.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_7_2": {
+            "Path": "Sounds/Voices/7/3.ogg",
+            "Volume": 1
+        },
+        "Dialog_7_3": {
+            "Path": "Sounds/Voices/7/4.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_8": "Sounds/Voices/8.ogg",
+        "Dialog_9_0": "Sounds/Voices/9/1.ogg",
+        "Dialog_9_1": "Sounds/Voices/9/2.ogg",
+        "Dialog_9_2": "Sounds/Voices/9/3.ogg",
+        "Dialog_9_3": "Sounds/Voices/9/4.ogg",
+        "Dialog_10_0": {
+            "Path": "Sounds/Voices/10/1.ogg",
+            "Volume": 1
+        },
+        "Dialog_10_1": {
+            "Path": "Sounds/Voices/10/2.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_10_2": {
+            "Path": "Sounds/Voices/10/3.ogg",
+            "Volume": 1
+        },
+        "Dialog_10_3": {
+            "Path": "Sounds/Voices/10/4.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_10_4": {
+            "Path": "Sounds/Voices/10/5.ogg",
+            "Volume": 1
+        },
+        "Dialog_10_5": {
+            "Path": "Sounds/Voices/10/6.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_10_6": {
+            "Path": "Sounds/Voices/10/7.ogg",
+            "Volume": 1
+        },
+        "Dialog_10_7": {
+            "Path": "Sounds/Voices/10/8.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_10_8": {
+            "Path": "Sounds/Voices/10/9.ogg",
+            "Volume": 1
+        },
+        "Dialog_10_9": {
+            "Path": "Sounds/Voices/10/10.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_11_0": "Sounds/Voices/11/1.ogg",
+        "Dialog_11_1": "Sounds/Voices/11/2.ogg",
+        "Dialog_11_2": "Sounds/Voices/11/3.ogg",
+        "Dialog_12": {
+            "Path": "Sounds/Voices/12.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_13_0": {
+            "Path": "Sounds/Voices/13/1.ogg",
+            "Volume": 1
+        },
+        "Dialog_13_1": {
+            "Path": "Sounds/Voices/13/2.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_13_2": {
+            "Path": "Sounds/Voices/13/3.ogg",
+            "Volume": 1
+        },
+        "Dialog_14": {
+            "Path": "Sounds/Voices/14.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_15": {
+            "Path": "Sounds/Voices/15.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_16": {
+            "Path": "Sounds/Voices/16.ogg",
+            "Volume": 0.5
+        },
+        "Dialog_17_0": "Sounds/Voices/17/1.ogg",
+        "Dialog_17_1": "Sounds/Voices/17/2.ogg"
+    },
+    "Weapons": {
+        "AK12": "Weapons/AK12.json",
+        "Glock": "Weapons/Glock.json",
+        "PSM7": "Weapons/PSM7.json"
+    },
+    "Throwables": {
+        "RGN": "Throwables/RGN.json"
+    },
+    "Items": {
+        "Bread": "Items/Food/Bread.json",
+        "Sausage": "Items/Food/Sausage.json",
+        "Vodka": "Items/Drink/Vodka.json",
+        "AidKit": "Items/Heal/AidKit.json",
+        "Adrenalin": "Items/Heal/Adrenalin.json",
+        "RatTail": "Items/Junk/RatTail.json",
+        "PistolBullet": "Items/Junk/PistolBullet.json",
+        "RifleBullet": "Items/Junk/RifleBullet.json",
+        "DogTag": "Items/Quest/DogTag.json",
+        "Radio": "Items/Quest/Radio.json"
+    }
 }

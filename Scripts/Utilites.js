@@ -46,6 +46,9 @@ export class Color {
     toString() {
         return this.A === 255 ? `rgb(${this.R}, ${this.G}, ${this.B})` : `rgba(${this.R}, ${this.G}, ${this.B}, ${this.A / 255})`;
     }
+    static Lerp(a, b, time) {
+        return new Color(a.R + (b.R - a.R) * time, a.G + (b.G - a.G) * time, a.B + (b.B - a.B) * time, a.A + (b.A - a.A) * time);
+    }
 }
 export class Rectangle {
     X;
