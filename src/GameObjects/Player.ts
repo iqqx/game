@@ -51,8 +51,8 @@ export class Player extends Entity {
 	private _timeToNextPunch = 0;
 	private _timeToPunch = 0;
 	private _mainHand = true;
-	// private _timeFromSpawn = 0;
-	private _timeFromSpawn = 4990; /// DEBUG
+	private _timeFromSpawn = 0;
+	// private _timeFromSpawn = 4990; /// DEBUG
 	private _timeFromEnd = -1;
 	private _running = false;
 	private _speaked = false;
@@ -1919,9 +1919,12 @@ export class Player extends Entity {
 			GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._charIndex), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
 
 			if (this._dialog.Messages[this._dialogState].length === this._charIndex) {
+				GUI.SetFillColor(new Color(0, 0, 0, 150));
+				GUI.SetStroke(Color.Green, 2);
+				GUI.DrawRectangle(GUI.Width / 2 + 215, GUI.Height - 135, 28, 28);
 				GUI.SetFont(24);
 				GUI.SetFillColor(Color.Green);
-				GUI.DrawText(GUI.Width / 2 + 200, GUI.Height - 115, "[E]");
+				GUI.DrawText(GUI.Width / 2 + 222, GUI.Height - 114, "E");
 			}
 		}
 
