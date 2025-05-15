@@ -1511,6 +1511,11 @@ export class Player extends Entity {
             }
             GUI.SetFont(16);
             GUI.DrawTextWithBreakes(this._dialog.Messages[this._dialogState].slice(0, this._charIndex), GUI.Width / 2 - 500 / 2 + 15, GUI.Height - 240);
+            if (this._dialog.Messages[this._dialogState].length === this._charIndex) {
+                GUI.SetFont(24);
+                GUI.SetFillColor(Color.Green);
+                GUI.DrawText(GUI.Width / 2 + 200, GUI.Height - 115, "[E]");
+            }
         }
         if (this._draggedItem !== null) {
             GUI.DrawImageScaled(this._draggedItem.Icon, this._xTarget - 25, GUI.Height - this._yTarget - 25, 50, 50);
