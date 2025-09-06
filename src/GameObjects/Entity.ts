@@ -18,7 +18,7 @@ export class Entity extends GameObject {
 	protected _movingRight = false;
 	protected _verticalAcceleration = 0;
 	protected _grounded = true;
-	protected _jumpForce = 20;
+	protected _jumpForce = 22;
 	protected _xTarget = 0;
 	protected _yTarget = 0;
 	protected _onLadder: Ladder | null = null;
