@@ -836,10 +836,11 @@ export class Player extends Entity {
                     this._throwableTime = 0;
                 }
             });
+            oncontextmenu = () => false;
         }
     }
     RegisterEvent(event, callback) {
-        Canvas.HTML.addEventListener(event, callback);
+        addEventListener(event, callback);
         this._registeredEvents.push({ Name: event, Callback: callback });
     }
     Update(dt) {

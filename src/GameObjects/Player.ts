@@ -929,11 +929,13 @@ export class Player extends Entity {
 					this._throwableTime = 0;
 				}
 			});
+
+			oncontextmenu = () => false;
 		}
 	}
 
 	private RegisterEvent<K extends keyof HTMLElementEventMap>(event: K, callback: (this: HTMLCanvasElement, ev: HTMLElementEventMap[K]) => any) {
-		Canvas.HTML.addEventListener(event, callback);
+		addEventListener(event, callback);
 		this._registeredEvents.push({ Name: event, Callback: callback });
 	}
 
